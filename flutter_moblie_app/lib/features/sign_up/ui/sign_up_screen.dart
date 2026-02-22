@@ -29,7 +29,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
-  final String _userType = 'طالب'; // Default user type
 
   String? _selectedCollege;
   String? _selectedStudyYear;
@@ -65,7 +64,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   ];
 
   String? selectedCountryCode = '+20';
-  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -209,8 +207,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           center: Alignment(-0.7, -0.7),
                           radius: 1.5,
                           colors: [
-                            ColorsManager.layerBlur1.withOpacity(0.4),
-                            ColorsManager.layerBlur1.withOpacity(0.1),
+                            ColorsManager.layerBlur1.withValues(alpha: 0.4),
+                            ColorsManager.layerBlur1.withValues(alpha: 0.1),
                             Colors.transparent,
                           ],
                           stops: const [0.0, 0.3, 0.8],
@@ -226,8 +224,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           center: Alignment(0.7, 0.7),
                           radius: 1.5,
                           colors: [
-                            ColorsManager.layerBlur2.withOpacity(0.4),
-                            ColorsManager.layerBlur2.withOpacity(0.1),
+                            ColorsManager.layerBlur2.withValues(alpha: 0.4),
+                            ColorsManager.layerBlur2.withValues(alpha: 0.1),
                             Colors.transparent,
                           ],
                           stops: const [0.0, 0.3, 0.8],
@@ -246,7 +244,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               borderRadius: BorderRadius.circular(16.0),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 ),

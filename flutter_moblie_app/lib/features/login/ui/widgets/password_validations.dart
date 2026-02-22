@@ -23,15 +23,16 @@ class PasswordValidations extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        buildValidationRow('حرف صغير واحد على الأقل', hasLowerCase),
+        buildValidationRow('At least 1 lowercase letter', hasLowerCase),
         verticalSpace(2),
-        buildValidationRow('حرف كبير واحد على الأقل', hasUpperCase),
+        buildValidationRow('At least 1 uppercase letter', hasUpperCase),
         verticalSpace(2),
-        buildValidationRow('حرف خاص واحد على الأقل', hasSpecialCharacters),
+        buildValidationRow(
+            'At least 1 special character', hasSpecialCharacters),
         verticalSpace(2),
-        buildValidationRow('رقم واحد على الأقل', hasNumber),
+        buildValidationRow('At least 1 number', hasNumber),
         verticalSpace(2),
-        buildValidationRow('8 أحرف على الأقل', hasMinLength),
+        buildValidationRow('At least 8 characters long', hasMinLength),
       ],
     );
   }

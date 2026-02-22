@@ -8,25 +8,26 @@ final class SignUpInitial extends SignUpState {}
 class SignUpLoading extends SignUpState {}
 
 class SignUpSuccess extends SignUpState {
+  final String token;
   final String message;
-  
-  SignUpSuccess(this.message);
+
+  SignUpSuccess(this.token, {this.message = 'تم التسجيل بنجاح'});
 }
 
 class SignUpOtpSent extends SignUpState {
   final String phoneNumber;
   final String email;
   final String message;
-  
+
   SignUpOtpSent({
     required this.phoneNumber,
     required this.email,
-    this.message = 'تم إرسال رمز التحقق',
+    required this.message,
   });
 }
 
 class SignUpError extends SignUpState {
   final String message;
-  
+
   SignUpError(this.message);
 }

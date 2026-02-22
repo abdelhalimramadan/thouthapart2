@@ -1,15 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:meta/meta.dart';
-import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thotha_mobile_app/core/networking/otp_service.dart';
 
 part 'sign_up_state.dart';
 
 class SignUpCubit extends Cubit<SignUpState> {
-  final Dio _dio = DioFactory.getDio();
   final OtpService _otpService = OtpService();
-  static const String _baseUrl = 'https://thoutha.page';
+  static const String _baseUrl = 'http://16.16.218.59:8080';
 
   SignUpCubit() : super(SignUpInitial());
 
@@ -22,7 +20,7 @@ class SignUpCubit extends Cubit<SignUpState> {
     String? college,
     String? studyYear,
     String? governorate,
-    String? category, // Add this
+    String? category,
   }) async {
     try {
       emit(SignUpLoading());
@@ -33,121 +31,144 @@ class SignUpCubit extends Cubit<SignUpState> {
         return;
       }
 
-      /* if (!RegExp(r'^[^@]+@[^\s]+\.[^\s]+$').hasMatch(email)) {
-        emit(SignUpError('الرجاء إدخال بريد إلكتروني صالح'));
-        return;
-      }*/
-
       if (password.length < 6) {
         emit(SignUpError('يجب أن تكون كلمة المرور 6 أحرف على الأقل'));
         return;
       }
 
-      // Call the registration API
-      print(
-          'Sending sign-up request with email: ${email.trim()} and password: $password');
+      // Create a fresh Dio instance WITHOUT Authorization header
+      final authDio = Dio();
+      authDio.options.connectTimeout = const Duration(seconds: 10);
+      authDio.options.receiveTimeout = const Duration(seconds: 10);
 
-      // Prepare the request data with new field names
+      // Prepare the request data with correct field names matching backend
       final requestData = {
         'email': email.trim().toLowerCase(),
-        'password': password,
-        if (firstName != null && firstName.isNotEmpty) 'firstName': firstName,
-        if (lastName != null && lastName.isNotEmpty) 'lastName': lastName,
-        if (phone != null && phone.isNotEmpty) 'phoneNumber': phone,
-        if (college != null && college.isNotEmpty) 'universty': college,
-        if (studyYear != null && studyYear.isNotEmpty) 'studyYear': studyYear,
-        if (governorate != null && governorate.isNotEmpty)
-          'cityName': governorate,
-        if (category != null && category.isNotEmpty) 'categoryName': category,
+        'password': password.trim(),
+        if (firstName != null && firstName.trim().isNotEmpty)
+          'firstName': firstName.trim(),
+        if (lastName != null && lastName.trim().isNotEmpty)
+          'lastName': lastName.trim(),
+        if (phone != null && phone.trim().isNotEmpty)
+          'phoneNumber': phone.trim(),
+        if (college != null && college.trim().isNotEmpty)
+          'universityName': college.trim(),
+        if (studyYear != null && studyYear.trim().isNotEmpty)
+          'studyYear': studyYear.trim(),
+        if (governorate != null && governorate.trim().isNotEmpty)
+          'cityName': governorate.trim(),
+        if (category != null && category.trim().isNotEmpty)
+          'categoryName': category.trim(),
       };
 
-      print('Request data: $requestData');
+      print('SignUp request data: $requestData');
 
-      final response = await _dio.post(
+      // Send POST request without Authorization header
+      final response = await authDio.post(
         '$_baseUrl/api/auth/signup',
         data: requestData,
         options: Options(
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
           },
-          validateStatus: (status) => status! < 500,
         ),
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response data: ${response.data}');
-
-      print('API Response Status: ${response.statusCode}');
-      print('API Response Data: ${response.data}');
+      print('SignUp response status: ${response.statusCode}');
+      print('SignUp response data: ${response.data}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Signup successful, now send OTP to phone number
-        print('Signup successful, sending OTP to phone: $phone');
-
-        // Format phone number with country code
-        String formattedPhone = phone ?? '';
-        if (formattedPhone.isNotEmpty && !formattedPhone.startsWith('+')) {
-          formattedPhone = '+20$formattedPhone'; // Assuming Egypt +20
+        // Extract token from response
+        String? token;
+        if (response.data is Map) {
+          token = response.data['token'] ?? response.data['accessToken'];
         }
 
-        // Send OTP
-        final otpResult = await _otpService.sendOtp(formattedPhone);
+        // Signup successful, now send OTP to phone number
+        if (phone != null && phone.isNotEmpty) {
+          String formattedPhone = phone.trim();
+          if (!formattedPhone.startsWith('+')) {
+            formattedPhone = '+20$formattedPhone';
+          }
 
-        if (otpResult['success']) {
-          // OTP sent successfully, navigate to OTP verification
-          emit(SignUpOtpSent(
-            phoneNumber: formattedPhone,
-            email: email.trim(),
-            message: otpResult['message'] ?? 'تم إرسال رمز التحقق',
-          ));
+          final otpResult = await _otpService.sendOtp(formattedPhone);
+
+          if (otpResult['success']) {
+            emit(SignUpOtpSent(
+              phoneNumber: formattedPhone,
+              email: email.trim(),
+              message: otpResult['message'] ?? 'تم إرسال رمز التحقق',
+            ));
+          } else {
+            emit(SignUpError(
+              'تم إنشاء الحساب لكن فشل إرسال رمز التحقق. يرجى تسجيل الدخول.',
+            ));
+          }
         } else {
-          // OTP send failed, but signup was successful
-          // You can either emit an error or navigate to login
-          emit(SignUpError(
-            'تم إنشاء الحساب لكن فشل إرسال رمز التحقق. يرجى تسجيل الدخول.',
-          ));
+          // No phone number, just emit success
+          emit(SignUpSuccess(token ?? '', message: 'تم التسجيل بنجاح'));
         }
       } else {
-        // Handle different error status codes
+        // Handle error responses
         String errorMessage = 'حدث خطأ في التسجيل';
+
         if (response.data != null) {
-          if (response.data is Map) {
-            errorMessage = response.data['message'] ??
+          if (response.data is List) {
+            // Backend returns array of errors
+            final errors = response.data as List;
+            if (errors.isNotEmpty) {
+              errorMessage = errors
+                  .map((e) => e['messageAr'] ?? e['messageEn'] ?? '')
+                  .where((msg) => msg.isNotEmpty)
+                  .join('\n');
+            }
+          } else if (response.data is Map) {
+            errorMessage = response.data['messageAr'] ??
+                response.data['messageEn'] ??
+                response.data['message'] ??
                 response.data['error'] ??
                 'حدث خطأ في التسجيل';
-          } else if (response.data is String) {
-            errorMessage = response.data;
           }
         }
 
-        // Common error messages
-        if (response.statusCode == 400) {
-          errorMessage = 'بيانات غير صالحة: $errorMessage';
-        } else if (response.statusCode == 409) {
+        if (response.statusCode == 409) {
           errorMessage = 'هذا البريد الإلكتروني مسجل مسبقاً';
-        } else if (response.statusCode == 422) {
-          errorMessage = 'بيانات غير صالحة: $errorMessage';
         }
 
         emit(SignUpError(errorMessage));
       }
     } on DioException catch (e) {
-      // Handle Dio-specific errors
       String errorMessage = 'حدث خطأ في الاتصال بالخادم';
-      if (e.response?.statusCode == 400) {
-        errorMessage = e.response?.data?['message'] ?? 'بيانات غير صالحة';
-      } else if (e.response?.statusCode == 409) {
-        errorMessage = 'هذا البريد الإلكتروني مسجل مسبقاً';
+
+      if (e.response != null) {
+        if (e.response!.data is List) {
+          final errors = e.response!.data as List;
+          if (errors.isNotEmpty) {
+            errorMessage = errors
+                .map((e) => e['messageAr'] ?? e['messageEn'] ?? '')
+                .where((msg) => msg.isNotEmpty)
+                .join('\n');
+          }
+        } else if (e.response!.data is Map) {
+          errorMessage = e.response!.data['messageAr'] ??
+              e.response!.data['messageEn'] ??
+              e.response!.data['message'] ??
+              'بيانات غير صالحة';
+        }
+
+        if (e.response!.statusCode == 409) {
+          errorMessage = 'هذا البريد الإلكتروني مسجل مسبقاً';
+        }
       } else if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
         errorMessage = 'انتهت مهلة الاتصال بالخادم';
       } else if (e.type == DioExceptionType.unknown) {
         errorMessage = 'لا يوجد اتصال بالإنترنت';
       }
+
       emit(SignUpError(errorMessage));
     } catch (e) {
-      emit(SignUpError('حدث خطأ غير متوقع'));
+      emit(SignUpError('حدث خطأ غير متوقع: ${e.toString()}'));
     }
   }
 }
