@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:thotha_mobile_app/core/helpers/phone_helper.dart';
 import 'package:thotha_mobile_app/core/networking/api_constants.dart';
 import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thotha_mobile_app/core/networking/connectivity_service.dart';
@@ -56,18 +57,16 @@ class OtpService {
         };
       }
 
-      // Ensure phone number starts with +
-      String formattedPhone = phoneNumber.trim();
-      if (!formattedPhone.startsWith('+')) {
-        formattedPhone = '+$formattedPhone';
-      }
+      // Ensure phone number doesn't start with + for the API
+      final String formattedPhone = PhoneHelper.normalizeEgyptPhone(phoneNumber);
 
       print('Sending OTP to: $formattedPhone');
 
       final response = await _dio.post(
-        '${ApiConstants.baseUrl}${ApiConstants.sendOtp}',
+        '${ApiConstants.otpBaseUrl}${ApiConstants.sendOtp}',
         data: {
           'phone_number': formattedPhone,
+          'otp': '',
         },
         options: Options(
           headers: {
@@ -185,16 +184,13 @@ class OtpService {
         };
       }
 
-      // Ensure phone number starts with +
-      String formattedPhone = phoneNumber.trim();
-      if (!formattedPhone.startsWith('+')) {
-        formattedPhone = '+$formattedPhone';
-      }
+      // Ensure phone number doesn't start with + for the API
+      final String formattedPhone = PhoneHelper.normalizeEgyptPhone(phoneNumber);
 
       print('Verifying OTP: $otp for phone: $formattedPhone');
 
       final response = await _dio.post(
-        '${ApiConstants.baseUrl}${ApiConstants.verifyOtp}',
+        '${ApiConstants.otpBaseUrl}${ApiConstants.verifyOtp}',
         data: {
           'phone_number': formattedPhone,
           'otp': otp,
@@ -294,26 +290,27 @@ class OtpService {
     }
 
     String formattedPhone = phoneNumber.trim();
-    if (!formattedPhone.startsWith('+')) {
-      formattedPhone = '+$formattedPhone';
+    // For validation, we can handle both cases, but let's normalize internally
+    if (formattedPhone.startsWith('+')) {
+      formattedPhone = formattedPhone.substring(1);
     }
 
-    // Egyptian phone number validation
-    if (formattedPhone.startsWith('+20')) {
-      final phoneRegex = RegExp(r'^\+20(1[0-2]\d{8})$');
+    // Egyptian phone number validation (normalized without +)
+    if (formattedPhone.startsWith('20')) {
+      final phoneRegex = RegExp(r'^20(1[0-2]\d{8})$');
       if (!phoneRegex.hasMatch(formattedPhone)) {
         return {
           'valid': false,
-          'error': 'رقم الهاتف المصري غير صحيح. يجب أن يكون بالصيغة: +20XXXXXXXXXX',
+          'error': 'رقم الهاتف المصري غير صحيح.',
         };
       }
     } else {
-      // International phone validation (basic)
-      final phoneRegex = RegExp(r'^\+\d{10,15}$');
+      // International phone validation (basic, normalized without +)
+      final phoneRegex = RegExp(r'^\d{10,15}$');
       if (!phoneRegex.hasMatch(formattedPhone)) {
         return {
           'valid': false,
-          'error': 'رقم الهاتف غير صحيح. يجب أن يبدأ بـ + ويحتوي على 10-15 رقم',
+          'error': 'رقم الهاتف غير صحيح. يجب أن يحتوي على 10-15 رقم',
         };
       }
     }

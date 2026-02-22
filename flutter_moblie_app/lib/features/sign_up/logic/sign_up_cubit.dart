@@ -1,13 +1,14 @@
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:meta/meta.dart';
+import 'package:thotha_mobile_app/core/helpers/phone_helper.dart';
+import 'package:thotha_mobile_app/core/networking/api_constants.dart';
 import 'package:thotha_mobile_app/core/networking/otp_service.dart';
 
 part 'sign_up_state.dart';
 
 class SignUpCubit extends Cubit<SignUpState> {
   final OtpService _otpService = OtpService();
-  static const String _baseUrl = 'http://16.16.218.59:8080';
 
   SignUpCubit() : super(SignUpInitial());
 
@@ -36,12 +37,27 @@ class SignUpCubit extends Cubit<SignUpState> {
         return;
       }
 
+      // Normalize phone number using PhoneHelper (no + prefix)
+      String? formattedPhone =
+          phone != null ? PhoneHelper.normalizeEgyptPhone(phone) : null;
+
       // Create a fresh Dio instance WITHOUT Authorization header
-      final authDio = Dio();
-      authDio.options.connectTimeout = const Duration(seconds: 10);
-      authDio.options.receiveTimeout = const Duration(seconds: 10);
+      // This ensures NO Bearer token is sent for signup
+      final authDio = Dio(
+        BaseOptions(
+          baseUrl: ApiConstants.baseUrl,
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 15),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          validateStatus: (status) => status! < 500,
+        ),
+      );
 
       // Prepare the request data with correct field names matching backend
+      // IMPORTANT: Send NAMES (strings), NOT IDs (integers)
       final requestData = {
         'email': email.trim().toLowerCase(),
         'password': password.trim(),
@@ -49,8 +65,8 @@ class SignUpCubit extends Cubit<SignUpState> {
           'firstName': firstName.trim(),
         if (lastName != null && lastName.trim().isNotEmpty)
           'lastName': lastName.trim(),
-        if (phone != null && phone.trim().isNotEmpty)
-          'phoneNumber': phone.trim(),
+        if (formattedPhone != null)
+          'phoneNumber': formattedPhone,
         if (college != null && college.trim().isNotEmpty)
           'universityName': college.trim(),
         if (studyYear != null && studyYear.trim().isNotEmpty)
@@ -61,21 +77,18 @@ class SignUpCubit extends Cubit<SignUpState> {
           'categoryName': category.trim(),
       };
 
-      print('SignUp request data: $requestData');
+      print('✅ SignUp Request URL: ${ApiConstants.baseUrl}/api/auth/signup');
+      print('✅ SignUp Request Data: $requestData');
+      print('✅ SignUp Headers: Content-Type=application/json (NO Authorization)');
 
-      // Send POST request without Authorization header
+      // Send POST request WITHOUT Authorization header
       final response = await authDio.post(
-        '$_baseUrl/api/auth/signup',
+        '/api/auth/signup',
         data: requestData,
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
       );
 
-      print('SignUp response status: ${response.statusCode}');
-      print('SignUp response data: ${response.data}');
+      print('✅ SignUp Response Status: ${response.statusCode}');
+      print('✅ SignUp Response Data: ${response.data}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         // Extract token from response
@@ -85,12 +98,7 @@ class SignUpCubit extends Cubit<SignUpState> {
         }
 
         // Signup successful, now send OTP to phone number
-        if (phone != null && phone.isNotEmpty) {
-          String formattedPhone = phone.trim();
-          if (!formattedPhone.startsWith('+')) {
-            formattedPhone = '+20$formattedPhone';
-          }
-
+        if (formattedPhone != null) {
           final otpResult = await _otpService.sendOtp(formattedPhone);
 
           if (otpResult['success']) {

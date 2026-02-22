@@ -7,10 +7,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/helpers/constants.dart';
+import 'package:thotha_mobile_app/core/networking/api_constants.dart';
 import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
-
-const String _profileBaseUrl = 'http://13.53.131.167:5000';
 
 class DoctorProfile extends StatefulWidget {
   const DoctorProfile({Key? key}) : super(key: key);
@@ -124,11 +123,11 @@ class _DoctorProfileState extends State<DoctorProfile> {
 
       // Try the dedicated '/profile' endpoint first, then '/me' (Flask backend)
       try {
-        response = await dio.get('$_profileBaseUrl/profile');
+        response = await dio.get('${ApiConstants.otpBaseUrl}/profile');
       } catch (_) {
         // If /profile fails, try /me
         try {
-          response = await dio.get('$_profileBaseUrl/me');
+          response = await dio.get('${ApiConstants.otpBaseUrl}/me');
         } catch (_) {
           // If /me fails (e.g. 404 on old server), simply proceed to fallback.
         }
@@ -137,7 +136,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
       // Fallback: Try POST /update_profile with empty body if GET endpoints failed
       if (response == null) {
         try {
-          final res = await dio.post('$_profileBaseUrl/update_profile', data: {});
+          final res = await dio.post('${ApiConstants.otpBaseUrl}/update_profile', data: {});
           if (res.statusCode == 200) {
             response = res;
           }
@@ -335,7 +334,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
     try {
       final dio = DioFactory.getDio();
       final response = await dio.post(
-        '$_profileBaseUrl/update_profile',
+        '${ApiConstants.otpBaseUrl}/update_profile',
         data: {'profile_image': base64Image},
       );
 
@@ -367,11 +366,11 @@ class _DoctorProfileState extends State<DoctorProfile> {
       
       print('Updating profile with token: exists');
       print('Update data: $data');
-      print('Update URL: $_profileBaseUrl/update_profile');
+      print('Update URL: ${ApiConstants.otpBaseUrl}/update_profile');
       
       // Create a new Dio instance for this specific request to avoid baseUrl conflicts
       final dio = Dio(BaseOptions(
-        baseUrl: _profileBaseUrl,
+        baseUrl: ApiConstants.otpBaseUrl,
         connectTimeout: const Duration(seconds: 60),
         receiveTimeout: const Duration(seconds: 60),
         headers: {

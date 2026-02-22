@@ -62,7 +62,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     'امتياز',
   ];
 
-  String? selectedCountryCode = '+20';
 
   @override
   void initState() {
@@ -366,8 +365,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ? const Center(
                                             child: CircularProgressIndicator())
                                         : DropdownButtonFormField<String>(
+                                            key: ValueKey(_selectedCollege),
                                             isExpanded: true,
-                                            value: _selectedCollege,
                                             decoration: InputDecoration(
                                               labelText: 'اختر الكلية',
                                               border: OutlineInputBorder(
@@ -382,12 +381,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 .toList(),
                                             onChanged: (v) => setState(
                                                 () => _selectedCollege = v),
+                                            validator: (value) {
+                                              if (value == null || value.isEmpty) {
+                                                return 'الرجاء اختيار الكلية';
+                                              }
+                                              return null;
+                                            },
                                           ),
                                     verticalSpace(16),
                                     // Study Year Dropdown
                                     DropdownButtonFormField<String>(
+                                      key: ValueKey(_selectedStudyYear),
                                       isExpanded: true,
-                                      value: _selectedStudyYear,
                                       decoration: InputDecoration(
                                         labelText: 'السنة الدراسية',
                                         border: OutlineInputBorder(
@@ -401,6 +406,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           .toList(),
                                       onChanged: (v) => setState(
                                           () => _selectedStudyYear = v),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'الرجاء اختيار السنة الدراسية';
+                                        }
+                                        return null;
+                                      },
                                     ),
                                     verticalSpace(16),
                                     // City/Governorate Dropdown
@@ -408,8 +419,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ? const Center(
                                             child: CircularProgressIndicator())
                                         : DropdownButtonFormField<String>(
+                                            key: ValueKey(_selectedGovernorate),
                                             isExpanded: true,
-                                            value: _selectedGovernorate,
                                             decoration: InputDecoration(
                                               labelText: 'اختر المحافظة',
                                               border: OutlineInputBorder(
@@ -424,6 +435,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 .toList(),
                                             onChanged: (v) => setState(
                                                 () => _selectedGovernorate = v),
+                                            validator: (value) {
+                                              if (value == null || value.isEmpty) {
+                                                return 'الرجاء اختيار المحافظة';
+                                              }
+                                              return null;
+                                            },
                                           ),
                                     verticalSpace(16),
                                     // Category/Specialty Dropdown
@@ -431,8 +448,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ? const Center(
                                             child: CircularProgressIndicator())
                                         : DropdownButtonFormField<String>(
+                                            key: ValueKey(_selectedCategory),
                                             isExpanded: true,
-                                            value: _selectedCategory,
                                             decoration: InputDecoration(
                                               labelText: 'اختر التخصص',
                                               border: OutlineInputBorder(
@@ -447,6 +464,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 .toList(),
                                             onChanged: (v) => setState(
                                                 () => _selectedCategory = v),
+                                            validator: (value) {
+                                              if (value == null || value.isEmpty) {
+                                                return 'الرجاء اختيار التخصص';
+                                              }
+                                              return null;
+                                            },
                                           ),
                                     verticalSpace(16),
                                     // Password Field

@@ -23,6 +23,7 @@ class ApiConstants {
   static const String getCitiesFallback = '/api/cities';
 
   // OTP endpoints
+  static const String otpBaseUrl = 'https://thoutha.page';
   static const String sendOtp = '/api/otp/send';
   static const String verifyOtp = '/api/otp/verify';
 }
