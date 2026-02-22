@@ -1,6 +1,5 @@
 class ApiConstants {
   static const String baseUrl = 'http://16.16.218.59:8080';
-  static const String otpBaseUrl = 'https://thoutha.page';
 
   // Authentication endpoints
   static const String doctorLogin = '/api/auth/login/doctor';

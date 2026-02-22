@@ -1,5 +1,6 @@
 import 'package:thotha_mobile_app/features/booking/ui/otp_verification_dialog.dart';
 import 'package:thotha_mobile_app/features/appointments/data/appointments_service.dart';
+import 'package:thotha_mobile_app/core/networking/otp_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -27,7 +28,9 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
+  final OtpService _otpService = OtpService();
   bool _isLoading = false;
+  bool _isSendingOtp = false;
 
   @override
   void dispose() {
@@ -37,18 +40,45 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
     super.dispose();
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => OtpVerificationDialog(
-          contactInfo: _phoneController.text,
-          onVerified: (code) {
-            _completeBooking();
-          },
-        ),
-      );
+      setState(() {
+        _isSendingOtp = true;
+      });
+
+      // Send OTP first
+      final otpResult = await _otpService.sendOtp(_phoneController.text);
+      
+      setState(() {
+        _isSendingOtp = false;
+      });
+
+      if (otpResult['success']) {
+        // Show OTP dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => OtpVerificationDialog(
+            contactInfo: _phoneController.text,
+            onVerified: (code) {
+              _completeBooking();
+            },
+            onResend: (phoneNumber) {
+              // Optional: Handle resend notification
+              print('OTP resent to: $phoneNumber');
+            },
+          ),
+        );
+      } else {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(otpResult['error'] ?? 'فشل إرسال رمز التحقق'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
@@ -333,9 +363,29 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                 if (value == null || value.isEmpty) {
                                   return 'الرجاء إدخال رقم الجوال';
                                 }
-                                if (value.length < 10) {
-                                  return 'يجب أن يتكون رقم الجوال من 10 أرقام على الأقل';
+                                
+                                // Enhanced phone validation
+                                String cleanPhone = value.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+                                
+                                // Check for Egyptian numbers
+                                if (cleanPhone.startsWith('01')) {
+                                  if (cleanPhone.length != 11) {
+                                    return 'رقم الجوال المصري يجب أن يكون 11 رقم';
+                                  }
+                                  if (!RegExp(r'^01[0-2]\d{8}$').hasMatch(cleanPhone)) {
+                                    return 'رقم الجوال المصري غير صحيح';
+                                  }
+                                } else if (cleanPhone.startsWith('+20')) {
+                                  if (cleanPhone.length != 13) {
+                                    return 'رقم الجوال المصري يجب أن يكون 13 رقم مع +20';
+                                  }
+                                  if (!RegExp(r'^\+201[0-2]\d{8}$').hasMatch(cleanPhone)) {
+                                    return 'رقم الجوال المصري غير صحيح';
+                                  }
+                                } else {
+                                  return 'الرجاء إدخال رقم جوال مصري صحيح';
                                 }
+                                
                                 return null;
                               },
                             ),
@@ -345,30 +395,53 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                               height: 48.h,
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: _isLoading ? null : _submitForm,
+                                onPressed: (_isLoading || _isSendingOtp) ? null : _submitForm,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: colorScheme.primary,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.0.r),
                                   ),
                                 ),
-                                child: _isLoading
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
+                                child: _isSendingOtp
+                                    ? Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          SizedBox(width: 12.w),
+                                          Text(
+                                            'جاري إرسال رمز التحقق...',
+                                            style: theme.textTheme.titleMedium?.copyWith(
+                                              fontSize: 16,
+                                              color: colorScheme.onPrimary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
                                       )
-                                    : Text(
-                                        'تأكيد الحجز',
-                                        style: theme.textTheme.titleMedium?.copyWith(
-                                          fontSize: 16,
-                                          color: colorScheme.onPrimary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                    : _isLoading
+                                        ? SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : Text(
+                                            'تأكيد الحجز',
+                                            style: theme.textTheme.titleMedium?.copyWith(
+                                              fontSize: 16,
+                                              color: colorScheme.onPrimary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                               ),
                             ),
                           ],

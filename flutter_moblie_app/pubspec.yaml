@@ -80,6 +80,7 @@ dependencies:
   googleapis: ^16.0.0
   googleapis_auth: ^2.0.0
   http: ^1.6.0
+  connectivity_plus: ^7.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

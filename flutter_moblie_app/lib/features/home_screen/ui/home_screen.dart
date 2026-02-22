@@ -180,23 +180,6 @@ class _HomeScreenState extends State<HomeScreen> {
               _scaffoldKey.currentState?.openDrawer();
             },
           ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const NotificationsScreen(),
-                  ),
-                );
-              },
-              icon: Icon(
-                Icons.notifications_none_outlined,
-                size: 28.sp,
-                color: Theme.of(context).iconTheme.color,
-              ),
-            ),
-          ],
         ),
         drawer: const HomeDrawer(),
         body: SafeArea(
