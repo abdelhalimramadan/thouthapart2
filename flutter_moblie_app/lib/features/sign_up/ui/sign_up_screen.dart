@@ -13,6 +13,7 @@ import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thotha_mobile_app/core/helpers/app_regex.dart';
 import 'package:thotha_mobile_app/features/login/ui/widgets/password_validations.dart';
+import 'package:thotha_mobile_app/features/booking/ui/otp_verification_dialog.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -161,21 +162,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Navigator.pushReplacementNamed(context, Routes.loginScreen);
                 });
               } else if (state is SignUpOtpSent) {
-                // Navigate to OTP verification screen
-                Navigator.pushNamed(
-                  context,
-                  Routes.signupOtpVerificationScreen,
-                  arguments: {
-                    'phoneNumber': state.phoneNumber,
-                    'email': state.email,
-                  },
-                );
-                // Optionally show a snackbar
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.blue,
-                    behavior: SnackBarBehavior.floating,
+                // Show OTP verification dialog
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => OtpVerificationDialog(
+                    contactInfo: state.phoneNumber,
+                    onVerified: (pin) {
+                      // Show success message and navigate to login
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('تم التحقق من رقم الهاتف بنجاح'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      Navigator.pushReplacementNamed(context, Routes.loginScreen);
+                    },
                   ),
                 );
               } else if (state is SignUpError) {
@@ -365,7 +367,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ? const Center(
                                             child: CircularProgressIndicator())
                                         : DropdownButtonFormField<String>(
-                                            key: ValueKey(_selectedCollege),
                                             isExpanded: true,
                                             decoration: InputDecoration(
                                               labelText: 'اختر الكلية',
@@ -391,7 +392,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     verticalSpace(16),
                                     // Study Year Dropdown
                                     DropdownButtonFormField<String>(
-                                      key: ValueKey(_selectedStudyYear),
                                       isExpanded: true,
                                       decoration: InputDecoration(
                                         labelText: 'السنة الدراسية',
@@ -419,7 +419,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ? const Center(
                                             child: CircularProgressIndicator())
                                         : DropdownButtonFormField<String>(
-                                            key: ValueKey(_selectedGovernorate),
                                             isExpanded: true,
                                             decoration: InputDecoration(
                                               labelText: 'اختر المحافظة',
@@ -448,7 +447,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ? const Center(
                                             child: CircularProgressIndicator())
                                         : DropdownButtonFormField<String>(
-                                            key: ValueKey(_selectedCategory),
                                             isExpanded: true,
                                             decoration: InputDecoration(
                                               labelText: 'اختر التخصص',

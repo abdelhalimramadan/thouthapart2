@@ -5,7 +5,6 @@ import '../../features/login/ui/login_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/reset_password/ui/otp_verification_screen.dart';
 import '../../features/sign_up/ui/sign_up_screen.dart';
-import '../../features/sign_up/ui/signup_otp_verification_screen.dart';
 import '../../features/splash_screen/splash_screen.dart';
 import '../../features/chat/ui/chat_screen.dart';
 import '../../features/forgot_password/ui/forgot_password_screen.dart';
@@ -50,14 +49,6 @@ class AppRouter {
       case Routes.resetPasswordScreen:
         return MaterialPageRoute(
           builder: (context) => const ResetPasswordScreen(),
-        );
-      case Routes.signupOtpVerificationScreen:
-        final args = settings.arguments as Map<String, dynamic>? ?? {};
-        return MaterialPageRoute(
-          builder: (context) => SignupOtpVerificationScreen(
-            phoneNumber: args['phoneNumber'] ?? '',
-            email: args['email'] ?? '',
-          ),
         );
       case Routes.categoriesScreen:
         return MaterialPageRoute(
