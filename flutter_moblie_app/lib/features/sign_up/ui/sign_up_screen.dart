@@ -27,8 +27,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
 
   String? _selectedCollege;
   String? _selectedStudyYear;
@@ -41,6 +39,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool hasSpecialCharacters = false;
   bool hasNumber = false;
   bool hasMinLength = false;
+  bool _obscurePassword = true;
 
   // Dynamic data from API
   final ApiService _apiService = ApiService();
@@ -140,7 +139,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     emailController.dispose();
     phoneController.dispose();
     passwordController.dispose();
-    confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -454,7 +452,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     // Password Field
                                     TextFormField(
                                       controller: passwordController,
-                                      obscureText: true,
+                                      obscureText: _obscurePassword,
                                       onChanged: (password) {
                                         setState(() {
                                           hasLowerCase =
@@ -478,6 +476,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ),
                                         prefixIcon:
                                             const Icon(Icons.lock_outline),
+                                        suffixIcon: IconButton(
+                                          icon: Icon(
+                                            _obscurePassword
+                                                ? Icons.visibility_off
+                                                : Icons.visibility,
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              _obscurePassword = !_obscurePassword;
+                                            });
+                                          },
+                                        ),
                                       ),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
@@ -494,30 +504,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           hasSpecialCharacters,
                                       hasNumber: hasNumber,
                                       hasMinLength: hasMinLength,
-                                    ),
-                                    verticalSpace(16),
-                                    // Confirm Password Field
-                                    TextFormField(
-                                      controller: confirmPasswordController,
-                                      obscureText: true,
-                                      decoration: InputDecoration(
-                                        labelText: 'تأكيد كلمة المرور',
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        prefixIcon:
-                                            const Icon(Icons.lock_outline),
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'الرجاء تأكيد كلمة المرور';
-                                        }
-                                        if (value != passwordController.text) {
-                                          return 'كلمتا المرور غير متطابقتين';
-                                        }
-                                        return null;
-                                      },
                                     ),
                                     verticalSpace(24),
                                     // Sign Up Button
