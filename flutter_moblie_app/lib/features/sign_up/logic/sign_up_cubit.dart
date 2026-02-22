@@ -125,22 +125,84 @@ class SignUpCubit extends Cubit<SignUpState> {
             // Backend returns array of errors
             final errors = response.data as List;
             if (errors.isNotEmpty) {
-              errorMessage = errors
+              // Check if error is about email or phone
+              String errorText = errors
                   .map((e) => e['messageAr'] ?? e['messageEn'] ?? '')
                   .where((msg) => msg.isNotEmpty)
                   .join('\n');
+
+              // Detect email duplicate
+              if (errorText.contains('email') ||
+                  errorText.contains('بريد') ||
+                  errorText.contains('Email') ||
+                  errorText.contains('البريد') ||
+                  errorText.contains('موجود') ||
+                  errorText.contains('مستخدم') ||
+                  errorText.contains('مسجل') ||
+                  errorText.contains('تكرار')) {
+                errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+              }
+              // Detect phone duplicate
+              else if (errorText.contains('phone') ||
+                  errorText.contains('تلفون') ||
+                  errorText.contains('Phone') ||
+                  errorText.contains('الهاتف') ||
+                  errorText.contains('رقم') ||
+                  errorText.contains('رقم الهاتف') ||
+                  errorText.contains('phoneNumber')) {
+                errorMessage = 'رقم الهاتف مسجل سابقاً';
+              } else {
+                errorMessage = errorText;
+              }
             }
           } else if (response.data is Map) {
-            errorMessage = response.data['messageAr'] ??
-                response.data['messageEn'] ??
-                response.data['message'] ??
-                response.data['error'] ??
+            final responseMap = response.data as Map;
+            String rawMessage = responseMap['messageAr'] ??
+                responseMap['messageEn'] ??
+                responseMap['message'] ??
+                responseMap['error'] ??
                 'حدث خطأ في التسجيل';
+
+            // Detect email duplicate
+            if (rawMessage.contains('email') ||
+                rawMessage.contains('بريد') ||
+                rawMessage.contains('Email') ||
+                rawMessage.contains('البريد') ||
+                rawMessage.contains('مستخدم') ||
+                rawMessage.contains('موجود') ||
+                rawMessage.contains('مسجل') ||
+                rawMessage.contains('تكرار') ||
+                rawMessage.contains('العثور') ||
+                rawMessage.contains('المورد')) {
+              errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+            }
+            // Detect phone duplicate
+            else if (rawMessage.contains('phone') ||
+                rawMessage.contains('تلفون') ||
+                rawMessage.contains('Phone') ||
+                rawMessage.contains('الهاتف') ||
+                rawMessage.contains('رقم') ||
+                rawMessage.contains('رقم الهاتف') ||
+                rawMessage.contains('phoneNumber')) {
+              errorMessage = 'رقم الهاتف مسجل سابقاً';
+            } else {
+              errorMessage = rawMessage;
+            }
           }
         }
 
+        // Status code 409 also means conflict (duplicate)
         if (response.statusCode == 409) {
-          errorMessage = 'هذا البريد الإلكتروني مسجل مسبقاً';
+          // Try to determine if it's email or phone from previous attempts
+          // Default to email since it's more common
+          errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+        }
+
+        // If message contains "No static resource found" or similar, it's likely a duplicate email
+        if (errorMessage.contains('لم يتم العثور على المورد الثابت') ||
+            errorMessage.contains('No static resource found') ||
+            errorMessage.contains('المورد الثابت')) {
+          errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
         }
 
         emit(SignUpError(errorMessage));
@@ -152,20 +214,80 @@ class SignUpCubit extends Cubit<SignUpState> {
         if (e.response!.data is List) {
           final errors = e.response!.data as List;
           if (errors.isNotEmpty) {
-            errorMessage = errors
+            // Check if error is about email or phone
+            String errorText = errors
                 .map((e) => e['messageAr'] ?? e['messageEn'] ?? '')
                 .where((msg) => msg.isNotEmpty)
                 .join('\n');
+
+            // Detect email duplicate
+            if (errorText.contains('email') ||
+                errorText.contains('بريد') ||
+                errorText.contains('Email') ||
+                errorText.contains('البريد') ||
+                errorText.contains('موجود') ||
+                errorText.contains('مستخدم') ||
+                errorText.contains('مسجل') ||
+                errorText.contains('تكرار')) {
+              errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+            }
+            // Detect phone duplicate
+            else if (errorText.contains('phone') ||
+                errorText.contains('تلفون') ||
+                errorText.contains('Phone') ||
+                errorText.contains('الهاتف') ||
+                errorText.contains('رقم') ||
+                errorText.contains('رقم الهاتف') ||
+                errorText.contains('phoneNumber')) {
+              errorMessage = 'رقم الهاتف مسجل سابقاً';
+            } else {
+              errorMessage = errorText;
+            }
           }
         } else if (e.response!.data is Map) {
-          errorMessage = e.response!.data['messageAr'] ??
-              e.response!.data['messageEn'] ??
-              e.response!.data['message'] ??
+          final responseMap = e.response!.data as Map;
+          String rawMessage = responseMap['messageAr'] ??
+              responseMap['messageEn'] ??
+              responseMap['message'] ??
               'بيانات غير صالحة';
+
+          // Detect email duplicate
+          if (rawMessage.contains('email') ||
+              rawMessage.contains('بريد') ||
+              rawMessage.contains('Email') ||
+              rawMessage.contains('البريد') ||
+              rawMessage.contains('مستخدم') ||
+              rawMessage.contains('موجود') ||
+              rawMessage.contains('مسجل') ||
+              rawMessage.contains('تكرار') ||
+              rawMessage.contains('العثور') ||
+              rawMessage.contains('المورد')) {
+            errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+          }
+          // Detect phone duplicate
+          else if (rawMessage.contains('phone') ||
+              rawMessage.contains('تلفون') ||
+              rawMessage.contains('Phone') ||
+              rawMessage.contains('الهاتف') ||
+              rawMessage.contains('رقم') ||
+              rawMessage.contains('رقم الهاتف') ||
+              rawMessage.contains('phoneNumber')) {
+            errorMessage = 'رقم الهاتف مسجل سابقاً';
+          } else {
+            errorMessage = rawMessage;
+          }
         }
 
+        // Status code 409 also means conflict (duplicate)
         if (e.response!.statusCode == 409) {
-          errorMessage = 'هذا البريد الإلكتروني مسجل مسبقاً';
+          errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+        }
+
+        // If message contains "No static resource found" or similar, it's likely a duplicate email
+        if (errorMessage.contains('لم يتم العثور على المورد الثابت') ||
+            errorMessage.contains('No static resource found') ||
+            errorMessage.contains('المورد الثابت')) {
+          errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
         }
       } else if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
