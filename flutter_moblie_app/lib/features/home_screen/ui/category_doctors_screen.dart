@@ -142,30 +142,24 @@ class CategoryDoctorsScreen extends StatelessWidget {
                           theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                     ),
                   ),
-                  SizedBox(height: 10.h),
+                  SizedBox(height: 8.h),
                   Row(
                     children: [
                       Icon(Icons.location_on, size: 16.r, color: Colors.grey),
-                      SizedBox(width: 6.w),
-                      Flexible(
-                        child: Text(
-                          doctor.cityName,
-                          style: theme.textTheme.bodySmall
-                              ?.copyWith(fontFamily: 'Cairo'),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      SizedBox(width: 4.w),
+                      Text(
+                        doctor.cityName,
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(fontFamily: 'Cairo'),
                       ),
                       Spacer(),
                       if (doctor.price != null)
-                        Flexible(
-                          child: Text(
-                            '${doctor.price} جنيه',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontFamily: 'Cairo',
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                        Text(
+                          '${doctor.price} جنيه',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontFamily: 'Cairo',
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                     ],
