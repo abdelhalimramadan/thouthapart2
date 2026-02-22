@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import 'core/routing/app_router.dart';
@@ -19,30 +18,26 @@ class DocApp extends StatelessWidget {
       create: (_) => ThemeProvider(),
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
-          return ScreenUtilInit(
-            designSize: const Size(375, 812),
-            minTextAdapt: true,
-            child: MaterialApp(
-              navigatorKey: NavigatorService.navigatorKey,
-              title: 'Doc App',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.lightTheme,
-              darkTheme: AppTheme.darkTheme,
-              themeMode:
-                  themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-              initialRoute: Routes.splashScreen,
-              onGenerateRoute: appRouter.generateRoute,
-              localizationsDelegates: const [
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: const [
-                Locale('ar', 'EG'),
-                Locale('en', 'US'),
-              ],
-              locale: const Locale('ar', 'EG'),
-            ),
+          return MaterialApp(
+            navigatorKey: NavigatorService.navigatorKey,
+            title: 'Doc App',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode:
+                themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            initialRoute: Routes.splashScreen,
+            onGenerateRoute: appRouter.generateRoute,
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('ar', 'EG'),
+              Locale('en', 'US'),
+            ],
+            locale: const Locale('ar', 'EG'),
           );
         },
       ),

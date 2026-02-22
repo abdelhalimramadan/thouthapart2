@@ -3,7 +3,6 @@ import 'package:thotha_mobile_app/features/appointments/data/appointments_servic
 import 'package:thotha_mobile_app/core/networking/otp_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class BookingConfirmationScreen extends StatefulWidget {
   final String doctorName;
@@ -40,13 +39,12 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
     super.dispose();
   }
 
-  void _submitForm() async {
+  void _submitForm(double width, double baseFontSize) async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isSendingOtp = true;
       });
 
-      // Send OTP first
       final otpResult = await _otpService.sendOtp(_phoneController.text);
       
       setState(() {
@@ -54,47 +52,39 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
       });
 
       if (otpResult['success']) {
-        // Show OTP dialog
+        if (!mounted) return;
         showDialog(
           context: context,
           barrierDismissible: false,
           builder: (context) => OtpVerificationDialog(
             contactInfo: _phoneController.text,
             onVerified: (code) {
-              _completeBooking();
+              _completeBooking(width, baseFontSize);
             },
             onResend: (phoneNumber) {
-              // Optional: Handle resend notification
-              print('OTP resent to: $phoneNumber');
+              // ignore
             },
           ),
         );
       } else {
-        // Show error message
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(otpResult['error'] ?? 'فشل إرسال رمز التحقق'),
+            content: Text(otpResult['error'] ?? 'فشل إرسال رمز التحقق', style: const TextStyle(fontFamily: 'Cairo')),
             backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
     }
   }
 
-  void _completeBooking() {
+  void _completeBooking(double width, double baseFontSize) {
       setState(() {
         _isLoading = true;
       });
 
-      // Simulate API call
       Future.delayed(const Duration(seconds: 2), () async {
-        // Build the appointment object
-        // Note: Formatting date/time or keeping as string depends on how AppointmentsScreen consumes it.
-        // AppointmentsScreen mock data uses DateTime object for date.
-        // We will store it as string ISO or just the string we have, and fix AppointmentsScreen to handle it.
-        // For now let's store what we have.
-
         final appointment = {
           'doctorName': widget.doctorName,
           'specialty': widget.specialty,
@@ -111,21 +101,20 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
           _isLoading = false;
         });
         
-        // Show success dialog
         showDialog(
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-            titlePadding: EdgeInsets.only(top: 20.h, left: 20.w, right: 20.w),
-            contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-            actionsPadding: EdgeInsets.only(bottom: 16.h, left: 16.w, right: 16.w),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            titlePadding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            actionsPadding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
             title: Text(
               'تم الحجز بنجاح',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: 18.sp,
+                fontSize: baseFontSize * 1.125, // 18
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF0B8FAC),
               ),
@@ -134,21 +123,21 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 72.w,
-                  height: 72.w,
+                  width: 72 * (width / 390),
+                  height: 72 * (width / 390),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0B8FAC).withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.check_rounded, color: const Color(0xFF0B8FAC), size: 42.w),
+                  child: Icon(Icons.check_rounded, color: const Color(0xFF0B8FAC), size: 42 * (width / 390)),
                 ),
-                SizedBox(height: 16.h),
+                const SizedBox(height: 16),
                 Text(
                   'تم حجز موعدك بنجاح مع ${widget.doctorName}\nفي يوم ${widget.date} الساعة ${widget.time}',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: 'Cairo',
-                    fontSize: 14.sp,
+                    fontSize: baseFontSize * 0.875, // 14
                     color: const Color(0xFF1F2937),
                     height: 1.6,
                   ),
@@ -158,22 +147,22 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
             actionsAlignment: MainAxisAlignment.center,
             actions: [
               SizedBox(
-                width: 140.w,
-                height: 40.h,
+                width: 140 * (width / 390),
+                height: 40,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context); // Close dialog
-                    Navigator.pop(context); // Go back to previous screen
+                    Navigator.pop(context); 
+                    Navigator.pop(context); 
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0B8FAC),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   child: Text(
                     'حسناً',
-                    style: TextStyle(fontFamily: 'Cairo', fontSize: 14.sp, color: Colors.white, fontWeight: FontWeight.w700),
+                    style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize * 0.875, color: Colors.white, fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -185,9 +174,13 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -196,7 +189,6 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
           height: double.infinity,
           child: Stack(
             children: [
-              // Full screen gradient overlay (top-left)
               Container(
                 width: double.infinity,
                 height: double.infinity,
@@ -213,7 +205,6 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                   ),
                 ),
               ),
-              // Bottom-right gradient overlay
               Container(
                 width: double.infinity,
                 height: double.infinity,
@@ -232,10 +223,13 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
               ),
               Center(
                 child: Padding(
-                  padding: EdgeInsets.all(24.0.w),
+                  padding: EdgeInsets.all(width * 0.06),
                   child: Container(
                     width: double.infinity,
-                    padding: EdgeInsets.all(24.0.w),
+                    constraints: BoxConstraints(
+                      maxWidth: width >= 600 ? 500 : double.infinity,
+                    ),
+                    padding: EdgeInsets.all(width * 0.06),
                     decoration: BoxDecoration(
                       color: theme.cardTheme.color ?? colorScheme.surface,
                       borderRadius: BorderRadius.circular(16.0),
@@ -253,67 +247,68 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Title
                             Center(
                               child: Text(
                                 'تأكيد الحجز',
                                 style: theme.textTheme.titleLarge?.copyWith(
-                                  fontSize: 24.sp,
+                                  fontFamily: 'Cairo',
+                                  fontSize: baseFontSize * 1.5, // 24
                                   fontWeight: FontWeight.bold,
                                   color: colorScheme.primary,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                            SizedBox(height: 16.h),
-                            // Doctor Info Card
+                            const SizedBox(height: 16),
                             Card(
                               elevation: 2,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.r),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: Padding(
-                                padding: EdgeInsets.all(16.r),
+                                padding: const EdgeInsets.all(16),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       'معلومات الطبيب',
                                       style: theme.textTheme.titleMedium?.copyWith(
-                                        fontSize: 16.sp,
+                                        fontFamily: 'Cairo',
+                                        fontSize: baseFontSize, // 16
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    SizedBox(height: 12.h),
-                                    _buildInfoRow('الطبيب:', widget.doctorName),
-                                    SizedBox(height: 8.h),
-                                    _buildInfoRow('التخصص:', widget.specialty),
-                                    SizedBox(height: 8.h),
-                                    _buildInfoRow('التاريخ:', widget.date),
-                                    SizedBox(height: 8.h),
-                                    _buildInfoRow('الوقت:', widget.time),
+                                    const SizedBox(height: 12),
+                                    _buildInfoRow('الطبيب:', widget.doctorName, baseFontSize),
+                                    const SizedBox(height: 8),
+                                    _buildInfoRow('التخصص:', widget.specialty, baseFontSize),
+                                    const SizedBox(height: 8),
+                                    _buildInfoRow('التاريخ:', widget.date, baseFontSize),
+                                    const SizedBox(height: 8),
+                                    _buildInfoRow('الوقت:', widget.time, baseFontSize),
                                   ],
                                 ),
                               ),
                             ),
-                            SizedBox(height: 24.h),
-                            // Patient Info Form title
+                            const SizedBox(height: 24),
                             Text(
                               'معلومات المريض',
                               style: theme.textTheme.titleLarge?.copyWith(
-                                fontSize: 18.sp,
+                                fontFamily: 'Cairo',
+                                fontSize: baseFontSize * 1.125, // 18
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 16.h),
-                            // First Name Field
+                            const SizedBox(height: 16),
                             TextFormField(
                               controller: _firstNameController,
+                              style: const TextStyle(fontFamily: 'Cairo'),
                               decoration: InputDecoration(
                                 labelText: 'الاسم الأول',
+                                labelStyle: const TextStyle(fontFamily: 'Cairo'),
                                 prefixIcon: Icon(Icons.person_outline, color: theme.iconTheme.color),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0.r),
+                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
                               ),
                               textInputAction: TextInputAction.next,
@@ -324,15 +319,16 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                 return null;
                               },
                             ),
-                            SizedBox(height: 16.h),
-                            // Last Name Field
+                            const SizedBox(height: 16),
                             TextFormField(
                               controller: _lastNameController,
+                              style: const TextStyle(fontFamily: 'Cairo'),
                               decoration: InputDecoration(
                                 labelText: 'اسم العائلة',
+                                labelStyle: const TextStyle(fontFamily: 'Cairo'),
                                 prefixIcon: Icon(Icons.person_outline, color: theme.iconTheme.color),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0.r),
+                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
                               ),
                               textInputAction: TextInputAction.next,
@@ -343,20 +339,22 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                 return null;
                               },
                             ),
-                            SizedBox(height: 16.h),
-                            // Phone Number Field
+                            const SizedBox(height: 16),
                             TextFormField(
                               controller: _phoneController,
                               keyboardType: TextInputType.number,
+                              style: const TextStyle(fontFamily: 'Cairo'),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(RegExp(r'[0-9\u0660-\u0669]')),
                               ],
                               decoration: InputDecoration(
                                 labelText: 'رقم الجوال',
+                                labelStyle: const TextStyle(fontFamily: 'Cairo'),
                                 hintText: '01X XXX XXXXX',
+                                hintStyle: const TextStyle(fontFamily: 'Cairo'),
                                 prefixIcon: Icon(Icons.phone_android, color: theme.iconTheme.color),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0.r),
+                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
                               ),
                               validator: (value) {
@@ -364,10 +362,8 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                   return 'الرجاء إدخال رقم الجوال';
                                 }
                                 
-                                // Enhanced phone validation
                                 String cleanPhone = value.replaceAll(RegExp(r'[\s\-\(\)]'), '');
                                 
-                                // Check for Egyptian numbers
                                 if (cleanPhone.startsWith('01')) {
                                   if (cleanPhone.length != 11) {
                                     return 'رقم الجوال المصري يجب أن يكون 11 رقم';
@@ -389,24 +385,23 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                 return null;
                               },
                             ),
-                            SizedBox(height: 24.h),
-                            // Submit Button
+                            const SizedBox(height: 24),
                             SizedBox(
-                              height: 48.h,
+                              height: 48,
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: (_isLoading || _isSendingOtp) ? null : _submitForm,
+                                onPressed: (_isLoading || _isSendingOtp) ? null : () => _submitForm(width, baseFontSize),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: colorScheme.primary,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0.r),
+                                    borderRadius: BorderRadius.circular(8.0),
                                   ),
                                 ),
                                 child: _isSendingOtp
                                     ? Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          SizedBox(
+                                          const SizedBox(
                                             width: 20,
                                             height: 20,
                                             child: CircularProgressIndicator(
@@ -414,11 +409,12 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                               color: Colors.white,
                                             ),
                                           ),
-                                          SizedBox(width: 12.w),
+                                          const SizedBox(width: 12),
                                           Text(
                                             'جاري إرسال رمز التحقق...',
                                             style: theme.textTheme.titleMedium?.copyWith(
-                                              fontSize: 16,
+                                              fontFamily: 'Cairo',
+                                              fontSize: baseFontSize,
                                               color: colorScheme.onPrimary,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -426,7 +422,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                         ],
                                       )
                                     : _isLoading
-                                        ? SizedBox(
+                                        ? const SizedBox(
                                             width: 20,
                                             height: 20,
                                             child: CircularProgressIndicator(
@@ -437,7 +433,8 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                         : Text(
                                             'تأكيد الحجز',
                                             style: theme.textTheme.titleMedium?.copyWith(
-                                              fontSize: 16,
+                                              fontFamily: 'Cairo',
+                                              fontSize: baseFontSize,
                                               color: colorScheme.onPrimary,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -458,21 +455,23 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value, double baseFontSize) {
     return Row(
       children: [
         Text(
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontSize: 14.sp,
+            fontFamily: 'Cairo',
+            fontSize: baseFontSize * 0.875, // 14
             color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
           ),
         ),
-        SizedBox(width: 8.w),
+        const SizedBox(width: 8),
         Text(
           value,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontSize: 14.sp,
+            fontFamily: 'Cairo',
+            fontSize: baseFontSize * 0.875, // 14
             fontWeight: FontWeight.bold,
           ),
         ),

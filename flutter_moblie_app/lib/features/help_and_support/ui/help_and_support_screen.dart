@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HelpAndSupportScreen extends StatefulWidget {
   const HelpAndSupportScreen({super.key});
@@ -30,7 +29,6 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
 
     setState(() => _isSending = true);
 
-    // Simulate send delay; in production you could call an API or use url_launcher
     await Future.delayed(const Duration(milliseconds: 800));
 
     if (!mounted) return;
@@ -41,8 +39,8 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
     _messageController.clear();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('تم إرسال رسالتك بنجاح. سنتواصل معك في أقرب وقت.'),
+      const SnackBar(
+        content: Text('تم إرسال رسالتك بنجاح. سنتواصل معك في أقرب وقت.', style: TextStyle(fontFamily: 'Cairo')),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
       ),
@@ -51,6 +49,9 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -60,7 +61,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
           style: TextStyle(
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
-            fontSize: 18.sp,
+            fontSize: baseFontSize * 1.125, // 18
           ),
         ),
         centerTitle: true,
@@ -70,7 +71,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -80,12 +81,12 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: 15.sp,
+                fontSize: baseFontSize * 0.9375, // 15
                 height: 1.6,
                 color: theme.textTheme.bodyMedium?.color,
               ),
             ),
-            SizedBox(height: 24.h),
+            const SizedBox(height: 24),
 
             // ملاحظات مهمة
             Text(
@@ -93,16 +94,16 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: 18.sp,
+                fontSize: baseFontSize * 1.125, // 18
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.primary,
               ),
             ),
-            SizedBox(height: 8.h),
-            _buildBullet(theme, 'الدعم الفني يقتصر فقط على المشاكل التقنية المتعلقة باستخدام التطبيق.'),
-            _buildBullet(theme, 'لا يتدخل فريق الدعم في أي نزاعات أو اتفاقات بين الطلاب والمرضى.'),
-            _buildBullet(theme, 'التطبيق دوره يقتصر على الربط فقط بين الطرفين.'),
-            SizedBox(height: 24.h),
+            const SizedBox(height: 8),
+            _buildBullet(theme, 'الدعم الفني يقتصر فقط على المشاكل التقنية المتعلقة باستخدام التطبيق.', baseFontSize),
+            _buildBullet(theme, 'لا يتدخل فريق الدعم في أي نزاعات أو اتفاقات بين الطلاب والمرضى.', baseFontSize),
+            _buildBullet(theme, 'التطبيق دوره يقتصر على الربط فقط بين الطرفين.', baseFontSize),
+            const SizedBox(height: 24),
 
             // وسائل التواصل
             Text(
@@ -110,22 +111,22 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: 18.sp,
+                fontSize: baseFontSize * 1.125, // 18
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.primary,
               ),
             ),
-            SizedBox(height: 8.h),
+            const SizedBox(height: 8),
             Text(
               'يمكنك التواصل معنا عبر البريد الإلكتروني:',
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: 14.sp,
+                fontSize: baseFontSize * 0.875, // 14
                 color: theme.textTheme.bodyMedium?.color,
               ),
             ),
-            SizedBox(height: 8.h),
+            const SizedBox(height: 8),
             InkWell(
               onTap: () {
                 // Optionally: launch mailto
@@ -138,18 +139,18 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                     textAlign: TextAlign.right,
                     style: TextStyle(
                       fontFamily: 'Cairo',
-                      fontSize: 16.sp,
+                      fontSize: baseFontSize, // 16
                       fontWeight: FontWeight.w600,
                       color: theme.colorScheme.primary,
                       decoration: TextDecoration.underline,
                     ),
                   ),
-                  SizedBox(width: 8.w),
-                  Icon(Icons.email_outlined, size: 22.sp, color: theme.colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Icon(Icons.email_outlined, size: 22 * (width / 390), color: theme.colorScheme.primary),
                 ],
               ),
             ),
-            SizedBox(height: 32.h),
+            const SizedBox(height: 32),
 
             // نموذج التواصل
             Text(
@@ -157,12 +158,12 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: 18.sp,
+                fontSize: baseFontSize * 1.125, // 18
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.primary,
               ),
             ),
-            SizedBox(height: 16.h),
+            const SizedBox(height: 16),
 
             Form(
               key: _formKey,
@@ -172,10 +173,13 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                   TextFormField(
                     controller: _nameController,
                     textAlign: TextAlign.right,
+                    style: const TextStyle(fontFamily: 'Cairo'),
                     decoration: InputDecoration(
                       labelText: 'الاسم',
+                      labelStyle: const TextStyle(fontFamily: 'Cairo'),
                       hintText: 'الاسم',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                      hintStyle: const TextStyle(fontFamily: 'Cairo'),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
                       fillColor: theme.cardColor,
                     ),
@@ -184,15 +188,18 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 16.h),
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: _emailController,
                     textAlign: TextAlign.right,
+                    style: const TextStyle(fontFamily: 'Cairo'),
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       labelText: 'البريد الإلكتروني',
+                      labelStyle: const TextStyle(fontFamily: 'Cairo'),
                       hintText: 'البريد الإلكتروني',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                      hintStyle: const TextStyle(fontFamily: 'Cairo'),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
                       fillColor: theme.cardColor,
                     ),
@@ -201,16 +208,19 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 16.h),
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: _messageController,
                     textAlign: TextAlign.right,
+                    style: const TextStyle(fontFamily: 'Cairo'),
                     maxLines: 5,
                     decoration: InputDecoration(
                       labelText: 'اكتب رسالتك هنا',
+                      labelStyle: const TextStyle(fontFamily: 'Cairo'),
                       hintText: 'اكتب رسالتك هنا',
+                      hintStyle: const TextStyle(fontFamily: 'Cairo'),
                       alignLabelWithHint: true,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
                       fillColor: theme.cardColor,
                     ),
@@ -219,23 +229,23 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 24.h),
+                  const SizedBox(height: 24),
                   SizedBox(
-                    height: 52.h,
+                    height: 52,
                     child: ElevatedButton(
                       onPressed: _isSending ? null : _sendMessage,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.colorScheme.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       child: _isSending
-                          ? SizedBox(
-                              height: 24.h,
-                              width: 24.w,
-                              child: const CircularProgressIndicator(
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
@@ -244,7 +254,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                               'إرسال',
                               style: TextStyle(
                                 fontFamily: 'Cairo',
-                                fontSize: 16.sp,
+                                fontSize: baseFontSize,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -253,16 +263,16 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 24.h),
+            const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBullet(ThemeData theme, String text) {
+  Widget _buildBullet(ThemeData theme, String text, double baseFontSize) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 6.h),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -270,7 +280,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
             '• ',
             style: TextStyle(
               fontFamily: 'Cairo',
-              fontSize: 14.sp,
+              fontSize: baseFontSize * 0.875, // 14
               color: theme.colorScheme.primary,
             ),
           ),
@@ -280,7 +290,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: 14.sp,
+                fontSize: baseFontSize * 0.875, // 14
                 height: 1.5,
                 color: theme.textTheme.bodyMedium?.color,
               ),

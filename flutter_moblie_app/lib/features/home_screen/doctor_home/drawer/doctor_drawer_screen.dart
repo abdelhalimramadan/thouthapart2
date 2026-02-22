@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_settings_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/patient_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_booking_records_screen.dart';
@@ -95,12 +94,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                 ),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DoctorSettingsScreen(),
-                    ),
-                  );
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
@@ -125,21 +118,23 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
         Color? textColor,
         bool isSelected = false,
         VoidCallback? onTap,
+        required double width,
+        required double baseFontSize,
       }) {
     final textTheme = Theme.of(context).textTheme;
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: isSelected 
             ? _cCyan.withAlpha(26)
             : null,
-        borderRadius: BorderRadius.circular(8.r),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8.r),
+        borderRadius: BorderRadius.circular(8),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: Row(
@@ -147,13 +142,16 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                 Icon(
                   icon,
                   color: isSelected ? _cCyan : (iconColor ?? Theme.of(context).iconTheme.color),
+                  size: 24,
                 ),
-                SizedBox(width: 12.w),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     title,
                     textAlign: TextAlign.right,
                     style: textTheme.bodyLarge?.copyWith(
+                      fontFamily: 'Cairo',
+                      fontSize: baseFontSize * 0.9,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                       color: isSelected 
                           ? _cCyan 
@@ -163,12 +161,12 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                 ),
                 if (isSelected)
                   Container(
-                    width: 4.w,
-                    height: 24.h,
+                    width: 4,
+                    height: 24,
                     decoration: BoxDecoration(
                       color: _cCyan,
-                      borderRadius: BorderRadius.horizontal(
-                        left: Radius.circular(4.r),
+                      borderRadius: const BorderRadius.horizontal(
+                        left: Radius.circular(4),
                       ),
                     ),
                   ),
@@ -240,10 +238,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
         }
       }
     } catch (e) {
-      // Handle exceptions
-      print('Exception: $e');
+      debugPrint('Exception: $e');
     } finally {
-      // Final fallback if everything failed
       if (_firstName == null || _firstName!.isEmpty) {
         final email = await SharedPrefHelper.getString('email');
         if (email.isNotEmpty) {
@@ -264,7 +260,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     if (currentRoute.contains('booking-records') || currentRoute.contains('records')) return 3;
     if (currentRoute.contains('patients') || currentRoute.contains('patient')) return 4;
     if (currentRoute.contains('settings') || currentRoute.contains('setting')) return 5;
-    if (currentRoute.contains('news') || currentRoute.contains('chat')) return 6;
     return 0;
   }
 
@@ -272,6 +267,9 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textTheme = Theme.of(context).textTheme;
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
     final double topPad = MediaQuery.of(context).padding.top;
     final int currentIndex = _getCurrentIndex();
 
@@ -282,9 +280,9 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              height: topPad + 160.h,
+              height: topPad + 160,
               padding: EdgeInsets.only(top: topPad),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
@@ -294,14 +292,15 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  SizedBox(
-                    height: 56.h,
+                   SizedBox(
+                    height: 56,
                     child: Stack(
                       children: [
                         Center(
                           child: Text(
                             'القائمة',
                             style: textTheme.titleLarge?.copyWith(
+                              fontFamily: 'Cairo',
                               fontWeight: FontWeight.w600,
                               color: Theme.of(context).colorScheme.surface,
                             ),
@@ -321,24 +320,24 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 12.h),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                     child: Container(
-                      height: 64.h,
+                      height: 64,
                       decoration: BoxDecoration(
                         color: Theme.of(context)
                             .colorScheme
                             .surface
-                            .withAlpha(64), // ~0.25 opacity
-                        borderRadius: BorderRadius.circular(12.r),
+                            .withAlpha(64),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Directionality(
                         textDirection: TextDirection.rtl,
                         child: Row(
                           children: [
                             Container(
-                              margin: EdgeInsets.only(left: 12.w, right: 12.w),
-                              width: 40.w,
-                              height: 40.h,
+                              margin: const EdgeInsets.symmetric(horizontal: 12),
+                              width: 40,
+                              height: 40,
                               decoration: BoxDecoration(
                                 color: Theme.of(context).colorScheme.surface,
                                 shape: BoxShape.circle,
@@ -350,7 +349,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                                     : null,
                               ),
                               child: _profileImage == null
-                                  ? Icon(
+                                  ? const Icon(
                                       Icons.person_outline,
                                       color: _cCyan,
                                     )
@@ -358,19 +357,18 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                             ),
                             Expanded(
                               child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 12.w,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
                                 ),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     _isLoadingName
-                                        ? SizedBox(
-                                            width: 16.w,
-                                            height: 16.w,
-                                            child:
-                                                const CircularProgressIndicator(
+                                        ? const SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
                                               strokeWidth: 2,
                                               color: Colors.white,
                                             ),
@@ -381,6 +379,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                                                 : 'د/ أحمد محمود',
                                             style: textTheme.titleMedium
                                                 ?.copyWith(
+                                              fontFamily: 'Cairo',
                                               color: Theme.of(context)
                                                   .colorScheme
                                                   .surface,
@@ -388,12 +387,13 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                    SizedBox(height: 2.h),
+                                    const SizedBox(height: 2),
                                     Text(
                                       _email != null && _email!.isNotEmpty
                                           ? _email!
                                           : 'zyadgamal@gmail.com',
                                       style: textTheme.bodySmall?.copyWith(
+                                        fontFamily: 'Cairo',
                                         color: Theme.of(context)
                                             .colorScheme
                                             .surface,
@@ -420,6 +420,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     title: 'الرئيسية',
                     icon: Icons.home,
                     isSelected: currentIndex == 0,
+                    width: width,
+                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
@@ -435,6 +437,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     title: 'الملف الشخصي',
                     icon: Icons.person_outline,
                     isSelected: currentIndex == 1,
+                    width: width,
+                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
@@ -450,6 +454,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     title: 'الحجوزات القادمة',
                     icon: Icons.event_note_outlined,
                     isSelected: currentIndex == 2,
+                    width: width,
+                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
@@ -465,6 +471,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     title: 'سجل الحجوزات',
                     icon: Icons.list_alt_rounded,
                     isSelected: currentIndex == 3,
+                    width: width,
+                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
@@ -480,12 +488,14 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     title: 'المرضي',
                     icon: Icons.people_outline,
                     isSelected: currentIndex == 4,
+                    width: width,
+                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           settings: const RouteSettings(name: 'patients'),
-                          builder: (context) =>  PatientScreen(),
+                          builder: (context) => PatientScreen(),
                         ),
                       );
                     },
@@ -495,6 +505,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     title: 'الإعدادات',
                     icon: Icons.settings_outlined,
                     isSelected: currentIndex == 5,
+                    width: width,
+                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -510,6 +522,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     context,
                     title: 'الشروط والأحكام',
                     icon: Icons.description_outlined,
+                    width: width,
+                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -524,6 +538,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     context,
                     title: 'المساعدة والدعم',
                     icon: Icons.help_outline,
+                    width: width,
+                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -535,14 +551,16 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     },
                   ),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: Divider(height: 24.h),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Divider(height: 24),
                   ),
                   _menuItem(
                     context,
                     title: 'تسجيل الخروج',
                     icon: Icons.logout_outlined,
                     textColor: Colors.red,
+                    width: width,
+                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       _showLogoutConfirmation(context);
@@ -552,11 +570,12 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 12.h),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
                 child: Text(
                   'الإصدار 1.0.0',
                   style: textTheme.bodySmall?.copyWith(
+                    fontFamily: 'Cairo',
                     color: isDark ? Colors.grey[400] : Colors.grey[700],
                   ),
                 ),

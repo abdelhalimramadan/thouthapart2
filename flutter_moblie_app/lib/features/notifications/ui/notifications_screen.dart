@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../data/models/patient_booking_model.dart';
 
 class NotificationsScreen extends StatelessWidget {
@@ -7,10 +6,12 @@ class NotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // TODO: Integrate with a Cubit to fetch actual notifications
     final List<PatientBookingModel> notifications = [];
 
     return Scaffold(
@@ -20,7 +21,7 @@ class NotificationsScreen extends StatelessWidget {
           style: TextStyle(
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
-            fontSize: 20.sp,
+            fontSize: baseFontSize * 1.25, // 20sp
           ),
         ),
         centerTitle: true,
@@ -28,43 +29,43 @@ class NotificationsScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
       ),
       body: notifications.isEmpty
-          ? _buildEmptyState(colorScheme)
+          ? _buildEmptyState(width, baseFontSize, colorScheme)
           : ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+              padding: EdgeInsets.symmetric(horizontal: width * 0.04, vertical: 10),
               itemCount: notifications.length,
               itemBuilder: (context, index) {
-                return _buildBookingCard(notifications[index], colorScheme);
+                return _buildBookingCard(notifications[index], width, baseFontSize, colorScheme);
               },
             ),
     );
   }
 
-  Widget _buildEmptyState(ColorScheme colorScheme) {
+  Widget _buildEmptyState(double width, double baseFontSize, ColorScheme colorScheme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.notifications_none_outlined,
-            size: 100.sp,
-            color: colorScheme.primary.withOpacity(0.3),
+            size: 100 * (width / 390),
+            color: colorScheme.primary.withValues(alpha: 0.3),
           ),
-          SizedBox(height: 16.h),
+          const SizedBox(height: 16),
           Text(
             'لا توجد تنبيهات حالياً',
             style: TextStyle(
               fontFamily: 'Cairo',
-              fontSize: 18.sp,
+              fontSize: baseFontSize * 1.125, // 18sp
               color: Colors.grey,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8.h),
+          const SizedBox(height: 8),
           Text(
             'ستظهر حجوزات المرضى الجديدة هنا',
             style: TextStyle(
               fontFamily: 'Cairo',
-              fontSize: 14.sp,
+              fontSize: baseFontSize * 0.875, // 14sp
               color: Colors.grey,
             ),
           ),
@@ -74,26 +75,26 @@ class NotificationsScreen extends StatelessWidget {
   }
 
   Widget _buildBookingCard(
-      PatientBookingModel booking, ColorScheme colorScheme) {
+      PatientBookingModel booking, double width, double baseFontSize, ColorScheme colorScheme) {
     return Card(
-      margin: EdgeInsets.only(bottom: 16.h),
+      margin: const EdgeInsets.only(bottom: 16),
       elevation: 4,
-      shadowColor: colorScheme.primary.withOpacity(0.2),
+      shadowColor: colorScheme.primary.withValues(alpha: 0.2),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
-        padding: EdgeInsets.all(16.r),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: colorScheme.primary.withOpacity(0.1),
+                  backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
                   child: Icon(Icons.person, color: colorScheme.primary),
                 ),
-                SizedBox(width: 12.w),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,7 +104,7 @@ class NotificationsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontWeight: FontWeight.bold,
-                          fontSize: 16.sp,
+                          fontSize: baseFontSize, // 16sp
                         ),
                       ),
                       Text(
@@ -111,45 +112,44 @@ class NotificationsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           color: Colors.grey[600],
-                          fontSize: 13.sp,
+                          fontSize: baseFontSize * 0.8125, // 13sp
                         ),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20.r),
+                    color: Colors.green.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     'حجز جديد',
                     style: TextStyle(
                       fontFamily: 'Cairo',
                       color: Colors.green,
-                      fontSize: 11.sp,
+                      fontSize: baseFontSize * 0.6875, // 11sp
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ],
             ),
-            Divider(height: 24.h),
+            const Divider(height: 24),
             Container(
-              padding: EdgeInsets.all(12.r),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: colorScheme.secondary.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(12.r),
+                color: colorScheme.secondary.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildInfoItem(
-                      Icons.calendar_today_outlined, booking.date, colorScheme),
+                      Icons.calendar_today_outlined, booking.date, baseFontSize, colorScheme),
                   _buildInfoItem(
-                      Icons.access_time_outlined, booking.time, colorScheme),
+                      Icons.access_time_outlined, booking.time, baseFontSize, colorScheme),
                 ],
               ),
             ),
@@ -159,17 +159,17 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoItem(IconData icon, String label, ColorScheme colorScheme) {
+  Widget _buildInfoItem(IconData icon, String label, double baseFontSize, ColorScheme colorScheme) {
     return Row(
       children: [
-        Icon(icon, size: 16.sp, color: colorScheme.primary),
-        SizedBox(width: 6.w),
+        Icon(icon, size: 16 * (baseFontSize / 16), color: colorScheme.primary),
+        const SizedBox(width: 6),
         Text(
           label,
           style: TextStyle(
             fontFamily: 'Cairo',
             fontWeight: FontWeight.w600,
-            fontSize: 14.sp,
+            fontSize: baseFontSize * 0.875, // 14sp
           ),
         ),
       ],

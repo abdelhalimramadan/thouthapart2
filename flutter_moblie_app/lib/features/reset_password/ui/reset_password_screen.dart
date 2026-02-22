@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../core/helpers/spacing.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
 import '../../../core/theming/styles.dart';
@@ -25,7 +23,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   void initState() {
     super.initState();
-    // Lock orientation to portrait
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -34,7 +31,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   void dispose() {
-    // Reset orientation to default
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -46,9 +42,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit(double width, double baseFontSize) {
     if (_formKey.currentState!.validate()) {
-      // Show success dialog
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -60,7 +55,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 borderRadius: BorderRadius.circular(16.0),
               ),
               child: Container(
-                padding: EdgeInsets.all(24.0.w),
+                constraints: BoxConstraints(
+                  maxWidth: width >= 600 ? 500 : double.infinity,
+                ),
+                padding: EdgeInsets.all(width * 0.06),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16.0),
@@ -68,29 +66,29 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.check_circle,
                       color: Colors.green,
                       size: 80.0,
                     ),
-                    verticalSpace(16),
+                    const SizedBox(height: 16),
                     Text(
                       'تم تغيير كلمة المرور بنجاح',
-                      style: TextStyles.font24BlackBold,
+                      style: TextStyles.font24BlackBold.copyWith(fontFamily: 'Cairo', fontSize: baseFontSize * 1.5),
                       textAlign: TextAlign.center,
                     ),
-                    verticalSpace(8),
+                    const SizedBox(height: 8),
                     Text(
                       'تم تغيير كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.',
-                      style: TextStyles.font14GrayRegular,
+                      style: TextStyles.font14GrayRegular.copyWith(fontFamily: 'Cairo', fontSize: baseFontSize * 0.875),
                       textAlign: TextAlign.center,
                     ),
-                    verticalSpace(24),
+                    const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       child: AppTextButton(
                         buttonText: 'تسجيل الدخول',
-                        textStyle: TextStyles.font16WhiteSemiBold,
+                        textStyle: TextStyles.font16WhiteSemiBold.copyWith(fontFamily: 'Cairo'),
                         onPressed: () {
                           Navigator.of(context).pushNamedAndRemoveUntil(
                             Routes.loginScreen,
@@ -111,10 +109,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
+
     return Scaffold(
       body: Stack(
         children: [
-          // Top-left gradient overlay
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -123,15 +124,14 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 center: const Alignment(-0.7, -0.7),
                 radius: 1.5,
                 colors: [
-                  ColorsManager.layerBlur1.withOpacity(0.4),
-                  ColorsManager.layerBlur1.withOpacity(0.1),
+                  ColorsManager.layerBlur1.withValues(alpha: 0.4),
+                  ColorsManager.layerBlur1.withValues(alpha: 0.1),
                   Colors.transparent,
                 ],
                 stops: const [0.0, 0.3, 0.8],
               ),
             ),
           ),
-          // Bottom-right gradient overlay
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -139,8 +139,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               gradient: RadialGradient(
                 radius: 1.5,
                 colors: [
-                  ColorsManager.layerBlur2.withOpacity(0.4),
-                  ColorsManager.layerBlur2.withOpacity(0.1),
+                  ColorsManager.layerBlur2.withValues(alpha: 0.4),
+                  ColorsManager.layerBlur2.withValues(alpha: 0.1),
                   Colors.transparent,
                 ],
                 stops: const [0.0, 0.3, 0.8],
@@ -150,16 +150,19 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           Center(
             child: SingleChildScrollView(
               child: Padding(
-                padding: EdgeInsets.all(24.0.w),
+                padding: EdgeInsets.all(width * 0.06),
                 child: Container(
                   width: double.infinity,
-                  padding: EdgeInsets.all(24.0.w),
+                  constraints: BoxConstraints(
+                    maxWidth: width >= 600 ? 500 : double.infinity,
+                  ),
+                  padding: EdgeInsets.all(width * 0.06),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16.0),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -176,38 +179,39 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           Center(
                             child: Image.asset(
                               'assets/images/splash-logo.png',
-                              width: 80.w,
-                              height: 80.h,
+                              width: 80 * (width / 390),
+                              height: 80 * (width / 390),
                             ),
                           ),
-                          verticalSpace(16),
+                          const SizedBox(height: 16),
                           Center(
                             child: Text(
                               'إعادة تعيين كلمة المرور',
-                              style: TextStyles.font24BlueBold,
+                              style: TextStyles.font24BlueBold.copyWith(fontFamily: 'Cairo', fontSize: baseFontSize * 1.5),
                             ),
                           ),
-                          verticalSpace(8),
+                          const SizedBox(height: 8),
                           Center(
                             child: Text(
                               'قم بإنشاء كلمة مرور جديدة لحسابك',
-                              style: TextStyles.font14GrayRegular,
+                              style: TextStyles.font14GrayRegular.copyWith(fontFamily: 'Cairo', fontSize: baseFontSize * 0.875),
                               textAlign: TextAlign.center,
                             ),
                           ),
-                          verticalSpace(24),
+                          const SizedBox(height: 24),
                           
-                          // New Password Field
                           Text(
                             'كلمة المرور الجديدة',
-                            style: TextStyles.font14DarkBlueMedium,
+                            style: TextStyles.font14DarkBlueMedium.copyWith(fontFamily: 'Cairo', fontSize: baseFontSize * 0.875),
                           ),
-                          verticalSpace(8),
+                          const SizedBox(height: 8),
                           TextFormField(
                             controller: _newPasswordController,
                             obscureText: _obscureNewPassword,
+                            style: const TextStyle(fontFamily: 'Cairo'),
                             decoration: InputDecoration(
                               hintText: 'أدخل كلمة المرور الجديدة',
+                              hintStyle: const TextStyle(fontFamily: 'Cairo'),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscureNewPassword
@@ -234,19 +238,20 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               return null;
                             },
                           ),
-                          verticalSpace(16),
+                          const SizedBox(height: 16),
                           
-                          // Confirm Password Field
                           Text(
                             'تأكيد كلمة المرور',
-                            style: TextStyles.font14DarkBlueMedium,
+                            style: TextStyles.font14DarkBlueMedium.copyWith(fontFamily: 'Cairo', fontSize: baseFontSize * 0.875),
                           ),
-                          verticalSpace(8),
+                          const SizedBox(height: 8),
                           TextFormField(
                             controller: _confirmPasswordController,
                             obscureText: _obscureConfirmPassword,
+                            style: const TextStyle(fontFamily: 'Cairo'),
                             decoration: InputDecoration(
                               hintText: 'أعد إدخال كلمة المرور الجديدة',
+                              hintStyle: const TextStyle(fontFamily: 'Cairo'),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscureConfirmPassword
@@ -273,15 +278,14 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               return null;
                             },
                           ),
-                          verticalSpace(32),
+                          const SizedBox(height: 40),
                           
-                          // Submit Button
                           SizedBox(
                             width: double.infinity,
                             child: AppTextButton(
                               buttonText: 'تغيير كلمة المرور',
-                              textStyle: TextStyles.font16WhiteSemiBold,
-                              onPressed: _submit,
+                              textStyle: TextStyles.font16WhiteSemiBold.copyWith(fontFamily: 'Cairo'),
+                              onPressed: () => _submit(width, baseFontSize),
                             ),
                           ),
                         ],
@@ -291,9 +295,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 ),
               ),
             ),
-
+          ),
+        ],
       ),
-    ]
-      ));
+    );
   }
 }

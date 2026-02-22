@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/helpers/constants.dart';
@@ -75,14 +74,10 @@ class _DoctorProfileState extends State<DoctorProfile> {
       final cachedCategory = await SharedPrefHelper.getString('category');
       final cachedImage = await SharedPrefHelper.getString('profile_image');
 
-      print('Cached category before setState: $cachedCategory');
-
       if (mounted) {
         setState(() {
-          _firstName =
-              (cachedFirst?.isNotEmpty ?? false) ? cachedFirst : _firstName;
-          _lastName =
-              (cachedLast?.isNotEmpty ?? false) ? cachedLast : _lastName;
+          _firstName = (cachedFirst?.isNotEmpty ?? false) ? cachedFirst : _firstName;
+          _lastName = (cachedLast?.isNotEmpty ?? false) ? cachedLast : _lastName;
           _email = (cachedEmail?.isNotEmpty ?? false) ? cachedEmail : _email;
           if (cachedPhone?.isNotEmpty ?? false) {
             if (!cachedPhone!.contains('@')) {
@@ -95,15 +90,12 @@ class _DoctorProfileState extends State<DoctorProfile> {
           _category = (cachedCategory?.isNotEmpty ?? false) ? cachedCategory : _category;
           _profileImage = (cachedImage?.isNotEmpty ?? false) ? cachedImage : _profileImage;
 
-          // Fallback if name is missing but email exists
           if ((_firstName == null || _firstName!.isEmpty) &&
               (_email != null && _email!.isNotEmpty)) {
             _firstName = _email!.split('@').first;
           }
         });
       }
-      // Fetch latest profile data in the background without blocking
-      // the initial screen render or showing a long loading state.
       unawaited(_fetchProfile(silent: true));
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -112,37 +104,32 @@ class _DoctorProfileState extends State<DoctorProfile> {
 
   Future<void> _fetchProfile({bool silent = false}) async {
     if (!silent) {
-      setState(() {
-        _error = null;
-        _loading = true;
-      });
+      if (mounted) {
+        setState(() {
+          _error = null;
+          _loading = true;
+        });
+      }
     }
     try {
       final dio = DioFactory.getDio();
       Response? response;
 
-      // Try the dedicated '/profile' endpoint first, then '/me' (Flask backend)
       try {
         response = await dio.get('${ApiConstants.otpBaseUrl}/profile');
       } catch (_) {
-        // If /profile fails, try /me
         try {
           response = await dio.get('${ApiConstants.otpBaseUrl}/me');
-        } catch (_) {
-          // If /me fails (e.g. 404 on old server), simply proceed to fallback.
-        }
+        } catch (_) {}
       }
 
-      // Fallback: Try POST /update_profile with empty body if GET endpoints failed
       if (response == null) {
         try {
           final res = await dio.post('${ApiConstants.otpBaseUrl}/update_profile', data: {});
           if (res.statusCode == 200) {
             response = res;
           }
-        } catch (_) {
-          // Ignore errors from fallback attempt
-        }
+        } catch (_) {}
       }
 
       if (response != null && response.statusCode == 200) {
@@ -155,28 +142,6 @@ class _DoctorProfileState extends State<DoctorProfile> {
           }
         }
         
-        // Debug log the complete response
-        print('API Response: $data');
-        print('User Map: $userMap');
-
-        // Print all keys in the response for debugging
-        if (data is Map) {
-          print('Top-level response keys: ${data.keys.toList()}');
-          // Print all key-value pairs for top level
-          data.forEach((key, value) {
-            print('$key: $value (${value.runtimeType})');
-          });
-          
-          if (data['user'] is Map) {
-            final userData = data['user'] as Map;
-            print('User object keys: ${userData.keys.toList()}');
-            // Print all key-value pairs for user object
-            userData.forEach((key, value) {
-              print('user.$key: $value (${value.runtimeType})');
-            });
-          }
-        }
-
         String? getVal(String a, String b) {
           if (userMap == null) return null;
           return (userMap[a] ?? userMap[b])?.toString();
@@ -185,76 +150,39 @@ class _DoctorProfileState extends State<DoctorProfile> {
         final firstName = getVal('first_name', 'firstName');
         final lastName = getVal('last_name', 'lastName');
         final email = userMap?['email']?.toString();
-        // Try multiple keys for phone
-        // Try to get phone from multiple possible locations
+        
         String? phone;
-        
-        // Debug: Print all keys that might contain phone info
-        print('Searching for phone number in response...');
-        
-        // Try direct access first
         phone = userMap?['phone']?.toString();
-        print('After checking userMap[\'phone\']: $phone');
         
-        // Try common alternative keys
         final possiblePhoneKeys = ['tel', 'telephone', 'phone_number', 'mobile', 'phoneNumber', 'phone'];
 
         for (var key in possiblePhoneKeys) {
           if ((phone == null || phone.isEmpty) && userMap?[key] != null) {
             phone = userMap?[key]?.toString();
-            print('Found phone in userMap[\'$key\']: $phone');
           }
         }
         
-        // If still not found, try to get from the root of the response
         if ((phone == null || phone.isEmpty) && data is Map) {
           for (var key in possiblePhoneKeys) {
             if (data[key] != null) {
               phone = data[key]?.toString();
-              print('Found phone in root[\'$key\']: $phone');
               if (phone != null && phone.isNotEmpty) break;
             }
           }
         }
 
-        // Try to find any key that might contain phone number
-        if ((phone == null || phone.isEmpty) && userMap != null) {
-          final phoneKeys = userMap.keys.where((key) => 
-            key.toString().toLowerCase().contains('phone') || 
-            key.toString().toLowerCase().contains('tel')
-          ).toList();
-          
-          for (final key in phoneKeys) {
-            final value = userMap[key]?.toString();
-            if (value != null && value.isNotEmpty && !value.contains('@')) {
-              phone = value;
-              break;
-            }
-          }
-        }
-
-        // Ensure phone is not an email
         if (phone != null && phone.contains('@')) {
           phone = null;
         }
 
-
-
         final faculty = userMap?['faculty']?.toString();
         final year = userMap?['year']?.toString();
         final governorate = (userMap?['governorate'] ?? userMap?['governorate_id'])?.toString();
-        // Try multiple keys for category/specialty
         final category = (userMap?['category'] ?? userMap?['specialty'] ?? userMap?['specialization'])?.toString();
         final profileImage = userMap?['profile_image']?.toString();
 
-        // Debug log the extracted values
-        print('Extracted phone: $phone');
-        print('Extracted category from API: $category');
-        print('All userMap keys: ${userMap?.keys.toList()}');
-
         if (mounted) {
           setState(() {
-            // Update state with fetched data, falling back to existing state if null
             if (firstName != null && firstName.isNotEmpty) _firstName = firstName;
             if (lastName != null && lastName.isNotEmpty) _lastName = lastName;
             if (email != null && email.isNotEmpty) _email = email;
@@ -265,7 +193,6 @@ class _DoctorProfileState extends State<DoctorProfile> {
             if (category != null && category.isNotEmpty) _category = category;
             if (profileImage != null && profileImage.isNotEmpty) _profileImage = profileImage;
 
-            // Fallback if name is missing but email exists
             if ((_firstName == null || _firstName!.isEmpty) &&
                 (_email != null && _email!.isNotEmpty)) {
               _firstName = _email!.split('@').first;
@@ -289,12 +216,8 @@ class _DoctorProfileState extends State<DoctorProfile> {
             DoctorDrawer.profileImageNotifier.value = profileImage;
           }
         }
-      } else {
-        // No known endpoint found. Do not show scary banner; keep cached data.
-        return;
       }
     } on DioException catch (e) {
-      // For 404 specifically, suppress the error and keep cached values
       if (e.response?.statusCode == 404) return;
       if (!silent && mounted) {
         setState(() => _error = e.message ?? 'تعذر الاتصال بالخادم');
@@ -323,10 +246,11 @@ class _DoctorProfileState extends State<DoctorProfile> {
         await _uploadImage(base64Image);
       }
     } catch (e) {
-      print('Error picking image: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('حدث خطأ أثناء اختيار الصورة')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('حدث خطأ أثناء اختيار الصورة', style: TextStyle(fontFamily: 'Cairo'))),
+        );
+      }
     }
   }
 
@@ -341,34 +265,29 @@ class _DoctorProfileState extends State<DoctorProfile> {
       if (response.statusCode == 200) {
         await SharedPrefHelper.setData('profile_image', base64Image);
         DoctorDrawer.profileImageNotifier.value = base64Image;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم تحديث الصورة الشخصية بنجاح')),
-        );
-      } else {
-        throw Exception('Failed to upload image');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('تم تحديث الصورة الشخصية بنجاح', style: TextStyle(fontFamily: 'Cairo'))),
+          );
+        }
       }
     } catch (e) {
-      print('Error uploading image: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('حدث خطأ أثناء تحديث الصورة')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('حدث خطأ أثناء تحديث الصورة', style: TextStyle(fontFamily: 'Cairo'))),
+        );
+      }
     }
   }
 
   Future<void> _updateProfileData(Map<String, dynamic> data) async {
     setState(() => _loading = true);
     try {
-      // Get token first
       final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
       if (token == null || token.isEmpty) {
         throw Exception('Token غير موجود. يرجى تسجيل الدخول مرة أخرى');
       }
       
-      print('Updating profile with token: exists');
-      print('Update data: $data');
-      print('Update URL: ${ApiConstants.otpBaseUrl}/update_profile');
-      
-      // Create a new Dio instance for this specific request to avoid baseUrl conflicts
       final dio = Dio(BaseOptions(
         baseUrl: ApiConstants.otpBaseUrl,
         connectTimeout: const Duration(seconds: 60),
@@ -385,14 +304,9 @@ class _DoctorProfileState extends State<DoctorProfile> {
         data: data,
       );
       
-      print('Update response status: ${response.statusCode}');
-      print('Update response data: ${response.data}');
-      
       if (response.statusCode == 200) {
-        // Check if response indicates success
         final responseData = response.data;
         if (responseData is Map && responseData['status'] == 'success') {
-          // Optimistic local update to ensure UI reflects changes even if server doesn't return them
           setState(() {
              if (data.containsKey('category')) _category = data['category'];
              if (data.containsKey('first_name')) _firstName = data['first_name'];
@@ -403,7 +317,6 @@ class _DoctorProfileState extends State<DoctorProfile> {
              if (data.containsKey('governorate')) _governorate = data['governorate'];
           });
 
-          // Persist to local storage
           if (_category != null) await SharedPrefHelper.setData('category', _category!);
           if (_firstName != null) await SharedPrefHelper.setData('first_name', _firstName!);
           if (_lastName != null) await SharedPrefHelper.setData('last_name', _lastName!);
@@ -412,56 +325,26 @@ class _DoctorProfileState extends State<DoctorProfile> {
           if (_year != null) await SharedPrefHelper.setData('year', _year!);
           if (_governorate != null) await SharedPrefHelper.setData('governorate', _governorate!);
 
-          // Refresh profile data from server
           await _fetchProfile(silent: true);
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('تم تحديث البيانات بنجاح'), backgroundColor: Colors.green),
+              const SnackBar(content: Text('تم تحديث البيانات بنجاح', style: TextStyle(fontFamily: 'Cairo')), backgroundColor: Colors.green),
             );
           }
-        } else {
-          throw Exception('Server returned error: ${responseData['message'] ?? 'Unknown error'}');
         }
-      } else {
-        // Log details to diagnose why update failed
-        print('update_profile failed: status=${response.statusCode}, data=${response.data}');
-        throw Exception('Failed to update: status ${response.statusCode}');
       }
     } on DioException catch (e) {
-      print('DioException updating profile: ${e.message}');
-      print('Response: ${e.response?.data}');
-      print('Status code: ${e.response?.statusCode}');
-      
       String errorMessage = 'حدث خطأ أثناء التحديث';
-      if (e.response != null) {
-        final errorData = e.response?.data;
-        if (errorData is Map && errorData['message'] != null) {
-          errorMessage = errorData['message'].toString();
-        } else if (e.response?.statusCode == 401) {
-          errorMessage = 'غير مصرح لك. يرجى تسجيل الدخول مرة أخرى';
-        } else if (e.response?.statusCode == 404) {
-          errorMessage = 'المستخدم غير موجود';
-        } else if (e.response?.statusCode == 400) {
-          errorMessage = 'بيانات غير صالحة';
-        }
-      } else if (e.type == DioExceptionType.connectionTimeout || 
-                 e.type == DioExceptionType.receiveTimeout) {
-        errorMessage = 'انتهت مهلة الاتصال. يرجى المحاولة مرة أخرى';
-      } else if (e.type == DioExceptionType.connectionError) {
-        errorMessage = 'تعذر الاتصال بالخادم. يرجى التحقق من الاتصال بالإنترنت';
-      }
-      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+          SnackBar(content: Text(errorMessage, style: const TextStyle(fontFamily: 'Cairo')), backgroundColor: Colors.red),
         );
       }
     } catch (e) {
-      print('Error updating profile: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('حدث خطأ أثناء التحديث: ${e.toString()}'), backgroundColor: Colors.red),
+          SnackBar(content: Text('حدث خطأ أثناء التحديث', style: const TextStyle(fontFamily: 'Cairo')), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -479,7 +362,6 @@ class _DoctorProfileState extends State<DoctorProfile> {
     String? selectedGovernorate = _governorate;
     String? selectedCollege = _faculty;
 
-    // Ensure initial values are in the lists or null
     if (selectedCategory != null && !_categories.contains(selectedCategory)) selectedCategory = null;
     if (selectedYear != null && !_studyYears.contains(selectedYear)) selectedYear = null;
     if (selectedGovernorate != null && !_governorates.contains(selectedGovernorate)) selectedGovernorate = null;
@@ -492,7 +374,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
           return Directionality(
             textDirection: TextDirection.rtl,
             child: AlertDialog(
-              title: const Text('تعديل البيانات', textAlign: TextAlign.center),
+              title: const Text('تعديل البيانات', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Cairo')),
               content: SingleChildScrollView(
                 child: SizedBox(
                   width: double.maxFinite,
@@ -501,50 +383,53 @@ class _DoctorProfileState extends State<DoctorProfile> {
                     children: [
                       TextField(
                         controller: firstNameCtrl,
-                        decoration: const InputDecoration(labelText: 'الاسم الأول'),
+                        style: const TextStyle(fontFamily: 'Cairo'),
+                        decoration: const InputDecoration(labelText: 'الاسم الأول', labelStyle: TextStyle(fontFamily: 'Cairo')),
                       ),
                       const SizedBox(height: 12),
                       TextField(
                         controller: lastNameCtrl,
-                        decoration: const InputDecoration(labelText: 'اسم العائلة'),
+                        style: const TextStyle(fontFamily: 'Cairo'),
+                        decoration: const InputDecoration(labelText: 'اسم العائلة', labelStyle: TextStyle(fontFamily: 'Cairo')),
                       ),
                       const SizedBox(height: 12),
                       TextField(
                         controller: phoneCtrl,
-                        decoration: const InputDecoration(labelText: 'رقم الهاتف'),
+                        style: const TextStyle(fontFamily: 'Cairo'),
+                        decoration: const InputDecoration(labelText: 'رقم الهاتف', labelStyle: TextStyle(fontFamily: 'Cairo')),
                         keyboardType: TextInputType.phone,
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
                         value: selectedCollege,
-                        decoration: const InputDecoration(labelText: 'الكلية'),
+                        decoration: const InputDecoration(labelText: 'الكلية', labelStyle: TextStyle(fontFamily: 'Cairo')),
                         isExpanded: true,
-                        items: _colleges.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                        items: _colleges.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontFamily: 'Cairo')))).toList(),
                         onChanged: (v) => setStateDialog(() => selectedCollege = v),
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
                         value: selectedYear,
-                        decoration: const InputDecoration(labelText: 'السنة الدراسية'),
+                        decoration: const InputDecoration(labelText: 'السنة الدراسية', labelStyle: TextStyle(fontFamily: 'Cairo')),
                         isExpanded: true,
-                        items: _studyYears.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                        items: _studyYears.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontFamily: 'Cairo')))).toList(),
                         onChanged: (v) => setStateDialog(() => selectedYear = v),
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
                         value: selectedGovernorate,
-                        decoration: const InputDecoration(labelText: 'المحافظة'),
+                        decoration: const InputDecoration(labelText: 'المحافظة', labelStyle: TextStyle(fontFamily: 'Cairo')),
                         isExpanded: true,
-                        items: _governorates.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                        items: _governorates.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontFamily: 'Cairo')))).toList(),
                         onChanged: (v) => setStateDialog(() => selectedGovernorate = v),
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
-                        value: selectedCategory, // Use the variable
-                        decoration: const InputDecoration(labelText: 'التخصص'),
+                        value: selectedCategory, 
+                        decoration: const InputDecoration(labelText: 'التخصص', labelStyle: TextStyle(fontFamily: 'Cairo')),
                         isExpanded: true,
-                        items: _categories.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-                        onChanged: (v) => setStateDialog(() => selectedCategory = v), // Update variable
+                        items: _categories.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontFamily: 'Cairo')))).toList(),
+                        onChanged: (v) => setStateDialog(() => selectedCategory = v), 
                       ),
                     ],
                   ),
@@ -553,7 +438,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('إلغاء'),
+                  child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo')),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -568,7 +453,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                       'faculty': selectedCollege,
                     });
                   },
-                  child: const Text('حفظ'),
+                  child: const Text('حفظ', style: TextStyle(fontFamily: 'Cairo')),
                 ),
               ],
             ),
@@ -580,6 +465,9 @@ class _DoctorProfileState extends State<DoctorProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
@@ -596,19 +484,19 @@ class _DoctorProfileState extends State<DoctorProfile> {
         automaticallyImplyLeading: false,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu, size: 24.w),
+            icon: Icon(Icons.menu, size: 24 * (width / 390)),
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Text(
-              'الملف الشخصي',
-              style:
-                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+        title: Center(
+          child: Text(
+            'الملف الشخصي',
+            style: textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Cairo',
+              fontSize: baseFontSize * 1.125, // 18
             ),
-          ],
+          ),
         ),
         actions: [
           IconButton(
@@ -616,15 +504,13 @@ class _DoctorProfileState extends State<DoctorProfile> {
             tooltip: 'تعديل البيانات',
             onPressed: _showEditProfileDialog,
           ),
-          SizedBox(width: 8.w),
+          const SizedBox(width: 8),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
             height: 1,
-            color: theme.brightness == Brightness.dark
-                ? Colors.grey[700]
-                : const Color(0xFFE5E7EB),
+            color: theme.brightness == Brightness.dark ? Colors.grey[700] : const Color(0xFFE5E7EB),
           ),
         ),
       ),
@@ -636,16 +522,16 @@ class _DoctorProfileState extends State<DoctorProfile> {
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _headerCard(theme, textTheme, colorScheme),
-                  SizedBox(height: 12.h),
-                  _infoCard(theme, textTheme, colorScheme),
+                  _headerCard(theme, textTheme, colorScheme, width, baseFontSize),
+                  const SizedBox(height: 12),
+                  _infoCard(theme, textTheme, colorScheme, width, baseFontSize),
                   if (_error != null) ...[
-                    SizedBox(height: 12.h),
-                    _errorBanner(textTheme, colorScheme, _error!),
+                    const SizedBox(height: 12),
+                    _errorBanner(textTheme, colorScheme, _error!, width, baseFontSize),
                   ],
                 ],
               ),
@@ -656,43 +542,34 @@ class _DoctorProfileState extends State<DoctorProfile> {
     );
   }
 
-  Widget _headerCard(
-      ThemeData theme, TextTheme textTheme, ColorScheme colorScheme) {
+  Widget _headerCard(ThemeData theme, TextTheme textTheme, ColorScheme colorScheme, double width, double baseFontSize) {
     final isDark = theme.brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
           width: 1.1,
         ),
         boxShadow: [
           BoxShadow(
-            color: isDark
-                ? Colors.black.withValues(alpha: 0.3)
-                : Colors.grey.withValues(alpha: 0.1),
+            color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1),
             offset: const Offset(0, 1),
             blurRadius: 3,
           ),
         ],
       ),
-      padding: EdgeInsets.all(16.r),
+      padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           Stack(
             children: [
               CircleAvatar(
-                radius: 28.r,
-                backgroundColor: theme.brightness == Brightness.dark
-                    ? Colors.grey[800]
-                    : Colors.grey[200],
-                backgroundImage: _profileImage != null
-                    ? MemoryImage(base64Decode(_profileImage!))
-                    : null,
-                child: _profileImage == null
-                    ? Icon(Icons.person_outline, color: theme.iconTheme.color)
-                    : null,
+                radius: 28 * (width / 390),
+                backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                backgroundImage: _profileImage != null ? MemoryImage(base64Decode(_profileImage!)) : null,
+                child: _profileImage == null ? Icon(Icons.person_outline, color: theme.iconTheme.color) : null,
               ),
               Positioned(
                 bottom: 0,
@@ -700,7 +577,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                 child: InkWell(
                   onTap: _pickImage,
                   child: Container(
-                    padding: EdgeInsets.all(4.r),
+                    padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color: colorScheme.primary,
                       shape: BoxShape.circle,
@@ -708,7 +585,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                     ),
                     child: Icon(
                       Icons.camera_alt,
-                      size: 12.sp,
+                      size: 12 * (width / 390),
                       color: Colors.white,
                     ),
                   ),
@@ -716,28 +593,30 @@ class _DoctorProfileState extends State<DoctorProfile> {
               ),
             ],
           ),
-          SizedBox(width: 12.w),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 _loading
-                    ? _shimmerLine(width: 120.w, height: 18.h, theme: theme)
+                    ? _shimmerLine(width: 120 * (width / 390), height: 18, theme: theme)
                     : Text(
                         _composeName(_firstName, _lastName) ?? 'دكتور',
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
-                          fontSize: 18.sp,
+                          fontSize: baseFontSize * 1.125, // 18
+                          fontFamily: 'Cairo',
                         ),
                         textAlign: TextAlign.right,
                       ),
-                SizedBox(height: 4.h),
+                const SizedBox(height: 4),
                 _loading
-                    ? _shimmerLine(width: 180.w, height: 14.h, theme: theme)
+                    ? _shimmerLine(width: 180 * (width / 390), height: 14, theme: theme)
                     : Text(
                         _email ?? '-',
                         style: textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurface.withValues(alpha: 0.7),
+                          fontFamily: 'Cairo',
                         ),
                         textAlign: TextAlign.right,
                         maxLines: 1,
@@ -751,60 +630,45 @@ class _DoctorProfileState extends State<DoctorProfile> {
     );
   }
 
-  Widget _infoCard(
-      ThemeData theme, TextTheme textTheme, ColorScheme colorScheme) {
+  Widget _infoCard(ThemeData theme, TextTheme textTheme, ColorScheme colorScheme, double width, double baseFontSize) {
     final isDark = theme.brightness == Brightness.dark;
     final items = <_InfoItem>[
-      _InfoItem(
-          icon: Icons.badge_outlined, label: 'الاسم الأول', value: _firstName),
-      _InfoItem(
-          icon: Icons.perm_identity, label: 'اسم العائلة', value: _lastName),
-      _InfoItem(
-          icon: Icons.email_outlined, label: 'البريد الإلكتروني', value: _email),
-      _InfoItem(
-          icon: Icons.phone_outlined, label: 'رقم الهاتف', value: _phone),
-      _InfoItem(
-          icon: Icons.school_outlined, label: 'الكلية', value: _faculty),
-      _InfoItem(
-          icon: Icons.event_note_outlined,
-          label: 'السنة الدراسية',
-          value: _year),
-      _InfoItem(
-          icon: Icons.work_outline, label: 'التخصص', value: _category), // Added Category
-      _InfoItem(
-          icon: Icons.place_outlined, label: 'المحافظة', value: _governorate),
+      _InfoItem(icon: Icons.badge_outlined, label: 'الاسم الأول', value: _firstName),
+      _InfoItem(icon: Icons.perm_identity, label: 'اسم العائلة', value: _lastName),
+      _InfoItem(icon: Icons.email_outlined, label: 'البريد الإلكتروني', value: _email),
+      _InfoItem(icon: Icons.phone_outlined, label: 'رقم الهاتف', value: _phone),
+      _InfoItem(icon: Icons.school_outlined, label: 'الكلية', value: _faculty),
+      _InfoItem(icon: Icons.event_note_outlined, label: 'السنة الدراسية', value: _year),
+      _InfoItem(icon: Icons.work_outline, label: 'التخصص', value: _category),
+      _InfoItem(icon: Icons.place_outlined, label: 'المحافظة', value: _governorate),
     ];
 
     return Container(
       decoration: BoxDecoration(
         color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
           width: 1.1,
         ),
         boxShadow: [
           BoxShadow(
-            color: isDark
-                ? Colors.black.withValues(alpha: 0.3)
-                : Colors.grey.withValues(alpha: 0.1),
+            color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1),
             offset: const Offset(0, 1),
             blurRadius: 3,
           ),
         ],
       ),
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Column(
         children: [
           for (int i = 0; i < items.length; i++) ...[
-            _infoRow(items[i], theme, textTheme, colorScheme),
+            _infoRow(items[i], theme, textTheme, colorScheme, width, baseFontSize),
             if (i != items.length - 1)
               Divider(
                 height: 1,
                 thickness: 1,
-                color: theme.brightness == Brightness.dark
-                    ? Colors.grey[700]
-                    : const Color(0xFFE5E7EB),
+                color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB),
               ),
           ]
         ],
@@ -812,14 +676,13 @@ class _DoctorProfileState extends State<DoctorProfile> {
     );
   }
 
-  Widget _infoRow(_InfoItem item, ThemeData theme, TextTheme textTheme,
-      ColorScheme colorScheme) {
-    return Container( // Changed Material/Inkwell to basic Container to remove tap effect
-      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 6.w),
+  Widget _infoRow(_InfoItem item, ThemeData theme, TextTheme textTheme, ColorScheme colorScheme, double width, double baseFontSize) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
       child: Row(
         children: [
-          Icon(item.icon, color: theme.iconTheme.color, size: 22.sp),
-          SizedBox(width: 12.w),
+          Icon(item.icon, color: theme.iconTheme.color, size: 22 * (width / 390)),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -828,18 +691,20 @@ class _DoctorProfileState extends State<DoctorProfile> {
                   item.label,
                   style: textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurface.withValues(alpha: 0.6),
-                    fontSize: 12.sp,
+                    fontSize: baseFontSize * 0.75, // 12
+                    fontFamily: 'Cairo',
                   ),
                   textAlign: TextAlign.right,
                 ),
-                SizedBox(height: 2.h),
+                const SizedBox(height: 2),
                 _loading
-                    ? _shimmerLine(width: 160.w, height: 16.h, theme: theme)
+                    ? _shimmerLine(width: 160 * (width / 390), height: 16, theme: theme)
                     : Text(
                         (item.value?.isNotEmpty ?? false) ? item.value! : '-',
                         style: textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
-                          fontSize: 14.sp,
+                          fontSize: baseFontSize * 0.875, // 14
+                          fontFamily: 'Cairo',
                         ),
                         textAlign: TextAlign.right,
                       ),
@@ -851,24 +716,25 @@ class _DoctorProfileState extends State<DoctorProfile> {
     );
   }
 
-  Widget _errorBanner(
-      TextTheme textTheme, ColorScheme colorScheme, String message) {
+  Widget _errorBanner(TextTheme textTheme, ColorScheme colorScheme, String message, double width, double baseFontSize) {
     return Container(
-      padding: EdgeInsets.all(12.r),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: colorScheme.error.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
           Icon(Icons.error_outline, color: colorScheme.error),
-          SizedBox(width: 8.w),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               message,
-              style: textTheme.bodyMedium
-                  ?.copyWith(color: colorScheme.onErrorContainer),
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onErrorContainer,
+                fontFamily: 'Cairo',
+              ),
               textAlign: TextAlign.right,
             ),
           ),
@@ -883,18 +749,13 @@ class _DoctorProfileState extends State<DoctorProfile> {
     return f?.isNotEmpty == true ? f : l;
   }
 
-  Widget _shimmerLine(
-      {required double width,
-      required double height,
-      required ThemeData theme}) {
+  Widget _shimmerLine({required double width, required double height, required ThemeData theme}) {
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark
-            ? Colors.grey[800]
-            : Colors.grey[200],
-        borderRadius: BorderRadius.circular(6.r),
+        color: theme.brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[200],
+        borderRadius: BorderRadius.circular(6),
       ),
     );
   }

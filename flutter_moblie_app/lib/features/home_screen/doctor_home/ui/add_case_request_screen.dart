@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
 import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
-import 'package:thotha_mobile_app/core/helpers/spacing.dart';
 import 'package:thotha_mobile_app/core/routing/routes.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
 import 'package:thotha_mobile_app/core/theming/styles.dart';
@@ -33,8 +31,6 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
 
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
-
-  // Removed hardcoded _categories list
 
   @override
   void initState() {
@@ -118,15 +114,12 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
       return;
     }
 
-    // Check if user is logged in
     final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
     
     if (token.isEmpty ) {
       _showLoginDialog();
     } else {
-      // Proceed with publishing
       try {
-        // Show loading
         if (mounted) {
            showDialog(
             context: context,
@@ -145,13 +138,12 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
           date: _dateController.text,
           time: _timeController.text,
           location: selectedCityName,
-          description: 'No details', // Description is not in UI, defaulting
+          description: 'No details', 
         );
 
         final repo = getIt<CaseRequestRepo>();
         final result = await repo.createCaseRequest(body);
 
-        // Hide loading
         if (mounted) Navigator.pop(context);
 
         if (result['success'] == true) {
@@ -175,7 +167,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
           }
         }
       } catch (e) {
-        if (mounted) Navigator.pop(context); // Hide loading
+        if (mounted) Navigator.pop(context); 
          if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -210,8 +202,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
               TextButton(
                 child: Text('تسجيل الدخول', style: TextStyles.font14BlueSemiBold),
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close dialog
-                  // Navigate to login screen
+                  Navigator.of(context).pop(); 
                   Navigator.of(context).pushNamed(Routes.loginScreen);
                 },
               ),
@@ -224,11 +215,18 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'إضافة طلب حالة',
-          style: TextStyles.font18DarkBlueBold,
+          style: TextStyles.font18DarkBlueBold.copyWith(
+            fontFamily: 'Cairo',
+            fontSize: baseFontSize * 1.125, // 18sp
+          ),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -240,112 +238,136 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         child: Directionality(
           textDirection: ui.TextDirection.rtl,
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(24.w),
+            padding: EdgeInsets.all(width * 0.06), // 24.w
             child: Form(
               key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'بيانات الحالة',
-                    style: TextStyles.font18DarkBlueBold,
-                  ),
-                  verticalSpace(8),
-                  Text(
-                    'قم بملء البيانات التالية لنشر طلب حالة جديد',
-                    style: TextStyles.font14GrayRegular,
-                  ),
-                  verticalSpace(32),
-
-                  // Specialization
-                  _buildLabel('التخصص'),
-                  verticalSpace(8),
-                  _isLoadingData
-                      ? const Center(child: CircularProgressIndicator())
-                      : DropdownButtonFormField<String>(
-                          value: _selectedCategory,
-                          decoration: _buildInputDecoration(
-                            hint: 'اختر التخصص',
-                            prefixIcon: Icons.medical_services_outlined,
-                          ),
-                          items: _categoriesList
-                              .map((c) => DropdownMenuItem(
-                                  value: c.name, child: Text(c.name)))
-                              .toList(),
-                          onChanged: (v) =>
-                              setState(() => _selectedCategory = v),
-                          validator: (value) =>
-                              value == null ? 'يرجى اختيار التخصص' : null,
-                          icon: const Icon(Icons.keyboard_arrow_down,
-                              color: ColorsManager.gray),
-                        ),
-                  verticalSpace(16),
-
-                  // Date
-                  _buildLabel('التاريخ المتاح'),
-                  verticalSpace(8),
-                  TextFormField(
-                    controller: _dateController,
-                    readOnly: true,
-                    onTap: () => _selectDate(context),
-                    decoration: _buildInputDecoration(
-                      hint: 'يوم / شهر / سنة',
-                      prefixIcon: Icons.calendar_today_outlined,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: width >= 600 ? 500 : double.infinity,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'بيانات الحالة',
+                      style: TextStyles.font18DarkBlueBold.copyWith(
+                        fontFamily: 'Cairo',
+                        fontSize: baseFontSize * 1.125,
+                      ),
                     ),
-                    validator: (value) =>
-                        value!.isEmpty ? 'يرجى اختيار التاريخ' : null,
-                  ),
-                  verticalSpace(16),
-
-                  // Time
-                  _buildLabel('الوقت المتاح'),
-                  verticalSpace(8),
-                  TextFormField(
-                    controller: _timeController,
-                    readOnly: true,
-                    onTap: () => _selectTime(context),
-                    decoration: _buildInputDecoration(
-                      hint: '00:00',
-                      prefixIcon: Icons.access_time_outlined,
+                    const SizedBox(height: 8),
+                    Text(
+                      'قم بملء البيانات التالية لنشر طلب حالة جديد',
+                      style: TextStyles.font14GrayRegular.copyWith(
+                        fontFamily: 'Cairo',
+                        fontSize: baseFontSize * 0.875,
+                      ),
                     ),
-                    validator: (value) =>
-                        value!.isEmpty ? 'يرجى اختيار الوقت' : null,
-                  ),
-                  verticalSpace(16),
+                    const SizedBox(height: 32),
 
-                  // Location / City
-                  _buildLabel('المكان / المدينة'),
-                  verticalSpace(8),
-                  _isLoadingData
-                      ? const Center(child: CircularProgressIndicator())
-                      : DropdownButtonFormField<int>(
-                          value: _selectedCityId,
-                          decoration: _buildInputDecoration(
-                            hint: 'اختر المدينة',
-                            prefixIcon: Icons.location_on_outlined,
+                    // Specialization
+                    _buildLabel('التخصص', baseFontSize),
+                    const SizedBox(height: 8),
+                    _isLoadingData
+                        ? const Center(child: CircularProgressIndicator())
+                        : DropdownButtonFormField<String>(
+                            value: _selectedCategory,
+                            decoration: _buildInputDecoration(
+                              hint: 'اختر التخصص',
+                              prefixIcon: Icons.medical_services_outlined,
+                              width: width,
+                              baseFontSize: baseFontSize,
+                            ),
+                            items: _categoriesList
+                                .map((c) => DropdownMenuItem(
+                                    value: c.name, child: Text(c.name, style: const TextStyle(fontFamily: 'Cairo'))))
+                                .toList(),
+                            onChanged: (v) =>
+                                setState(() => _selectedCategory = v),
+                            validator: (value) =>
+                                value == null ? 'يرجى اختيار التخصص' : null,
+                            icon: const Icon(Icons.keyboard_arrow_down,
+                                color: ColorsManager.gray),
                           ),
-                          items: _cities
-                              .map((c) => DropdownMenuItem(
-                                    value: c.id,
-                                    child: Text(c.name),
-                                  ))
-                              .toList(),
-                          onChanged: (v) => setState(() => _selectedCityId = v),
-                          validator: (value) =>
-                              value == null ? 'يرجى اختيار المدينة' : null,
-                          icon: const Icon(Icons.keyboard_arrow_down,
-                              color: ColorsManager.gray),
-                        ),
-                  verticalSpace(40),
+                    const SizedBox(height: 16),
 
-                  // Publish Button
-                  AppTextButton(
-                    buttonText: 'نشر الطلب',
-                    textStyle: TextStyles.font16WhiteSemiBold,
-                    backgroundColor: ColorsManager.mainBlue,
-                    onPressed: _publishRequest,
-                  ),
-                ],
+                    // Date
+                    _buildLabel('التاريخ المتاح', baseFontSize),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _dateController,
+                      readOnly: true,
+                      onTap: () => _selectDate(context),
+                      decoration: _buildInputDecoration(
+                        hint: 'يوم / شهر / سنة',
+                        prefixIcon: Icons.calendar_today_outlined,
+                        width: width,
+                        baseFontSize: baseFontSize,
+                      ),
+                      validator: (value) =>
+                          value!.isEmpty ? 'يرجى اختيار التاريخ' : null,
+                      style: const TextStyle(fontFamily: 'Cairo'),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Time
+                    _buildLabel('الوقت المتاح', baseFontSize),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _timeController,
+                      readOnly: true,
+                      onTap: () => _selectTime(context),
+                      decoration: _buildInputDecoration(
+                        hint: '00:00',
+                        prefixIcon: Icons.access_time_outlined,
+                        width: width,
+                        baseFontSize: baseFontSize,
+                      ),
+                      validator: (value) =>
+                          value!.isEmpty ? 'يرجى اختيار الوقت' : null,
+                      style: const TextStyle(fontFamily: 'Cairo'),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Location / City
+                    _buildLabel('المكان / المدينة', baseFontSize),
+                    const SizedBox(height: 8),
+                    _isLoadingData
+                        ? const Center(child: CircularProgressIndicator())
+                        : DropdownButtonFormField<int>(
+                            value: _selectedCityId,
+                            decoration: _buildInputDecoration(
+                              hint: 'اختر المدينة',
+                              prefixIcon: Icons.location_on_outlined,
+                              width: width,
+                              baseFontSize: baseFontSize,
+                            ),
+                            items: _cities
+                                .map((c) => DropdownMenuItem(
+                                      value: c.id,
+                                      child: Text(c.name, style: const TextStyle(fontFamily: 'Cairo')),
+                                    ))
+                                .toList(),
+                            onChanged: (v) => setState(() => _selectedCityId = v),
+                            validator: (value) =>
+                                value == null ? 'يرجى اختيار المدينة' : null,
+                            icon: const Icon(Icons.keyboard_arrow_down,
+                                color: ColorsManager.gray),
+                          ),
+                    const SizedBox(height: 40),
+
+                    // Publish Button
+                    AppTextButton(
+                      buttonText: 'نشر الطلب',
+                      textStyle: TextStyles.font16WhiteSemiBold.copyWith(
+                        fontFamily: 'Cairo',
+                        fontSize: baseFontSize,
+                      ),
+                      backgroundColor: ColorsManager.mainBlue,
+                      onPressed: _publishRequest,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -357,10 +379,12 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
   InputDecoration _buildInputDecoration({
     required String hint,
     required IconData prefixIcon,
+    required double width,
+    required double baseFontSize,
   }) {
     return InputDecoration(
       isDense: true,
-      contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 18.h),
+      contentPadding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 18),
       focusedBorder: OutlineInputBorder(
         borderSide: const BorderSide(color: ColorsManager.mainBlue, width: 1.3),
         borderRadius: BorderRadius.circular(16.0),
@@ -377,22 +401,28 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         borderSide: const BorderSide(color: Colors.red, width: 1.3),
         borderRadius: BorderRadius.circular(16.0),
       ),
-      hintStyle: TextStyles.font14LightGrayRegular,
+      hintStyle: TextStyles.font14LightGrayRegular.copyWith(
+        fontFamily: 'Cairo',
+        fontSize: baseFontSize * 0.875,
+      ),
       hintText: hint,
       prefixIcon: Icon(
         prefixIcon,
         color: ColorsManager.mainBlue,
-        size: 22.sp,
+        size: 22,
       ),
       fillColor: ColorsManager.moreLighterGray,
       filled: true,
     );
   }
 
-  Widget _buildLabel(String label) {
+  Widget _buildLabel(String label, double baseFontSize) {
     return Text(
       label,
-      style: TextStyles.font14DarkBlueMedium,
+      style: TextStyles.font14DarkBlueMedium.copyWith(
+        fontFamily: 'Cairo',
+        fontSize: baseFontSize * 0.875,
+      ),
     );
   }
 }

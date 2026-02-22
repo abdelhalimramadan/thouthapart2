@@ -1,63 +1,55 @@
-/*
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:thotha_mobile_app/core/utils/notification_helper.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/drawer/settings/ui/settings_screen.dart';
-import 'package:thotha_mobile_app/features/notifications/ui/notifications_screen.dart';
-import 'package:thotha_mobile_app/core/theming/app_theme.dart';
 
 class MyBookingsScreen extends StatelessWidget {
   MyBookingsScreen({super.key});
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  @override*/
-/**//*
-
+  @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+    final baseFontSize = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: Theme(
-        data: AppTheme.lightTheme,
-        child: const Drawer(
-          child: HomeDrawer(),
-        ),
+      drawer: const Drawer(
+        child: HomeDrawer(),
       ),
       appBar: AppBar(
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
-        automaticallyImplyLeading: false, // Disable default back button
-        title: Container(
+        automaticallyImplyLeading: false,
+        title: SizedBox(
           width: double.infinity,
           height: 50,
           child: Stack(
             children: [
-              // Menu icon on the left
               Positioned(
                 left: 0,
                 child: IconButton(
                   icon: Icon(
                     Icons.menu,
                     color: theme.iconTheme.color,
-                    size: 40,
-                    weight: 700, // Bold weight
+                    size: 32 * (width / 390),
                   ),
                   onPressed: () {
                     _scaffoldKey.currentState?.openDrawer();
                   },
                 ),
               ),
-              // Logo centered
               Positioned(
-                right: 30,
+                right: width * 0.08,
                 child: Image.asset(
                   'assets/images/splash-logo.png',
-                  width: 46,
-                  height: 50,
+                  width: 46 * (width / 390),
+                  height: 50 * (width / 390),
                   fit: BoxFit.contain,
                 ),
               ),
@@ -70,77 +62,55 @@ class MyBookingsScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // User greeting container
-              Container(
-                width: 400,
-                height: 80,
-                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                padding: const EdgeInsets.only(top: 15),
-                child: Stack(
+              // User greeting
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Notification icon (left side)
-                    Positioned(
-                      left: 20,
-                      child: Container(
-                        width: 70,
-                        height: 39.99,
-                        alignment: Alignment.centerLeft,
-                        child: Icon(
-                          Icons.notifications_none,
-                          size: 30,
-                          color: theme.iconTheme.color,
-                        ),
-                      ),
+                    Icon(
+                      Icons.notifications_none,
+                      size: 30 * (width / 390),
+                      color: theme.iconTheme.color,
                     ),
-
-                    // User name and greeting (right side)
-                    Positioned(
-                      right: 0,
-                      top: -4,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          // Greeting
-                          Text(
-                            'مرحباً، أهلاً بعودتك',
-                            textDirection: TextDirection.rtl,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontFamily: 'Cairo',
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              height: 1.5,
-                              letterSpacing: 0.4,
-                              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
-                            ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'مرحباً، أهلاً بعودتك',
+                          textDirection: TextDirection.rtl,
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontWeight: FontWeight.w400,
+                            fontSize: baseFontSize,
+                            color: isDark ? Colors.white70 : Colors.black54,
                           ),
-                          // Name
-                          Text(
-                            'يوسف ايمن',
-                            textDirection: TextDirection.rtl,
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontFamily: 'Cairo',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 22,
-                              height: 1.5,
-                              letterSpacing: 0.1,
-                            ),
+                        ),
+                        Text(
+                          'يوسف ايمن',
+                          textDirection: TextDirection.rtl,
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontWeight: FontWeight.w600,
+                            fontSize: baseFontSize * 1.375, // 22
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
 
-              // Search Container (new separate container)
+              // Search bar
               Container(
-                width: 377.23,
-                height: 40,
-                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                width: double.infinity,
+                height: 44,
+                margin: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: isDark ? Colors.grey[700]! : const Color(0xFF021433),
-                    width: 0.25,
+                    width: 0.5,
                   ),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -149,311 +119,199 @@ class MyBookingsScreen extends StatelessWidget {
                   children: [
                     Text(
                       ' ابحث عن ',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontFamily: 'Cairo',
-                      ),
+                      style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize * 0.875),
                     ),
                     const SizedBox(width: 8),
-                    Container(
-                      width: 17,
-                      height: 17,
-                      alignment: Alignment.center,
-                      child: Icon(
-                        Icons.search,
-                        size: 12,
-                        color: theme.iconTheme.color?.withOpacity(0.7), // #111827 with 70% opacity
-                      ),
+                    Icon(
+                      Icons.search,
+                      size: 20,
+                      color: theme.iconTheme.color?.withOpacity(0.7),
                     ),
-                    const SizedBox(width: 12),
                   ],
                 ),
               ),
-              Container(
-                width: 414,
-                height: null,
-                padding: const EdgeInsets.only(top: 15, left: 20, right:15),
+
+              // Main Content
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 15),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    // Header
-                    Container(
-                      width: 374,
-                      height: 42,
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: 10),
-                      decoration: BoxDecoration(
-                        color: theme.scaffoldBackgroundColor,
-                      ),
-                      child: Text(
-                        'حجوزاتي القادمه',
-                        textAlign: TextAlign.right,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 28,
-                          height: 1.5,
-                        ),
+                    Text(
+                      'حجوزاتي القادمه',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w700,
+                        fontSize: baseFontSize * 1.75, // 28
                       ),
                     ),
-
-                    Container(
-                      width: 373.01,
-                      height: 175.97,
-                      margin: const EdgeInsets.symmetric(vertical: 11.99),
-                      padding: const EdgeInsets.only(
-                        top: 23.99,
-                        right: 20,
-                        left: 20,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.cardTheme.color ?? colorScheme.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: isDark ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      // ... rest of your existing Stack children
-                      child: Stack(
-                        children: [
-                          // Left Container - Adjusted for better layout
-                          Positioned(
-                            right: 90,
-                            top: -10,
-                            child: SizedBox(
-                              width: 333.80426025390625,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: double.infinity,
-                                    height: 80.99864196777344,
-                                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          width: double.infinity,
-                                          height: 26.99,
-                                          alignment: Alignment.centerRight,
-                                          child: const Text(
-                                            'زياد جمال ',
-                                            textAlign: TextAlign.right,
-                                            style: TextStyle(
-                                              fontFamily: 'Cairo',
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 18,
-                                              height: 1.5,
-                                              color: Color(0xFF0A0A0A),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 21.0,
-                                          alignment: Alignment.centerRight,
-                                          child: const Text(
-                                            'تدريب زراعة اسنان',
-                                            textAlign: TextAlign.right,
-                                            style: TextStyle(
-                                              fontFamily: 'Cairo',
-                                              fontWeight: FontWeight.w400,
-                                              fontSize: 14,
-                                              height: 1.5,
-                                              color: Color(0xFF858585),
-                                            ),
-                                          ),
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 21.0,
-                                          margin: const EdgeInsets.only(top: 5.0),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.end,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Text(
-                                                    '11:30 صباحا',
-                                                    style: TextStyle(
-                                                      fontFamily: 'Cairo',
-                                                      fontWeight: FontWeight.w400,
-                                                      fontSize: 14,
-                                                      height: 1.5,
-                                                      color: Color(0xFF6A7282),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  const Icon(
-                                                    Icons.access_time,
-                                                    size: 16,
-                                                    color: Color(0xFF6A7282),
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(width: 24),
-                                              Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Text(
-                                                    '2025-11-29',
-                                                    style: TextStyle(
-                                                      fontFamily: 'Cairo',
-                                                      fontWeight: FontWeight.w400,
-                                                      fontSize: 14,
-                                                      height: 1.5,
-                                                      color: Color(0xFF6A7282),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  const Icon(
-                                                    Icons.calendar_month,
-                                                    size: 16,
-                                                    color: Color(0xFF6A7282),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          // Image Container - Adjusted position
-                          Positioned(
-                            right: 10,
-                            top: 0,
-                            child: Opacity(
-                              opacity: 0.8,
-                              child: Container(
-                                width: 78.99,
-                                height: 79.99,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  image: const DecorationImage(
-                                    image: AssetImage('assets/images/test.jpg'),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Buttons - independent from info container
-                          Positioned(
-                            bottom: 19,
-                            child: SizedBox(
-                              width: 331.80426025390625,
-                              height: 36.99217987060547,
-                              child: Row(
-                                textDirection: TextDirection.ltr,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SizedBox(
-                                    width: 162.90621948242188,
-                                    height: 36.99217987060547,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        // Add edit action
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFFEFF6FF),
-                                        foregroundColor: const Color(0xFF155DFC),
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(6),
-                                          side: const BorderSide(color: Color(0xFF155DFC)),
-                                        ),
-                                        padding: const EdgeInsets.only(
-
-                                          right: 60.64,
-                                          left: 66.62,
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'تعديل',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontFamily: 'Cairo',
-                                          fontWeight: FontWeight.w400,
-                                          height: 21 / 14,
-                                          letterSpacing: 0,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 160.90621948242188,
-                                    height: 36.99217987060547,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        // Add cancel action
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFFFEF2F2),
-                                        foregroundColor: const Color(0xFFE7000B),
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(6),
-                                          side: const BorderSide(color: Color(0xFFE7000B)),
-                                        ),
-                                        padding: const EdgeInsets.only(
-
-                                          right: 60.33,
-                                          left: 67.31,
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'إلغاء',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontFamily: 'Cairo',
-                                          fontWeight: FontWeight.w400,
-                                          height: 21 / 14,
-                                          letterSpacing: 0,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    const SizedBox(height: 12),
+                    _buildBookingCard(
+                      context: context,
+                      patientName: 'زياد جمال',
+                      service: 'تدريب زراعة اسنان',
+                      time: '11:30 صباحا',
+                      date: '2025-11-29',
+                      profileImage: 'assets/images/test.jpg',
+                      width: width,
+                      baseFontSize: baseFontSize,
                     ),
-                    SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
-
-                  ])
+                  ],
+                ),
               ),
-            ]),
+              SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
+            ],
+          ),
         ),
       ),
     );
+  }
 
+  Widget _buildBookingCard({
+    required BuildContext context,
+    required String patientName,
+    required String service,
+    required String time,
+    required String date,
+    required String profileImage,
+    required double width,
+    required double baseFontSize,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color ?? colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            textDirection: TextDirection.rtl,
+            children: [
+              Container(
+                width: 70 * (width / 390),
+                height: 70 * (width / 390),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  image: DecorationImage(
+                    image: AssetImage(profileImage),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      patientName,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w600,
+                        fontSize: baseFontSize * 1.125, // 18
+                      ),
+                    ),
+                    Text(
+                      service,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: baseFontSize * 0.875, // 14
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          time,
+                          style: TextStyle(fontSize: baseFontSize * 0.75, color: Colors.grey),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                        const SizedBox(width: 12),
+                        Text(
+                          date,
+                          style: TextStyle(fontSize: baseFontSize * 0.75, color: Colors.grey),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.calendar_month, size: 14, color: Colors.grey),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFEF2F2),
+                    foregroundColor: const Color(0xFFE7000B),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                      side: const BorderSide(color: Color(0xFFE7000B)),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  child: Text(
+                    'إلغاء',
+                    style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize * 0.875),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEFF6FF),
+                    foregroundColor: const Color(0xFF155DFC),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                      side: const BorderSide(color: Color(0xFF155DFC)),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  child: Text(
+                    'تعديل',
+                    style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize * 0.875),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
-// Navigation extension to easily navigate to settings
 extension SettingsNavigation on BuildContext {
   void navigateToSettings() {
     Navigator.push(
       this,
-      MaterialPageRoute(builder: (context) =>  SettingsScreen()),
+      MaterialPageRoute(builder: (context) => SettingsScreen()),
     );
   }
 }
-*/

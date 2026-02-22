@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/models/doctor_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/logic/doctor_cubit.dart';
 import 'package:thotha_mobile_app/features/home_screen/logic/doctor_state.dart';
 import 'package:thotha_mobile_app/features/doctor_info/ui/doctor_info_screen.dart';
-import 'dart:ui'; // For ImageFilter
+import 'dart:ui'; 
 
 class CategoryDoctorsScreen extends StatelessWidget {
   final String categoryName;
@@ -24,6 +23,10 @@ class CategoryDoctorsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
+
     return BlocProvider(
       create: (context) {
         final cubit = getIt<DoctorCubit>();
@@ -46,9 +49,10 @@ class CategoryDoctorsScreen extends StatelessWidget {
         appBar: AppBar(
           title: Text(
             categoryName,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Cairo',
               fontWeight: FontWeight.w700,
+              fontSize: baseFontSize * 1.125, // 18sp
             ),
           ),
           centerTitle: true,
@@ -58,19 +62,20 @@ class CategoryDoctorsScreen extends StatelessWidget {
             if (state is DoctorLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is DoctorError) {
-              return Center(child: Text(state.error));
+              return Center(child: Text(state.error, style: const TextStyle(fontFamily: 'Cairo')));
             } else if (state is DoctorSuccess) {
               final doctors = state.doctors;
               if (doctors.isEmpty) {
-                return const Center(
-                    child: Text('لا يوجد أطباء في هذا القسم حالياً'));
+                return Center(
+                    child: Text('لا يوجد أطباء في هذا القسم حالياً', 
+                      style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize)));
               }
               return ListView.separated(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                padding: EdgeInsets.symmetric(horizontal: width * 0.04, vertical: 16),
                 itemCount: doctors.length,
-                separatorBuilder: (_, __) => SizedBox(height: 12.h),
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
-                  return _buildDoctorItem(context, doctors[index]);
+                  return _buildDoctorItem(context, doctors[index], width, baseFontSize);
                 },
               );
             }
@@ -81,21 +86,21 @@ class CategoryDoctorsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDoctorItem(BuildContext context, DoctorModel doctor) {
+  Widget _buildDoctorItem(BuildContext context, DoctorModel doctor, double width, double baseFontSize) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () => _showDoctorDetails(context, doctor),
       child: Container(
-        padding: EdgeInsets.all(12.w),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: theme.cardColor,
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 6.r,
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 6,
               offset: const Offset(0, 2),
             ),
           ],
@@ -104,8 +109,8 @@ class CategoryDoctorsScreen extends StatelessWidget {
           children: [
             // Avatar
             Container(
-              width: 60.r,
-              height: 60.r,
+              width: 60 * (width / 390),
+              height: 60 * (width / 390),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isDark ? Colors.grey[800] : Colors.grey[200],
@@ -116,12 +121,12 @@ class CategoryDoctorsScreen extends StatelessWidget {
                         doctor.photo!,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) =>
-                            Icon(Icons.person, color: Colors.grey),
+                            const Icon(Icons.person, color: Colors.grey),
                       )
-                    : Icon(Icons.person, color: Colors.grey),
+                    : const Icon(Icons.person, color: Colors.grey),
               ),
             ),
-            SizedBox(width: 12.w),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,31 +136,33 @@ class CategoryDoctorsScreen extends StatelessWidget {
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontFamily: 'Cairo',
                       fontWeight: FontWeight.w700,
+                      fontSize: baseFontSize,
                     ),
                   ),
-                  SizedBox(height: 4.h),
+                  const SizedBox(height: 4),
                   Text(
                     doctor.categoryName,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontFamily: 'Cairo',
+                      fontSize: baseFontSize * 0.875,
                       color:
-                          theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                          theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                     ),
                   ),
-                  SizedBox(height: 10.h),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
-                      Icon(Icons.location_on, size: 16.r, color: Colors.grey),
-                      SizedBox(width: 6.w),
+                      const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                      const SizedBox(width: 6),
                       Flexible(
                         child: Text(
                           doctor.cityName,
                           style: theme.textTheme.bodySmall
-                              ?.copyWith(fontFamily: 'Cairo'),
+                              ?.copyWith(fontFamily: 'Cairo', fontSize: baseFontSize * 0.75),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Spacer(),
+                      const Spacer(),
                       if (doctor.price != null)
                         Flexible(
                           child: Text(
@@ -164,6 +171,7 @@ class CategoryDoctorsScreen extends StatelessWidget {
                               fontFamily: 'Cairo',
                               color: Colors.green,
                               fontWeight: FontWeight.bold,
+                              fontSize: baseFontSize * 0.75,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -190,7 +198,7 @@ class CategoryDoctorsScreen extends StatelessWidget {
             onTap: () => Navigator.pop(context),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.black.withOpacity(0.2)),
+              child: Container(color: Colors.black.withValues(alpha: 0.2)),
             ),
           ),
           DraggableScrollableSheet(

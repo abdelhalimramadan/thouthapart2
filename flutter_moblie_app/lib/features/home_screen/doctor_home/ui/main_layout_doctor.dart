@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/doctor_next_booking_screen.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/patient_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_booking_records_screen.dart';
 
 
@@ -49,23 +47,23 @@ class _MainLayoutDoctorState extends State<MainLayoutDoctor> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      body: Container(
-        color: colorScheme.surface,
-        child: PageView(
-          controller: _pageController,
-          physics: const NeverScrollableScrollPhysics(),
-          children: _screens,
-        ),
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        children: _screens,
       ),
       bottomNavigationBar: Container(
-        height: 75.h,
-        padding: EdgeInsets.symmetric(vertical: 8.h),
+        height: 75 * (height / 812).clamp(0.8, 1.2),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: colorScheme.surface,
           boxShadow: [
@@ -86,20 +84,23 @@ class _MainLayoutDoctorState extends State<MainLayoutDoctor> {
               label: 'الحجوزات',
               isActive: _currentIndex == 1,
               onTap: () => _onItemTapped(1),
+              width: width,
             ),
-            SizedBox(width: 24.w),
+            SizedBox(width: 24 * (width / 390)),
             _buildNavItem(
               icon: Icons.list_alt_rounded,
               label: 'السجل',
               isActive: _currentIndex == 2,
               onTap: () => _onItemTapped(2),
+              width: width,
             ),
-            SizedBox(width: 24.w),
+            SizedBox(width: 24 * (width / 390)),
             _buildNavItem(
               icon: Icons.home_sharp,
               label: 'الرئيسية',
               isActive: _currentIndex == 0,
               onTap: () => _onItemTapped(0),
+              width: width,
             ),
           ],
         ),
@@ -112,9 +113,11 @@ class _MainLayoutDoctorState extends State<MainLayoutDoctor> {
     required String label,
     required bool isActive,
     required VoidCallback onTap,
+    required double width,
     IconData? activeIcon,
   }) {
-    final double iconSize = 25.w;
+    final double iconSize = 25 * (width / 390);
+    final baseFontSize = width * 0.04;
 
     return GestureDetector(
       onTap: onTap,
@@ -125,11 +128,11 @@ class _MainLayoutDoctorState extends State<MainLayoutDoctor> {
           AnimatedContainer(
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeOutCubic,
-            transform: Matrix4.translationValues(0, isActive ? -5.h : 0, 0),
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: isActive ? 8.h : 5.h),
+            transform: Matrix4.translationValues(0, isActive ? -5 : 0, 0),
+            padding: EdgeInsets.symmetric(horizontal: 12 * (width / 390), vertical: isActive ? 8 : 5),
             decoration: BoxDecoration(
               color: isActive ? Theme.of(context).colorScheme.primary.withAlpha((0.08 * 255).round()) : Colors.transparent,
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(12),
               boxShadow: isActive
                   ? [
                       BoxShadow(
@@ -146,19 +149,15 @@ class _MainLayoutDoctorState extends State<MainLayoutDoctor> {
               color: isActive ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-          SizedBox(height: 0.h),
-          AnimatedOpacity(
-            duration: const Duration(milliseconds: 180),
-            opacity: isActive ? 1.0 : 1.0,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontFamily: 'Cairo',
-                    color: isActive ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 12.sp,
-                    fontWeight: isActive ? FontWeight.w400 : FontWeight.normal,
-                  ),
-            ),
+          const SizedBox(height: 0),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontFamily: 'Cairo',
+                  color: isActive ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontSize: baseFontSize * 0.75, // 12
+                  fontWeight: isActive ? FontWeight.w400 : FontWeight.normal,
+                ),
           ),
         ],
       ),

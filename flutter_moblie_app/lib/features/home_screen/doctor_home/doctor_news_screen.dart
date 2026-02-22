@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thotha_mobile_app/core/utils/notification_helper.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
 import 'package:thotha_mobile_app/features/notifications/ui/notifications_screen.dart';
 
 class DoctorNewsScreen extends StatefulWidget {
-  DoctorNewsScreen({super.key});
+  const DoctorNewsScreen({super.key});
 
   @override
   State<DoctorNewsScreen> createState() => _DoctorNewsScreenState();
@@ -16,10 +15,14 @@ class _DoctorNewsScreenState extends State<DoctorNewsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
+
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -32,7 +35,7 @@ class _DoctorNewsScreenState extends State<DoctorNewsScreen> {
         automaticallyImplyLeading: false,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu, size: 24.w),
+            icon: Icon(Icons.menu, size: 24 * (width / 390)),
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ),
@@ -40,32 +43,20 @@ class _DoctorNewsScreenState extends State<DoctorNewsScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 37.w,
-              height: 40.h,
-              child: Image.asset(
-                'assets/images/splash-logo.png',
-                width: 37.w,
-                height: 40.h,
-                fit: BoxFit.contain,
-              ),
+            Image.asset(
+              'assets/images/splash-logo.png',
+              width: 37 * (width / 390),
+              height: 40 * (width / 390),
+              fit: BoxFit.contain,
             ),
-            SizedBox(width: 8.w),
-            SizedBox(
-              width: 92.w,
-              height: 27.h,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'لوحة التحكم',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontFamily: 'Cairo',
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
-                    height: 1.5,
-                    letterSpacing: 0,
-                  ),
-                ),
+            const SizedBox(width: 8),
+            Text(
+              'لوحة التحكم',
+              style: textTheme.titleLarge?.copyWith(
+                fontFamily: 'Cairo',
+                fontSize: baseFontSize * 1.125, // 18
+                fontWeight: FontWeight.w600,
+                height: 1.5,
               ),
             ),
           ],
@@ -74,16 +65,14 @@ class _DoctorNewsScreenState extends State<DoctorNewsScreen> {
           Stack(
             children: [
               IconButton(
-                icon: Icon(Icons.notifications_none, size: 24.w),
+                icon: Icon(Icons.notifications_none, size: 24 * (width / 390)),
                 onPressed: () {
-                  // Mark notifications as read when opened
                   NotificationHelper.hasUnreadNotifications = false;
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const NotificationsScreen()),
                   ).then((_) {
-                    // This will refresh the notification badge when returning to the screen
                     if (mounted) setState(() {});
                   });
                 },
@@ -93,8 +82,8 @@ class _DoctorNewsScreenState extends State<DoctorNewsScreen> {
                   right: 8,
                   top: 10,
                   child: Container(
-                    width: 16.w,
-                    height: 16.w,
+                    width: 16 * (width / 390),
+                    height: 16 * (width / 390),
                     decoration: BoxDecoration(
                       color: colorScheme.error,
                       shape: BoxShape.circle,
@@ -106,7 +95,7 @@ class _DoctorNewsScreenState extends State<DoctorNewsScreen> {
                             : '${NotificationHelper.getUnreadCount()}',
                         style: textTheme.labelSmall?.copyWith(
                           color: colorScheme.onError,
-                          fontSize: 10.sp,
+                          fontSize: baseFontSize * 0.625, // 10
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -115,7 +104,7 @@ class _DoctorNewsScreenState extends State<DoctorNewsScreen> {
                 ),
             ],
           ),
-          SizedBox(width: 8.w),
+          const SizedBox(width: 8),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.1),
@@ -125,13 +114,20 @@ class _DoctorNewsScreenState extends State<DoctorNewsScreen> {
           ),
         ),
       ),
-      body: _buildMainContent(),
+      body: _buildMainContent(baseFontSize),
     );
   }
 
-  Widget _buildMainContent() {
+  Widget _buildMainContent(double baseFontSize) {
     return Center(
-      child: Text('Main Content Here'),
+      child: Text(
+        'قريباً.. أخبار الأطباء',
+        style: TextStyle(
+          fontFamily: 'Cairo',
+          fontSize: baseFontSize * 1.25,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }

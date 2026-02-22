@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/routing/routes.dart';
@@ -28,8 +27,6 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
     _screens = [
       const HomeScreen(),
       const ChatScreen(),
-      //const Placeholder(child: Center(child: Text('صفحة الملف الشخصي'))),
-      // For profile screen (index 3)
     ];
   }
 
@@ -41,8 +38,6 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
 
   void _onItemTapped(int index) {
     if (index == 2) {
-      // Profile button index is 2
-      // Navigate to login screen and remove all previous routes
       Navigator.pushNamedAndRemoveUntil(
         context,
         Routes.loginScreen,
@@ -58,21 +53,21 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      body: Container(
-        color: colorScheme.surface,
-        child: PageView(
-          controller: _pageController,
-          physics: const NeverScrollableScrollPhysics(),
-          children: _screens,
-        ),
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        children: _screens,
       ),
       bottomNavigationBar: Container(
-        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         decoration: BoxDecoration(
           color: colorScheme.surface,
           boxShadow: [
@@ -93,6 +88,7 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
                 label: 'الصفحة الرئيسية',
                 isActive: _currentIndex == 0,
                 onTap: () => _onItemTapped(0),
+                width: width,
               ),
             ),
             Flexible(
@@ -101,11 +97,10 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
                 label: 'ثوثة المساعد',
                 isActive: _currentIndex == 1,
                 onTap: () => _onItemTapped(1),
+                width: width,
               ),
             ),
-            SizedBox(
-             width: 10.w,
-            ),
+            const SizedBox(width: 10),
             Flexible(
               child: _buildNavItem(
                 icon : Icons.person,
@@ -113,6 +108,7 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
                 label: 'الملف',
                 isActive: _currentIndex == 2,
                 onTap: () => _onItemTapped(2),
+                width: width,
               ),
             ),
           ],
@@ -126,13 +122,15 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
     required String label,
     required bool isActive,
     required VoidCallback onTap,
+    required double width,
     IconData? activeIcon,
   }) {
+    final baseFontSize = width * 0.04;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(12),
         splashColor: Theme.of(context)
             .colorScheme
             .onSurface
@@ -143,7 +141,7 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
             .withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.15 : 0.1),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: const BoxDecoration(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -153,9 +151,9 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
                 color: isActive
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.onSurfaceVariant,
-                size: 24.w,
+                size: 24 * (width / 390),
               ),
-              SizedBox(height: 4.h),
+              const SizedBox(height: 4),
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -163,9 +161,8 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
                       color: isActive
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontSize: 11.sp,
-                      fontWeight:
-                          isActive ? FontWeight.w600 : FontWeight.normal,
+                      fontSize: baseFontSize * 0.6875, // 11
+                      fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
                     ),
               ),
             ],
@@ -180,7 +177,9 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
     required String label,
     required bool isActive,
     required VoidCallback onTap,
+    required double width,
   }) {
+    final baseFontSize = width * 0.04;
     return InkWell(
       onTap: onTap,
       child: Column(
@@ -188,11 +187,10 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
         children: [
           SvgPicture.asset(
             iconPath,
-            width: 24.w,
-            height: 24.w,
-            // Removed colorFilter to maintain original SVG colors
+            width: 24 * (width / 390),
+            height: 24 * (width / 390),
           ),
-          SizedBox(height: 4.h),
+          const SizedBox(height: 4),
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -200,7 +198,7 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
                   color: isActive
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 12.sp,
+                  fontSize: baseFontSize * 0.75, // 12
                   fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
                 ),
           ),

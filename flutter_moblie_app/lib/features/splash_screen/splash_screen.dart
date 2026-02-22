@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theming/colors.dart';
@@ -24,7 +23,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Precache all onboarding images in parallel
     _precacheOnboardingImages();
   }
 
@@ -38,13 +36,12 @@ class _SplashScreenState extends State<SplashScreen> {
     try {
       await Future.wait(
         images.map((image) => precacheImage(
-              // Must match the cacheWidth used in DoctorImageAndText
               ResizeImage(AssetImage(image), width: 1500),
               context,
             )),
       );
     } catch (e) {
-      // debugPrint('Failed to precache images: $e');
+      // ignore
     }
   }
 
@@ -52,7 +49,6 @@ class _SplashScreenState extends State<SplashScreen> {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Check if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
@@ -62,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
           onPressed: () async {
             Navigator.of(context).pop();
             await Geolocator.openLocationSettings();
-            _checkLocationPermission(); // Retry loop
+            _checkLocationPermission(); 
           },
         );
       }
@@ -80,7 +76,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 'يحتاج التطبيق إلى إذن الموقع ليعمل بشكل صحيح. يرجى منح الإذن.',
             onPressed: () {
               Navigator.of(context).pop();
-              _checkLocationPermission(); // Retry loop
+              _checkLocationPermission(); 
             },
           );
         }
@@ -97,14 +93,13 @@ class _SplashScreenState extends State<SplashScreen> {
           onPressed: () async {
             Navigator.of(context).pop();
             await Geolocator.openAppSettings();
-            _checkLocationPermission(); // Retry loop
+            _checkLocationPermission(); 
           },
         );
       }
       return;
     }
 
-    // Location permission granted, now check notifications
     if (mounted) {
       _checkNotificationPermission();
     }
@@ -114,7 +109,6 @@ class _SplashScreenState extends State<SplashScreen> {
     NotificationSettings settings =
         await FirebaseMessaging.instance.getNotificationSettings();
 
-    // 1. If already authorized, move on to onboarding
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       if (mounted) {
         Navigator.pushReplacementNamed(context, Routes.onBoardingScreen);
@@ -122,7 +116,6 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
 
-    // 2. If denied (disabled from settings), show the "Settings" dialog
     if (settings.authorizationStatus == AuthorizationStatus.denied) {
       if (mounted) {
         await NotificationPermissionHelper.showPermanentlyDeniedDialog(
@@ -132,30 +125,25 @@ class _SplashScreenState extends State<SplashScreen> {
             await Geolocator.openAppSettings();
           },
         );
-        // After returning from settings, the user should have enabled them.
         _checkNotificationPermission();
       }
       return;
     }
 
-    // 3. If not determined (first time), show our pitch dialog
     if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
       if (mounted) {
         await NotificationPermissionHelper.showNotificationPermissionDialog(
             context);
-        // After pitch, trigger the system request
         await FirebaseMessaging.instance.requestPermission(
           alert: true,
           badge: true,
           sound: true,
         );
-        // Re-check whatever the user chose in the system dialog
         _checkNotificationPermission();
       }
       return;
     }
 
-    // Default: Final navigation if for some reason we reach here (e.g. provisional)
     if (mounted) {
       Navigator.pushReplacementNamed(context, Routes.onBoardingScreen);
     }
@@ -166,6 +154,9 @@ class _SplashScreenState extends State<SplashScreen> {
     required String content,
     required VoidCallback onPressed,
   }) {
+    final width = MediaQuery.of(context).size.width;
+    final baseFontSize = width * 0.04;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -175,7 +166,7 @@ class _SplashScreenState extends State<SplashScreen> {
           style: TextStyle(
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
-            fontSize: 18.sp,
+            fontSize: baseFontSize * 1.125, // 18sp
           ),
           textAlign: TextAlign.right,
           textDirection: TextDirection.rtl,
@@ -184,7 +175,7 @@ class _SplashScreenState extends State<SplashScreen> {
           content,
           style: TextStyle(
             fontFamily: 'Cairo',
-            fontSize: 14.sp,
+            fontSize: baseFontSize * 0.875, // 14sp
           ),
           textAlign: TextAlign.right,
           textDirection: TextDirection.rtl,
@@ -198,6 +189,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.bold,
                 color: ColorsManager.mainBlue,
+                fontSize: baseFontSize,
               ),
             ),
           ),
@@ -208,38 +200,40 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Full screen gradient overlay (matching onboarding)
           Container(
             width: double.infinity,
             height: double.infinity,
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: const Alignment(-0.7, -0.7), // Top-left quadrant
+                center: const Alignment(-0.7, -0.7), 
                 radius: 1.5,
                 colors: [
-                  ColorsManager.layerBlur1.withOpacity(0.4),
-                  ColorsManager.layerBlur1.withOpacity(0.1),
+                  ColorsManager.layerBlur1.withValues(alpha: 0.4),
+                  ColorsManager.layerBlur1.withValues(alpha: 0.1),
                   Colors.transparent,
                 ],
                 stops: const [0.1, 0.5, 0.8],
               ),
             ),
           ),
-          // Bottom-right gradient overlay (matching onboarding)
           Container(
             width: double.infinity,
             height: double.infinity,
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: const Alignment(0.7, 0.7), // Bottom-right quadrant
+                center: const Alignment(0.7, 0.7), 
                 radius: 1.5,
                 colors: [
-                  ColorsManager.layerBlur2.withOpacity(0.4),
-                  ColorsManager.layerBlur2.withOpacity(0.1),
+                  ColorsManager.layerBlur2.withValues(alpha: 0.4),
+                  ColorsManager.layerBlur2.withValues(alpha: 0.1),
                   Colors.transparent,
                 ],
                 stops: const [0.1, 0.5, 0.8],
@@ -247,25 +241,22 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
           ),
 
-          // Main content
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo Image
                 Image.asset(
                   'assets/images/splash-logo.png',
-                  width: 200.w,
-                  height: 200.h,
+                  width: 200 * (width / 390),
+                  height: 200 * (width / 390),
                   fit: BoxFit.contain,
                 ),
-                SizedBox(height: 32.h),
-                // Title Text
+                const SizedBox(height: 32),
                 Text(
                   'رعاية ذكية، لمسة طبية',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 28.sp,
+                    fontSize: baseFontSize * 1.75, // 28sp
                     fontWeight: FontWeight.bold,
                     color: ColorsManager.fontColor,
                     fontFamily: 'Cairo',

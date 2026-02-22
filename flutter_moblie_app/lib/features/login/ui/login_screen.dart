@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../core/helpers/app_regex.dart';
 import '../../../core/helpers/spacing.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
@@ -33,8 +31,6 @@ class _LoginScreenState extends State<LoginScreen> {
     _formKey = GlobalKey<FormState>();
     _loadSavedCredentials();
   }
-
-
 
   // Load saved credentials if they exist
   Future<void> _loadSavedCredentials() async {
@@ -68,147 +64,141 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Handle login form submission
-    Future<void> _login() async {
-      if (!_formKey.currentState!.validate()) {
-        return; // Stop if form validation fails
-      }
-
-      // Save credentials if remember me is checked
-      if (rememberMe) {
-        await _handleRememberMe(true);
-      }
-
-      setState(() {
-        isLoading = true;
-        errorMessage = null;
-        passwordError = null;
-      });
-
-      try {
-        // Call the login API
-        final result = await AuthService().login(
-          email: emailController.text.trim(),
-          password: passwordController.text,
-        );
-
-        if (result['success'] == true) {
-          if (mounted) {
-            // Navigate to doctor main layout with fade transition and white background
-            Navigator.of(context).pushReplacement(
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    const DoctorHomeScreen(),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: child,
-                  );
-                },
-                transitionDuration: const Duration(milliseconds: 300),
-              ),
-            );
-          }
-        } else {
-          // Show error message if login fails
-          String errorMsg =
-              result['error'] ?? 'فشل تسجيل الدخول. الرجاء المحاولة مرة أخرى.';
-
-          // More specific error messages based on status code
-          if (result['statusCode'] == 401) {
-            errorMsg = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
-          } else if (result['statusCode'] == 404) {
-            errorMsg =
-                'لا يوجد حساب مسجل بهذا البريد الإلكتروني. الرجاء إنشاء حساب أولاً';
-          }
-
-          setState(() {
-            errorMessage = errorMsg;
-          });
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            errorMessage = 'Login failed. Please try again.';
-            // You can add more specific error handling here
-          });
-        }
-      } finally {
-        if (mounted) {
-          setState(() {
-            isLoading = false;
-          });
-        }
-      }
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
     }
 
+    if (rememberMe) {
+      await _handleRememberMe(true);
+    }
+
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+      passwordError = null;
+    });
+
+    try {
+      final result = await AuthService().login(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
+
+      if (result['success'] == true) {
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const DoctorHomeScreen(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              transitionDuration: const Duration(milliseconds: 300),
+            ),
+          );
+        }
+      } else {
+        String errorMsg =
+            result['error'] ?? 'فشل تسجيل الدخول. الرجاء المحاولة مرة أخرى.';
+        if (result['statusCode'] == 401) {
+          errorMsg = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+        } else if (result['statusCode'] == 404) {
+          errorMsg =
+              'لا يوجد حساب مسجل بهذا البريد الإلكتروني. الرجاء إنشاء حساب أولاً';
+        }
+        setState(() {
+          errorMessage = errorMsg;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          errorMessage = 'Login failed. Please try again.';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+    final baseFontSize = width * 0.04;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
-      body: SizedBox(
-        width: double.infinity,
-        height: double.infinity,
-        child: Stack(
-          children: [
-            // Full screen gradient overlay
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(-0.7, -0.7), // Top-left quadrant
-                  radius: 1.5,
-                  colors: [
-                    ColorsManager.layerBlur1.withValues(alpha: 0.4),
-                    ColorsManager.layerBlur1.withValues(alpha: 0.1),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.3, 0.8],
-                ),
+      body: Stack(
+        children: [
+          // Full screen gradient overlay
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: const Alignment(-0.7, -0.7),
+                radius: 1.5,
+                colors: [
+                  ColorsManager.layerBlur1.withAlpha(102),
+                  ColorsManager.layerBlur1.withAlpha(25),
+                  Colors.transparent,
+                ],
+                stops: const [0.0, 0.3, 0.8],
               ),
             ),
+          ),
 
-            // Bottom-right gradient overlay
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0.7, 0.7), // Bottom-right quadrant
-                  radius: 1.5,
-                  colors: [
-                    ColorsManager.layerBlur2.withValues(alpha: 0.4),
-                    ColorsManager.layerBlur2.withValues(alpha: 0.1),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.1, 0.3, 0.8],
-                ),
+          // Bottom-right gradient overlay
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: const Alignment(0.7, 0.7),
+                radius: 1.5,
+                colors: [
+                  ColorsManager.layerBlur2.withAlpha(102),
+                  ColorsManager.layerBlur2.withAlpha(25),
+                  Colors.transparent,
+                ],
+                stops: const [0.1, 0.3, 0.8],
               ),
             ),
+          ),
 
-            SafeArea(
-              child: SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
-                  ),
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.0.w, vertical: 24.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: width * 0.06,
+                      vertical: height * 0.03,
+                    ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
                           width: double.infinity,
-                          padding: EdgeInsets.all(24.0.w),
+                          constraints: BoxConstraints(
+                            maxWidth: width >= 600 ? 500 : double.infinity,
+                          ),
+                          padding: EdgeInsets.all(width * 0.06),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16.0),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
+                                color: Colors.black.withAlpha(25),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -222,28 +212,41 @@ class _LoginScreenState extends State<LoginScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  verticalSpace(10),
                                   Center(
                                     child: Image.asset(
                                       'assets/images/splash-logo.png',
-                                      width: 80.w,
-                                      height: 80.h,
+                                      width: width * 0.2,
+                                      height: width * 0.2,
+                                      fit: BoxFit.contain,
                                     ),
                                   ),
+                                  SizedBox(height: height * 0.01),
                                   Text(
                                     'تسجيل الدخول',
-                                    style: TextStyles.font24BlueBold,
+                                    style: TextStyle(
+                                      fontSize: baseFontSize * 1.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: ColorsManager.mainBlue,
+                                      fontFamily: 'Cairo',
+                                    ),
                                     textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  verticalSpace(8),
+                                  SizedBox(height: height * 0.01),
                                   Text(
                                     'ادخل البريد الإلكتروني وكلمة المرور',
-                                    style: TextStyles.font14GrayRegular,
+                                    style: TextStyle(
+                                      fontSize: baseFontSize * 0.875,
+                                      color: Colors.grey,
+                                      fontFamily: 'Cairo',
+                                    ),
                                     textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  verticalSpace(16),
+                                  SizedBox(height: height * 0.02),
 
-                                  // Error message
                                   if (errorMessage != null)
                                     Container(
                                       padding: const EdgeInsets.all(12),
@@ -255,13 +258,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                       child: Row(
                                         children: [
-                                          const Icon(Icons.error_outline,
-                                              color: Colors.red),
+                                          const Icon(Icons.error_outline, color: Colors.red),
                                           const SizedBox(width: 8),
                                           Expanded(
                                             child: Text(
-                                              errorMessage ?? 'An error occurred',
-                                              style: const TextStyle(color: Colors.red),
+                                              errorMessage!,
+                                              style: const TextStyle(
+                                                color: Colors.red,
+                                                fontFamily: 'Cairo',
+                                              ),
+                                              softWrap: true,
                                             ),
                                           ),
                                         ],
@@ -283,15 +289,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                       if (value == null || value.isEmpty) {
                                         return 'الرجاء إدخال البريد الإلكتروني';
                                       }
-                                      if (!RegExp(r'^[^@]+@[^\s]+\.[^\s]+$')
-                                          .hasMatch(value)) {
+                                      if (!RegExp(r'^[^@]+@[^\s]+\.[^\s]+$').hasMatch(value)) {
                                         return 'الرجاء إدخال بريد إلكتروني صالح';
                                       }
                                       return null;
                                     },
                                   ),
-
-                                  verticalSpace(16),
+                                  SizedBox(height: height * 0.02),
 
                                   // Password Field
                                   TextFormField(
@@ -302,9 +306,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       prefixIcon: const Icon(Icons.lock_outline),
                                       suffixIcon: IconButton(
                                         icon: Icon(
-                                          isObscureText
-                                              ? Icons.visibility_off
-                                              : Icons.visibility,
+                                          isObscureText ? Icons.visibility_off : Icons.visibility,
                                         ),
                                         onPressed: () {
                                           setState(() {
@@ -326,22 +328,27 @@ class _LoginScreenState extends State<LoginScreen> {
                                       return null;
                                     },
                                   ),
-
-                                  verticalSpace(8),
+                                  SizedBox(height: height * 0.01),
 
                                   // Forgot Password & Remember Me
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context)
-                                              .pushNamed(Routes.forgotPasswordScreen);
-                                        },
-                                        child: Text(
-                                          'نسيت كلمة المرور؟',
-                                          style: TextStyles.font13BlueRegular.copyWith(
-                                            decoration: TextDecoration.underline,
+                                      Flexible(
+                                        child: TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pushNamed(Routes.forgotPasswordScreen);
+                                          },
+                                          child: Text(
+                                            'نسيت كلمة المرور؟',
+                                            style: TextStyle(
+                                              fontSize: baseFontSize * 0.8,
+                                              color: ColorsManager.mainBlue,
+                                              decoration: TextDecoration.underline,
+                                              fontFamily: 'Cairo',
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                       ),
@@ -359,18 +366,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                           ),
                                           Text(
                                             'تذكرني',
-                                            style: TextStyles.font13DarkBlueMedium,
+                                            style: TextStyle(
+                                              fontSize: baseFontSize * 0.8,
+                                              color: ColorsManager.darkBlue,
+                                              fontWeight: FontWeight.w500,
+                                              fontFamily: 'Cairo',
+                                            ),
                                           ),
                                         ],
                                       ),
                                     ],
                                   ),
-
-                                  verticalSpace(16),
+                                  SizedBox(height: height * 0.02),
 
                                   // Login Button
                                   SizedBox(
-                                    height: 48,
+                                    width: double.infinity,
+                                    height: 52,
                                     child: ElevatedButton(
                                       onPressed: isLoading ? null : _login,
                                       style: ElevatedButton.styleFrom(
@@ -388,36 +400,56 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 color: Colors.white,
                                               ),
                                             )
-                                          : const Text('تسجيل الدخول',
+                                          : const Text(
+                                              'تسجيل الدخول',
                                               style: TextStyle(
-                                                  fontSize: 16, color: Colors.white)),
+                                                fontSize: 16,
+                                                color: Colors.white,
+                                                fontFamily: 'Cairo',
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
                                     ),
                                   ),
-                                  verticalSpace(10),
-                                  // Terms & Conditions
+                                  SizedBox(height: height * 0.01),
                                   Text(
                                     'بالدخول، أنت توافق على الشروط والأحكام.',
-                                    style: TextStyles.font13GrayRegular,
+                                    style: TextStyle(
+                                      fontSize: baseFontSize * 0.8,
+                                      color: Colors.grey,
+                                      fontFamily: 'Cairo',
+                                    ),
                                     textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  verticalSpace(16),
+                                  SizedBox(height: height * 0.02),
                                   // Sign up link
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                  Wrap(
+                                    alignment: WrapAlignment.center,
+                                    crossAxisAlignment: WrapCrossAlignment.center,
                                     children: [
                                       Text(
                                         'هل ليس لديك حساب بالفعل؟ ',
-                                        style: TextStyles.font13DarkBlueMedium,
+                                        style: TextStyle(
+                                          fontSize: baseFontSize * 0.8,
+                                          color: ColorsManager.darkBlue,
+                                          fontWeight: FontWeight.w500,
+                                          fontFamily: 'Cairo',
+                                        ),
                                       ),
                                       GestureDetector(
                                         onTap: () {
-                                          Navigator.pushNamed(
-                                              context, Routes.signUpScreen);
+                                          Navigator.pushNamed(context, Routes.signUpScreen);
                                         },
                                         child: Text(
                                           'إنشاء حساب',
-                                          style: TextStyles.font13BlueSemiBold.copyWith(
+                                          style: TextStyle(
+                                            fontSize: baseFontSize * 0.8,
+                                            color: ColorsManager.mainBlue,
+                                            fontWeight: FontWeight.bold,
                                             decoration: TextDecoration.underline,
+                                            fontFamily: 'Cairo',
                                           ),
                                         ),
                                       ),
@@ -428,8 +460,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-                        verticalSpace(16),
-                        // Back button moved here
+                        SizedBox(height: height * 0.02),
+                        // Back button
                         GestureDetector(
                           onTap: () {
                             Navigator.of(context).pushNamedAndRemoveUntil(
@@ -439,9 +471,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           child: Container(
                             width: double.infinity,
-                            height: 48.h,
+                            constraints: BoxConstraints(
+                              maxWidth: width >= 600 ? 500 : double.infinity,
+                            ),
+                            height: 52,
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
+                              gradient: const LinearGradient(
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
                                 colors: [
@@ -452,18 +487,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
+                                  color: Colors.black.withAlpha(25),
                                   blurRadius: 8,
-                                  offset: Offset(0, 4),
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Text(
                                 'الرجوع للصفحة الرئيسية',
-                                style: TextStyles.font14GrayRegular.copyWith(
+                                style: TextStyle(
+                                  fontSize: 14,
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
+                                  fontFamily: 'Cairo',
                                 ),
                               ),
                             ),
@@ -472,11 +509,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

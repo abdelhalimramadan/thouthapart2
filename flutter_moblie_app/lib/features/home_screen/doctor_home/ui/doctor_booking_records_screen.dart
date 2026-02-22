@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thotha_mobile_app/core/utils/notification_helper.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
 import 'package:thotha_mobile_app/features/notifications/ui/notifications_screen.dart';
 
 class DoctorBookingRecordsScreen extends StatefulWidget {
-  DoctorBookingRecordsScreen({super.key});
+  const DoctorBookingRecordsScreen({super.key});
 
   @override
   State<DoctorBookingRecordsScreen> createState() => _DoctorBookingRecordsScreenState();
@@ -16,6 +15,10 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+    final baseFontSize = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -33,7 +36,7 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
         automaticallyImplyLeading: false,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu, size: 24.w),
+            icon: Icon(Icons.menu, size: 24 * (width / 390)),
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ),
@@ -41,32 +44,20 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 37.w,
-              height: 40.h,
-              child: Image.asset(
-                'assets/images/splash-logo.png',
-                width: 37.w,
-                height: 40.h,
-                fit: BoxFit.contain,
-              ),
+            Image.asset(
+              'assets/images/splash-logo.png',
+              width: 37 * (width / 390),
+              height: 40 * (width / 390),
+              fit: BoxFit.contain,
             ),
-            SizedBox(width: 8.w),
-            SizedBox(
-              width: 92.w,
-              height: 27.h,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'لوحة التحكم',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontFamily: 'Cairo',
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
-                    height: 1.5,
-                    letterSpacing: 0,
-                  ),
-                ),
+            const SizedBox(width: 8),
+            Text(
+              'لوحة التحكم',
+              style: textTheme.titleLarge?.copyWith(
+                fontFamily: 'Cairo',
+                fontSize: baseFontSize * 1.125, // 18
+                fontWeight: FontWeight.w600,
+                height: 1.5,
               ),
             ),
           ],
@@ -75,15 +66,13 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
           Stack(
             children: [
               IconButton(
-                icon: Icon(Icons.notifications_none, size: 24.w),
+                icon: Icon(Icons.notifications_none, size: 24 * (width / 390)),
                 onPressed: () {
-                  // Mark notifications as read when opened
                   NotificationHelper.hasUnreadNotifications = false;
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const NotificationsScreen()),
                   ).then((_) {
-                    // This will refresh the notification badge when returning to the screen
                     if (mounted) setState(() {});
                   });
                 },
@@ -93,8 +82,8 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
                 right: 8,
                 top: 10,
                 child: Container(
-                  width: 16.w,
-                  height: 16.w,
+                  width: 16 * (width / 390),
+                  height: 16 * (width / 390),
                   decoration: BoxDecoration(
                     color: colorScheme.error,
                     shape: BoxShape.circle,
@@ -104,7 +93,7 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
                       NotificationHelper.getUnreadCount() > 9 ? '9+' : '${NotificationHelper.getUnreadCount()}',
                       style: textTheme.labelSmall?.copyWith(
                         color: colorScheme.onError,
-                        fontSize: 10.sp,
+                        fontSize: baseFontSize * 0.625, // 10
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -113,7 +102,7 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
               ),
             ],
           ),
-          SizedBox(width: 8.w),
+          const SizedBox(width: 8),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.1),
@@ -123,7 +112,7 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
           ),
         ),
       ),
-      body: _buildMainContent(context),
+      body: _buildMainContent(context, width, height, baseFontSize),
     );
   }
 
@@ -135,140 +124,130 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
     required String status,
     required Color statusColor,
     required String profileImage,
+    required double width,
+    required double baseFontSize,
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.cardTheme.color ?? colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
-          boxShadow: [
-            BoxShadow(
-              color: isDark
-                  ? Colors.black.withAlpha((0.3 * 255).round())
-                  : Colors.grey.withAlpha((0.08 * 255).round()),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Status and Info Column
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color ?? colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withAlpha((0.3 * 255).round())
+                : Colors.grey.withAlpha((0.08 * 255).round()),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Status and Info Row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Status
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: statusColor,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            status,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Cairo',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        status,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Cairo',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
                         ),
-
-                        // Patient Info
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              patientName,
+                              textAlign: TextAlign.right,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.w600,
+                                fontSize: baseFontSize * 1.125, // 18
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              service,
+                              textAlign: TextAlign.right,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontFamily: 'Cairo',
+                                color: colorScheme.onSurface.withAlpha((0.6 * 255).round()),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Text(
-                                  patientName,
-                                  textAlign: TextAlign.right,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontFamily: 'Cairo',
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 18,
-                                  ),
+                                  date,
+                                  style: theme.textTheme.bodySmall,
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  service,
-                                  textAlign: TextAlign.right,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontFamily: 'Cairo',
-                                    color: colorScheme.onSurface.withAlpha((0.6 * 255).round()),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    const SizedBox(width: 8),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          date,
-                                          style: theme.textTheme.bodySmall,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Icon(
-                                          Icons.calendar_month,
-                                          size: 16,
-                                          color: colorScheme.onSurface.withAlpha((0.6 * 255).round()),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.calendar_month,
+                                  size: 16,
+                                  color: colorScheme.onSurface.withAlpha((0.6 * 255).round()),
                                 ),
                               ],
                             ),
-                          ),
+                          ],
                         ),
-
-                        // Patient Image
-                        Container(
-                          width: 60,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            image: DecorationImage(
-                              image: AssetImage(profileImage),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                      ),
+                    ),
+                    Container(
+                      width: 60 * (width / 390),
+                      height: 70 * (width / 390),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        image: DecorationImage(
+                          image: AssetImage(profileImage),
+                          fit: BoxFit.cover,
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
-              )]) );
+              ],
+            ),
+          )
+        ],
+      ),
+    );
   }
 
-  Widget _buildMainContent(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget _buildMainContent(BuildContext context, double width, double height, double baseFontSize) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // Header
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 10),
@@ -278,83 +257,59 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
               style: theme.textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w700,
-                fontSize: 24,
+                fontSize: baseFontSize * 1.5, // 24
                 height: 1.5,
               ),
             ),
           ),
-
-          // Booking Card
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.only(top: 12, bottom: 16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.cardTheme.color ?? colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
-              boxShadow: [
-                BoxShadow(
-                  color: isDark ? Colors.black.withAlpha((0.3 * 255).round()) : Colors.grey.withAlpha((0.08 * 255).round()),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // First Booking Card
-                _buildBookingCard(
-                  context: context,
-                  patientName: 'زياد جمال',
-                  service: 'تقويم اسنان',
-                  date: '2025-11-29',
-                  status: 'متكمل',
-                   statusColor: Colors.greenAccent,
-                  profileImage: 'assets/images/zozjpg.jpg',
-                ),
-                SizedBox(height: 8.h),
-
-                // Second Booking Card
-                _buildBookingCard(
-                  context: context,
-                  patientName: 'عبدالحليم رمضان',
-                  service: 'حشو عصب',
-                  date: '2025-11-30',
-                  status: 'انتظار',
-                  statusColor: Colors.orangeAccent,
-                  profileImage: 'assets/images/halim.jpg',
-                ),
-                SizedBox(height: 16.h),
-
-                // Third Booking Card
-                _buildBookingCard(
-                  context: context,
-                  patientName: 'محمد اشرف',
-                  service: 'تنظيف أسنان',
-                  date: '2025-12-01',
-                  status: 'ملغي',
-                  statusColor: Colors.redAccent,
-                  profileImage: 'assets/images/kateb.jpg',
-                ),
-                SizedBox(height: 16.h),
-
-                // Fourth Booking Card
-                _buildBookingCard(
-                  context: context,
-                  patientName: 'جوزيف جورح',
-                  service: 'تركيب كوبري',
-                  date: '2025-12-02',
-                  status: 'مكتمل',
-                  statusColor: Colors.greenAccent,
-                  profileImage: 'assets/images/joseoh.jpeg',
-                ),
-              ],
-            ),
+          const SizedBox(height: 12),
+          _buildBookingCard(
+            context: context,
+            patientName: 'زياد جمال',
+            service: 'تقويم اسنان',
+            date: '2025-11-29',
+            status: 'مكتمل',
+            statusColor: Colors.greenAccent,
+            profileImage: 'assets/images/zozjpg.jpg',
+            width: width,
+            baseFontSize: baseFontSize,
           ),
-
-          // Add some bottom padding
+          const SizedBox(height: 12),
+          _buildBookingCard(
+            context: context,
+            patientName: 'عبدالحليم رمضان',
+            service: 'حشو عصب',
+            date: '2025-11-30',
+            status: 'انتظار',
+            statusColor: Colors.orangeAccent,
+            profileImage: 'assets/images/halim.jpg',
+            width: width,
+            baseFontSize: baseFontSize,
+          ),
+          const SizedBox(height: 12),
+          _buildBookingCard(
+            context: context,
+            patientName: 'محمد اشرف',
+            service: 'تنظيف أسنان',
+            date: '2025-12-01',
+            status: 'ملغي',
+            statusColor: Colors.redAccent,
+            profileImage: 'assets/images/kateb.jpg',
+            width: width,
+            baseFontSize: baseFontSize,
+          ),
+          const SizedBox(height: 12),
+          _buildBookingCard(
+            context: context,
+            patientName: 'جوزيف جورح',
+            service: 'تركيب كوبري',
+            date: '2025-12-02',
+            status: 'مكتمل',
+            statusColor: Colors.greenAccent,
+            profileImage: 'assets/images/joseoh.jpeg',
+            width: width,
+            baseFontSize: baseFontSize,
+          ),
           SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
         ],
       ),
