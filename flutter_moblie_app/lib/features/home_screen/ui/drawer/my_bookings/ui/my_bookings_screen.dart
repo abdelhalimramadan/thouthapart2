@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
-import 'package:thotha_mobile_app/features/home_screen/ui/drawer/settings/ui/settings_screen.dart';
 
 class MyBookingsScreen extends StatelessWidget {
   MyBookingsScreen({super.key});
@@ -303,15 +302,6 @@ class MyBookingsScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-extension SettingsNavigation on BuildContext {
-  void navigateToSettings() {
-    Navigator.push(
-      this,
-      MaterialPageRoute(builder: (context) => SettingsScreen()),
     );
   }
 }

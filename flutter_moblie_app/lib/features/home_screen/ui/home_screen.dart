@@ -9,9 +9,16 @@ import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/features/home_screen/logic/doctor_cubit.dart';
 
 import 'package:thotha_mobile_app/features/home_screen/logic/doctor_state.dart';
+import 'package:thotha_mobile_app/core/helpers/constants.dart';
+import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
+import 'package:thotha_mobile_app/features/login/ui/login_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.drawer = const HomeDrawer(), this.showAddCaseCategory = false});
+
+  final Widget drawer;
+  final bool showAddCaseCategory;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -34,6 +41,45 @@ class _HomeScreenState extends State<HomeScreen> {
     'تقويم الأسنان': 'assets/svg/تقويم اسنان.svg',
     'تركيبات الأسنان': 'assets/svg/تركيبات اسنان.svg',
   };
+
+  Future<void> _handleCategoryTap({
+    required String categoryName,
+    required int? categoryId,
+    required String? cityName,
+  }) async {
+    if (widget.showAddCaseCategory && _isAddCaseCategory(categoryName)) {
+      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      if (token.isEmpty) {
+        if (!mounted) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LoginScreen(
+              nextScreen: const HomeScreen(
+                drawer: DoctorDrawer(),
+                showAddCaseCategory: true,
+              ),
+              nextRouteSettings: const RouteSettings(name: 'add-case'),
+            ),
+          ),
+        );
+        return;
+      }
+    }
+
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CategoryDoctorsScreen(
+          categoryName: categoryName,
+          categoryId: categoryId,
+          cityId: _selectedCityId,
+          cityName: cityName,
+        ),
+      ),
+    );
+  }
 
   Widget _buildSquareCategory(
       String assetPath, 
@@ -74,16 +120,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CategoryDoctorsScreen(
-              categoryName: resolvedCategoryName,
-              categoryId: categoryId,
-              cityId: _selectedCityId,
-              cityName: cityName,
-            ),
-          ),
+        _handleCategoryTap(
+          categoryName: resolvedCategoryName,
+          categoryId: categoryId,
+          cityName: cityName,
         );
       },
       child: Container(
@@ -147,6 +187,14 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  bool _isAddCaseCategory(String name) {
+    final compact = name.replaceAll(' ', '');
+    return name.contains('نشر حالة جديدة') ||
+        name.contains('إضافة حالة جديدة') ||
+        compact.contains('نشرحالةجديدة') ||
+        compact.contains('اضافةحالةجديدة');
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -175,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ),
-        drawer: const HomeDrawer(),
+        drawer: widget.drawer,
         body: SafeArea(
           child: BlocBuilder<DoctorCubit, DoctorState>(
             builder: (context, state) {
@@ -191,6 +239,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? categories
                     : categories
                         .where((c) => c.name.contains(_searchController.text))
+                        .toList();
+
+                final visibleCategories = widget.showAddCaseCategory
+                    ? filteredCategories
+                    : filteredCategories
+                        .where((c) => !_isAddCaseCategory(c.name))
                         .toList();
 
                 return SingleChildScrollView(
@@ -405,7 +459,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
 
                         // Categories Grid
-                        if (filteredCategories.isNotEmpty)
+                        if (visibleCategories.isNotEmpty)
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: width * 0.05),
                             child: LayoutBuilder(
@@ -420,9 +474,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     crossAxisSpacing: 12,
                                     childAspectRatio: 1.0,
                                   ),
-                                  itemCount: filteredCategories.length,
+                                  itemCount: visibleCategories.length,
                                   itemBuilder: (context, index) {
-                                    final category = filteredCategories[index];
+                                    final category = visibleCategories[index];
                                     final asset = _categoryAssets[category.name] ??
                                         'assets/svg/فحص شامل.svg';
 

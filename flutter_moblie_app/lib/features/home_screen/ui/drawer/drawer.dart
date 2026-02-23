@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:thotha_mobile_app/core/routing/routes.dart';
+import 'package:thotha_mobile_app/core/theming/theme_provider.dart';
 import 'package:thotha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
-import 'package:thotha_mobile_app/features/home_screen/ui/drawer/settings/ui/home_settings_screen.dart'
-    show HomeSettingsScreen;
 import 'package:thotha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
@@ -50,6 +50,48 @@ class HomeDrawer extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _toggleMenuItem(
+    BuildContext context, {
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+    IconData? icon,
+    Color? iconColor,
+    required double baseFontSize,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Row(
+          children: [
+            Icon(icon, color: iconColor ?? Theme.of(context).iconTheme.color),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                textAlign: TextAlign.right,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontFamily: 'Cairo',
+                      fontWeight: FontWeight.bold,
+                      fontSize: baseFontSize,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+              ),
+            ),
+            Switch.adaptive(
+              value: value,
+              onChanged: onChanged,
+              activeTrackColor: const Color(0xFF8DECB8),
+              inactiveThumbColor: Colors.white,
+              inactiveTrackColor: Theme.of(context).dividerColor,
+            ),
+          ],
         ),
       ),
     );
@@ -143,10 +185,6 @@ class HomeDrawer extends StatelessWidget {
                         'assets/svg/ثوثه الدكتور 1.svg',
                         width: 24,
                         height: 24,
-                        colorFilter: ColorFilter.mode(
-                          colorScheme.primary,
-                          BlendMode.srcIn,
-                        ),
                       ),
                       baseFontSize: baseFontSize,
                       onTap: () {
@@ -159,17 +197,15 @@ class HomeDrawer extends StatelessWidget {
                         );
                       },
                     ),
-                    _menuItem(
-                      context,
-                      title: 'الإعدادات',
-                      icon: Icons.settings_outlined,
-                      baseFontSize: baseFontSize,
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, _) {
+                        return _toggleMenuItem(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => const HomeSettingsScreen()),
+                          title: 'الوضع الداكن',
+                          value: themeProvider.isDarkMode,
+                          onChanged: (v) => themeProvider.toggleTheme(v),
+                          icon: Icons.dark_mode_outlined,
+                          baseFontSize: baseFontSize,
                         );
                       },
                     ),

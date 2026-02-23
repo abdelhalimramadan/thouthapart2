@@ -8,6 +8,7 @@ import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/networking/api_constants.dart';
 import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
+import 'package:thotha_mobile_app/core/routing/routes.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
 
 class DoctorProfile extends StatefulWidget {
@@ -519,6 +520,25 @@ class _DoctorProfileState extends State<DoctorProfile> {
                   _headerCard(theme, textTheme, colorScheme, width, baseFontSize),
                   const SizedBox(height: 12),
                   _infoCard(theme, textTheme, colorScheme, width, baseFontSize),
+                  const SizedBox(height: 12),
+                  _actionCard(
+                    theme: theme,
+                    colorScheme: colorScheme,
+                    width: width,
+                    child: ListTile(
+                      leading: Icon(Icons.lock_outline, color: theme.iconTheme.color),
+                      title: Text(
+                        'تغيير كلمة المرور',
+                        style: textTheme.bodyLarge?.copyWith(
+                          fontFamily: 'Cairo',
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () => Navigator.pushNamed(context, Routes.resetPasswordScreen),
+                    ),
+                  ),
                   if (_error != null) ...[
                     const SizedBox(height: 12),
                     _errorBanner(textTheme, colorScheme, _error!, width, baseFontSize),
@@ -747,6 +767,33 @@ class _DoctorProfileState extends State<DoctorProfile> {
         color: theme.brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[200],
         borderRadius: BorderRadius.circular(6),
       ),
+    );
+  }
+
+  Widget _actionCard({
+    required ThemeData theme,
+    required ColorScheme colorScheme,
+    required double width,
+    required Widget child,
+  }) {
+    final isDark = theme.brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
+          width: 1.1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1),
+            offset: const Offset(0, 1),
+            blurRadius: 3,
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 }

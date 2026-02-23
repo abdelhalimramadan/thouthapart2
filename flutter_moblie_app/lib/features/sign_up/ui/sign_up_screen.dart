@@ -349,8 +349,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 SizedBox(height: height * 0.02),
                                 // University/College Dropdown
                                 _isLoadingUniversities
-                                    ? const Center(child: CircularProgressIndicator())
+                                    ? const Center(key: ValueKey('uni_loading'), child: CircularProgressIndicator())
                                     : DropdownButtonFormField<String>(
+                                        key: const ValueKey('uni_dropdown'),
                                         isExpanded: true,
                                         decoration: InputDecoration(
                                           labelText: 'اختر الكلية',
@@ -397,8 +398,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 SizedBox(height: height * 0.02),
                                 // City/Governorate Dropdown
                                 _isLoadingCities
-                                    ? const Center(child: CircularProgressIndicator())
+                                    ? const Center(key: ValueKey('city_loading'), child: CircularProgressIndicator())
                                     : DropdownButtonFormField<String>(
+                                        key: const ValueKey('city_dropdown'),
                                         isExpanded: true,
                                         decoration: InputDecoration(
                                           labelText: 'اختر المحافظة',
@@ -423,8 +425,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 SizedBox(height: height * 0.02),
                                 // Category/Specialty Dropdown
                                 _isLoadingCategories
-                                    ? const Center(child: CircularProgressIndicator())
+                                    ? const Center(key: ValueKey('cat_loading'), child: CircularProgressIndicator())
                                     : DropdownButtonFormField<String>(
+                                        key: const ValueKey('cat_dropdown'),
                                         isExpanded: true,
                                         decoration: InputDecoration(
                                           labelText: 'اختر التخصص',

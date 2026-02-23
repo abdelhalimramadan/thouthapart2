@@ -274,25 +274,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               ),
             ),
 
-            // Grid Container with 4 cards
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: width * 0.05),
-              child: GridView.count(
-                crossAxisCount: width > 600 ? 4 : 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: width > 600 ? 1.5 : (187 / 105),
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                children: [
-                  _buildStatCard('الحجوزات اليوم', '28', Icons.people_outline, isDark, theme, colorScheme, textTheme, baseFontSize),
-                  _buildStatCard('الحجوزات اليوم', '28', Icons.calendar_today, isDark, theme, colorScheme, textTheme, baseFontSize),
-                  _buildStatCard('الحجوزات المكتملة', '20', Icons.check_circle_outline, isDark, theme, colorScheme, textTheme, baseFontSize),
-                  _buildStatCard('التقييم', '4.8', Icons.star_border, isDark, theme, colorScheme, textTheme, baseFontSize),
-                ],
-              ),
-            ),
-
             // الحجوزات القادمة اليوم Header
             Container(
               width: double.infinity,

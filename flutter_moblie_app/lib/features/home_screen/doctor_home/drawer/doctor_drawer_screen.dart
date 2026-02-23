@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_settings_screen.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/patient_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:thotha_mobile_app/core/theming/theme_provider.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_booking_records_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_profile.dart';
@@ -15,6 +15,7 @@ import 'package:thotha_mobile_app/features/home_screen/doctor_home/doctor_next_b
 import 'package:thotha_mobile_app/features/home_screen/ui/home_screen.dart';
 import 'package:thotha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
 import 'package:thotha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
+import 'package:thotha_mobile_app/features/about_app/ui/about_app_screen.dart';
 
 class DoctorDrawer extends StatefulWidget {
   const DoctorDrawer({super.key});
@@ -179,6 +180,60 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     );
   }
 
+  Widget _toggleMenuItem(
+      BuildContext context, {
+        required String title,
+        required bool value,
+        required ValueChanged<bool> onChanged,
+        IconData? icon,
+        Color? iconColor,
+        required double width,
+        required double baseFontSize,
+      }) {
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                color: iconColor ?? Theme.of(context).iconTheme.color,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.right,
+                  style: textTheme.bodyLarge?.copyWith(
+                    fontFamily: 'Cairo',
+                    fontSize: baseFontSize * 0.9,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              Switch.adaptive(
+                value: value,
+                onChanged: onChanged,
+                activeTrackColor: const Color(0xFF10B981),
+                inactiveThumbColor: Colors.white,
+                inactiveTrackColor: Theme.of(context).dividerColor,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _fetchDoctorName() async {
     setState(() => _isLoadingName = true);
 
@@ -247,12 +302,11 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
 
   int _getCurrentIndex() {
     final currentRoute = ModalRoute.of(context)?.settings.name?.toLowerCase() ?? '';
-    if (currentRoute.contains('doctor-home') || currentRoute.contains('home')) return 0;
-    if (currentRoute.contains('doctor-profile') || currentRoute.contains('profile')) return 1;
-    if (currentRoute.contains('upcoming-bookings') || currentRoute.contains('booking')) return 2;
-    if (currentRoute.contains('booking-records') || currentRoute.contains('records')) return 3;
-    if (currentRoute.contains('patients') || currentRoute.contains('patient')) return 4;
-    if (currentRoute.contains('settings') || currentRoute.contains('setting')) return 5;
+    if (currentRoute.contains('doctor-home')) return 0;
+    if (currentRoute.contains('add-case')) return 1;
+    if (currentRoute.contains('doctor-profile') || currentRoute.contains('profile')) return 2;
+    if (currentRoute.contains('upcoming-bookings')) return 3;
+    if (currentRoute.contains('booking-records') || currentRoute.contains('records')) return 4;
     return 0;
   }
 
@@ -429,13 +483,18 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     context,
                     title: 'إضافة حالة جديدة',
                     icon: Icons.add_circle_outline,
+                    isSelected: currentIndex == 1,
                     width: width,
                     baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (context) => const HomeScreen(),
+                          settings: const RouteSettings(name: 'add-case'),
+                          builder: (context) => const HomeScreen(
+                            drawer: DoctorDrawer(),
+                            showAddCaseCategory: true,
+                          ),
                         ),
                       );
                     },
@@ -444,7 +503,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     context,
                     title: 'الملف الشخصي',
                     icon: Icons.person_outline,
-                    isSelected: currentIndex == 1,
+                    isSelected: currentIndex == 2,
                     width: width,
                     baseFontSize: baseFontSize,
                     onTap: () {
@@ -461,7 +520,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     context,
                     title: 'الحجوزات القادمة',
                     icon: Icons.event_note_outlined,
-                    isSelected: currentIndex == 2,
+                    isSelected: currentIndex == 3,
                     width: width,
                     baseFontSize: baseFontSize,
                     onTap: () {
@@ -478,7 +537,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     context,
                     title: 'سجل الحجوزات',
                     icon: Icons.list_alt_rounded,
-                    isSelected: currentIndex == 3,
+                    isSelected: currentIndex == 4,
                     width: width,
                     baseFontSize: baseFontSize,
                     onTap: () {
@@ -491,28 +550,23 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       );
                     },
                   ),
-                  _menuItem(
-                    context,
-                    title: 'المرضي',
-                    icon: Icons.people_outline,
-                    isSelected: currentIndex == 4,
-                    width: width,
-                    baseFontSize: baseFontSize,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          settings: const RouteSettings(name: 'patients'),
-                          builder: (context) => PatientScreen(),
-                        ),
+                  Consumer<ThemeProvider>(
+                    builder: (context, themeProvider, _) {
+                      return _toggleMenuItem(
+                        context,
+                        title: 'الوضع الداكن',
+                        value: themeProvider.isDarkMode,
+                        onChanged: (value) => themeProvider.toggleTheme(value),
+                        icon: Icons.dark_mode_outlined,
+                        width: width,
+                        baseFontSize: baseFontSize,
                       );
                     },
                   ),
                   _menuItem(
                     context,
-                    title: 'الإعدادات',
-                    icon: Icons.settings_outlined,
-                    isSelected: currentIndex == 5,
+                    title: 'حول التطبيق',
+                    icon: Icons.info_outline,
                     width: width,
                     baseFontSize: baseFontSize,
                     onTap: () {
@@ -520,8 +574,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          settings: const RouteSettings(name: 'settings'),
-                          builder: (context) => const DoctorSettingsScreen(),
+                          builder: (context) => const AboutAppScreen(),
                         ),
                       );
                     },

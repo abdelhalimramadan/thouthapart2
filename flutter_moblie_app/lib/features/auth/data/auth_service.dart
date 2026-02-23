@@ -175,24 +175,16 @@ class AuthService {
   Future<Map<String, dynamic>> register({
     required String email,
     required String password,
-    required String confirm,
-    required String first_name,
-    required String last_name,
-    required String phone,
-    required String faculty,
-    required String year,
-    required String governorate,
+    String? confirm,
+    String? first_name,
+    String? last_name,
+    String? phone,
+    String? faculty,
+    String? year,
+    String? governorate,
   }) async {
     try {
-      if (email.isEmpty ||
-          password.isEmpty ||
-          first_name.isEmpty ||
-          last_name.isEmpty ||
-          phone.isEmpty ||
-          faculty.isEmpty ||
-          year.isEmpty ||
-          governorate.isEmpty ||
-          confirm.isEmpty) {
+      if (email.isEmpty || password.isEmpty) {
         return {
           'success': false,
           'error': 'البريد الإلكتروني وكلمة المرور مطلوبان',
@@ -200,7 +192,7 @@ class AuthService {
         };
       }
 
-      if (password.length <= 6) {
+      if (password.length < 6) {
         return {
           'success': false,
           'error': 'يجب أن تكون كلمة المرور 6 أحرف على الأقل',
@@ -209,17 +201,17 @@ class AuthService {
       }
 
       final response = await _dio.post(
-        '${ApiConstants.baseUrl}/register',
+        '${ApiConstants.baseUrl}${ApiConstants.signup}',
         data: {
           'email': email.trim(),
           'password': password,
-          'faculty': faculty,
-          'first_name': first_name,
-          'last_name': last_name,
-          'governorate': governorate,
-          'year': year,
-          'phone': phone,
-          'confirm_password': confirm,
+          if (faculty != null) 'universityName': faculty,
+          if (first_name != null) 'firstName': first_name,
+          if (last_name != null) 'lastName': last_name,
+          if (governorate != null) 'cityName': governorate,
+          if (year != null) 'studyYear': year,
+          if (phone != null) 'phoneNumber': phone,
+          if (confirm != null) 'confirm_password': confirm,
         },
         options: Options(
           headers: {
@@ -232,14 +224,14 @@ class AuthService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         // Persist provided user info so UI can greet correctly after signup
         try {
-          if (first_name.isNotEmpty) {
+          if (first_name != null && first_name.isNotEmpty) {
             await SharedPrefHelper.setData('first_name', first_name);
-            await SharedPrefHelper.setData('last_name', last_name);
+            if (last_name != null) await SharedPrefHelper.setData('last_name', last_name);
             await SharedPrefHelper.setData('email', email.trim());
-            await SharedPrefHelper.setData('phone', phone);
-            await SharedPrefHelper.setData('faculty', faculty);
-            await SharedPrefHelper.setData('year', year);
-            await SharedPrefHelper.setData('governorate', governorate);
+            if (phone != null) await SharedPrefHelper.setData('phone', phone);
+            if (faculty != null) await SharedPrefHelper.setData('faculty', faculty);
+            if (year != null) await SharedPrefHelper.setData('year', year);
+            if (governorate != null) await SharedPrefHelper.setData('governorate', governorate);
           }
         } catch (_) {}
 

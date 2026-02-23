@@ -9,7 +9,10 @@ import '../../auth/data/auth_service.dart';
 import '../../home_screen/doctor_home/ui/doctor_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, this.nextScreen, this.nextRouteSettings});
+
+  final Widget? nextScreen;
+  final RouteSettings? nextRouteSettings;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -87,10 +90,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (result['success'] == true) {
         if (mounted) {
+          final next = widget.nextScreen ?? const DoctorHomeScreen();
           Navigator.of(context).pushReplacement(
             PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  const DoctorHomeScreen(),
+              settings: widget.nextRouteSettings,
+              pageBuilder: (context, animation, secondaryAnimation) => next,
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) {
                 return FadeTransition(opacity: animation, child: child);
