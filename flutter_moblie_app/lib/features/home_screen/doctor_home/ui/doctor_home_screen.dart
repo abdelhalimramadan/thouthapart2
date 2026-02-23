@@ -6,8 +6,7 @@ import '../../../../core/networking/dio_factory.dart';
 import '../../../../core/utils/notification_helper.dart';
 import '../drawer/doctor_drawer_screen.dart';
 import '../../../notifications/ui/notifications_screen.dart';
-import '../../../../core/theming/colors.dart';
-import 'add_case_request_screen.dart';
+// Unused imports removed
 
 class DoctorHomeScreen extends StatefulWidget {
   const DoctorHomeScreen({Key? key}) : super(key: key);
@@ -116,12 +115,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     } catch (e) {
       debugPrint('Exception: $e');
     } finally {
-      if (_firstName == null || _firstName!.isEmpty) {
-        final email = await SharedPrefHelper.getString('email');
-        if (email.isNotEmpty) {
-          _firstName = email.split('@').first;
-        }
-      }
       if (mounted) setState(() => _isLoadingName = false);
     }
   }
@@ -226,18 +219,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AddCaseRequestScreen(),
-            ),
-          );
-        },
-        backgroundColor: ColorsManager.mainBlue,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
       body: _buildMainContent(width, height, baseFontSize, colorScheme, textTheme, isDark, theme),
     );
   }
@@ -267,8 +248,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                         )
                       : Text(
                           _firstName != null
-                              ? ' Welcome $_firstName'
-                              : ' مرحباً، د.',
+                              ? ' مرحباً يا د/ $_firstName'
+                              : ' مرحباً يا دكتور',
                           style: textTheme.titleLarge?.copyWith(
                             fontFamily: 'Cairo',
                             fontSize: baseFontSize * 1.5, // 24sp

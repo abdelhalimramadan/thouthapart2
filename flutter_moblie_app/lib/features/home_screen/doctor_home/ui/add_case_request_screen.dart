@@ -15,7 +15,8 @@ import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 
 class AddCaseRequestScreen extends StatefulWidget {
-  const AddCaseRequestScreen({super.key});
+  final String? initialSpecialization;
+  const AddCaseRequestScreen({super.key, this.initialSpecialization});
 
   @override
   State<AddCaseRequestScreen> createState() => _AddCaseRequestScreenState();
@@ -35,6 +36,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedCategory = widget.initialSpecialization;
     _fetchInitialData();
   }
 

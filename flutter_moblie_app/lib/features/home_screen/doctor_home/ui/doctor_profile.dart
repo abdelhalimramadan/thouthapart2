@@ -89,11 +89,6 @@ class _DoctorProfileState extends State<DoctorProfile> {
           _governorate = (cachedGovernorate?.isNotEmpty ?? false) ? cachedGovernorate : _governorate;
           _category = (cachedCategory?.isNotEmpty ?? false) ? cachedCategory : _category;
           _profileImage = (cachedImage?.isNotEmpty ?? false) ? cachedImage : _profileImage;
-
-          if ((_firstName == null || _firstName!.isEmpty) &&
-              (_email != null && _email!.isNotEmpty)) {
-            _firstName = _email!.split('@').first;
-          }
         });
       }
       unawaited(_fetchProfile(silent: true));
@@ -192,11 +187,6 @@ class _DoctorProfileState extends State<DoctorProfile> {
             if (governorate != null && governorate.isNotEmpty) _governorate = governorate;
             if (category != null && category.isNotEmpty) _category = category;
             if (profileImage != null && profileImage.isNotEmpty) _profileImage = profileImage;
-
-            if ((_firstName == null || _firstName!.isEmpty) &&
-                (_email != null && _email!.isNotEmpty)) {
-              _firstName = _email!.split('@').first;
-            }
           });
         }
 

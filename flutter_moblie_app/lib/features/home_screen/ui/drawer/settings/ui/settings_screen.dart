@@ -1,15 +1,8 @@
-/*
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
-import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thotha_mobile_app/core/theming/theme_provider.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
-
-import '../../../../../../core/theming/colors.dart';
-import 'package:thotha_mobile_app/core/routing/routes.dart';
 
 class SettingsScreen extends StatefulWidget {
   /// If true, the screen will show the Doctor drawer when opening the menu.
@@ -27,128 +20,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _receiveOffers = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // Doctor name/email state (loaded from cache or server)
-  String? _firstName;
-  String? _lastName;
-  String? _email;
-  bool _isLoadingName = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchDoctorName();
-  }
-
-  Future<void> _fetchDoctorName() async {
-    if (!mounted) return;
-    setState(() {
-      _isLoadingName = true;
-    });
-
-    try {
-      // Try cache first
-      final cachedFirstName = await SharedPrefHelper.getString('first_name');
-      final cachedLastName = await SharedPrefHelper.getString('last_name');
-      final cachedEmail = await SharedPrefHelper.getString('email');
-
-      if (cachedFirstName != null && cachedFirstName.isNotEmpty) {
-        if (!mounted) return;
-        setState(() {
-          _firstName = cachedFirstName;
-          _lastName = cachedLastName;
-          _email = cachedEmail;
-          _isLoadingName = false;
-        });
-        return;
-      }
-
-      final dio = DioFactory.getDio();
-      Response response;
-      try {
-        response = await dio.get('/me');
-      } catch (_) {
-        response = await dio.get('/profile');
-      }
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-        String? f;
-        String? l;
-        String? e;
-        if (data is Map) {
-          f = (data['first_name'] ?? data['firstName']) as String?;
-          l = (data['last_name'] ?? data['lastName']) as String?;
-          e = (data['email'] ?? (data['user']?['email'])) as String?;
-
-          if ((f == null || f.isEmpty) && data['user'] != null) {
-            final user = data['user'];
-            f = f ?? (user['first_name'] ?? user['firstName']) as String?;
-            l = l ?? (user['last_name'] ?? user['lastName']) as String?;
-          }
-        }
-
-        if (!mounted) return;
-        setState(() {
-          _firstName = f;
-          _lastName = l;
-          _email = e;
-        });
-
-        if (f != null && f.isNotEmpty) {
-          await SharedPrefHelper.setData('first_name', f);
-          await SharedPrefHelper.setData('last_name', l ?? '');
-          if (e != null) await SharedPrefHelper.setData('email', e);
-        }
-      }
-    } catch (e) {
-      // ignore errors, fall back to defaults
-    } finally {
-      if (!mounted) return;
-      setState(() {
-        _isLoadingName = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
         key: _scaffoldKey,
+        backgroundColor: theme.scaffoldBackgroundColor,
         // Show the drawer based on where Settings was opened from
         drawer: widget.useDoctorDrawer
-            ? const Drawer(child: DoctorDrawer())
-            : const Drawer(child: HomeDrawer()),
+            ? const DoctorDrawer()
+            : const HomeDrawer(),
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: theme.colorScheme.surface,
           elevation: 0,
           automaticallyImplyLeading: false,
-          // Disable default back button
+          toolbarHeight: 75.6,
           title: Container(
             width: double.infinity,
-            height: 50,
+            height: 50 * (width / 390),
             child: Stack(
               children: [
-                // Menu icon on the left
                 Positioned(
                   left: 0,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.menu,
-                      color: Colors.black,
-                      size: 30,
-                      weight: 700, // Bold weight
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.menu,
+                        color: theme.iconTheme.color,
+                        size: 30 * (width / 390),
+                      ),
+                      onPressed: () {
+                        _scaffoldKey.currentState?.openDrawer();
+                      },
                     ),
-                    onPressed: () {
-                      _scaffoldKey.currentState?.openDrawer();
-                    },
                   ),
                 ),
-                // Logo centered
                 Center(
                   child: Image.asset(
                     'assets/images/splash-logo.png',
-                    width: 46,
-                    height: 50,
+                    width: 46 * (width / 390),
+                    height: 50 * (width / 390),
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -156,221 +75,119 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           centerTitle: true,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1.1),
+            child: Container(
+              height: 1.1,
+              color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
+            ),
+          ),
         ),
-        body: Column(children: [
-          // Main Settings Container
+        body: SingleChildScrollView(
+          child: Column(children: [
+          const SizedBox(height: 20),
           Column(
             children: [
-              // Settings Header
               Container(
-                color: Colors.white,
-                alignment: Alignment.center,
-                padding: const EdgeInsets.only(right: 20),
-                child: const Text(
+                width: double.infinity,
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
                   'الإعدادات',
-                  style: TextStyle(
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w700,
-                    fontSize: 28,
+                    fontSize: baseFontSize * 1.75, // 28
                     height: 1.5,
-                    color: Color(0xFF0A0A0A),
                   ),
                   textAlign: TextAlign.right,
                 ),
               ),
-              const SizedBox(height: 23.99),
-
-              // Main Content Container
+              const SizedBox(height: 24),
               Container(
-                width: 374.01,
+                width: width * 0.95,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.cardTheme.color ?? colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
                 ),
                 child: Column(
                   children: [
                     // Notifications Toggle
-                    Container(
-                      width: double.infinity,
-                      height: 49.0,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Color(0xFFE5E7EB),
-                            width: 1.1,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Transform.translate(
-                            offset: const Offset(0, -0.29),
-                            child: SizedBox(
-                              width: 53,
-                              height: 24,
-                              child: Transform.scale(
-                                scale: 1.0,
-                                child: Switch.adaptive(
-                                  value: _notificationsEnabled,
-                                  onChanged: (bool value) {
-                                    setState(() {
-                                      _notificationsEnabled = value;
-                                    });
-                                    // Add any additional logic here (e.g., save to preferences)
-                                  },
-                                  activeColor: const Color(0xFF8DECB8),
-                                  activeTrackColor: const Color(0xFF8DECB8),
-                                  inactiveThumbColor: Colors.white,
-                                  inactiveTrackColor: const Color(0xFFE5E7EB),
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  thumbColor:
-                                      MaterialStateProperty.all(Colors.white),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const Text(
-                            'الإشعارات',
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF0A0A0A),
-                              height: 1.5, // 24/16 = 1.5 line height
-                            ),
-                          ),
-                        ],
-                      ),
+                    _buildToggleRow(
+                      context,
+                      'الإشعارات',
+                      _notificationsEnabled,
+                      (val) => setState(() => _notificationsEnabled = val),
                     ),
 
                     // Receive Offers Toggle
-                    Container(
-                      width: double.infinity,
-                      height: 49.0,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Color(0xFFE5E7EB),
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Transform.translate(
-                            offset: const Offset(0, -0.29),
-                            child: SizedBox(
-                              width: 53,
-                              height: 24,
-                              child: Transform.scale(
-                                scale: 1.0,
-                                child: Switch(
-                                  value: _receiveOffers,
-                                  onChanged: (bool value) {
-                                    setState(() {
-                                      _receiveOffers = value;
-                                    });
-                                    // Add any additional logic here (e.g., save to preferences)
-                                  },
-                                  activeColor: const Color(0xFF8DECB8),
-                                  activeTrackColor: const Color(0xFF8DECB8),
-                                  inactiveThumbColor: Colors.white,
-                                  inactiveTrackColor: const Color(0xFFE5E7EB),
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  thumbColor:
-                                      MaterialStateProperty.all(Colors.white),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const Text(
-                            'تلقي العروض',
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF0A0A0A),
-                              height: 1.5, // 24/16 = 1.5 line height
-                            ),
-                          ),
-                        ],
-                      ),
+                    _buildToggleRow(
+                      context,
+                      'تلقي العروض',
+                      _receiveOffers,
+                      (val) => setState(() => _receiveOffers = val),
                     ),
 
                     // Dark Mode Toggle
-                    Container(
-                      width: double.infinity,
-                      height: 49.0,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Color(0xFFE5E7EB),
-                            width: 1.1,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Consumer<ThemeProvider>(
-                            builder: (context, themeProvider, child) {
-                              return Transform.translate(
-                                offset: const Offset(0, -0.29),
-                                child: SizedBox(
-                                  width: 53,
-                                  height: 24,
-                                  child: Transform.scale(
-                                    scale: 1.0,
-                                    child: Switch(
-                                      value: themeProvider.isDarkMode,
-                                      onChanged: (bool value) {
-                                        themeProvider.toggleTheme(value);
-                                      },
-                                      activeColor: const Color(0xFF8DECB8),
-                                      activeTrackColor: const Color(0xFF8DECB8),
-                                      inactiveThumbColor: Colors.white,
-                                      inactiveTrackColor:
-                                          const Color(0xFFE5E7EB),
-                                      materialTapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                      thumbColor: MaterialStateProperty.all(
-                                          Colors.white),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          const Text(
-                            'الوضع الداكن',
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF0A0A0A),
-                              height: 1.5, // 24/16 = 1.5 line height
-                            ),
-                          ),
-                        ],
-                      ),
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, child) {
+                        return _buildToggleRow(
+                          context,
+                          'الوضع الداكن',
+                          themeProvider.isDarkMode,
+                          (val) => themeProvider.toggleTheme(val),
+                        );
+                      },
                     ),
-                    SizedBox(height: 14),
-
-                    // Change Password Button
-                    // Password change functionality removed as requested
+                    const SizedBox(height: 14),
                   ],
                 ),
               ),
             ],
           )
-        ]));
+        ])));
+  }
+
+  Widget _buildToggleRow(BuildContext context, String title, bool value, Function(bool) onChanged) {
+    final theme = Theme.of(context);
+    final width = MediaQuery.of(context).size.width;
+    final baseFontSize = width * 0.04;
+
+    return Container(
+      width: double.infinity,
+      height: 49.0 * (width / 390),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: theme.brightness == Brightness.dark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
+            width: 1.1,
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Transform.scale(
+            scale: 0.8 * (width / 390).clamp(0.8, 1.2),
+            child: Switch.adaptive(
+              value: value,
+              onChanged: onChanged,
+              activeColor: const Color(0xFF8DECB8),
+              inactiveTrackColor: const Color(0xFFE5E7EB),
+            ),
+          ),
+          Text(
+            title,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontFamily: 'Cairo',
+              fontSize: baseFontSize, // 16
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
-*/

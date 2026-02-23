@@ -68,7 +68,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Icon(Icons.close,
-                          size: 24, color: theme.iconTheme.color),
+                          size: 24 * (width / 390), color: theme.iconTheme.color),
                     ),
                     Text(
                       'تفاصيل الطبيب',
@@ -161,10 +161,10 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.location_on_outlined,
-                                      size: 16,
-                                      color: Color(0xFF858585),
+                                      size: 16 * (width / 390),
+                                      color: const Color(0xFF858585),
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -182,10 +182,10 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.star,
                                       color: Colors.amber,
-                                      size: 20,
+                                      size: 20 * (width / 390),
                                     ),
                                     const SizedBox(width: 4),
                                     RichText(
@@ -334,8 +334,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              const Icon(Icons.calendar_today_outlined,
-                                  size: 18, color: Color(0xFF0B8FAC)),
+                              Icon(Icons.calendar_today_outlined,
+                                  size: 18 * (width / 390), color: const Color(0xFF0B8FAC)),
                               const SizedBox(width: 6),
                             ],
                           ),
@@ -457,8 +457,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                     ),
                                   ),
                                 ),
-                                const Icon(Icons.sticky_note_2_outlined,
-                                    color: Color(0xFF3B82F6), size: 20),
+                                Icon(Icons.sticky_note_2_outlined,
+                                    color: const Color(0xFF3B82F6), size: baseFontSize * 1.25),
                               ],
                             ),
                           ),
@@ -618,8 +618,7 @@ class _InfoTile extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          const Icon(icon, color: Color(0xFF0B8FAC)),
+          Icon(icon, color: const Color(0xFF0B8FAC)),
         ],
       ),
     );

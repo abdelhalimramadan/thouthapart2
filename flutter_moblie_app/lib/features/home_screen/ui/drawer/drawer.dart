@@ -67,190 +67,181 @@ class HomeDrawer extends StatelessWidget {
     return Drawer(
       child: Container(
         color: theme.scaffoldBackgroundColor,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              height: topPad + 180,
-              padding: EdgeInsets.only(top: topPad),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                   SizedBox(
-                    height: 56,
-                    child: Stack(
-                      children: [
-                        Center(
-                          child: Text(
-                            'القائمة',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontFamily: 'Cairo',
+        child: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    // Header Section
+                    Container(
+                      padding: EdgeInsets.only(top: topPad, bottom: 20),
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: theme.dividerColor.withValues(alpha: 0.1),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.close,
+                                color: colorScheme.onSurface,
+                                size: 28,
+                              ),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                          ),
+                          Image.asset(
+                            'assets/images/splash-logo.png',
+                            width: 70 * (width / 390),
+                            height: 70 * (width / 390),
+                            fit: BoxFit.contain,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'رعاية ذكية، لمسة طبية',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: baseFontSize * 0.875,
                               fontWeight: FontWeight.bold,
-                              fontSize: baseFontSize * 1.25, // 20sp
-                              color: colorScheme.onSurface,
+                              color: ColorsManager.fontColor,
+                              fontFamily: 'Cairo',
                             ),
                           ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Menu Items
+                    _menuItem(
+                      context,
+                      title: 'الصفحة الرئيسية',
+                      icon: Icons.home_outlined,
+                      baseFontSize: baseFontSize,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          Routes.categoriesScreen,
+                          (route) => false,
+                        );
+                      },
+                    ),
+                    _menuItem(
+                      context,
+                      title: 'ثوثه المساعد',
+                      customIcon: SvgPicture.asset(
+                        'assets/svg/ثوثه الدكتور 1.svg',
+                        width: 24,
+                        height: 24,
+                        colorFilter: ColorFilter.mode(
+                          colorScheme.primary,
+                          BlendMode.srcIn,
                         ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.close,
-                              color: Colors.black,
-                              size: 30,
-                            ),
-                            onPressed: () => Navigator.of(context).pop(),
+                      ),
+                      baseFontSize: baseFontSize,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ChatScreen(),
                           ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  ),
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Logo Image
-                        Image.asset(
-                          'assets/images/splash-logo.png',
-                          width: 77 * (width / 390),
-                          height: 77 * (width / 390),
-                          fit: BoxFit.contain,
-                        ),
-                        const SizedBox(height: 16),
-                        // Title Text
-                        Text(
-                          'رعاية ذكية، لمسة طبية',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: baseFontSize * 0.875, // 14sp
-                            fontWeight: FontWeight.bold,
-                            color: ColorsManager.fontColor,
-                            fontFamily: 'Cairo',
+                    _menuItem(
+                      context,
+                      title: 'الإعدادات',
+                      icon: Icons.settings_outlined,
+                      baseFontSize: baseFontSize,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const HomeSettingsScreen()),
+                        );
+                      },
+                    ),
+                    _menuItem(
+                      context,
+                      title: 'الشروط والأحكام',
+                      icon: Icons.description_outlined,
+                      baseFontSize: baseFontSize,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const TermsAndConditionsScreen(),
                           ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  _menuItem(
-                    context,
-                    title: 'الصفحة الرئيسية',
-                    icon: Icons.home_outlined,
-                    baseFontSize: baseFontSize,
-                    onTap: () {
-                      Navigator.pop(context); // Close drawer
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        Routes.categoriesScreen,
-                        (route) => false,
-                      );
-                    },
-                  ),
-                  _menuItem(
-                    context,
-                    title: 'ثوثه المساعد',
-                    customIcon: SvgPicture.asset(
-                      'assets/svg/ثوثه الدكتور 1.svg',
-                      width: 24,
-                      height: 24,
+                    _menuItem(
+                      context,
+                      title: 'المساعدة والدعم',
+                      icon: Icons.help_outline,
+                      baseFontSize: baseFontSize,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HelpAndSupportScreen(),
+                          ),
+                        );
+                      },
                     ),
-                    baseFontSize: baseFontSize,
-                    onTap: () {
-                      Navigator.pop(context); // Close drawer
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ChatScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _menuItem(
-                    context,
-                    title: 'الإعدادات',
-                    icon: Icons.settings_outlined,
-                    baseFontSize: baseFontSize,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const HomeSettingsScreen()),
-                      );
-                    },
-                  ),
-                  _menuItem(
-                    context,
-                    title: 'الشروط والأحكام',
-                    icon: Icons.description_outlined,
-                    baseFontSize: baseFontSize,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TermsAndConditionsScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _menuItem(
-                    context,
-                    title: 'المساعدة والدعم',
-                    icon: Icons.help_outline,
-                    baseFontSize: baseFontSize,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HelpAndSupportScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _menuItem(
-                    context,
-                    title: 'تسجيل الدخول',
-                    icon: Icons.person,
-                    baseFontSize: baseFontSize,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        Routes.loginScreen,
-                        (route) => false,
-                      );
-                    },
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Divider(height: 24),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Center(
-                child: Text(
-                  'الإصدار 1.0.0',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.bold,
-                    fontSize: baseFontSize * 0.75, // 12sp
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                    _menuItem(
+                      context,
+                      title: 'تسجيل الدخول',
+                      icon: Icons.login_outlined,
+                      baseFontSize: baseFontSize,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          Routes.loginScreen,
+                          (route) => false,
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              
+              // Footer Section
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Column(
+                  children: [
+                    const Divider(indent: 32, endIndent: 32),
+                    const SizedBox(height: 8),
+                    Text(
+                      'الإصدار 1.0.0',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.bold,
+                        fontSize: baseFontSize * 0.75,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

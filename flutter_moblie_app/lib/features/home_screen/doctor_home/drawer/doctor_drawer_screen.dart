@@ -12,6 +12,7 @@ import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/doctor_next_booking_screen.dart';
 
+import 'package:thotha_mobile_app/features/home_screen/ui/home_screen.dart';
 import 'package:thotha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
 import 'package:thotha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
 
@@ -240,14 +241,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     } catch (e) {
       debugPrint('Exception: $e');
     } finally {
-      if (_firstName == null || _firstName!.isEmpty) {
-        final email = await SharedPrefHelper.getString('email');
-        if (email.isNotEmpty) {
-          setState(() {
-            _firstName = email.split('@').first;
-          });
-        }
-      }
       setState(() => _isLoadingName = false);
     }
   }
@@ -374,9 +367,9 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                                             ),
                                           )
                                         : Text(
-                                            _firstName != null
+                                            (_firstName != null && _firstName!.isNotEmpty)
                                                 ? 'د/ ${_firstName!} ${_lastName ?? ''}'
-                                                : 'د/ أحمد محمود',
+                                                : 'دكتور',
                                             style: textTheme.titleMedium
                                                 ?.copyWith(
                                               fontFamily: 'Cairo',
@@ -391,7 +384,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                                     Text(
                                       _email != null && _email!.isNotEmpty
                                           ? _email!
-                                          : 'zyadgamal@gmail.com',
+                                          : '********',
                                       style: textTheme.bodySmall?.copyWith(
                                         fontFamily: 'Cairo',
                                         color: Theme.of(context)
@@ -428,6 +421,21 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                         MaterialPageRoute(
                           settings: const RouteSettings(name: 'doctor-home'),
                           builder: (context) => const DoctorHomeScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'إضافة حالة جديدة',
+                    icon: Icons.add_circle_outline,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const HomeScreen(),
                         ),
                       );
                     },
@@ -573,7 +581,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
                 child: Text(
-                  'الإصدار 1.0.0',
+                  'الإصدار 1.0.2',
                   style: textTheme.bodySmall?.copyWith(
                     fontFamily: 'Cairo',
                     color: isDark ? Colors.grey[400] : Colors.grey[700],

@@ -6,6 +6,8 @@ import 'package:thotha_mobile_app/features/home_screen/logic/doctor_cubit.dart';
 import 'package:thotha_mobile_app/features/home_screen/logic/doctor_state.dart';
 import 'package:thotha_mobile_app/features/doctor_info/ui/doctor_info_screen.dart';
 import 'dart:ui'; 
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/add_case_request_screen.dart';
+import 'package:thotha_mobile_app/core/theming/colors.dart';
 
 class CategoryDoctorsScreen extends StatelessWidget {
   final String categoryName;
@@ -57,6 +59,24 @@ class CategoryDoctorsScreen extends StatelessWidget {
           ),
           centerTitle: true,
         ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddCaseRequestScreen(
+                  initialSpecialization: categoryName,
+                ),
+              ),
+            );
+          },
+          label: const Text(
+            'نشر حالة جديدة',
+            style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
+          ),
+          icon: const Icon(Icons.add_task_rounded, color: Colors.white),
+          backgroundColor: ColorsManager.mainBlue,
+        ),
         body: BlocBuilder<DoctorCubit, DoctorState>(
           builder: (context, state) {
             if (state is DoctorLoading) {
@@ -67,8 +87,11 @@ class CategoryDoctorsScreen extends StatelessWidget {
               final doctors = state.doctors;
               if (doctors.isEmpty) {
                 return Center(
-                    child: Text('لا يوجد أطباء في هذا القسم حالياً', 
-                      style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize)));
+                  child: Text(
+                    'لا يوجد أطباء متاحين حالياً في هذا القسم',
+                    style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize * 0.9),
+                  ),
+                );
               }
               return ListView.separated(
                 padding: EdgeInsets.symmetric(horizontal: width * 0.04, vertical: 16),
@@ -146,7 +169,7 @@ class CategoryDoctorsScreen extends StatelessWidget {
                       fontFamily: 'Cairo',
                       fontSize: baseFontSize * 0.875,
                       color:
-                          theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                          theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -186,6 +209,7 @@ class CategoryDoctorsScreen extends StatelessWidget {
       ),
     );
   }
+
 
   void _showDoctorDetails(BuildContext context, DoctorModel doctor) {
     showModalBottomSheet(
