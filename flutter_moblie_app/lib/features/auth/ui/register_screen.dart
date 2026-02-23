@@ -1,7 +1,4 @@
-/*
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/helpers/spacing.dart';
 import 'package:thotha_mobile_app/core/routing/routes.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
@@ -30,7 +27,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  // Validate email format
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'البريد الإلكتروني مطلوب';
@@ -41,7 +37,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return null;
   }
 
-  // Validate password
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'كلمة المرور مطلوبة';
@@ -53,7 +48,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
-    // Validate form first
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -71,7 +65,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (response['success'] == true) {
         if (mounted) {
-          // Show success message and navigate to login
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -88,7 +81,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           _errorMessage = response['error'] ?? 'فشل إنشاء الحساب. الرجاء المحاولة مرة أخرى';
         });
       }
-      }
     } catch (e) {
       setState(() {
         _errorMessage = 'حدث خطأ في الاتصال بالخادم';
@@ -104,6 +96,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -113,23 +109,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         body: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.all(24.0.w),
+            padding: const EdgeInsets.all(24.0),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   verticalSpace(40),
-                  // Logo or App Name
                   Center(
                     child: Text(
                       'ثوثة',
-                      style: TextStyles.font24BlueBold,
+                      style: TextStyles.font24BlueBold.copyWith(
+                        fontSize: baseFontSize * 1.5,
+                      ),
                     ),
                   ),
                   verticalSpace(24),
-                  
-                  // Email Field
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
@@ -144,8 +139,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     validator: _validateEmail,
                   ),
                   verticalSpace(16),
-                  
-                  // Password Field
                   TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(
@@ -157,54 +150,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     obscureText: true,
                     validator: _validatePassword,
-                      }
-                      return null;
-                    },
                   ),
-                  if (_errorMessage != null) ...{
-                    SizedBox(height: 16.h),
+                  if (_errorMessage != null) ...[
+                    const SizedBox(height: 16),
                     Text(
                       _errorMessage!,
                       style: TextStyle(
                         color: Colors.red,
-                        fontSize: 14.sp,
+                        fontSize: baseFontSize * 0.875,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                  },
-                  SizedBox(height: 32.h),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _register,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
+                  ],
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    height: 52 * (width / 390),
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _register,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        backgroundColor: ColorsManager.mainBlue,
                       ),
-                      backgroundColor: ColorsManager.mainBlue,
-                    ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          )
-                        : Text(
-                            'تسجيل',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
+                      child: _isLoading
+                          ? const CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            )
+                          : Text(
+                              'تسجيل',
+                              style: TextStyle(
+                                fontSize: baseFontSize,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
+                    ),
                   ),
-                  SizedBox(height: 16.h),
+                  const SizedBox(height: 16),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/login');
+                      Navigator.pushReplacementNamed(context, Routes.loginScreen);
                     },
                     child: Text(
                       'لديك حساب بالفعل؟ تسجيل الدخول',
                       style: TextStyle(
                         color: ColorsManager.mainBlue,
-                        fontSize: 14.sp,
+                        fontSize: baseFontSize * 0.875,
                       ),
                     ),
                   ),
@@ -217,4 +210,3 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
-*/

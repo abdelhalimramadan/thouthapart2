@@ -70,54 +70,32 @@ class AuthService {
 
           if (data is Map) {
             // Common shapes: top-level or nested under 'user'
+            Map? userMap;
             if (data['user'] is Map) {
-              final user = data['user'] as Map;
-              f = (user['first_name'] ?? user['firstName']) as String?;
-              l = (user['last_name'] ?? user['lastName']) as String?;
-              e = (user['email']??user['email']) as String?;
-              p = (user['phone']??user['phone'])?.toString();
-              y = (user['year']??user['year']) as String?;
-              g = (user['governorate']??user['governorate']) as String?;
-              fa = (user['faculty']??user['faculty']) as String?;
-              c = (user['category']??user['category'])?.toString();
+              userMap = data['user'] as Map;
+            } else {
+              userMap = data;
             }
 
-            f = f ?? (data['first_name'] ?? data['firstName']) as String?;
-            l = l ?? (data['last_name'] ?? data['lastName']) as String?;
-            e = e ?? (data['email']??data['email']) as String?;
-            p = p ?? (data['phone']??data['phone'])?.toString();
-            y = y ?? (data['year']??data['year']) as String?;
-            g = g ?? (data['governorate']??data['governorate']) as String?;
-            fa = fa ?? (data['faculty']??data['faculty']) as String?;
-            c = c ?? data['category']?.toString();
-          }
+            f = (userMap['first_name'] ?? userMap['firstName']) as String?;
+            l = (userMap['last_name'] ?? userMap['lastName']) as String?;
+            e = (userMap['email']) as String?;
+            p = (userMap['phone'] ?? userMap['tel'])?.toString();
+            y = (userMap['year'] ?? userMap['study_year']) as String?;
+            g = (userMap['governorate'] ?? userMap['city']) as String?;
+            fa = (userMap['faculty'] ?? userMap['college']) as String?;
+            c = (userMap['category'] ?? userMap['specialization'])?.toString();
 
-          if (f != null && f.isNotEmpty) {
-            await SharedPrefHelper.setData('first_name', f);
-            await SharedPrefHelper.setData('last_name', l ?? '');
-            if (e != null && e.isNotEmpty) {
-              await SharedPrefHelper.setData('email', e);
-              await SharedPrefHelper.setData('phone', p ?? '');
-              await SharedPrefHelper.setData('year', y ?? '');
-              await SharedPrefHelper.setData('governorate', g ?? '');
-              await SharedPrefHelper.setData('faculty', fa ?? '');
-              if (c != null && c.isNotEmpty) {
-                await SharedPrefHelper.setData('category', c);
-              }
+            if (f != null && f.isNotEmpty) {
+              await SharedPrefHelper.setData('first_name', f);
+              await SharedPrefHelper.setData('last_name', l ?? '');
+              if (e != null && e.isNotEmpty) await SharedPrefHelper.setData('email', e);
+              if (p != null && p.isNotEmpty) await SharedPrefHelper.setData('phone', p);
+              if (y != null && y.isNotEmpty) await SharedPrefHelper.setData('year', y);
+              if (g != null && g.isNotEmpty) await SharedPrefHelper.setData('governorate', g);
+              if (fa != null && fa.isNotEmpty) await SharedPrefHelper.setData('faculty', fa);
+              if (c != null && c.isNotEmpty) await SharedPrefHelper.setData('category', c);
             }
-
-            // Save additional profile fields
-            final phone = data['phone']?.toString();
-            final faculty = data['faculty']?.toString();
-            final year = data['year']?.toString();
-            final governorate = data['governorate']?.toString();
-            final category = data['category']?.toString();
-
-            if (phone != null) await SharedPrefHelper.setData('phone', phone);
-            if (faculty != null) await SharedPrefHelper.setData('faculty', faculty);
-            if (year != null) await SharedPrefHelper.setData('year', year);
-            if (governorate != null) await SharedPrefHelper.setData('governorate', governorate);
-            if (category != null) await SharedPrefHelper.setData('category', category);
           }
         } catch (_) {
           // ignore persistence failures; UI can fallback to /me

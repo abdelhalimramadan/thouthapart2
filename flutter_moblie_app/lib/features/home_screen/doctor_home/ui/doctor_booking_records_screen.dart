@@ -159,62 +159,70 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: statusColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        status,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
+                     Container(
+                       padding: EdgeInsets.symmetric(
+                           horizontal: 12 * (width / 390), vertical: 4 * (width / 390)),
+                       decoration: BoxDecoration(
+                         color: statusColor,
+                         borderRadius: BorderRadius.circular(12),
+                       ),
+                       child: Text(
+                         status,
+                         style: TextStyle(
+                           color: Colors.white,
+                           fontFamily: 'Cairo',
+                           fontWeight: FontWeight.bold,
+                           fontSize: baseFontSize * 0.75, // 12
+                         ),
+                       ),
+                     ),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(
-                              patientName,
-                              textAlign: TextAlign.right,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontFamily: 'Cairo',
-                                fontWeight: FontWeight.w600,
-                                fontSize: baseFontSize * 1.125, // 18
-                              ),
-                            ),
+                             Text(
+                               patientName,
+                               textAlign: TextAlign.right,
+                               maxLines: 1,
+                               overflow: TextOverflow.ellipsis,
+                               style: theme.textTheme.titleMedium?.copyWith(
+                                 fontFamily: 'Cairo',
+                                 fontWeight: FontWeight.w600,
+                                 fontSize: baseFontSize * 1.125, // 18
+                               ),
+                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              service,
-                              textAlign: TextAlign.right,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontFamily: 'Cairo',
-                                color: colorScheme.onSurface.withAlpha((0.6 * 255).round()),
-                              ),
-                            ),
+                             Text(
+                               service,
+                               textAlign: TextAlign.right,
+                               maxLines: 1,
+                               overflow: TextOverflow.ellipsis,
+                               style: theme.textTheme.bodyMedium?.copyWith(
+                                 fontFamily: 'Cairo',
+                                 color: colorScheme.onSurface.withAlpha((0.6 * 255).round()),
+                                 fontSize: baseFontSize, // 16
+                               ),
+                             ),
                             const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(
-                                  date,
-                                  style: theme.textTheme.bodySmall,
-                                ),
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.calendar_month,
-                                  size: 16,
-                                  color: colorScheme.onSurface.withAlpha((0.6 * 255).round()),
-                                ),
-                              ],
-                            ),
+                             Row(
+                               mainAxisAlignment: MainAxisAlignment.end,
+                               children: [
+                                 Text(
+                                   date,
+                                   style: theme.textTheme.bodySmall?.copyWith(
+                                     fontSize: baseFontSize * 0.75, // 12
+                                   ),
+                                 ),
+                                 const SizedBox(width: 4),
+                                 Icon(
+                                   Icons.calendar_month,
+                                   size: 16 * (width / 390),
+                                   color: colorScheme.onSurface.withAlpha((0.6 * 255).round()),
+                                 ),
+                               ],
+                             ),
                           ],
                         ),
                       ),

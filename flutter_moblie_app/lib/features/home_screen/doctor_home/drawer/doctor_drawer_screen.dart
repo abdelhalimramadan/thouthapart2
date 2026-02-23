@@ -240,14 +240,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     } catch (e) {
       debugPrint('Exception: $e');
     } finally {
-      if (_firstName == null || _firstName!.isEmpty) {
-        final email = await SharedPrefHelper.getString('email');
-        if (email.isNotEmpty) {
-          setState(() {
-            _firstName = email.split('@').first;
-          });
-        }
-      }
       setState(() => _isLoadingName = false);
     }
   }
@@ -374,9 +366,9 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                                             ),
                                           )
                                         : Text(
-                                            _firstName != null
+                                            (_firstName != null && _firstName!.isNotEmpty)
                                                 ? 'د/ ${_firstName!} ${_lastName ?? ''}'
-                                                : 'د/ أحمد محمود',
+                                                : 'دكتور',
                                             style: textTheme.titleMedium
                                                 ?.copyWith(
                                               fontFamily: 'Cairo',
@@ -391,7 +383,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                                     Text(
                                       _email != null && _email!.isNotEmpty
                                           ? _email!
-                                          : 'zyadgamal@gmail.com',
+                                          : '********',
                                       style: textTheme.bodySmall?.copyWith(
                                         fontFamily: 'Cairo',
                                         color: Theme.of(context)

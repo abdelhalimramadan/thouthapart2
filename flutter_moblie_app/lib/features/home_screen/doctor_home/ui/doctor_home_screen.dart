@@ -116,12 +116,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     } catch (e) {
       debugPrint('Exception: $e');
     } finally {
-      if (_firstName == null || _firstName!.isEmpty) {
-        final email = await SharedPrefHelper.getString('email');
-        if (email.isNotEmpty) {
-          _firstName = email.split('@').first;
-        }
-      }
       if (mounted) setState(() => _isLoadingName = false);
     }
   }
@@ -267,8 +261,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                         )
                       : Text(
                           _firstName != null
-                              ? ' Welcome $_firstName'
-                              : ' مرحباً، د.',
+                              ? ' مرحباً يا د/ $_firstName'
+                              : ' مرحباً يا دكتور',
                           style: textTheme.titleLarge?.copyWith(
                             fontFamily: 'Cairo',
                             fontSize: baseFontSize * 1.5, // 24sp
