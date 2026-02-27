@@ -100,17 +100,11 @@ class _DoctorProfileState extends State<DoctorProfile> {
 
   Future<void> _fetchProfile({bool silent = false}) async {
     if (!silent) {
-      if (mounted) {
-        setState(() {
-          _error = null;
-          _loading = true;
-        });
-      }
+      if (mounted) setState(() { _error = null; _loading = true; });
     }
     try {
       final dio = DioFactory.getDio();
       Response? response;
-
       try {
         response = await dio.get('${ApiConstants.otpBaseUrl}/profile');
       } catch (_) {
@@ -122,9 +116,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
       if (response == null) {
         try {
           final res = await dio.post('${ApiConstants.otpBaseUrl}/update_profile', data: {});
-          if (res.statusCode == 200) {
-            response = res;
-          }
+          if (res.statusCode == 200) response = res;
         } catch (_) {}
       }
 
@@ -137,7 +129,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
             userMap = Map<String, dynamic>.from(userMap['user']);
           }
         }
-        
+
         String? getVal(String a, String b) {
           if (userMap == null) return null;
           return (userMap[a] ?? userMap[b])?.toString();
@@ -146,18 +138,14 @@ class _DoctorProfileState extends State<DoctorProfile> {
         final firstName = getVal('first_name', 'firstName');
         final lastName = getVal('last_name', 'lastName');
         final email = userMap?['email']?.toString();
-        
-        String? phone;
-        phone = userMap?['phone']?.toString();
-        
-        final possiblePhoneKeys = ['tel', 'telephone', 'phone_number', 'mobile', 'phoneNumber', 'phone'];
 
+        String? phone = userMap?['phone']?.toString();
+        final possiblePhoneKeys = ['tel', 'telephone', 'phone_number', 'mobile', 'phoneNumber', 'phone'];
         for (var key in possiblePhoneKeys) {
           if ((phone == null || phone.isEmpty) && userMap?[key] != null) {
             phone = userMap?[key]?.toString();
           }
         }
-        
         if ((phone == null || phone.isEmpty) && data is Map) {
           for (var key in possiblePhoneKeys) {
             if (data[key] != null) {
@@ -166,10 +154,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
             }
           }
         }
-
-        if (phone != null && phone.contains('@')) {
-          phone = null;
-        }
+        if (phone != null && phone.contains('@')) phone = null;
 
         final faculty = userMap?['faculty']?.toString();
         final year = userMap?['year']?.toString();
@@ -194,9 +179,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
         if ((firstName?.isNotEmpty ?? false)) {
           await SharedPrefHelper.setData('first_name', firstName);
           await SharedPrefHelper.setData('last_name', lastName ?? '');
-          if ((email?.isNotEmpty ?? false)) {
-            await SharedPrefHelper.setData('email', email);
-          }
+          if ((email?.isNotEmpty ?? false)) await SharedPrefHelper.setData('email', email);
           if (phone != null) await SharedPrefHelper.setData('phone', phone);
           if (faculty != null) await SharedPrefHelper.setData('faculty', faculty);
           if (year != null) await SharedPrefHelper.setData('year', year);
@@ -210,33 +193,25 @@ class _DoctorProfileState extends State<DoctorProfile> {
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) return;
-      if (!silent && mounted) {
-        setState(() => _error = e.message ?? 'تعذر الاتصال بالخادم');
-      }
+      if (!silent && mounted) setState(() => _error = e.message ?? 'تعذر الاتصال بالخادم');
     } catch (_) {
-      if (!silent && mounted) {
-        setState(() => _error = 'حدث خطأ غير متوقع');
-      }
+      if (!silent && mounted) setState(() => _error = 'حدث خطأ غير متوقع');
     } finally {
       if (!silent && mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
+    final picker = ImagePicker();
     try {
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
       if (image != null) {
         final bytes = await File(image.path).readAsBytes();
         final base64Image = base64Encode(bytes);
-
-        setState(() {
-          _profileImage = base64Image;
-        });
-
+        setState(() => _profileImage = base64Image);
         await _uploadImage(base64Image);
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('حدث خطأ أثناء اختيار الصورة', style: TextStyle(fontFamily: 'Cairo'))),
@@ -252,17 +227,19 @@ class _DoctorProfileState extends State<DoctorProfile> {
         '${ApiConstants.otpBaseUrl}/update_profile',
         data: {'profile_image': base64Image},
       );
-
       if (response.statusCode == 200) {
         await SharedPrefHelper.setData('profile_image', base64Image);
         DoctorDrawer.profileImageNotifier.value = base64Image;
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم تحديث الصورة الشخصية بنجاح', style: TextStyle(fontFamily: 'Cairo'))),
+            const SnackBar(
+              content: Text('تم تحديث الصورة الشخصية بنجاح', style: TextStyle(fontFamily: 'Cairo')),
+              backgroundColor: Colors.green,
+            ),
           );
         }
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('حدث خطأ أثناء تحديث الصورة', style: TextStyle(fontFamily: 'Cairo'))),
@@ -275,10 +252,8 @@ class _DoctorProfileState extends State<DoctorProfile> {
     setState(() => _loading = true);
     try {
       final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-      if (token == null || token.isEmpty) {
-        throw Exception('Token غير موجود. يرجى تسجيل الدخول مرة أخرى');
-      }
-      
+      if (token == null || token.isEmpty) throw Exception('Token غير موجود');
+
       final dio = Dio(BaseOptions(
         baseUrl: ApiConstants.otpBaseUrl,
         connectTimeout: const Duration(seconds: 60),
@@ -289,23 +264,20 @@ class _DoctorProfileState extends State<DoctorProfile> {
           'Authorization': 'Bearer $token',
         },
       ));
-      
-      final response = await dio.post(
-        '/update_profile',
-        data: data,
-      );
-      
+
+      final response = await dio.post('/update_profile', data: data);
+
       if (response.statusCode == 200) {
         final responseData = response.data;
         if (responseData is Map && responseData['status'] == 'success') {
           setState(() {
-             if (data.containsKey('category')) _category = data['category'];
-             if (data.containsKey('first_name')) _firstName = data['first_name'];
-             if (data.containsKey('last_name')) _lastName = data['last_name'];
-             if (data.containsKey('phone')) _phone = data['phone'];
-             if (data.containsKey('faculty')) _faculty = data['faculty'];
-             if (data.containsKey('year')) _year = data['year'];
-             if (data.containsKey('governorate')) _governorate = data['governorate'];
+            if (data.containsKey('category')) _category = data['category'];
+            if (data.containsKey('first_name')) _firstName = data['first_name'];
+            if (data.containsKey('last_name')) _lastName = data['last_name'];
+            if (data.containsKey('phone')) _phone = data['phone'];
+            if (data.containsKey('faculty')) _faculty = data['faculty'];
+            if (data.containsKey('year')) _year = data['year'];
+            if (data.containsKey('governorate')) _governorate = data['governorate'];
           });
 
           if (_category != null) await SharedPrefHelper.setData('category', _category!);
@@ -320,22 +292,24 @@ class _DoctorProfileState extends State<DoctorProfile> {
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('تم تحديث البيانات بنجاح', style: TextStyle(fontFamily: 'Cairo')), backgroundColor: Colors.green),
+              const SnackBar(
+                content: Text('تم تحديث البيانات بنجاح', style: TextStyle(fontFamily: 'Cairo')),
+                backgroundColor: Colors.green,
+              ),
             );
           }
         }
       }
-    } on DioException catch (e) {
-      String errorMessage = 'حدث خطأ أثناء التحديث';
+    } on DioException catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage, style: const TextStyle(fontFamily: 'Cairo')), backgroundColor: Colors.red),
+          const SnackBar(content: Text('حدث خطأ أثناء التحديث', style: TextStyle(fontFamily: 'Cairo')), backgroundColor: Colors.red),
         );
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('حدث خطأ أثناء التحديث', style: const TextStyle(fontFamily: 'Cairo')), backgroundColor: Colors.red),
+          const SnackBar(content: Text('حدث خطأ أثناء التحديث', style: TextStyle(fontFamily: 'Cairo')), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -365,62 +339,42 @@ class _DoctorProfileState extends State<DoctorProfile> {
           return Directionality(
             textDirection: TextDirection.rtl,
             child: AlertDialog(
-              title: const Text('تعديل البيانات', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Cairo')),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: const Text('تعديل البيانات', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700)),
               content: SingleChildScrollView(
                 child: SizedBox(
                   width: double.maxFinite,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      TextField(
-                        controller: firstNameCtrl,
-                        style: const TextStyle(fontFamily: 'Cairo'),
-                        decoration: const InputDecoration(labelText: 'الاسم الأول', labelStyle: TextStyle(fontFamily: 'Cairo')),
-                      ),
+                      _dialogField(firstNameCtrl, 'الاسم الأول', Icons.badge_outlined),
                       const SizedBox(height: 12),
-                      TextField(
-                        controller: lastNameCtrl,
-                        style: const TextStyle(fontFamily: 'Cairo'),
-                        decoration: const InputDecoration(labelText: 'اسم العائلة', labelStyle: TextStyle(fontFamily: 'Cairo')),
-                      ),
+                      _dialogField(lastNameCtrl, 'اسم العائلة', Icons.person_outlined),
                       const SizedBox(height: 12),
-                      TextField(
-                        controller: phoneCtrl,
-                        style: const TextStyle(fontFamily: 'Cairo'),
-                        decoration: const InputDecoration(labelText: 'رقم الهاتف', labelStyle: TextStyle(fontFamily: 'Cairo')),
-                        keyboardType: TextInputType.phone,
-                      ),
+                      _dialogField(phoneCtrl, 'رقم الهاتف', Icons.phone_outlined, isPhone: true),
                       const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                        value: selectedCollege,
-                        decoration: const InputDecoration(labelText: 'الكلية', labelStyle: TextStyle(fontFamily: 'Cairo')),
-                        isExpanded: true,
-                        items: _colleges.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontFamily: 'Cairo')))).toList(),
+                      _dialogDropdown(
+                        label: 'الكلية', icon: Icons.school_outlined,
+                        value: selectedCollege, items: _colleges,
                         onChanged: (v) => setStateDialog(() => selectedCollege = v),
                       ),
                       const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                        value: selectedYear,
-                        decoration: const InputDecoration(labelText: 'السنة الدراسية', labelStyle: TextStyle(fontFamily: 'Cairo')),
-                        isExpanded: true,
-                        items: _studyYears.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontFamily: 'Cairo')))).toList(),
+                      _dialogDropdown(
+                        label: 'السنة الدراسية', icon: Icons.event_note_outlined,
+                        value: selectedYear, items: _studyYears,
                         onChanged: (v) => setStateDialog(() => selectedYear = v),
                       ),
                       const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                        value: selectedGovernorate,
-                        decoration: const InputDecoration(labelText: 'المحافظة', labelStyle: TextStyle(fontFamily: 'Cairo')),
-                        isExpanded: true,
-                        items: _governorates.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontFamily: 'Cairo')))).toList(),
+                      _dialogDropdown(
+                        label: 'المحافظة', icon: Icons.place_outlined,
+                        value: selectedGovernorate, items: _governorates,
                         onChanged: (v) => setStateDialog(() => selectedGovernorate = v),
                       ),
                       const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                        value: selectedCategory, 
-                        decoration: const InputDecoration(labelText: 'التخصص', labelStyle: TextStyle(fontFamily: 'Cairo')),
-                        isExpanded: true,
-                        items: _categories.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontFamily: 'Cairo')))).toList(),
-                        onChanged: (v) => setStateDialog(() => selectedCategory = v), 
+                      _dialogDropdown(
+                        label: 'التخصص', icon: Icons.medical_services_outlined,
+                        value: selectedCategory, items: _categories,
+                        onChanged: (v) => setStateDialog(() => selectedCategory = v),
                       ),
                     ],
                   ),
@@ -429,9 +383,13 @@ class _DoctorProfileState extends State<DoctorProfile> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo')),
+                  child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo', color: Colors.grey)),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF021433),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
                   onPressed: () async {
                     Navigator.pop(context);
                     await _updateProfileData({
@@ -444,7 +402,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                       'faculty': selectedCollege,
                     });
                   },
-                  child: const Text('حفظ', style: TextStyle(fontFamily: 'Cairo')),
+                  child: const Text('حفظ', style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
                 ),
               ],
             ),
@@ -454,44 +412,88 @@ class _DoctorProfileState extends State<DoctorProfile> {
     );
   }
 
+  Widget _dialogField(TextEditingController ctrl, String label, IconData icon, {bool isPhone = false}) {
+    return TextField(
+      controller: ctrl,
+      style: const TextStyle(fontFamily: 'Cairo'),
+      keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(fontFamily: 'Cairo'),
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      ),
+    );
+  }
+
+  Widget _dialogDropdown({
+    required String label,
+    required IconData icon,
+    required String? value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(fontFamily: 'Cairo'),
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      ),
+      isExpanded: true,
+      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontFamily: 'Cairo')))).toList(),
+      onChanged: onChanged,
+    );
+  }
+
+  // ─────────────────────────── BUILD ──────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final baseFontSize = width * 0.04;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: isDark ? const Color(0xFF0D1117) : const Color(0xFFF5F6FA),
       drawer: const DoctorDrawer(),
       appBar: AppBar(
-        toolbarHeight: 75.6,
+        toolbarHeight: 60,
         elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
+        backgroundColor: isDark ? const Color(0xFF161B22) : Colors.white,
         automaticallyImplyLeading: false,
         leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu, size: 24 * (width / 390)),
+          builder: (ctx) => IconButton(
+            icon: Icon(Icons.menu, size: 24 * (width / 390), color: theme.iconTheme.color),
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ),
-        title: Center(
-          child: Text(
-            'الملف الشخصي',
-            style: textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Cairo',
-              fontSize: baseFontSize * 1.125, // 18
-            ),
+        title: Text(
+          'الملف الشخصي',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontWeight: FontWeight.w700,
+            fontSize: baseFontSize * 1.125,
+            color: isDark ? Colors.white : const Color(0xFF021433),
           ),
         ),
+        centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_note),
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF021433).withOpacity(0.08),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.edit_outlined, size: 18, color: Color(0xFF021433)),
+            ),
             tooltip: 'تعديل البيانات',
             onPressed: _showEditProfileDialog,
           ),
@@ -501,7 +503,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
           preferredSize: const Size.fromHeight(1),
           child: Container(
             height: 1,
-            color: theme.brightness == Brightness.dark ? Colors.grey[700] : const Color(0xFFE5E7EB),
+            color: isDark ? Colors.grey[800] : const Color(0xFFE5E7EB),
           ),
         ),
       ),
@@ -512,39 +514,96 @@ class _DoctorProfileState extends State<DoctorProfile> {
           color: colorScheme.primary,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _headerCard(theme, textTheme, colorScheme, width, baseFontSize),
-                  const SizedBox(height: 12),
-                  _infoCard(theme, textTheme, colorScheme, width, baseFontSize),
-                  const SizedBox(height: 12),
-                  _actionCard(
-                    theme: theme,
-                    colorScheme: colorScheme,
-                    width: width,
-                    child: ListTile(
-                      leading: Icon(Icons.lock_outline, color: theme.iconTheme.color),
-                      title: Text(
-                        'تغيير كلمة المرور',
-                        style: textTheme.bodyLarge?.copyWith(
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.right,
+            child: Column(
+              children: [
+                // ── Header Banner ──────────────────────────────────────────
+                _buildHeaderBanner(width, baseFontSize, isDark),
+
+                // ── Info Sections ──────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: Column(
+                    children: [
+                      // ── Personal info ──────────────────────────────────
+                      _buildSectionCard(
+                        isDark: isDark,
+                        title: 'المعلومات الشخصية',
+                        icon: Icons.person_outline,
+                        children: [
+                          _buildInfoTile(isDark, Icons.badge_outlined, 'الاسم الأول', _firstName, baseFontSize),
+                          _buildDivider(isDark),
+                          _buildInfoTile(isDark, Icons.perm_identity, 'اسم العائلة', _lastName, baseFontSize),
+                          _buildDivider(isDark),
+                          _buildInfoTile(isDark, Icons.email_outlined, 'البريد الإلكتروني', _email, baseFontSize),
+                          _buildDivider(isDark),
+                          _buildInfoTile(isDark, Icons.phone_outlined, 'رقم الهاتف', _phone, baseFontSize),
+                        ],
                       ),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                      onTap: () => Navigator.pushNamed(context, Routes.resetPasswordScreen),
-                    ),
+                      const SizedBox(height: 12),
+                      // ── Academic info ──────────────────────────────────
+                      _buildSectionCard(
+                        isDark: isDark,
+                        title: 'المعلومات الأكاديمية',
+                        icon: Icons.school_outlined,
+                        children: [
+                          _buildInfoTile(isDark, Icons.school_outlined, 'الكلية', _faculty, baseFontSize),
+                          _buildDivider(isDark),
+                          _buildInfoTile(isDark, Icons.event_note_outlined, 'السنة الدراسية', _year, baseFontSize),
+                          _buildDivider(isDark),
+                          _buildInfoTile(isDark, Icons.medical_services_outlined, 'التخصص', _category, baseFontSize),
+                          _buildDivider(isDark),
+                          _buildInfoTile(isDark, Icons.place_outlined, 'المحافظة', _governorate, baseFontSize),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // ── Security ───────────────────────────────────────
+                      _buildSectionCard(
+                        isDark: isDark,
+                        title: 'الأمان',
+                        icon: Icons.security_outlined,
+                        children: [
+                          ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                            leading: Container(
+                              width: 36, height: 36,
+                              decoration: BoxDecoration(
+                                color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(Icons.lock_outline, size: 18, color: Color(0xFF021433)),
+                            ),
+                            title: const Text('تغيير كلمة المرور', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600)),
+                            trailing: const Icon(Icons.arrow_back_ios, size: 14, color: Colors.grey),
+                            onTap: () => Navigator.pushNamed(context, Routes.resetPasswordScreen),
+                          ),
+                        ],
+                      ),
+
+                      if (_error != null) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.red[50],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.red[200]!),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: Colors.red),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(_error!, style: const TextStyle(fontFamily: 'Cairo', color: Colors.red)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
+                    ],
                   ),
-                  if (_error != null) ...[
-                    const SizedBox(height: 12),
-                    _errorBanner(textTheme, colorScheme, _error!, width, baseFontSize),
-                  ],
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -552,171 +611,236 @@ class _DoctorProfileState extends State<DoctorProfile> {
     );
   }
 
-  Widget _headerCard(ThemeData theme, TextTheme textTheme, ColorScheme colorScheme, double width, double baseFontSize) {
-    final isDark = theme.brightness == Brightness.dark;
+  // ─────────────────────── Header Banner ──────────────────────────────────────
+  Widget _buildHeaderBanner(double width, double baseFontSize, bool isDark) {
+    final fullName = _composeName(_firstName, _lastName);
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
-          width: 1.1,
+        gradient: const LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [Color(0xFF021433), Color(0xFF0A3A7A)],
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
         ),
         boxShadow: [
           BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1),
-            offset: const Offset(0, 1),
-            blurRadius: 3,
+            color: const Color(0xFF021433).withOpacity(0.35),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(16),
-      child: Row(
+      padding: EdgeInsets.only(
+        top: 28,
+        bottom: 32,
+        left: 20,
+        right: 20,
+      ),
+      child: Column(
         children: [
+          // Avatar
           Stack(
+            alignment: Alignment.bottomRight,
             children: [
-              CircleAvatar(
-                radius: 28 * (width / 390),
-                backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-                backgroundImage: _profileImage != null ? MemoryImage(base64Decode(_profileImage!)) : null,
-                child: _profileImage == null ? Icon(Icons.person_outline, color: theme.iconTheme.color) : null,
+              Container(
+                width: 90 * (width / 390),
+                height: 90 * (width / 390),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                  color: Colors.grey[300],
+                ),
+                child: ClipOval(
+                  child: _profileImage != null
+                      ? Image.memory(base64Decode(_profileImage!), fit: BoxFit.cover)
+                      : const Icon(Icons.person, size: 48, color: Colors.grey),
+                ),
               ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: InkWell(
-                  onTap: _pickImage,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: theme.cardTheme.color ?? Colors.white, width: 1.5),
-                    ),
-                    child: Icon(
-                      Icons.camera_alt,
-                      size: 12 * (width / 390),
-                      color: Colors.white,
-                    ),
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
                   ),
+                  child: const Icon(Icons.camera_alt, size: 15, color: Color(0xFF021433)),
                 ),
               ),
             ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+          const SizedBox(height: 14),
+          // Name
+          if (_loading)
+            Container(
+              width: 140,
+              height: 20,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+            )
+          else
+            Text(
+              fullName != null ? 'د. $fullName' : 'الملف الشخصي',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.w700,
+                fontSize: baseFontSize * 1.25,
+                color: Colors.white,
+              ),
+            ),
+          const SizedBox(height: 6),
+          // Email
+          if (_loading)
+            Container(
+              width: 180,
+              height: 14,
+              margin: const EdgeInsets.only(top: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(6),
+              ),
+            )
+          else if (_email != null)
+            Text(
+              _email!,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: baseFontSize * 0.8,
+                color: Colors.white.withOpacity(0.75),
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          const SizedBox(height: 10),
+          // Category chip
+          if (_category != null && _category!.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withOpacity(0.3)),
+              ),
+              child: Text(
+                _category!,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w600,
+                  fontSize: baseFontSize * 0.8,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────── Section Card ───────────────────────────────────
+  Widget _buildSectionCard({
+    required bool isDark,
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF161B22) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isDark ? Colors.grey[800]! : const Color(0xFFE5E7EB)),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black.withOpacity(0.2) : Colors.grey.withOpacity(0.07),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+            child: Row(
               children: [
-                _loading
-                    ? _shimmerLine(width: 120 * (width / 390), height: 18, theme: theme)
-                    : Text(
-                        _composeName(_firstName, _lastName) ?? 'دكتور',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          fontSize: baseFontSize * 1.125, // 18
-                          fontFamily: 'Cairo',
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                const SizedBox(height: 4),
-                _loading
-                    ? _shimmerLine(width: 180 * (width / 390), height: 14, theme: theme)
-                    : Text(
-                        _email ?? '-',
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface.withValues(alpha: 0.7),
-                          fontFamily: 'Cairo',
-                        ),
-                        textAlign: TextAlign.right,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                Icon(icon, size: 16, color: const Color(0xFF021433)),
+                const SizedBox(width: 6),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: isDark ? Colors.white70 : const Color(0xFF021433),
+                  ),
+                ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _infoCard(ThemeData theme, TextTheme textTheme, ColorScheme colorScheme, double width, double baseFontSize) {
-    final isDark = theme.brightness == Brightness.dark;
-    final items = <_InfoItem>[
-      _InfoItem(icon: Icons.badge_outlined, label: 'الاسم الأول', value: _firstName),
-      _InfoItem(icon: Icons.perm_identity, label: 'اسم العائلة', value: _lastName),
-      _InfoItem(icon: Icons.email_outlined, label: 'البريد الإلكتروني', value: _email),
-      _InfoItem(icon: Icons.phone_outlined, label: 'رقم الهاتف', value: _phone),
-      _InfoItem(icon: Icons.school_outlined, label: 'الكلية', value: _faculty),
-      _InfoItem(icon: Icons.event_note_outlined, label: 'السنة الدراسية', value: _year),
-      _InfoItem(icon: Icons.work_outline, label: 'التخصص', value: _category),
-      _InfoItem(icon: Icons.place_outlined, label: 'المحافظة', value: _governorate),
-    ];
-
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
-          width: 1.1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1),
-            offset: const Offset(0, 1),
-            blurRadius: 3,
+          const SizedBox(height: 6),
+          Divider(height: 1, color: isDark ? Colors.grey[800] : const Color(0xFFE5E7EB)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Column(children: children),
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Column(
-        children: [
-          for (int i = 0; i < items.length; i++) ...[
-            _infoRow(items[i], theme, textTheme, colorScheme, width, baseFontSize),
-            if (i != items.length - 1)
-              Divider(
-                height: 1,
-                thickness: 1,
-                color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB),
-              ),
-          ]
-        ],
-      ),
     );
   }
 
-  Widget _infoRow(_InfoItem item, ThemeData theme, TextTheme textTheme, ColorScheme colorScheme, double width, double baseFontSize) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+  // ─────────────────────────── Info Tile ──────────────────────────────────────
+  Widget _buildInfoTile(bool isDark, IconData icon, String label, String? value, double baseFontSize) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          Icon(item.icon, color: theme.iconTheme.color, size: 22 * (width / 390)),
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 16, color: const Color(0xFF021433)),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.label,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface.withValues(alpha: 0.6),
-                    fontSize: baseFontSize * 0.75, // 12
+                  label,
+                  style: TextStyle(
                     fontFamily: 'Cairo',
+                    fontSize: baseFontSize * 0.7,
+                    color: Colors.grey,
                   ),
-                  textAlign: TextAlign.right,
                 ),
                 const SizedBox(height: 2),
                 _loading
-                    ? _shimmerLine(width: 160 * (width / 390), height: 16, theme: theme)
-                    : Text(
-                        (item.value?.isNotEmpty ?? false) ? item.value! : '-',
-                        style: textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: baseFontSize * 0.875, // 14
-                          fontFamily: 'Cairo',
+                    ? Container(
+                        height: 14,
+                        width: 120,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.grey[800] : Colors.grey[200],
+                          borderRadius: BorderRadius.circular(4),
                         ),
-                        textAlign: TextAlign.right,
+                      )
+                    : Text(
+                        (value?.isNotEmpty ?? false) ? value! : '—',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontWeight: FontWeight.w600,
+                          fontSize: baseFontSize * 0.875,
+                          color: isDark ? Colors.white : const Color(0xFF111827),
+                        ),
                       ),
               ],
             ),
@@ -726,82 +850,12 @@ class _DoctorProfileState extends State<DoctorProfile> {
     );
   }
 
-  Widget _errorBanner(TextTheme textTheme, ColorScheme colorScheme, String message, double width, double baseFontSize) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.error.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline, color: colorScheme.error),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onErrorContainer,
-                fontFamily: 'Cairo',
-              ),
-              textAlign: TextAlign.right,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildDivider(bool isDark) =>
+      Divider(height: 1, color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6));
 
   String? _composeName(String? f, String? l) {
     if ((f == null || f.isEmpty) && (l == null || l.isEmpty)) return null;
-    if (f != null && f.isNotEmpty && l != null && l.isNotEmpty) return '$f $l';
+    if ((f?.isNotEmpty ?? false) && (l?.isNotEmpty ?? false)) return '$f $l';
     return f?.isNotEmpty == true ? f : l;
   }
-
-  Widget _shimmerLine({required double width, required double height, required ThemeData theme}) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[200],
-        borderRadius: BorderRadius.circular(6),
-      ),
-    );
-  }
-
-  Widget _actionCard({
-    required ThemeData theme,
-    required ColorScheme colorScheme,
-    required double width,
-    required Widget child,
-  }) {
-    final isDark = theme.brightness == Brightness.dark;
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
-          width: 1.1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1),
-            offset: const Offset(0, 1),
-            blurRadius: 3,
-          ),
-        ],
-      ),
-      child: child,
-    );
-  }
-}
-
-class _InfoItem {
-  final IconData icon;
-  final String label;
-  final String? value;
-
-  _InfoItem({required this.icon, required this.label, required this.value});
 }

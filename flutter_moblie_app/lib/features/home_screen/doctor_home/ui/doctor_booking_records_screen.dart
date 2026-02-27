@@ -116,10 +116,167 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
     );
   }
 
+  void _showBookingDetails({
+    required BuildContext context,
+    required String patientName,
+    required String phone,
+    required String date,
+    required String time,
+    required String service,
+    required String profileImage,
+    required double baseFontSize,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          decoration: BoxDecoration(
+            color: theme.cardTheme.color ?? theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.only(
+            top: 20,
+            left: 20,
+            right: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 28,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[600] : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                textDirection: TextDirection.rtl,
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      image: DecorationImage(
+                        image: AssetImage(profileImage),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    patientName,
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontWeight: FontWeight.w700,
+                      fontSize: baseFontSize * 1.25,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Divider(color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
+              const SizedBox(height: 12),
+              _buildDetailRow(
+                context: context,
+                icon: Icons.phone_outlined,
+                label: 'رقم الهاتف',
+                value: phone,
+                baseFontSize: baseFontSize,
+              ),
+              const SizedBox(height: 14),
+              _buildDetailRow(
+                context: context,
+                icon: Icons.calendar_month_outlined,
+                label: 'التاريخ',
+                value: date,
+                baseFontSize: baseFontSize,
+              ),
+              const SizedBox(height: 14),
+              _buildDetailRow(
+                context: context,
+                icon: Icons.access_time_outlined,
+                label: 'الوقت',
+                value: time,
+                baseFontSize: baseFontSize,
+              ),
+              const SizedBox(height: 14),
+              _buildDetailRow(
+                context: context,
+                icon: Icons.medical_services_outlined,
+                label: 'التخصص',
+                value: service,
+                baseFontSize: baseFontSize,
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required String value,
+    required double baseFontSize,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Row(
+      textDirection: TextDirection.rtl,
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 18, color: const Color(0xFF021433)),
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: baseFontSize * 0.75,
+                color: Colors.grey,
+              ),
+            ),
+            Text(
+              value,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.w600,
+                fontSize: baseFontSize * 0.9,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildBookingCard({
     required BuildContext context,
     required String patientName,
+    required String phone,
     required String service,
+    required String time,
     required String date,
     required String status,
     required Color statusColor,
@@ -131,119 +288,86 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color ?? colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? Colors.black.withAlpha((0.3 * 255).round())
-                : Colors.grey.withAlpha((0.08 * 255).round()),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+    return GestureDetector(
+      onTap: () => _showBookingDetails(
+        context: context,
+        patientName: patientName,
+        phone: phone,
+        date: date,
+        time: time,
+        service: service,
+        profileImage: profileImage,
+        baseFontSize: baseFontSize,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                     Container(
-                       padding: EdgeInsets.symmetric(
-                           horizontal: 12 * (width / 390), vertical: 4 * (width / 390)),
-                       decoration: BoxDecoration(
-                         color: statusColor,
-                         borderRadius: BorderRadius.circular(12),
-                       ),
-                       child: Text(
-                         status,
-                         style: TextStyle(
-                           color: Colors.white,
-                           fontFamily: 'Cairo',
-                           fontWeight: FontWeight.bold,
-                           fontSize: baseFontSize * 0.75, // 12
-                         ),
-                       ),
-                     ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                             Text(
-                               patientName,
-                               textAlign: TextAlign.right,
-                               maxLines: 1,
-                               overflow: TextOverflow.ellipsis,
-                               style: theme.textTheme.titleMedium?.copyWith(
-                                 fontFamily: 'Cairo',
-                                 fontWeight: FontWeight.w600,
-                                 fontSize: baseFontSize * 1.125, // 18
-                               ),
-                             ),
-                            const SizedBox(height: 4),
-                             Text(
-                               service,
-                               textAlign: TextAlign.right,
-                               maxLines: 1,
-                               overflow: TextOverflow.ellipsis,
-                               style: theme.textTheme.bodyMedium?.copyWith(
-                                 fontFamily: 'Cairo',
-                                 color: colorScheme.onSurface.withAlpha((0.6 * 255).round()),
-                                 fontSize: baseFontSize, // 16
-                               ),
-                             ),
-                            const SizedBox(height: 8),
-                             Row(
-                               mainAxisAlignment: MainAxisAlignment.end,
-                               children: [
-                                 Text(
-                                   date,
-                                   style: theme.textTheme.bodySmall?.copyWith(
-                                     fontSize: baseFontSize * 0.75, // 12
-                                   ),
-                                 ),
-                                 const SizedBox(width: 4),
-                                 Icon(
-                                   Icons.calendar_month,
-                                   size: 16 * (width / 390),
-                                   color: colorScheme.onSurface.withAlpha((0.6 * 255).round()),
-                                 ),
-                               ],
-                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 60 * (width / 390),
-                      height: 70 * (width / 390),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        image: DecorationImage(
-                          image: AssetImage(profileImage),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: theme.cardTheme.color ?? colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
+          boxShadow: [
+            BoxShadow(
+              color: isDark
+                  ? Colors.black.withAlpha((0.3 * 255).round())
+                  : Colors.grey.withAlpha((0.08 * 255).round()),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
             ),
-          )
-        ],
+          ],
+        ),
+        child: Row(
+          textDirection: TextDirection.rtl,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Patient Image
+            Container(
+              width: 52 * (width / 390),
+              height: 52 * (width / 390),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                image: DecorationImage(
+                  image: AssetImage(profileImage),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            // Name
+            Expanded(
+              child: Text(
+                patientName,
+                textAlign: TextAlign.right,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w600,
+                  fontSize: baseFontSize * 1.0,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Status badge
+            Container(
+              padding: EdgeInsets.symmetric(
+                  horizontal: 10 * (width / 390), vertical: 4 * (width / 390)),
+              decoration: BoxDecoration(
+                color: statusColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                status,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.bold,
+                  fontSize: baseFontSize * 0.7,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -265,7 +389,7 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
               style: theme.textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w700,
-                fontSize: baseFontSize * 1.5, // 24
+                fontSize: baseFontSize * 1.5,
                 height: 1.5,
               ),
             ),
@@ -274,7 +398,9 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
           _buildBookingCard(
             context: context,
             patientName: 'زياد جمال',
+            phone: '01012345678',
             service: 'تقويم اسنان',
+            time: '11:30 صباحا',
             date: '2025-11-29',
             status: 'مكتمل',
             statusColor: Colors.greenAccent,
@@ -286,7 +412,9 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
           _buildBookingCard(
             context: context,
             patientName: 'عبدالحليم رمضان',
+            phone: '01098765432',
             service: 'حشو عصب',
+            time: '02:45 مساءً',
             date: '2025-11-30',
             status: 'انتظار',
             statusColor: Colors.orangeAccent,
@@ -298,7 +426,9 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
           _buildBookingCard(
             context: context,
             patientName: 'محمد اشرف',
+            phone: '01156781234',
             service: 'تنظيف أسنان',
+            time: '10:15 صباحا',
             date: '2025-12-01',
             status: 'ملغي',
             statusColor: Colors.redAccent,
@@ -310,7 +440,9 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
           _buildBookingCard(
             context: context,
             patientName: 'جوزيف جورح',
+            phone: '01234567890',
             service: 'تركيب كوبري',
+            time: '04:30 مساءً',
             date: '2025-12-02',
             status: 'مكتمل',
             statusColor: Colors.greenAccent,
