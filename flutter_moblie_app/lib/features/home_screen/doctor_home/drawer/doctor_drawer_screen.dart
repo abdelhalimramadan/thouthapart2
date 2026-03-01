@@ -16,6 +16,7 @@ import 'package:thotha_mobile_app/features/home_screen/ui/home_screen.dart';
 import 'package:thotha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
 import 'package:thotha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
 import 'package:thotha_mobile_app/features/about_app/ui/about_app_screen.dart';
+import 'package:thotha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart';
 
 class DoctorDrawer extends StatefulWidget {
   const DoctorDrawer({super.key});
@@ -591,6 +592,22 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const TermsAndConditionsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'سياسة الخصوصية',
+                    icon: Icons.shield_outlined,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PrivacyPolicyScreen(),
                         ),
                       );
                     },

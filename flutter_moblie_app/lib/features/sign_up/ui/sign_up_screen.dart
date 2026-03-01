@@ -50,9 +50,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _isLoadingCategories = false;
 
   final List<String> _studyYears = [
-    'الفرقة الأولى',
-    'الفرقة الثانية',
-    'الفرقة الثالثة',
     'الفرقة الرابعة',
     'الفرقة الخامسة',
     'امتياز',

@@ -7,9 +7,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/networking/api_constants.dart';
+import 'package:thotha_mobile_app/core/networking/api_service.dart';
 import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
+import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
+import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
+import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
 import 'package:thotha_mobile_app/core/routing/routes.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/account_deletion_screen.dart';
 
 class DoctorProfile extends StatefulWidget {
   const DoctorProfile({Key? key}) : super(key: key);
@@ -33,33 +38,92 @@ class _DoctorProfileState extends State<DoctorProfile> {
   String? _category;
   String? _profileImage;
 
-  final List<String> _governorates = [
-    'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'الشرقية', 'الغربية',
-    'المنوفية', 'البحيرة', 'القليوبية', 'دمياط', 'كفر الشيخ', 'بورسعيد',
-    'الإسماعيلية', 'السويس', 'المنيا', 'أسيوط', 'سوهاج', 'قنا', 'الأقصر',
-    'أسوان', 'البحر الأحمر', 'مطروح', 'شمال سيناء', 'جنوب سيناء', 'الفيوم',
-    'بني سويف', 'الوادي الجديد',
-  ];
+  // Populated from API — empty until fetched
+  List<String> _governorates = [];
+  List<String> _categories = [];
+  List<String> _colleges = [];
 
-  final List<String> _categories = [
-    'جراحة الوجه والفكين', 'تقويم الأسنان', 'علاج الجذور', 'طب أسنان الأطفال',
-    'تركيبات الأسنان', 'علاج اللثة', 'طب الأسنان التجميلي', 'زراعة الأسنان',
-  ];
-
-  final List<String> _colleges = [
-    'كلية طب الأسنان - القاهرة', 'كلية طب الأسنان - عين شمس',
-    'كلية طب الأسنان - الإسكندرية', 'كلية طب الأسنان - المنصورة', 'أخرى',
-  ];
-
+  // No API for study years — hardcoded
   final List<String> _studyYears = [
-    'الفرقة الأولى', 'الفرقة الثانية', 'الفرقة الثالثة',
     'الفرقة الرابعة', 'الفرقة الخامسة', 'امتياز',
   ];
+
+  // Flag set when ANY reference-data API call fails
+  bool _refDataError = false;
+
+  // API service
+  final ApiService _apiService = ApiService();
+
+  // Loading flags for API dropdowns
+  bool _loadingCities = false;
+  bool _loadingUniversities = false;
+  bool _loadingCategories = false;
 
   @override
   void initState() {
     super.initState();
     _bootstrap();
+    _fetchReferenceData();
+  }
+
+  // ── Fetch dropdown data from API ───────────────────────────────────────
+  Future<void> _fetchReferenceData() async {
+    await Future.wait([
+      _fetchCities(),
+      _fetchUniversities(),
+      _fetchCategories(),
+    ]);
+  }
+
+  Future<void> _fetchCities() async {
+    if (mounted) setState(() => _loadingCities = true);
+    try {
+      final result = await _apiService.getCities();
+      if (result['success'] == true && mounted) {
+        final cities = result['data'] as List<CityModel>;
+        setState(() => _governorates = cities.map((c) => c.name).toList());
+      } else if (mounted) {
+        setState(() => _refDataError = true);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _refDataError = true);
+    } finally {
+      if (mounted) setState(() => _loadingCities = false);
+    }
+  }
+
+  Future<void> _fetchUniversities() async {
+    if (mounted) setState(() => _loadingUniversities = true);
+    try {
+      final result = await _apiService.getUniversities();
+      if (result['success'] == true && mounted) {
+        final universities = result['data'] as List<UniversityModel>;
+        setState(() => _colleges = universities.map((u) => u.name).toList());
+      } else if (mounted) {
+        setState(() => _refDataError = true);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _refDataError = true);
+    } finally {
+      if (mounted) setState(() => _loadingUniversities = false);
+    }
+  }
+
+  Future<void> _fetchCategories() async {
+    if (mounted) setState(() => _loadingCategories = true);
+    try {
+      final result = await _apiService.getCategories();
+      if (result['success'] == true && mounted) {
+        final categories = result['data'] as List<CategoryModel>;
+        setState(() => _categories = categories.map((c) => c.name).toList());
+      } else if (mounted) {
+        setState(() => _refDataError = true);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _refDataError = true);
+    } finally {
+      if (mounted) setState(() => _loadingCategories = false);
+    }
   }
 
   Future<void> _bootstrap() async {
@@ -322,15 +386,18 @@ class _DoctorProfileState extends State<DoctorProfile> {
     final lastNameCtrl = TextEditingController(text: _lastName);
     final phoneCtrl = TextEditingController(text: _phone);
 
-    String? selectedCategory = _category;
-    String? selectedYear = _year;
-    String? selectedGovernorate = _governorate;
-    String? selectedCollege = _faculty;
+    // Safely match current values against the (possibly API-updated) lists
+    String? selectedCategory =
+        (_category != null && _categories.contains(_category)) ? _category : null;
+    String? selectedYear =
+        (_year != null && _studyYears.contains(_year)) ? _year : null;
+    String? selectedGovernorate =
+        (_governorate != null && _governorates.contains(_governorate)) ? _governorate : null;
+    String? selectedCollege =
+        (_faculty != null && _colleges.contains(_faculty)) ? _faculty : null;
 
-    if (selectedCategory != null && !_categories.contains(selectedCategory)) selectedCategory = null;
-    if (selectedYear != null && !_studyYears.contains(selectedYear)) selectedYear = null;
-    if (selectedGovernorate != null && !_governorates.contains(selectedGovernorate)) selectedGovernorate = null;
-    if (selectedCollege != null && !_colleges.contains(selectedCollege)) selectedCollege = null;
+    final bool isLoadingDropdowns =
+        _loadingCities || _loadingUniversities || _loadingCategories;
 
     showDialog(
       context: context,
@@ -340,7 +407,11 @@ class _DoctorProfileState extends State<DoctorProfile> {
             textDirection: TextDirection.rtl,
             child: AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: const Text('تعديل البيانات', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700)),
+              title: const Text(
+                'تعديل البيانات',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+              ),
               content: SingleChildScrollView(
                 child: SizedBox(
                   width: double.maxFinite,
@@ -353,29 +424,130 @@ class _DoctorProfileState extends State<DoctorProfile> {
                       const SizedBox(height: 12),
                       _dialogField(phoneCtrl, 'رقم الهاتف', Icons.phone_outlined, isPhone: true),
                       const SizedBox(height: 12),
-                      _dialogDropdown(
-                        label: 'الكلية', icon: Icons.school_outlined,
-                        value: selectedCollege, items: _colleges,
-                        onChanged: (v) => setStateDialog(() => selectedCollege = v),
-                      ),
+                      // ── College dropdown (API) ──────────────────────────
+                      if (_loadingUniversities)
+                        _buildDropdownLoading('جاري تحميل الكليات...')
+                      else
+                        _dialogDropdown(
+                          label: 'الكلية',
+                          icon: Icons.school_outlined,
+                          value: selectedCollege,
+                          items: _colleges,
+                          onChanged: (v) => setStateDialog(() => selectedCollege = v),
+                        ),
                       const SizedBox(height: 12),
                       _dialogDropdown(
-                        label: 'السنة الدراسية', icon: Icons.event_note_outlined,
-                        value: selectedYear, items: _studyYears,
+                        label: 'السنة الدراسية',
+                        icon: Icons.event_note_outlined,
+                        value: selectedYear,
+                        items: _studyYears,
                         onChanged: (v) => setStateDialog(() => selectedYear = v),
                       ),
                       const SizedBox(height: 12),
-                      _dialogDropdown(
-                        label: 'المحافظة', icon: Icons.place_outlined,
-                        value: selectedGovernorate, items: _governorates,
-                        onChanged: (v) => setStateDialog(() => selectedGovernorate = v),
-                      ),
+                      // ── Governorate dropdown (API) ──────────────────────
+                      if (_loadingCities)
+                        _buildDropdownLoading('جاري تحميل المحافظات...')
+                      else
+                        _dialogDropdown(
+                          label: 'المحافظة',
+                          icon: Icons.place_outlined,
+                          value: selectedGovernorate,
+                          items: _governorates,
+                          onChanged: (v) => setStateDialog(() => selectedGovernorate = v),
+                        ),
                       const SizedBox(height: 12),
-                      _dialogDropdown(
-                        label: 'التخصص', icon: Icons.medical_services_outlined,
-                        value: selectedCategory, items: _categories,
-                        onChanged: (v) => setStateDialog(() => selectedCategory = v),
-                      ),
+                      // ── Category dropdown (API) ─────────────────────────
+                      if (_loadingCategories)
+                        _buildDropdownLoading('جاري تحميل التخصصات...')
+                      else
+                        _dialogDropdown(
+                          label: 'التخصص',
+                          icon: Icons.medical_services_outlined,
+                          value: selectedCategory,
+                          items: _categories,
+                          onChanged: (v) => setStateDialog(() => selectedCategory = v),
+                        ),
+                      // ── Status bar: loading / error+retry ────────────────
+                      if (isLoadingDropdowns) ...[
+                        const SizedBox(height: 8),
+                        const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1.5,
+                                color: Color(0xFF021433),
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'جاري تحميل بيانات القوائم...',
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 11,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ] else if (_refDataError) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.red[50],
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.red[200]!),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.wifi_off_rounded,
+                                  color: Colors.red, size: 16),
+                              const SizedBox(width: 8),
+                              const Expanded(
+                                child: Text(
+                                  'تعذّر تحميل بعض القوائم من الخادم',
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 11,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                onPressed: () {
+                                  setState(() => _refDataError = false);
+                                  _fetchReferenceData();
+                                  Navigator.pop(context);
+                                  Future.delayed(
+                                    const Duration(milliseconds: 600),
+                                    _showEditProfileDialog,
+                                  );
+                                },
+                                child: const Text(
+                                  'إعادة المحاولة',
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 11,
+                                    color: Color(0xFF021433),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -383,7 +555,10 @@ class _DoctorProfileState extends State<DoctorProfile> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo', color: Colors.grey)),
+                  child: const Text(
+                    'إلغاء',
+                    style: TextStyle(fontFamily: 'Cairo', color: Colors.grey),
+                  ),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -402,12 +577,46 @@ class _DoctorProfileState extends State<DoctorProfile> {
                       'faculty': selectedCollege,
                     });
                   },
-                  child: const Text('حفظ', style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
+                  child: const Text(
+                    'حفظ',
+                    style: TextStyle(fontFamily: 'Cairo', color: Colors.white),
+                  ),
                 ),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  /// Shimmer-like loading placeholder for a dropdown
+  Widget _buildDropdownLoading(String label) {
+    return Container(
+      height: 52,
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+        color: Colors.grey[50],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF021433)),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 13,
+              color: Colors.grey,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -575,6 +784,33 @@ class _DoctorProfileState extends State<DoctorProfile> {
                             title: const Text('تغيير كلمة المرور', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600)),
                             trailing: const Icon(Icons.arrow_back_ios, size: 14, color: Colors.grey),
                             onTap: () => Navigator.pushNamed(context, Routes.resetPasswordScreen),
+                          ),
+                          Divider(height: 1, color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6)),
+                          ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                            leading: Container(
+                              width: 36, height: 36,
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(Icons.delete_forever_rounded, size: 18, color: Colors.redAccent),
+                            ),
+                            title: const Text(
+                              'حذف الحساب',
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.w600,
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                            trailing: const Icon(Icons.arrow_back_ios, size: 14, color: Colors.grey),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const AccountDeletionScreen(),
+                              ),
+                            ),
                           ),
                         ],
                       ),
