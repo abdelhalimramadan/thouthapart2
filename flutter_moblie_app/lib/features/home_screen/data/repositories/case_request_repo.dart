@@ -17,4 +17,37 @@ class CaseRequestRepo {
       };
     }
   }
+
+  Future<Map<String, dynamic>> getRequestById(int id) async {
+    try {
+      return await _apiService.getRequestById(id);
+    } catch (e) {
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getAllRequests() async {
+    try {
+      return await _apiService.getAllRequests();
+    } catch (e) {
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteRequest(int id) async {
+    try {
+      return await _apiService.deleteRequest(id);
+    } catch (e) {
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
 }

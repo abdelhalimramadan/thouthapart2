@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thotha_mobile_app/core/theming/theme_provider.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_booking_records_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_requests_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_profile.dart';
 import 'package:thotha_mobile_app/features/login/ui/login_screen.dart';
@@ -308,6 +309,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     if (currentRoute.contains('doctor-profile') || currentRoute.contains('profile')) return 2;
     if (currentRoute.contains('upcoming-bookings')) return 3;
     if (currentRoute.contains('booking-records') || currentRoute.contains('records')) return 4;
+    if (currentRoute.contains('doctor-requests')) return 5;
     return 0;
   }
 
@@ -547,6 +549,23 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                         MaterialPageRoute(
                           settings: const RouteSettings(name: 'booking-records'),
                           builder: (context) => DoctorBookingRecordsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'طلباتي',
+                    icon: Icons.assignment_outlined,
+                    isSelected: currentIndex == 5,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          settings: const RouteSettings(name: 'doctor-requests'),
+                          builder: (context) => const DoctorRequestsScreen(),
                         ),
                       );
                     },

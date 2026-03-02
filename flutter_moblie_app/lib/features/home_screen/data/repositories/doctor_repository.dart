@@ -48,4 +48,12 @@ class DoctorRepository {
     }
     throw Exception(result['error'] ?? 'فشل في تحميل المدن');
   }
+
+  Future<Map<String, dynamic>> deleteDoctor() async {
+    try {
+      return await _apiService.deleteDoctor();
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
 }

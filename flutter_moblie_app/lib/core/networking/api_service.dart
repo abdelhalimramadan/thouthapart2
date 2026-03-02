@@ -224,6 +224,211 @@ class ApiService {
     }
   }
 
+  /// Update doctor profile (authenticated).
+  /// Backend endpoint: /api/doctor/updateDoctor
+  Future<Map<String, dynamic>> updateDoctor(Map<String, dynamic> body) async {
+    try {
+      // Ensure latest auth header is applied
+      await DioFactory.addDioHeaders();
+
+      final response = await _dio.post(
+        '${ApiConstants.baseUrl}${ApiConstants.updateDoctor}',
+        data: body,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {'success': true, 'data': response.data};
+      }
+
+      return {
+        'success': false,
+        'error': 'فشل في تحديث بيانات الطبيب',
+        'statusCode': response.statusCode,
+      };
+    } on DioException catch (e) {
+      return {
+        'success': false,
+        'error': _handleDioError(e),
+        'statusCode': e.response?.statusCode ?? 500,
+      };
+    } catch (_) {
+      return {
+        'success': false,
+        'error': 'حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى',
+      };
+    }
+  }
+
+  /// Fetch single request by id.
+  Future<Map<String, dynamic>> getRequestById(int id) async {
+    try {
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}${ApiConstants.getRequestById}/$id',
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map<String, dynamic>) {
+          return {
+            'success': true,
+            'data': CaseRequestModel.fromJson(data),
+          };
+        }
+        return {
+          'success': false,
+          'error': 'صيغة البيانات غير صحيحة',
+          'statusCode': response.statusCode,
+        };
+      }
+
+      return {
+        'success': false,
+        'error': 'فشل في تحميل الطلب',
+        'statusCode': response.statusCode,
+      };
+    } on DioException catch (e) {
+      return {
+        'success': false,
+        'error': _handleDioError(e),
+        'statusCode': e.response?.statusCode ?? 500,
+      };
+    } catch (_) {
+      return {
+        'success': false,
+        'error': 'حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى',
+      };
+    }
+  }
+
+  /// Fetch all requests.
+  Future<Map<String, dynamic>> getAllRequests() async {
+    try {
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}${ApiConstants.getAllRequests}',
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is List) {
+          final items = data
+              .map((e) => CaseRequestModel.fromJson(Map<String, dynamic>.from(e as Map)))
+              .toList();
+          return {'success': true, 'data': items};
+        }
+        return {
+          'success': false,
+          'error': 'صيغة البيانات غير صحيحة',
+          'statusCode': response.statusCode,
+        };
+      }
+
+      return {
+        'success': false,
+        'error': 'فشل في تحميل الطلبات',
+        'statusCode': response.statusCode,
+      };
+    } on DioException catch (e) {
+      return {
+        'success': false,
+        'error': _handleDioError(e),
+        'statusCode': e.response?.statusCode ?? 500,
+      };
+    } catch (_) {
+      return {
+        'success': false,
+        'error': 'حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى',
+      };
+    }
+  }
+
+  /// Delete doctor account (authenticated).
+  Future<Map<String, dynamic>> deleteDoctor() async {
+    try {
+      await DioFactory.addDioHeaders();
+      final response = await _dio.delete(
+        '${ApiConstants.baseUrl}${ApiConstants.deleteDoctor}',
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return {'success': true};
+      }
+      return {
+        'success': false,
+        'error': 'فشل في حذف الحساب',
+        'statusCode': response.statusCode,
+      };
+    } on DioException catch (e) {
+      return {
+        'success': false,
+        'error': _handleDioError(e),
+        'statusCode': e.response?.statusCode ?? 500,
+      };
+    } catch (_) {
+      return {
+        'success': false,
+        'error': 'حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى',
+      };
+    }
+  }
+
+  /// Delete a request by id (authenticated).
+  Future<Map<String, dynamic>> deleteRequest(int id) async {
+    try {
+      await DioFactory.addDioHeaders();
+      final response = await _dio.delete(
+        '${ApiConstants.baseUrl}${ApiConstants.deleteRequest}/$id',
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return {'success': true};
+      }
+      return {
+        'success': false,
+        'error': 'فشل في حذف الطلب',
+        'statusCode': response.statusCode,
+      };
+    } on DioException catch (e) {
+      return {
+        'success': false,
+        'error': _handleDioError(e),
+        'statusCode': e.response?.statusCode ?? 500,
+      };
+    } catch (_) {
+      return {
+        'success': false,
+        'error': 'حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى',
+      };
+    }
+  }
+
   String _handleDioError(DioException e) {
 
     if (e.type == DioExceptionType.connectionTimeout ||
