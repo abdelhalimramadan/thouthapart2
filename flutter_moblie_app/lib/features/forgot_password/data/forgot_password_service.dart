@@ -1,142 +1,195 @@
 import 'package:dio/dio.dart';
+import 'package:thotha_mobile_app/core/helpers/phone_helper.dart';
 import 'package:thotha_mobile_app/core/networking/api_constants.dart';
-import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
 
-class ForgotPasswordService {
-  final Dio _dio = DioFactory.getDio();
+/// Handles all password-reset API calls.
+///
+/// Flow:
+///   1. [requestReset]   → POST /api/password-reset/request   (sends OTP via WhatsApp)
+///   2. [verifyOtp]      → POST /api/password-reset/verify-otp
+///   3. [changePassword] → POST /api/password-reset/change-password
+class PasswordResetService {
+  PasswordResetService._();
+  static final PasswordResetService instance = PasswordResetService._();
 
-  // Send OTP to email for password reset
-  Future<Map<String, dynamic>> sendOtp(String email) async {
+  // Fresh public Dio — no auth header, no interceptors
+  Dio get _dio => Dio(BaseOptions(
+        baseUrl: ApiConstants.baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        contentType: 'application/json',          // ← يضمن JSON encoding للـ body
+        responseType: ResponseType.json,
+        headers: const {'Accept': 'application/json'},
+        validateStatus: (status) => status != null && status < 500,
+      ));
+
+  // ── Step 1: Request OTP ─────────────────────────────────────────────────
+
+  /// Sends an OTP to the user's WhatsApp.
+  /// [phone] is normalised to +2xxxxxxxxxx before sending.
+  Future<Map<String, dynamic>> requestReset(String phone) async {
+    final normalised = PhoneHelper.normalizeEgyptPhone(phone);
     try {
-      final response = await _dio.post(
-        '${ApiConstants.otpBaseUrl}${ApiConstants.sendOtp}',
-        data: {'email': email},
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-          validateStatus: (status) => status! < 500,
-        ),
+      final res = await _dio.post(
+        ApiConstants.passwordResetRequest,
+        data: {'phone_number': normalised},
       );
 
-      if (response.statusCode == 200) {
+      if (res.statusCode == 200) {
+        final data = res.data is Map ? res.data as Map : {};
         return {
           'success': true,
-          'message': 'تم إرسال رمز التحقق بنجاح',
-        };
-      } else {
-        String msg = 'فشل إرسال رمز التحقق';
-        if (response.data is Map<String, dynamic>) {
-          msg = response.data['message'] ?? msg;
-        } else if (response.data is String) {
-          msg = response.data;
-        }
-        return {
-          'success': false,
-          'message': msg,
+          'message': data['message'] ?? 'تم إرسال رمز التحقق على الواتساب',
+          'expires_in': data['expires_in_seconds'] ?? 300,
+          'user_email': data['user_email'],
+          'phone': normalised,
         };
       }
+
+      // Handle specific error codes from API docs
+      switch (res.statusCode) {
+        case 400:
+          return {'success': false, 'message': 'تنسيق رقم الهاتف غير صحيح'};
+        case 404:
+          return {'success': false, 'message': 'لا يوجد حساب مرتبط بهذا الرقم'};
+        case 429:
+          return {'success': false, 'message': 'طلبات كثيرة جداً، انتظر قليلاً ثم أعد المحاولة'};
+        case 503:
+          return {'success': false, 'message': 'خدمة الواتساب غير متاحة حالياً، حاول مرة أخرى لاحقاً'};
+        default:
+          return _errorFromResponse(res, 'فشل في إرسال رمز التحقق');
+      }
+    } on DioException catch (e) {
+      return _dioError(e);
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'حدث خطأ: ${e.toString()}',
-      };
+      return {'success': false, 'message': 'حدث خطأ غير متوقع'};
     }
   }
 
-  // Verify OTP
+  // ── Step 2: Verify OTP ──────────────────────────────────────────────────
+
   Future<Map<String, dynamic>> verifyOtp({
-    required String email,
+    required String phone,
     required String otp,
   }) async {
+    final normalised = PhoneHelper.normalizeEgyptPhone(phone);
     try {
-      final response = await _dio.post(
-        '${ApiConstants.otpBaseUrl}${ApiConstants.verifyOtp}',
+      final res = await _dio.post(
+        ApiConstants.passwordResetVerifyOtp,
         data: {
-          'email': email,
+          'phone_number': normalised,
           'otp': otp,
         },
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-          validateStatus: (status) => status! < 500,
-        ),
       );
 
-      if (response.statusCode == 200) {
+      if (res.statusCode == 200) {
+        final data = res.data is Map ? res.data as Map : {};
         return {
           'success': true,
-          'message': 'تم التحقق من الرمز بنجاح',
-          'resetToken': response.data['resetToken'],
-        };
-      } else {
-        String msg = 'رمز التحقق غير صالح';
-        if (response.data is Map<String, dynamic>) {
-          msg = response.data['message'] ?? msg;
-        } else if (response.data is String) {
-          msg = response.data;
-        }
-        return {
-          'success': false,
-          'message': msg,
+          'message': data['message'] ?? 'تم التحقق بنجاح، يمكنك الآن تغيير كلمة المرور',
+          'session_expires_in': data['session_expires_in_minutes'] ?? 10,
         };
       }
+
+      // Handle specific error codes from API docs
+      switch (res.statusCode) {
+        case 400:
+          return {'success': false, 'message': 'رمز التحقق غير صحيح أو البيانات ناقصة'};
+        case 404:
+          return {'success': false, 'message': 'لم يتم إرسال رمز تحقق لهذا الرقم، يرجى طلب رمز جديد'};
+        case 410:
+          return {'success': false, 'message': 'انتهت صلاحية رمز التحقق، يرجى طلب رمز جديد'};
+        case 429:
+          return {'success': false, 'message': 'تجاوزت عدد المحاولات المسموح بها، يرجى الانتظار والمحاولة لاحقاً'};
+        default:
+          return _errorFromResponse(res, 'رمز التحقق غير صحيح');
+      }
+    } on DioException catch (e) {
+      return _dioError(e);
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'حدث خطأ: ${e.toString()}',
-      };
+      return {'success': false, 'message': 'حدث خطأ غير متوقع'};
     }
   }
 
-  // Reset password
-  Future<Map<String, dynamic>> resetPassword({
-    required String email,
-    required String otp,
+  // ── Step 3: Change Password ─────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> changePassword({
+    required String phone,
     required String newPassword,
     required String confirmPassword,
   }) async {
-    try {
-      if (newPassword != confirmPassword) {
-        return {
-          'success': false,
-          'message': 'كلمات المرور غير متطابقة',
-        };
-      }
+    if (newPassword != confirmPassword) {
+      return {'success': false, 'message': 'كلمتا المرور غير متطابقتين'};
+    }
+    if (newPassword.length < 6) {
+      return {'success': false, 'message': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'};
+    }
 
-      final response = await _dio.post(
-        '${ApiConstants.otpBaseUrl}/api/auth/reset-password',
+    final normalised = PhoneHelper.normalizeEgyptPhone(phone);
+    try {
+      final res = await _dio.post(
+        ApiConstants.passwordResetChange,
         data: {
-          'email': email,
-          'otp': otp,
-          'newPassword': newPassword,
-          'confirmPassword': confirmPassword,
+          'phone_number': normalised,
+          'new_password': newPassword,
+          'confirm_password': confirmPassword,
         },
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-          validateStatus: (status) => status! < 500,
-        ),
       );
 
-      if (response.statusCode == 200) {
+      if (res.statusCode == 200) {
+        final data = res.data is Map ? res.data as Map : {};
         return {
           'success': true,
-          'message': 'تم إعادة تعيين كلمة المرور بنجاح',
-        };
-      } else {
-        String msg = 'فشل إعادة تعيين كلمة المرور';
-        if (response.data is Map<String, dynamic>) {
-          msg = response.data['message'] ?? msg;
-        } else if (response.data is String) {
-          msg = response.data;
-        }
-        return {
-          'success': false,
-          'message': msg,
+          'message': data['message'] ?? 'تم تغيير كلمة المرور بنجاح',
         };
       }
+
+      return _errorFromResponse(res, 'فشل في تغيير كلمة المرور');
+    } on DioException catch (e) {
+      return _dioError(e);
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'حدث خطأ: ${e.toString()}',
-      };
+      return {'success': false, 'message': 'حدث خطأ غير متوقع'};
     }
+  }
+
+  // ── Helpers ─────────────────────────────────────────────────────────────
+
+  Map<String, dynamic> _errorFromResponse(Response res, String fallback) {
+    // Try to read the server's own message first
+    String? serverMsg;
+    final data = res.data;
+    if (data is Map) {
+      serverMsg = (data['message'] ?? data['error'] ?? data['detail'])?.toString();
+    } else if (data is String && data.isNotEmpty) {
+      serverMsg = data;
+    }
+
+    // Only use hardcoded Arabic if the server returned nothing useful
+    final bool hasServerMsg = serverMsg != null && serverMsg.isNotEmpty;
+    String msg = hasServerMsg ? serverMsg : fallback;
+
+    if (!hasServerMsg) {
+      switch (res.statusCode) {
+        case 400: msg = '$fallback (تحقق من تنسيق رقم الهاتف)'; break;
+        case 404: msg = 'لا يوجد حساب مرتبط بهذا الرقم';            break;
+        case 410: msg = 'انتهت صلاحية رمز التحقق، أعد المحاولة';     break;
+        case 429: msg = 'طلبات كثيرة جداً، انتظر قليلاً ثم أعد المحاولة'; break;
+        case 403: msg = 'يجب التحقق من رمز OTP أولاً';               break;
+        default:  break;
+      }
+    }
+
+    return {'success': false, 'message': msg, 'statusCode': res.statusCode};
+  }
+
+  Map<String, dynamic> _dioError(DioException e) {
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      return {'success': false, 'message': 'انتهت مهلة الاتصال، تحقق من الإنترنت'};
+    }
+    if (e.type == DioExceptionType.connectionError) {
+      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
+    }
+    return {'success': false, 'message': 'حدث خطأ في الشبكة'};
   }
 }

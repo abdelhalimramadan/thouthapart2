@@ -1,38 +1,40 @@
 class ApiConstants {
+  ApiConstants._(); // prevent instantiation
+
   static const String baseUrl = 'https://thoutha.page';
+  static const String otpBaseUrl = baseUrl;
 
-  // Authentication endpoints
+  // ── Authentication ────────────────────────────────────────────
   static const String doctorLogin = '/api/auth/login/doctor';
-  static const String signup = '/api/auth/signup';
+  static const String signup      = '/api/auth/signup';
 
-  // Doctor endpoints (public) - Try different variations
-  static const String getDoctorsByCities = '/api/doctor/getDoctorsByCity';
-  static const String getDoctorsByCategories = '/api/doctor/getDoctorsByCategory';
-  static const String getCaseRequestsByCategories = '/api/case/getByCategory'; // Assumed endpoint
+  // ── Password Reset ────────────────────────────────────────────
+  static const String passwordResetRequest  = '/api/password-reset/request';
+  static const String passwordResetVerifyOtp = '/api/password-reset/verify-otp';
+  static const String passwordResetChange   = '/api/password-reset/change-password';
 
-  // Doctor endpoints (auth)
+  // ── OTP ───────────────────────────────────────────────────────
+  static const String sendOtp   = '/api/otp/send';
+  static const String verifyOtp = '/api/otp/verify';
+
+  // ── Doctor (public) ───────────────────────────────────────────
+  static const String getDoctorsByCities      = '/api/doctor/getDoctorsByCity';
+  static const String getDoctorsByCategories  = '/api/doctor/getDoctorsByCategory';
+
+  // ── Doctor (authenticated) ────────────────────────────────────
   static const String updateDoctor = '/api/doctor/updateDoctor';
   static const String deleteDoctor = '/api/doctor/deleteDoctor';
 
-  // Reference data endpoints
+  // ── Reference data ────────────────────────────────────────────
   static const String getUniversities = '/api/university/getAllUniversities';
-  static const String getCategories = '/api/category/getCategories';
-  static const String getCities = '/api/cities/getAllCities';  // Updated to new endpoint
-  
-  // Alternative/fallback endpoints
-  static const String getCategoriesAlt = '/api/categories';
-  static const String getCategoriesFallback = '/api/category/getCategories';
-  static const String getCitiesAlt = '/cities';
-  static const String getCitiesFallback = '/api/cities';
+  static const String getCategories   = '/api/category/getCategories';
+  static const String getCities       = '/api/cities/getAllCities';
 
-  // OTP endpoints
-  static const String otpBaseUrl = 'https://thoutha.page';
-  static const String sendOtp = '/api/otp/send';
-  static const String verifyOtp = '/api/otp/verify';
-
-  // Requests endpoints
-  static const String createCaseRequest = '/api/request/createRequest'; // Assumed endpoint
-  static const String getRequestById = '/api/request/getRequestById';
-  static const String getAllRequests = '/api/request/getAllRequests';
-  static const String deleteRequest = '/api/request/deleteRequest';
+  // ── Case Requests ─────────────────────────────────────────────
+  static const String getCaseRequestsByCategories = '/api/request/getRequestsByCategoryId';
+  static const String createCaseRequest           = '/api/request/createRequest';
+  static const String getRequestById              = '/api/request/getRequestById';
+  static const String getAllRequests               = '/api/request/getAllRequests';
+  static const String deleteRequest               = '/api/request/deleteRequest';
+  static const String getRequestsByDoctorId       = '/api/request/getRequestsByDoctorId';
 }

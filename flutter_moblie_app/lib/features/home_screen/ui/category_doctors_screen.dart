@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/models/doctor_model.dart';
-import 'package:thotha_mobile_app/features/home_screen/logic/doctor_cubit.dart';
-import 'package:thotha_mobile_app/features/home_screen/logic/doctor_state.dart';
-import 'package:thotha_mobile_app/features/doctor_info/ui/doctor_info_screen.dart';
-import 'dart:ui'; 
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/add_case_request_screen.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
+import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
+import 'package:thotha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/add_case_request_screen.dart';
 
-class CategoryDoctorsScreen extends StatelessWidget {
+class CategoryDoctorsScreen extends StatefulWidget {
   final String categoryName;
   final int? categoryId;
   final int? cityId;
@@ -24,185 +20,251 @@ class CategoryDoctorsScreen extends StatelessWidget {
   });
 
   @override
+  State<CategoryDoctorsScreen> createState() => _CategoryDoctorsScreenState();
+}
+
+class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
+  final CaseRequestRepo _repo = getIt<CaseRequestRepo>();
+
+  List<CaseRequestModel> _requests = [];
+  bool _isLoading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRequests();
+  }
+
+  Future<void> _loadRequests() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    Map<String, dynamic> result;
+    if (widget.categoryId != null) {
+      result = await _repo.getRequestsByCategoryId(widget.categoryId!);
+    } else {
+      result = {'success': false, 'error': 'لم يتم تحديد التخصص'};
+    }
+
+    if (!mounted) return;
+
+    if (result['success'] == true) {
+      setState(() {
+        _requests = List<CaseRequestModel>.from(result['data'] as List);
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _error = result['error']?.toString() ?? 'فشل في تحميل الحالات';
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final baseFontSize = width * 0.04;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
-    return BlocProvider(
-      create: (context) {
-        final cubit = getIt<DoctorCubit>();
-        if (categoryId != null) {
-          if (cityName != null && cityName!.isNotEmpty) {
-            cubit.filterByCategoryAndCity(categoryId!, cityName!);
-          } else {
-            cubit.filterByCategory(categoryId!);
-          }
-        } else {
-          if (cityName != null && cityName!.isNotEmpty) {
-            cubit.filterByCategoryNameAndCity(categoryName, cityName!);
-          } else {
-            cubit.filterByCategoryName(categoryName);
-          }
-        }
-        return cubit;
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            categoryName,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w700,
-              fontSize: baseFontSize * 1.125, // 18sp
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          widget.categoryName,
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontWeight: FontWeight.w700,
+            fontSize: baseFontSize * 1.125,
           ),
-          centerTitle: true,
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AddCaseRequestScreen(
-                  initialSpecialization: categoryName,
-                ),
+        centerTitle: true,
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddCaseRequestScreen(
+                initialSpecialization: widget.categoryName,
               ),
-            );
-          },
-          label: const Text(
-            'نشر حالة جديدة',
-            style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
-          ),
-          icon: const Icon(Icons.add_task_rounded, color: Colors.white),
-          backgroundColor: ColorsManager.mainBlue,
+            ),
+          ).then((_) => _loadRequests()); // Refresh after adding
+        },
+        label: const Text(
+          'نشر حالة جديدة',
+          style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
         ),
-        body: BlocBuilder<DoctorCubit, DoctorState>(
-          builder: (context, state) {
-            if (state is DoctorLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is DoctorError) {
-              return Center(child: Text(state.error, style: const TextStyle(fontFamily: 'Cairo')));
-            } else if (state is DoctorSuccess) {
-              final doctors = state.doctors;
-              if (doctors.isEmpty) {
-                return Center(
-                  child: Text(
-                    'لا يوجد أطباء متاحين حالياً في هذا القسم',
-                    style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize * 0.9),
-                  ),
-                );
-              }
-              return ListView.separated(
-                padding: EdgeInsets.symmetric(horizontal: width * 0.04, vertical: 16),
-                itemCount: doctors.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  return _buildDoctorItem(context, doctors[index], width, baseFontSize);
-                },
-              );
-            }
-            return const SizedBox.shrink();
-          },
-        ),
+        icon: const Icon(Icons.add_task_rounded, color: Colors.white),
+        backgroundColor: ColorsManager.mainBlue,
+      ),
+      body: Directionality(
+        textDirection: TextDirection.rtl,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _error != null
+                ? _buildError(baseFontSize)
+                : _requests.isEmpty
+                    ? _buildEmpty(baseFontSize, width)
+                    : RefreshIndicator(
+                        onRefresh: _loadRequests,
+                        child: ListView.separated(
+                          padding: EdgeInsets.fromLTRB(
+                            width * 0.04,
+                            16,
+                            width * 0.04,
+                            100, // space for FAB
+                          ),
+                          itemCount: _requests.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            return _buildRequestCard(
+                              context,
+                              _requests[index],
+                              width,
+                              baseFontSize,
+                              isDark,
+                              theme,
+                            );
+                          },
+                        ),
+                      ),
       ),
     );
   }
 
-  Widget _buildDoctorItem(BuildContext context, DoctorModel doctor, double width, double baseFontSize) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return GestureDetector(
-      onTap: () => _showDoctorDetails(context, doctor),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
+  Widget _buildRequestCard(
+    BuildContext context,
+    CaseRequestModel req,
+    double width,
+    double baseFontSize,
+    bool isDark,
+    ThemeData theme,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+        border: Border.all(
+          color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
         ),
-        child: Row(
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Avatar
-            Container(
-              width: 60 * (width / 390),
-              height: 60 * (width / 390),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isDark ? Colors.grey[800] : Colors.grey[200],
-              ),
-              child: ClipOval(
-                child: doctor.photo != null && doctor.photo!.isNotEmpty
-                    ? Image.network(
-                        doctor.photo!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            const Icon(Icons.person, color: Colors.grey),
-                      )
-                    : const Icon(Icons.person, color: Colors.grey),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    doctor.fullName,
-                    style: theme.textTheme.titleMedium?.copyWith(
+            // Header row: specialization + id badge
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    req.specialization,
+                    style: TextStyle(
                       fontFamily: 'Cairo',
+                      fontSize: baseFontSize * 1.05,
                       fontWeight: FontWeight.w700,
-                      fontSize: baseFontSize,
+                      color: ColorsManager.mainBlue,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    doctor.categoryName,
-                    style: theme.textTheme.bodyMedium?.copyWith(
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: ColorsManager.mainBlue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '#${req.id}',
+                    style: TextStyle(
                       fontFamily: 'Cairo',
-                      fontSize: baseFontSize * 0.875,
-                      color:
-                          theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                      fontSize: baseFontSize * 0.72,
+                      fontWeight: FontWeight.bold,
+                      color: ColorsManager.mainBlue,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on, size: 16, color: Colors.grey),
-                      const SizedBox(width: 6),
-                      Flexible(
-                        child: Text(
-                          doctor.cityName,
-                          style: theme.textTheme.bodySmall
-                              ?.copyWith(fontFamily: 'Cairo', fontSize: baseFontSize * 0.75),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                ),
+              ],
+            ),
+
+            // Location
+            if (req.location.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(Icons.location_on_outlined, size: 15, color: Colors.grey[500]),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      req.location,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: baseFontSize * 0.82,
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
                       ),
-                      const Spacer(),
-                      if (doctor.price != null)
-                        Flexible(
-                          child: Text(
-                            '${doctor.price} جنيه',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontFamily: 'Cairo',
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold,
-                              fontSize: baseFontSize * 0.75,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                    ],
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
+            ],
+
+            // Description
+            if (req.description.isNotEmpty && req.description != 'No details') ...[
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[850] : const Color(0xFFF9FAFB),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  req.description,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: baseFontSize * 0.85,
+                    color: isDark ? Colors.grey[200] : Colors.grey[800],
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            const SizedBox(height: 10),
+
+            // Date and time chips
+            Row(
+              children: [
+                _buildChip(
+                  icon: Icons.calendar_today_outlined,
+                  text: req.date,
+                  baseFontSize: baseFontSize,
+                  isDark: isDark,
+                ),
+                const SizedBox(width: 10),
+                _buildChip(
+                  icon: Icons.access_time_outlined,
+                  text: req.time,
+                  baseFontSize: baseFontSize,
+                  isDark: isDark,
+                ),
+              ],
             ),
           ],
         ),
@@ -210,34 +272,92 @@ class CategoryDoctorsScreen extends StatelessWidget {
     );
   }
 
-
-  void _showDoctorDetails(BuildContext context, DoctorModel doctor) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Stack(children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.black.withValues(alpha: 0.2)),
+  Widget _buildChip({
+    required IconData icon,
+    required String text,
+    required double baseFontSize,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[800] : Colors.grey[100],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: ColorsManager.mainBlue),
+          const SizedBox(width: 5),
+          Text(
+            text,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: baseFontSize * 0.75,
+              color: isDark ? Colors.grey[200] : Colors.grey[800],
             ),
           ),
-          DraggableScrollableSheet(
-            initialChildSize: 0.45,
-            maxChildSize: 0.9,
-            minChildSize: 0.3,
-            builder: (context, controller) {
-              return DoctorInfoContent(
-                controller: controller,
-                doctor: doctor,
-              );
-            },
-          )
-        ]);
-      },
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmpty(double baseFontSize, double width) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.assignment_outlined,
+            size: 70 * (width / 390),
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'لا توجد حالات في هذا التخصص حالياً',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: baseFontSize * 0.95,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'كن أول من ينشر حالة!',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: baseFontSize * 0.85,
+              color: ColorsManager.mainBlue,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildError(double baseFontSize) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline_rounded, size: 56, color: Colors.redAccent),
+          const SizedBox(height: 12),
+          Text(
+            _error ?? 'حدث خطأ غير متوقع',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontFamily: 'Cairo', color: Colors.redAccent),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: _loadRequests,
+            icon: const Icon(Icons.refresh),
+            label: const Text('إعادة المحاولة', style: TextStyle(fontFamily: 'Cairo')),
+            style: ElevatedButton.styleFrom(backgroundColor: ColorsManager.mainBlue),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -14,7 +14,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
   final _messageController = TextEditingController();
   bool _isSending = false;
 
-  static const String _supportEmail = 'haleezmo0@gmail.com';
+  static const String _supportEmail = 'abdelhalim@thoutha.page';
 
   @override
   void dispose() {

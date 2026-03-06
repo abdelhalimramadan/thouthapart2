@@ -43,7 +43,8 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>? ?? {};
         return MaterialPageRoute(
           builder: (context) => OtpVerificationScreen(
-            email: args['email'] ?? '',
+            phone:           args['phone'] ?? '',
+            expiresInSeconds: args['expires_in'] ?? 300,
           ),
         );
       case Routes.resetPasswordScreen:

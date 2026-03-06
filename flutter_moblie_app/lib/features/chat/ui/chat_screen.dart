@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:thotha_mobile_app/core/networking/api_constants.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
 import 'package:thotha_mobile_app/core/routing/routes.dart';
 
@@ -14,7 +13,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  static const String _apiBase = 'https://thoutha.page/api';
+  static final String _apiBase = '${ApiConstants.baseUrl}/api';
   static const Map<String, String> _apiHeaders = {
     'Content-Type': 'application/json'
   };
@@ -650,7 +649,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'عرض أطباء $category',
+                    'عرض حالات $category',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Cairo',

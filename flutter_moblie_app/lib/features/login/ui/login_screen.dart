@@ -90,7 +90,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (result['success'] == true) {
         if (mounted) {
-          final next = widget.nextScreen ?? const DoctorHomeScreen();
+          final Widget next = const DoctorHomeScreen();
+
           Navigator.of(context).pushReplacement(
             PageRouteBuilder(
               settings: widget.nextRouteSettings,

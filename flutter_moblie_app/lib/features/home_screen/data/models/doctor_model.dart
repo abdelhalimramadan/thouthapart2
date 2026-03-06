@@ -12,6 +12,8 @@ class DoctorModel {
   final String? description;
   final double? price;
 
+  String get fullName => '$firstName $lastName';
+
   DoctorModel({
     this.id,
     required this.firstName,
@@ -60,7 +62,5 @@ class DoctorModel {
       'price': price,
     };
   }
-
-  String get fullName => '$firstName $lastName';
 }
 // End of DoctorModel

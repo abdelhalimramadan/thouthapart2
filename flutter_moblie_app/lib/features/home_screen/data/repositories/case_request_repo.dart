@@ -50,4 +50,26 @@ class CaseRequestRepo {
       };
     }
   }
+
+  Future<Map<String, dynamic>> getRequestsByDoctorId(int doctorId) async {
+    try {
+      return await _apiService.getRequestsByDoctorId(doctorId);
+    } catch (e) {
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getRequestsByCategoryId(int categoryId) async {
+    try {
+      return await _apiService.getCaseRequestsByCategory(categoryId);
+    } catch (e) {
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
 }

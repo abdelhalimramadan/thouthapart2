@@ -4,6 +4,9 @@ import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/networking/api_constants.dart';
 import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thotha_mobile_app/features/login/ui/login_screen.dart';
+import 'package:thotha_mobile_app/core/networking/api_service.dart';
+
+import '../../../../core/routing/routes.dart';
 
 class AccountDeletionScreen extends StatefulWidget {
   const AccountDeletionScreen({Key? key}) : super(key: key);
@@ -73,39 +76,33 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
       final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
       if (token == null || token.isEmpty) {
         _showSnack('خطأ في المصادقة، يرجى تسجيل الدخول مجدداً', isError: true);
+        setState(() => _isLoading = false);
         return;
       }
 
-      final dio = DioFactory.getDio();
-      try {
-        await dio.delete(
-          '${ApiConstants.otpBaseUrl}/delete_account',
-          data: {'password': _passwordController.text},
+      // Use the correct API endpoint via ApiService
+      // Note: We don't send password in body as the endpoint is likely token-based authenticated
+      // The password check above serves as a client-side confirm.
+      final result = await ApiService().deleteDoctor();
+
+      if (result['success'] == true) {
+        // Clear all stored data
+        await SharedPrefHelper.clearAllSecuredData();
+
+        if (!mounted) return;
+        _showSnack('تم حذف الحساب بنجاح');
+        await Future.delayed(const Duration(seconds: 1));
+        if (!mounted) return;
+
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          Routes.loginScreen,
+          (Route<dynamic> route) => false,
         );
-      } catch (_) {
-        try {
-          await dio.post(
-            '${ApiConstants.otpBaseUrl}/delete_account',
-            data: {'password': _passwordController.text},
-          );
-        } catch (_) {}
+      } else {
+        _showSnack(result['error'] ?? 'فشل في حذف الحساب', isError: true);
       }
-
-      // Clear all stored data
-      await SharedPrefHelper.clearAllSecuredData();
-
-      if (!mounted) return;
-      _showSnack('تم حذف الحساب بنجاح');
-      await Future.delayed(const Duration(seconds: 1));
-      if (!mounted) return;
-
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (_) => false,
-      );
-    } catch (e) {
-      _showSnack('حدث خطأ أثناء حذف الحساب. يرجى المحاولة لاحقاً', isError: true);
+    } catch (_) {
+      _showSnack('حدث خطأ غير متوقع', isError: true);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
