@@ -34,5 +34,6 @@ class ApiConstants {
   static const String createCaseRequest = '/api/request/createRequest'; // Assumed endpoint
   static const String getRequestById = '/api/request/getRequestById';
   static const String getAllRequests = '/api/request/getAllRequests';
+  static const String getRequestsByDoctorId = '/api/request/getRequestsByDoctorId';
   static const String deleteRequest = '/api/request/deleteRequest';
 }

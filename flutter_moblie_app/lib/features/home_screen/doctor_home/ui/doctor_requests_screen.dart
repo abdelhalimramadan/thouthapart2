@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
@@ -19,16 +20,39 @@ class _DoctorRequestsScreenState extends State<DoctorRequestsScreen> {
   List<CaseRequestModel> _requests = [];
   bool _isLoading = false;
   String? _error;
+  int _doctorId = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadRequests();
+    _initAndLoad();
+  }
+
+  Future<void> _initAndLoad() async {
+    final id = (await SharedPrefHelper.getInt('doctor_id') ?? 0) as int;
+    if (id == 0) {
+      if (mounted) {
+        setState(() {
+          _error = 'تعذر تحديد هوية الطبيب، يرجى تسجيل الدخول مرة أخرى';
+        });
+      }
+      return;
+    }
+    _doctorId = id;
+    await _loadRequests();
+  }
+
+  Future<void> _handleRefresh() async {
+    if (_doctorId > 0) {
+      await _loadRequests();
+    } else {
+      await _initAndLoad();
+    }
   }
 
   Future<void> _loadRequests() async {
     if (mounted) setState(() { _isLoading = true; _error = null; });
-    final result = await _repo.getAllRequests();
+    final result = await _repo.getRequestsByDoctorId(_doctorId);
     if (!mounted) return;
     if (result['success'] == true) {
       setState(() {
@@ -161,7 +185,7 @@ class _DoctorRequestsScreenState extends State<DoctorRequestsScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.refresh_rounded, size: 22 * (width / 390)),
-            onPressed: _loadRequests,
+            onPressed: _handleRefresh,
           ),
         ],
       ),
@@ -174,7 +198,7 @@ class _DoctorRequestsScreenState extends State<DoctorRequestsScreen> {
                 : _requests.isEmpty
                     ? _buildEmpty(baseFontSize)
                     : RefreshIndicator(
-                        onRefresh: _loadRequests,
+                        onRefresh: _handleRefresh,
                         child: ListView.separated(
                           padding: EdgeInsets.all(width * 0.05),
                           itemCount: _requests.length,
@@ -318,7 +342,7 @@ class _DoctorRequestsScreenState extends State<DoctorRequestsScreen> {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: _loadRequests,
+            onPressed: _handleRefresh,
             icon: const Icon(Icons.refresh),
             label: const Text('إعادة المحاولة', style: TextStyle(fontFamily: 'Cairo')),
           ),

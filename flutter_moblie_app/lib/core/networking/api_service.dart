@@ -429,6 +429,56 @@ class ApiService {
     }
   }
 
+  /// Fetch requests belonging to a specific doctor.
+  /// Needs auth (handled by interceptor).
+  Future<Map<String, dynamic>> getRequestsByDoctorId(int doctorId) async {
+    try {
+      await DioFactory.addDioHeaders();
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}${ApiConstants.getRequestsByDoctorId}',
+        queryParameters: {'doctorId': doctorId},
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is List) {
+          final items = data
+              .map((e) => CaseRequestModel.fromJson(Map<String, dynamic>.from(e as Map)))
+              .toList();
+          return {'success': true, 'data': items};
+        }
+        return {
+          'success': false,
+          'error': 'صيغة البيانات غير صحيحة',
+          'statusCode': response.statusCode,
+        };
+      }
+
+      return {
+        'success': false,
+        'error': 'فشل في تحميل الطلبات',
+        'statusCode': response.statusCode,
+      };
+    } on DioException catch (e) {
+      return {
+        'success': false,
+        'error': _handleDioError(e),
+        'statusCode': e.response?.statusCode ?? 500,
+      };
+    } catch (_) {
+      return {
+        'success': false,
+        'error': 'حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى',
+      };
+    }
+  }
+
   String _handleDioError(DioException e) {
 
     if (e.type == DioExceptionType.connectionTimeout ||
