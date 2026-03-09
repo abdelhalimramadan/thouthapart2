@@ -8,7 +8,9 @@ import '../../../core/widgets/app_text_button.dart';
 import '../../forgot_password/data/forgot_password_service.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+  final String phone;
+
+  const ResetPasswordScreen({super.key, required this.phone});
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -24,23 +26,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   bool    _isLoading           = false;
   String? _errorMessage;
 
-  // Passed from OtpVerificationScreen via Navigator arguments
-  late String _phone;
-  bool _argsLoaded = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_argsLoaded) {
-      final args = ModalRoute.of(context)?.settings.arguments;
-      if (args is Map) {
-        _phone = (args['phone'] ?? '').toString();
-      } else {
-        _phone = '';
-      }
-      _argsLoaded = true;
-    }
-  }
 
   @override
   void dispose() {
@@ -72,7 +57,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
     try {
       final result = await PasswordResetService.instance.changePassword(
-        phone:           _phone,
+        phone:           widget.phone,
         newPassword:     _newPassCtrl.text,
         confirmPassword: _confirmPassCtrl.text,
       );

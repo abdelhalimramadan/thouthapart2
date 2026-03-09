@@ -20,7 +20,7 @@ class PasswordResetService {
         contentType: 'application/json',          // ← يضمن JSON encoding للـ body
         responseType: ResponseType.json,
         headers: const {'Accept': 'application/json'},
-        validateStatus: (status) => status != null && status < 500,
+        validateStatus: (status) => status != null,
       ));
 
   // ── Step 1: Request OTP ─────────────────────────────────────────────────
@@ -144,7 +144,23 @@ class PasswordResetService {
         };
       }
 
-      return _errorFromResponse(res, 'فشل في تغيير كلمة المرور');
+      // Handle specific error codes from API docs
+      switch (res.statusCode) {
+        case 400:
+          return {'success': false, 'message': 'بيانات غير صحيحة، تحقق من المدخلات'};
+        case 401:
+          return {'success': false, 'message': 'يجب التحقق من رمز OTP أولاً'};
+        case 403:
+          return {'success': false, 'message': 'يجب التحقق من رمز OTP أولاً قبل تغيير كلمة المرور'};
+        case 404:
+          return {'success': false, 'message': 'لا يوجد حساب مرتبط بهذا الرقم'};
+        case 410:
+          return {'success': false, 'message': 'انتهت صلاحية الجلسة، يرجى إعادة التحقق من الرمز'};
+        case 429:
+          return {'success': false, 'message': 'طلبات كثيرة جداً، انتظر قليلاً ثم أعد المحاولة'};
+        default:
+          return _errorFromResponse(res, 'فشل في تغيير كلمة المرور');
+      }
     } on DioException catch (e) {
       return _dioError(e);
     } catch (e) {

@@ -48,8 +48,11 @@ class AppRouter {
           ),
         );
       case Routes.resetPasswordScreen:
+        final resetArgs = settings.arguments as Map? ?? {};
         return MaterialPageRoute(
-          builder: (context) => const ResetPasswordScreen(),
+          builder: (context) => ResetPasswordScreen(
+            phone: (resetArgs['phone'] ?? '').toString(),
+          ),
         );
       case Routes.categoriesScreen:
         return MaterialPageRoute(
