@@ -240,7 +240,7 @@ class ApiService {
   Future<Map<String, dynamic>> updateDoctor(Map<String, dynamic> body) async {
     try {
       await DioFactory.addDioHeaders();
-      final res = await _dio.post(ApiConstants.updateDoctor, data: body);
+      final res = await _dio.put(ApiConstants.updateDoctor, data: body);
       if (res.statusCode == 200 || res.statusCode == 201) return _okData(res.data);
       return _fail('فشل في تحديث بيانات الطبيب', code: res.statusCode);
     } on DioException catch (e) {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
+import 'package:thotha_mobile_app/core/networking/api_service.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
@@ -25,6 +27,7 @@ class CategoryDoctorsScreen extends StatefulWidget {
 
 class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
   final CaseRequestRepo _repo = getIt<CaseRequestRepo>();
+  final ApiService _apiService = ApiService();
 
   List<CaseRequestModel> _requests = [];
   bool _isLoading = false;
@@ -65,6 +68,55 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     }
   }
 
+  /// Updates the doctor's categoryName to the current category then opens
+  /// the AddCaseRequestScreen. All other doctor fields are kept as-is.
+  Future<void> _updateCategoryAndNavigate() async {
+    // Load all doctor info from SharedPreferences
+    int doctorId = await SharedPrefHelper.getInt('doctor_id');
+    if (doctorId == 0) {
+      final idStr = await SharedPrefHelper.getString('doctor_id');
+      doctorId = int.tryParse(idStr ?? '') ?? 0;
+    }
+
+    final firstName = await SharedPrefHelper.getString('first_name') ?? '';
+    final lastName  = await SharedPrefHelper.getString('last_name')  ?? '';
+    final phone     = await SharedPrefHelper.getString('phone')      ?? '';
+    final faculty   = await SharedPrefHelper.getString('faculty')    ?? '';
+    final year      = await SharedPrefHelper.getString('year')       ?? '';
+    final governorate = await SharedPrefHelper.getString('governorate') ?? '';
+
+    final body = <String, dynamic>{
+      if (doctorId != 0)     'id':             doctorId,
+      if (firstName.isNotEmpty) 'firstName':   firstName,
+      if (lastName.isNotEmpty)  'lastName':    lastName,
+      if (phone.isNotEmpty)     'phoneNumber': phone,
+      if (year.isNotEmpty)      'studyYear':   year,
+      if (faculty.isNotEmpty)   'universityName': faculty,
+      if (governorate.isNotEmpty) 'cityName':  governorate,
+      'categoryName': widget.categoryName,
+    };
+
+    final result = await _apiService.updateDoctor(body);
+
+    if (result['success'] == true) {
+      // Update cached category in SharedPreferences
+      await SharedPrefHelper.setData('category', widget.categoryName);
+    } else {
+      // Silently continue even on failure – don't block navigation
+      debugPrint('updateDoctor failed: ${result['error']}');
+    }
+
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddCaseRequestScreen(
+          initialSpecialization: widget.categoryName,
+        ),
+      ),
+    ).then((_) => _loadRequests());
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -86,16 +138,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
         centerTitle: true,
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddCaseRequestScreen(
-                initialSpecialization: widget.categoryName,
-              ),
-            ),
-          ).then((_) => _loadRequests()); // Refresh after adding
-        },
+        onPressed: () => _updateCategoryAndNavigate(),
         label: const Text(
           'نشر حالة جديدة',
           style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
