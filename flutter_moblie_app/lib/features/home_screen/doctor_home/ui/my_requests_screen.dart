@@ -183,7 +183,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
-    final result = await _repo.deleteRequest(request.id);
+    final result = await _repo.deleteRequest(request.id ?? 0);
 
     if (!mounted) return;
     Navigator.pop(context); // إغلاق اللودينج
@@ -329,7 +329,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    req.specialization,
+                    req.categoryName,
                     style: TextStyle(
                       fontSize: baseFontSize * 1.125,
                       fontWeight: FontWeight.bold,
@@ -339,26 +339,27 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                 ),
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            ColorsManager.mainBlue.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '#${req.id}',
-                        style: TextStyle(
-                          color: ColorsManager.mainBlue,
-                          fontSize: baseFontSize * 0.75,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Cairo',
+                    if (req.id != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              ColorsManager.mainBlue.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '#${req.id}',
+                          style: TextStyle(
+                            color: ColorsManager.mainBlue,
+                            fontSize: baseFontSize * 0.75,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Cairo',
+                          ),
                         ),
                       ),
-                    ),
                     const SizedBox(width: 8),
                     Material(
                       color: Colors.red.withValues(alpha: 0.08),
@@ -378,27 +379,52 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              req.location,
-              style: TextStyle(
-                fontSize: baseFontSize * 0.875,
-                color: isDark ? Colors.grey[400] : Colors.grey[600],
-                fontFamily: 'Cairo',
+            // Doctor name
+            Row(children: [
+              Icon(Icons.person_outline, size: 14, color: Colors.grey[500]),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  req.doctorFullName,
+                  style: TextStyle(
+                    fontSize: baseFontSize * 0.875,
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                    fontFamily: 'Cairo',
+                  ),
+                ),
               ),
-            ),
+            ]),
+            // City
+            if (req.doctorCityName.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Row(children: [
+                Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[500]),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    req.doctorCityName,
+                    style: TextStyle(
+                      fontSize: baseFontSize * 0.875,
+                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      fontFamily: 'Cairo',
+                    ),
+                  ),
+                ),
+              ]),
+            ],
             const SizedBox(height: 16),
             Row(
               children: [
                 _buildInfoChip(
                   icon: Icons.calendar_today,
-                  text: req.date,
+                  text: req.formattedDate,
                   baseFontSize: baseFontSize,
                   isDark: isDark,
                 ),
                 const SizedBox(width: 12),
                 _buildInfoChip(
                   icon: Icons.access_time,
-                  text: req.time,
+                  text: req.formattedTime,
                   baseFontSize: baseFontSize,
                   isDark: isDark,
                 ),

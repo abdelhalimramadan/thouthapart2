@@ -31,7 +31,7 @@ class ApiConstants {
   static const String getCities       = '/api/cities/getAllCities';
 
   // ── Case Requests ─────────────────────────────────────────────
-  static const String getCaseRequestsByCategories = '/api/request/getRequestsByCategoryId';
+  static const String getCaseRequestsByCategories = '/api/request/getRequestByCategoryId';
   static const String createCaseRequest           = '/api/request/createRequest';
   static const String getRequestById              = '/api/request/getRequestById';
   static const String getAllRequests               = '/api/request/getAllRequests';

@@ -40,7 +40,7 @@ class DoctorRepository {
       if (allRequestsResult['success'] == true) {
         final all = allRequestsResult['data'] as List<CaseRequestModel>;
         // Filter by exact match or contains, robust string comparison
-        return all.where((r) => r.specialization.trim() == categoryName.trim()).toList();
+        return all.where((r) => r.categoryName.trim() == categoryName.trim()).toList();
       }
     }
 

@@ -385,13 +385,13 @@ class _CaseCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // Header: id badge + specialization
+            // Header: id badge + category
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _IdBadge(id: req.id, baseFontSize: baseFontSize),
+                if (req.id != null) _IdBadge(id: req.id!, baseFontSize: baseFontSize),
                 Text(
-                  req.specialization,
+                  req.categoryName,
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: baseFontSize,
@@ -402,19 +402,35 @@ class _CaseCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            // Location
+            // Doctor name
             Row(children: [
-              Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[500]),
+              Icon(Icons.person_outline, size: 14, color: Colors.grey[500]),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  req.location,
+                  req.doctorFullName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize * 0.8, color: Colors.grey[600]),
                 ),
               ),
             ]),
+            // City · University
+            if (req.doctorCityName.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Row(children: [
+                Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[500]),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    req.doctorCityName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize * 0.8, color: Colors.grey[600]),
+                  ),
+                ),
+              ]),
+            ],
             // Description (optional)
             if (req.description.isNotEmpty && req.description != 'No details') ...[
               const SizedBox(height: 6),
@@ -429,9 +445,9 @@ class _CaseCard extends StatelessWidget {
             const SizedBox(height: 10),
             // Time + Date chips
             Row(children: [
-              _InfoChip(icon: Icons.access_time_outlined,    text: req.time, baseFontSize: baseFontSize),
+              _InfoChip(icon: Icons.access_time_outlined,    text: req.formattedTime, baseFontSize: baseFontSize),
               const SizedBox(width: 8),
-              _InfoChip(icon: Icons.calendar_today_outlined, text: req.date, baseFontSize: baseFontSize),
+              _InfoChip(icon: Icons.calendar_today_outlined, text: req.formattedDate, baseFontSize: baseFontSize),
             ]),
           ],
         ),
@@ -441,7 +457,7 @@ class _CaseCard extends StatelessWidget {
 }
 
 class _IdBadge extends StatelessWidget {
-  final int id;
+  final int? id;
   final double baseFontSize;
   const _IdBadge({required this.id, required this.baseFontSize});
 
@@ -454,7 +470,7 @@ class _IdBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        '#$id',
+        '#${id ?? ""}', 
         style: TextStyle(
           fontFamily: 'Cairo',
           fontSize: baseFontSize * 0.68,
@@ -523,10 +539,13 @@ class _CaseDetailsSheet extends StatelessWidget {
           const SizedBox(height: 12),
           const Divider(),
           const SizedBox(height: 10),
-          _DetailRow(icon: Icons.medical_services_outlined, label: 'التخصص',  value: req.specialization),
-          _DetailRow(icon: Icons.location_on_outlined,       label: 'الموقع',  value: req.location),
-          _DetailRow(icon: Icons.calendar_today_outlined,    label: 'التاريخ', value: req.date),
-          _DetailRow(icon: Icons.access_time_outlined,       label: 'الوقت',   value: req.time),
+          _DetailRow(icon: Icons.medical_services_outlined, label: 'التخصص',    value: req.categoryName),
+          _DetailRow(icon: Icons.person_outline,             label: 'الطبيب',    value: req.doctorFullName),
+          _DetailRow(icon: Icons.phone_outlined,             label: 'الهاتف',    value: req.doctorPhoneNumber),
+          _DetailRow(icon: Icons.location_on_outlined,       label: 'المدينة',   value: req.doctorCityName),
+          _DetailRow(icon: Icons.school_outlined,            label: 'الجامعة',   value: req.doctorUniversityName),
+          _DetailRow(icon: Icons.calendar_today_outlined,    label: 'التاريخ',   value: req.formattedDate),
+          _DetailRow(icon: Icons.access_time_outlined,       label: 'الوقت',     value: req.formattedTime),
           if (req.description.isNotEmpty) ...[
             const SizedBox(height: 10),
             Container(

@@ -209,13 +209,13 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header row: specialization + id badge
+            // Header row: categoryName + id badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
-                    req.specialization,
+                    req.categoryName,
                     style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: baseFontSize * 1.05,
@@ -224,41 +224,84 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                     ),
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: ColorsManager.mainBlue.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
+                if (req.id != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: ColorsManager.mainBlue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '#${req.id}',
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: baseFontSize * 0.72,
+                        fontWeight: FontWeight.bold,
+                        color: ColorsManager.mainBlue,
+                      ),
+                    ),
                   ),
+              ],
+            ),
+
+            // Doctor name
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.person_outline, size: 15, color: Colors.grey[500]),
+                const SizedBox(width: 4),
+                Expanded(
                   child: Text(
-                    '#${req.id}',
+                    req.doctorFullName,
                     style: TextStyle(
                       fontFamily: 'Cairo',
-                      fontSize: baseFontSize * 0.72,
-                      fontWeight: FontWeight.bold,
-                      color: ColorsManager.mainBlue,
+                      fontSize: baseFontSize * 0.88,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.grey[200] : Colors.grey[800],
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
 
-            // Location
-            if (req.location.isNotEmpty) ...[
-              const SizedBox(height: 6),
+            // City · University
+            if (req.doctorCityName.isNotEmpty || req.doctorUniversityName.isNotEmpty) ...[
+              const SizedBox(height: 5),
               Row(
                 children: [
                   Icon(Icons.location_on_outlined, size: 15, color: Colors.grey[500]),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      req.location,
+                      [req.doctorCityName, req.doctorUniversityName]
+                          .where((s) => s.isNotEmpty)
+                          .join(' · '),
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: baseFontSize * 0.82,
                         color: isDark ? Colors.grey[400] : Colors.grey[600],
                       ),
                       overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
+            // Phone
+            if (req.doctorPhoneNumber.isNotEmpty) ...[
+              const SizedBox(height: 5),
+              Row(
+                children: [
+                  Icon(Icons.phone_outlined, size: 15, color: Colors.grey[500]),
+                  const SizedBox(width: 4),
+                  Text(
+                    req.doctorPhoneNumber,
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: baseFontSize * 0.82,
+                      color: isDark ? Colors.grey[400] : Colors.grey[600],
                     ),
                   ),
                 ],
@@ -296,17 +339,18 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
               children: [
                 _buildChip(
                   icon: Icons.calendar_today_outlined,
-                  text: req.date,
+                  text: req.formattedDate,
                   baseFontSize: baseFontSize,
                   isDark: isDark,
                 ),
                 const SizedBox(width: 10),
-                _buildChip(
-                  icon: Icons.access_time_outlined,
-                  text: req.time,
-                  baseFontSize: baseFontSize,
-                  isDark: isDark,
-                ),
+                if (req.formattedTime.isNotEmpty)
+                  _buildChip(
+                    icon: Icons.access_time_outlined,
+                    text: req.formattedTime,
+                    baseFontSize: baseFontSize,
+                    isDark: isDark,
+                  ),
               ],
             ),
           ],

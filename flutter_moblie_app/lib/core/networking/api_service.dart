@@ -43,8 +43,18 @@ class ApiService {
         return 'انتهت مهلة الاتصال. تحقق من الإنترنت';
       case DioExceptionType.connectionError:
         return 'تعذر الاتصال بالخادم. تحقق من الإنترنت';
+      case DioExceptionType.badResponse:
+        final code = e.response?.statusCode;
+        final serverMsg = e.response?.data is Map
+            ? (e.response!.data['message'] ?? e.response!.data['error'] ?? '')
+            : e.response?.data?.toString() ?? '';
+        if (code == 401) return 'غير مصرح: يرجى تسجيل الدخول مجدداً (401)';
+        if (code == 403) return 'ممنوع الوصول (403)';
+        if (code == 404) return 'الرابط غير موجود (404)';
+        if (code != null && code >= 500) return 'خطأ في الخادم ($code)';
+        return 'خطأ HTTP $code${serverMsg.isNotEmpty ? ": $serverMsg" : ""}';
       default:
-        return 'حدث خطأ غير متوقع';
+        return 'خطأ غير متوقع: ${e.message ?? e.type.name}';
     }
   }
 
@@ -132,18 +142,54 @@ class ApiService {
 
   Future<Map<String, dynamic>> getCaseRequestsByCategory(int categoryId) async {
     try {
-      final res = await _dio.get(
+      print('=== getCaseRequestsByCategory ===');
+      print('categoryId: $categoryId');
+
+      final res = await _public.get(
         ApiConstants.getCaseRequestsByCategories,
         queryParameters: {'categoryId': categoryId},
       );
+
+      print('statusCode: ${res.statusCode}');
+      print('responseType: ${res.data?.runtimeType}');
+      print('responseData: ${res.data}');
+
       if (res.statusCode == 200) {
-        return _okList((res.data as List).map((j) => CaseRequestModel.fromJson(j)).toList());
+        final data = res.data;
+        // Support both plain List and Map with data/content/items key
+        final List? raw = data is List
+            ? data
+            : (data is Map
+                ? (data['data'] ?? data['content'] ?? data['items'] ?? data['requests']) as List?
+                : null);
+        if (raw != null) {
+          final List<CaseRequestModel> parsed = [];
+          for (final j in raw) {
+            try {
+              final map = Map<String, dynamic>.from(j as Map);
+              parsed.add(CaseRequestModel.fromJson(map));
+            } catch (e) {
+              print('WARNING: failed to parse case request item: $e\nitem: $j');
+            }
+          }
+          return _okList(parsed);
+        }
+        print('ERROR: unexpected response format: $data');
+        return _fail('صيغة البيانات غير صحيحة', code: res.statusCode);
       }
       return _fail('فشل في تحميل الطلبات', code: res.statusCode);
     } on DioException catch (e) {
+      print('=== DioException in getCaseRequestsByCategory ===');
+      print('type: ${e.type}');
+      print('statusCode: ${e.response?.statusCode}');
+      print('responseData: ${e.response?.data}');
+      print('message: ${e.message}');
       return _fail(_dioError(e), code: e.response?.statusCode);
-    } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+    } catch (e, st) {
+      print('=== UNEXPECTED ERROR in getCaseRequestsByCategory ===');
+      print('error: $e');
+      print('stackTrace: $st');
+      return _fail('حدث خطأ غير متوقع: ${e.toString()}');
     }
   }
 
