@@ -34,11 +34,22 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
   List<CaseRequestModel> _requests = [];
   bool _isLoading = false;
   String? _error;
+  bool _isUserLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
+    _checkLoginStatus();
     _loadRequests();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+    if (mounted) {
+      setState(() {
+        _isUserLoggedIn = token.isNotEmpty;
+      });
+    }
   }
 
   Future<void> _loadRequests() async {
@@ -165,7 +176,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
         ),
         centerTitle: true,
       ),
-      floatingActionButton: isLoggedInUser
+      floatingActionButton: _isUserLoggedIn
           ? FloatingActionButton.extended(
               onPressed: () => _updateCategoryAndNavigate(),
               label: const Text(
