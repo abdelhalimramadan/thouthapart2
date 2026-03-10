@@ -155,8 +155,12 @@ extension ProfileStatePatterns<T> on ProfileState<T> {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
-    TResult Function(DoctorProfileModel? cachedData)? loading,
-    TResult Function(T data)? success,
+    TResult Function(DoctorProfileModel? cachedData,
+            List<UniversityModel> universities, List<CityModel> cities)?
+        loading,
+    TResult Function(
+            T data, List<UniversityModel> universities, List<CityModel> cities)?
+        success,
     TResult Function(String error, DioExceptionType? type)? error,
     required TResult orElse(),
   }) {
@@ -165,9 +169,9 @@ extension ProfileStatePatterns<T> on ProfileState<T> {
       case _Initial() when initial != null:
         return initial();
       case Loading() when loading != null:
-        return loading(_that.cachedData);
+        return loading(_that.cachedData, _that.universities, _that.cities);
       case Success() when success != null:
-        return success(_that.data);
+        return success(_that.data, _that.universities, _that.cities);
       case Error() when error != null:
         return error(_that.error, _that.type);
       case _:
@@ -191,8 +195,12 @@ extension ProfileStatePatterns<T> on ProfileState<T> {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
-    required TResult Function(DoctorProfileModel? cachedData) loading,
-    required TResult Function(T data) success,
+    required TResult Function(DoctorProfileModel? cachedData,
+            List<UniversityModel> universities, List<CityModel> cities)
+        loading,
+    required TResult Function(
+            T data, List<UniversityModel> universities, List<CityModel> cities)
+        success,
     required TResult Function(String error, DioExceptionType? type) error,
   }) {
     final _that = this;
@@ -200,9 +208,9 @@ extension ProfileStatePatterns<T> on ProfileState<T> {
       case _Initial():
         return initial();
       case Loading():
-        return loading(_that.cachedData);
+        return loading(_that.cachedData, _that.universities, _that.cities);
       case Success():
-        return success(_that.data);
+        return success(_that.data, _that.universities, _that.cities);
       case Error():
         return error(_that.error, _that.type);
       case _:
@@ -225,8 +233,12 @@ extension ProfileStatePatterns<T> on ProfileState<T> {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
-    TResult? Function(DoctorProfileModel? cachedData)? loading,
-    TResult? Function(T data)? success,
+    TResult? Function(DoctorProfileModel? cachedData,
+            List<UniversityModel> universities, List<CityModel> cities)?
+        loading,
+    TResult? Function(
+            T data, List<UniversityModel> universities, List<CityModel> cities)?
+        success,
     TResult? Function(String error, DioExceptionType? type)? error,
   }) {
     final _that = this;
@@ -234,9 +246,9 @@ extension ProfileStatePatterns<T> on ProfileState<T> {
       case _Initial() when initial != null:
         return initial();
       case Loading() when loading != null:
-        return loading(_that.cachedData);
+        return loading(_that.cachedData, _that.universities, _that.cities);
       case Success() when success != null:
-        return success(_that.data);
+        return success(_that.data, _that.universities, _that.cities);
       case Error() when error != null:
         return error(_that.error, _that.type);
       case _:
@@ -268,9 +280,29 @@ class _Initial<T> implements ProfileState<T> {
 /// @nodoc
 
 class Loading<T> implements ProfileState<T> {
-  const Loading({this.cachedData});
+  const Loading(
+      {this.cachedData,
+      final List<UniversityModel> universities = const [],
+      final List<CityModel> cities = const []})
+      : _universities = universities,
+        _cities = cities;
 
   final DoctorProfileModel? cachedData;
+  final List<UniversityModel> _universities;
+  @JsonKey()
+  List<UniversityModel> get universities {
+    if (_universities is EqualUnmodifiableListView) return _universities;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_universities);
+  }
+
+  final List<CityModel> _cities;
+  @JsonKey()
+  List<CityModel> get cities {
+    if (_cities is EqualUnmodifiableListView) return _cities;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_cities);
+  }
 
   /// Create a copy of ProfileState
   /// with the given fields replaced by the non-null parameter values.
@@ -285,15 +317,22 @@ class Loading<T> implements ProfileState<T> {
         (other.runtimeType == runtimeType &&
             other is Loading<T> &&
             (identical(other.cachedData, cachedData) ||
-                other.cachedData == cachedData));
+                other.cachedData == cachedData) &&
+            const DeepCollectionEquality()
+                .equals(other._universities, _universities) &&
+            const DeepCollectionEquality().equals(other._cities, _cities));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, cachedData);
+  int get hashCode => Object.hash(
+      runtimeType,
+      cachedData,
+      const DeepCollectionEquality().hash(_universities),
+      const DeepCollectionEquality().hash(_cities));
 
   @override
   String toString() {
-    return 'ProfileState<$T>.loading(cachedData: $cachedData)';
+    return 'ProfileState<$T>.loading(cachedData: $cachedData, universities: $universities, cities: $cities)';
   }
 }
 
@@ -303,7 +342,10 @@ abstract mixin class $LoadingCopyWith<T, $Res>
   factory $LoadingCopyWith(Loading<T> value, $Res Function(Loading<T>) _then) =
       _$LoadingCopyWithImpl;
   @useResult
-  $Res call({DoctorProfileModel? cachedData});
+  $Res call(
+      {DoctorProfileModel? cachedData,
+      List<UniversityModel> universities,
+      List<CityModel> cities});
 
   $DoctorProfileModelCopyWith<$Res>? get cachedData;
 }
@@ -320,12 +362,22 @@ class _$LoadingCopyWithImpl<T, $Res> implements $LoadingCopyWith<T, $Res> {
   @pragma('vm:prefer-inline')
   $Res call({
     Object? cachedData = freezed,
+    Object? universities = null,
+    Object? cities = null,
   }) {
     return _then(Loading<T>(
       cachedData: freezed == cachedData
           ? _self.cachedData
           : cachedData // ignore: cast_nullable_to_non_nullable
               as DoctorProfileModel?,
+      universities: null == universities
+          ? _self._universities
+          : universities // ignore: cast_nullable_to_non_nullable
+              as List<UniversityModel>,
+      cities: null == cities
+          ? _self._cities
+          : cities // ignore: cast_nullable_to_non_nullable
+              as List<CityModel>,
     ));
   }
 
@@ -347,9 +399,28 @@ class _$LoadingCopyWithImpl<T, $Res> implements $LoadingCopyWith<T, $Res> {
 /// @nodoc
 
 class Success<T> implements ProfileState<T> {
-  const Success(this.data);
+  const Success(this.data,
+      {final List<UniversityModel> universities = const [],
+      final List<CityModel> cities = const []})
+      : _universities = universities,
+        _cities = cities;
 
   final T data;
+  final List<UniversityModel> _universities;
+  @JsonKey()
+  List<UniversityModel> get universities {
+    if (_universities is EqualUnmodifiableListView) return _universities;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_universities);
+  }
+
+  final List<CityModel> _cities;
+  @JsonKey()
+  List<CityModel> get cities {
+    if (_cities is EqualUnmodifiableListView) return _cities;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_cities);
+  }
 
   /// Create a copy of ProfileState
   /// with the given fields replaced by the non-null parameter values.
@@ -363,16 +434,22 @@ class Success<T> implements ProfileState<T> {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Success<T> &&
-            const DeepCollectionEquality().equals(other.data, data));
+            const DeepCollectionEquality().equals(other.data, data) &&
+            const DeepCollectionEquality()
+                .equals(other._universities, _universities) &&
+            const DeepCollectionEquality().equals(other._cities, _cities));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(data));
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(data),
+      const DeepCollectionEquality().hash(_universities),
+      const DeepCollectionEquality().hash(_cities));
 
   @override
   String toString() {
-    return 'ProfileState<$T>.success(data: $data)';
+    return 'ProfileState<$T>.success(data: $data, universities: $universities, cities: $cities)';
   }
 }
 
@@ -382,7 +459,8 @@ abstract mixin class $SuccessCopyWith<T, $Res>
   factory $SuccessCopyWith(Success<T> value, $Res Function(Success<T>) _then) =
       _$SuccessCopyWithImpl;
   @useResult
-  $Res call({T data});
+  $Res call(
+      {T data, List<UniversityModel> universities, List<CityModel> cities});
 }
 
 /// @nodoc
@@ -397,12 +475,22 @@ class _$SuccessCopyWithImpl<T, $Res> implements $SuccessCopyWith<T, $Res> {
   @pragma('vm:prefer-inline')
   $Res call({
     Object? data = freezed,
+    Object? universities = null,
+    Object? cities = null,
   }) {
     return _then(Success<T>(
       freezed == data
           ? _self.data
           : data // ignore: cast_nullable_to_non_nullable
               as T,
+      universities: null == universities
+          ? _self._universities
+          : universities // ignore: cast_nullable_to_non_nullable
+              as List<UniversityModel>,
+      cities: null == cities
+          ? _self._cities
+          : cities // ignore: cast_nullable_to_non_nullable
+              as List<CityModel>,
     ));
   }
 }

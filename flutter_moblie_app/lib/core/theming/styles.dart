@@ -51,7 +51,14 @@ class TextStyles {
     color: Colors.black,
   );
 
+  static TextStyle font18BlackBold = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.bold,
+    color: Colors.black,
+  );
+
   static TextStyle font18BlackSemiBold = TextStyle(
+
     fontSize: 18,
     fontWeight: FontWeightHelper.semiBold,
     color: Colors.black,

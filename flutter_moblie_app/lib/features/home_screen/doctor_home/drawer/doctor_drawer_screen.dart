@@ -514,10 +514,11 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           settings: const RouteSettings(name: 'doctor-profile'),
-                          builder: (context) => const DoctorProfile(),
+                          builder: (context) => const DoctorProfileScreen(),
                         ),
                       );
                     },
+
                   ),
                   _menuItem(
                     context,

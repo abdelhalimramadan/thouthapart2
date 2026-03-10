@@ -1,7 +1,14 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
+import 'package:thotha_mobile_app/core/networking/api_service.dart';
+import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
+import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
+
 
 class ProfileRepository {
   final Dio _dio = DioFactory.getDio();
@@ -9,46 +16,92 @@ class ProfileRepository {
   /// Centralized logic to fetch profile with fallbacks and strict model parsing
   Future<DoctorProfileModel> fetchProfile() async {
     Response? response;
-    DioException? lastError;
-    bool validJsonResponseFound = false;
-
-    // Ordered by specificity as requested in the plan
-    final endpoints = ['/api/auth/profile', '/api/user/me', '/profile', '/me', '/update_profile'];
+    // Ordered by specificity
+    final endpoints = [
+      '/api/auth/profile', 
+      '/api/doctor/profile',
+      '/api/user/me', 
+      '/api/me',
+      '/profile', 
+      '/me'
+    ];
 
     for (final path in endpoints) {
       try {
-        if (path == '/update_profile') {
-           response = await _dio.post(path, data: {});
-        } else {
-           response = await _dio.get(path);
-        }
+        response = await _dio.get(path);
         
-        // Ensure we actually got JSON data, not an HTML page fallback (like a 200 OK Cloudflare page)
+        // Ensure we actually got JSON data
         if (response.statusCode == 200 && response.data != null && response.data is Map<String, dynamic>) {
-          validJsonResponseFound = true;
-          break; // Success! We found the correct JSON endpoint.
+          final data = response.data;
+          Map<String, dynamic> jsonData = data as Map<String, dynamic>;
+          
+          // Unwrap if nested under 'user', 'data', or 'doctor'
+          if (jsonData.containsKey('user') && jsonData['user'] is Map) {
+            jsonData = Map<String, dynamic>.from(jsonData['user']);
+          } else if (jsonData.containsKey('data') && jsonData['data'] is Map) {
+            jsonData = Map<String, dynamic>.from(jsonData['data']);
+          } else if (jsonData.containsKey('doctor') && jsonData['doctor'] is Map) {
+            jsonData = Map<String, dynamic>.from(jsonData['doctor']);
+          }
+
+          final profile = DoctorProfileModel.fromJson(jsonData);
+          await _cacheProfileLocally(profile);
+          return profile;
         }
-      } on DioException catch (e) {
-        lastError = e;
-        continue; // Fallback to next endpoint
+      } catch (_) {
+        // Continue to next endpoint
       }
     }
 
-    if (validJsonResponseFound && response != null) {
-      final data = response.data;
-      Map<String, dynamic> jsonData = data as Map<String, dynamic>;
-      if (jsonData.containsKey('user') && jsonData['user'] is Map) {
-        jsonData = Map<String, dynamic>.from(jsonData['user']);
+    // FINAL FALLBACK: Decode the JWT token if API fails
+    // This is very reliable as the token contains profile info
+    try {
+      final tokenProfile = await _getProfileFromToken();
+      if (tokenProfile != null) {
+        await _cacheProfileLocally(tokenProfile);
+        return tokenProfile;
       }
-      final profile = DoctorProfileModel.fromJson(jsonData);
-      await _cacheProfileLocally(profile);
-      return profile;
+    } catch (_) {}
+
+    // If everything fails, try to return cached data instead of throwing
+    final cached = await getCachedProfile();
+    if (cached.firstName != null && cached.firstName!.isNotEmpty) {
+      return cached;
     }
 
-    if (lastError != null) {
-      throw lastError; // Let cubit handle specific network error
-    } else {
-      throw Exception('Failed to load profile: Endpoints did not return valid JSON data. Check Network/API Paths.');
+    throw Exception('لا يمكن تحميل البيانات، يرجى التحقق من الاتصال');
+  }
+
+  Future<DoctorProfileModel?> _getProfileFromToken() async {
+    try {
+      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      if (token == null || token.isEmpty) return null;
+
+      final parts = token.split('.');
+      if (parts.length != 3) return null;
+
+      // Base64Url decode the payload part (index 1)
+      String payload = parts[1];
+      // Add padding if needed
+      while (payload.length % 4 != 0) {
+        payload += '=';
+      }
+      
+      final Map<String, dynamic> decoded = json.decode(utf8.decode(base64Url.decode(payload)));
+      
+      return DoctorProfileModel(
+        id: int.tryParse(decoded['id']?.toString() ?? ''),
+        firstName: (decoded['firstName'] ?? decoded['first_name'])?.toString(),
+        lastName: (decoded['lastName'] ?? decoded['last_name'])?.toString(),
+        email: decoded['email']?.toString() ?? decoded['sub']?.toString(),
+        phone: (decoded['phoneNumber'] ?? decoded['phone'])?.toString(),
+        faculty: (decoded['universityName'] ?? decoded['faculty'])?.toString(),
+        year: (decoded['studyYear'] ?? decoded['year'])?.toString(),
+        governorate: (decoded['cityName'] ?? decoded['governorate'])?.toString(),
+        category: (decoded['categoryName'] ?? decoded['category'])?.toString(),
+      );
+    } catch (_) {
+      return null;
     }
   }
 
@@ -85,4 +138,39 @@ class ProfileRepository {
       category: cachedCat,
     );
   }
+  Future<void> updateProfile(Map<String, dynamic> body) async {
+    final result = await getIt<ApiService>().updateDoctor(body);
+    if (result['success'] == true) {
+      // Sync with local cache so drawer and home see the updates immediately
+      final updatedProfile = DoctorProfileModel(
+        firstName: body['firstName']?.toString(),
+        lastName: body['lastName']?.toString(),
+        email: body['email']?.toString(),
+        phone: body['phoneNumber']?.toString(),
+        faculty: body['universityName']?.toString(),
+        year: body['studyYear']?.toString(),
+        governorate: body['cityName']?.toString(),
+      );
+      await _cacheProfileLocally(updatedProfile);
+    } else {
+      throw Exception(result['error']?.toString() ?? 'فشل تحديث البيانات');
+    }
+  }
+
+  Future<List<UniversityModel>> getUniversities() async {
+    final result = await getIt<ApiService>().getUniversities();
+    if (result['success'] == true) {
+      return result['data'] as List<UniversityModel>;
+    }
+    throw Exception(result['error'] ?? 'فشل في تحميل قائمة الجامعات');
+  }
+
+  Future<List<CityModel>> getCities() async {
+    final result = await getIt<ApiService>().getCities();
+    if (result['success'] == true) {
+      return result['data'] as List<CityModel>;
+    }
+    throw Exception(result['error'] ?? 'فشل في تحميل قائمة المدن');
+  }
 }
+

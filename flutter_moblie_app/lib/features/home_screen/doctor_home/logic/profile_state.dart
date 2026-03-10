@@ -1,4 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
+import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
 import 'package:dio/dio.dart';
 
@@ -9,9 +11,20 @@ class ProfileState<T> with _$ProfileState<T> {
   const factory ProfileState.initial() = _Initial;
   
   // Represents "Stale-While-Revalidate" state (loading but showing cached data)
-  const factory ProfileState.loading({DoctorProfileModel? cachedData}) = Loading<T>;
+  const factory ProfileState.loading({
+    DoctorProfileModel? cachedData,
+    @Default([]) List<UniversityModel> universities,
+    @Default([]) List<CityModel> cities,
+  }) = Loading<T>;
   
-  const factory ProfileState.success(T data) = Success<T>;
+  const factory ProfileState.success(
+    T data, {
+    @Default([]) List<UniversityModel> universities,
+    @Default([]) List<CityModel> cities,
+  }) = Success<T>;
   
-  const factory ProfileState.error({required String error, required DioExceptionType? type}) = Error;
+  const factory ProfileState.error({
+    required String error, 
+    required DioExceptionType? type,
+  }) = Error;
 }
