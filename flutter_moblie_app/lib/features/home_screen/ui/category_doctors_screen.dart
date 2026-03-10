@@ -7,6 +7,7 @@ import 'package:thotha_mobile_app/features/booking/ui/booking_confirmation_scree
 import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/add_case_request_screen.dart';
+import 'package:thotha_mobile_app/core/helpers/constants.dart';
 
 class CategoryDoctorsScreen extends StatefulWidget {
   final String categoryName;
@@ -164,15 +165,17 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
         ),
         centerTitle: true,
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _updateCategoryAndNavigate(),
-        label: const Text(
-          'نشر حالة جديدة',
-          style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
-        ),
-        icon: const Icon(Icons.add_task_rounded, color: Colors.white),
-        backgroundColor: ColorsManager.mainBlue,
-      ),
+      floatingActionButton: isLoggedInUser
+          ? FloatingActionButton.extended(
+              onPressed: () => _updateCategoryAndNavigate(),
+              label: const Text(
+                'نشر حالة جديدة',
+                style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
+              ),
+              icon: const Icon(Icons.add_task_rounded, color: Colors.white),
+              backgroundColor: ColorsManager.mainBlue,
+            )
+          : null,
       body: Directionality(
         textDirection: TextDirection.rtl,
         child: _isLoading
