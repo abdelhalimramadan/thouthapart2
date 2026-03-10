@@ -36,5 +36,5 @@ class ApiConstants {
   static const String getRequestById              = '/api/request/getRequestById';
   static const String getAllRequests               = '/api/request/getAllRequests';
   static const String deleteRequest               = '/api/request/deleteRequest';
-  static const String getRequestsByDoctorId       = '/api/request/getRequestsByDoctorId';
+  static const String getRequestsByDoctorId       = '/api/request/getRequestByDoctorId';
 }
