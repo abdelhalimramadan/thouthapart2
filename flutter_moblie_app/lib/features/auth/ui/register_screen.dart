@@ -16,6 +16,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _facultyController = TextEditingController();
+  final _yearController = TextEditingController();
+  final _governorateController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
   String? _errorMessage;
@@ -24,6 +31,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _phoneController.dispose();
+    _facultyController.dispose();
+    _yearController.dispose();
+    _governorateController.dispose();
     super.dispose();
   }
 
@@ -47,6 +61,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return null;
   }
 
+  String? _validateConfirmPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'تأكيد كلمة المرور مطلوب';
+    }
+    if (value != _passwordController.text) {
+      return 'كلمات المرور غير متطابقة';
+    }
+    return null;
+  }
+
+  String? _validateRequired(String? value, String fieldName) {
+    if (value == null || value.isEmpty) {
+      return '$fieldName مطلوب';
+    }
+    return null;
+  }
+
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -61,6 +92,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final response = await _authService.register(
         email: _emailController.text.trim(),
         password: _passwordController.text,
+        confirm: _confirmPasswordController.text,
+        first_name: _firstNameController.text.trim(),
+        last_name: _lastNameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        faculty: _facultyController.text.trim(),
+        year: _yearController.text.trim(),
+        governorate: _governorateController.text.trim(),
       );
 
       if (response['success'] == true) {
@@ -150,6 +188,92 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     obscureText: true,
                     validator: _validatePassword,
+                  ),
+                  verticalSpace(16),
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    decoration: InputDecoration(
+                      labelText: 'تأكيد كلمة المرور',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    obscureText: true,
+                    validator: _validateConfirmPassword,
+                  ),
+                  verticalSpace(16),
+                  TextFormField(
+                    controller: _firstNameController,
+                    decoration: InputDecoration(
+                      labelText: 'الاسم الأول',
+                      prefixIcon: const Icon(Icons.person_outline),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    validator: (value) => _validateRequired(value, 'الاسم الأول'),
+                  ),
+                  verticalSpace(16),
+                  TextFormField(
+                    controller: _lastNameController,
+                    decoration: InputDecoration(
+                      labelText: 'الاسم الأخير',
+                      prefixIcon: const Icon(Icons.person_outline),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    validator: (value) => _validateRequired(value, 'الاسم الأخير'),
+                  ),
+                  verticalSpace(16),
+                  TextFormField(
+                    controller: _phoneController,
+                    decoration: InputDecoration(
+                      labelText: 'رقم الهاتف',
+                      prefixIcon: const Icon(Icons.phone_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    keyboardType: TextInputType.phone,
+                    validator: (value) => _validateRequired(value, 'رقم الهاتف'),
+                  ),
+                  verticalSpace(16),
+                  TextFormField(
+                    controller: _facultyController,
+                    decoration: InputDecoration(
+                      labelText: 'الكلية',
+                      prefixIcon: const Icon(Icons.school_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    validator: (value) => _validateRequired(value, 'الكلية'),
+                  ),
+                  verticalSpace(16),
+                  TextFormField(
+                    controller: _yearController,
+                    decoration: InputDecoration(
+                      labelText: 'السنة الدراسية',
+                      prefixIcon: const Icon(Icons.calendar_today_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    validator: (value) => _validateRequired(value, 'السنة الدراسية'),
+                  ),
+                  verticalSpace(16),
+                  TextFormField(
+                    controller: _governorateController,
+                    decoration: InputDecoration(
+                      labelText: 'المحافظة',
+                      prefixIcon: const Icon(Icons.location_city_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    validator: (value) => _validateRequired(value, 'المحافظة'),
                   ),
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 16),

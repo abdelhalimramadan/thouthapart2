@@ -179,9 +179,21 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                       labelStyle: const TextStyle(fontFamily: 'Cairo'),
                       hintText: 'الاسم',
                       hintStyle: const TextStyle(fontFamily: 'Cairo'),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.colorScheme.outline, width: 1.5),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.colorScheme.outline, width: 1.5),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+                      ),
                       filled: true,
                       fillColor: theme.cardColor,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) return 'يرجى إدخال الاسم';
@@ -199,9 +211,21 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                       labelStyle: const TextStyle(fontFamily: 'Cairo'),
                       hintText: 'البريد الإلكتروني',
                       hintStyle: const TextStyle(fontFamily: 'Cairo'),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.colorScheme.outline, width: 1.5),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.colorScheme.outline, width: 1.5),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+                      ),
                       filled: true,
                       fillColor: theme.cardColor,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) return 'يرجى إدخال البريد الإلكتروني';
@@ -220,9 +244,21 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                       hintText: 'اكتب رسالتك هنا',
                       hintStyle: const TextStyle(fontFamily: 'Cairo'),
                       alignLabelWithHint: true,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.colorScheme.outline, width: 1.5),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.colorScheme.outline, width: 1.5),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+                      ),
                       filled: true,
                       fillColor: theme.cardColor,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) return 'يرجى كتابة رسالتك';

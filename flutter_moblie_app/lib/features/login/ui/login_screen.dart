@@ -474,6 +474,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               (route) => false,
                             );
                           },
+
                           child: Container(
                             width: double.infinity,
                             constraints: BoxConstraints(

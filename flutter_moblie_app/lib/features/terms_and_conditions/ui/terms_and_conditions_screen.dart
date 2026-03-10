@@ -40,27 +40,27 @@ class TermsAndConditionsScreen extends StatelessWidget {
               context,
               'ثانياً: دور تطبيق ثوثة',
               '• التطبيق وسيلة ربط فقط بين الطالب والمريض.\n'
-              '• لا نضمن حضور أي طرف للموعد.\n'
-              '• لا نتحكم في جودة العلاج أو نتائجه.\n'
-              '• أي اتفاق يتم هو اتفاق مباشر بين الطرفين.',
+                  '• لا نضمن حضور أي طرف للموعد.\n'
+                  '• لا نتحكم في جودة العلاج أو نتائجه.\n'
+                  '• أي اتفاق يتم هو اتفاق مباشر بين الطرفين.',
               baseFontSize,
             ),
             _buildSection(
               context,
               'شروط وأحكام المرضى',
               '• التطبيق لا يضمن التزام الطالب بالحضور.\n'
-              '• المريض مسؤول عن التأكد أنه يتعامل مع طالب وليس طبيباً مرخصاً.\n'
-              '• التطبيق غير مسؤول عن أي أضرار طبية أو مادية.\n'
-              '• عدم الحضور أو إلغاء الموعد لا يحمل التطبيق أي مسؤولية.',
+                  '• المريض مسؤول عن التأكد أنه يتعامل مع طالب وليس طبيباً مرخصاً.\n'
+                  '• التطبيق غير مسؤول عن أي أضرار طبية أو مادية.\n'
+                  '• عدم الحضور أو إلغاء الموعد لا يحمل التطبيق أي مسؤولية.',
               baseFontSize,
             ),
             _buildSection(
               context,
               'شروط وأحكام الطلاب',
               '• الطالب يقر بأنه طالب طب أسنان وليس طبيباً.\n'
-              '• الطالب يتحمل المسؤولية الكاملة عن أي إجراء طبي.\n'
-              '• الالتزام بالمواعيد والتواصل الواضح مع المرضى.\n'
-              '• يحق للتطبيق حذف الحساب في حالة إساءة الاستخدام.',
+                  '• الطالب يتحمل المسؤولية الكاملة عن أي إجراء طبي.\n'
+                  '• الالتزام بالمواعيد والتواصل الواضح مع المرضى.\n'
+                  '• يحق للتطبيق حذف الحساب في حالة إساءة الاستخدام.',
               baseFontSize,
             ),
             _buildSection(
@@ -79,6 +79,7 @@ class TermsAndConditionsScreen extends StatelessWidget {
             Center(
               child: Text(
                 'آخر تحديث: فبراير 2026',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: baseFontSize * 0.75, // 12
@@ -92,7 +93,8 @@ class TermsAndConditionsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(BuildContext context, String title, String content, double baseFontSize) {
+  Widget _buildSection(
+      BuildContext context, String title, String content, double baseFontSize) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
@@ -109,16 +111,21 @@ class TermsAndConditionsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            content,
-            textAlign: TextAlign.right,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: baseFontSize * 0.875, // 14
-              height: 1.6,
-              color: Theme.of(context).textTheme.bodyMedium?.color,
-            ),
-          ),
+          // Split content by lines and create separate Text widgets for better alignment
+          ...content.split('\n').map((line) => Padding(
+                padding: const EdgeInsets.only(bottom: 2, right: 0),
+                child: Text(
+                  line,
+                  textAlign: TextAlign.right,
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: baseFontSize * 0.875, // 14
+                    height: 1.6,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
+                ),
+              )),
         ],
       ),
     );
