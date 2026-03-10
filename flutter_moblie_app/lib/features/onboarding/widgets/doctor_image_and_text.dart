@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theming/colors.dart';
 
 class DoctorImageAndText extends StatelessWidget {
@@ -15,10 +16,7 @@ class DoctorImageAndText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final height = size.height;
-    final isTablet = width >= 600;
+    final isTablet = 1.sw >= 600;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -26,8 +24,8 @@ class DoctorImageAndText extends StatelessWidget {
           child: SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: width * 0.05,
-                vertical: height * 0.02,
+                horizontal: 20.w,
+                vertical: 16.h,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -38,18 +36,18 @@ class DoctorImageAndText extends StatelessWidget {
                     aspectRatio: 1,
                     child: Container(
                       constraints: BoxConstraints(
-                        maxWidth: isTablet ? 300 : width * 0.5,
-                        maxHeight: isTablet ? 300 : width * 0.5,
+                        maxWidth: isTablet ? 300.w : 0.5.sw,
+                        maxHeight: isTablet ? 300.h : 0.5.sw,
                       ),
-                      margin: EdgeInsets.only(bottom: height * 0.05),
+                      margin: EdgeInsets.only(bottom: 40.h),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withAlpha(76),
-                            spreadRadius: 2,
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
+                            spreadRadius: 2.r,
+                            blurRadius: 10.r,
+                            offset: Offset(0, 5.h),
                           ),
                         ],
                       ),
@@ -65,7 +63,7 @@ class DoctorImageAndText extends StatelessWidget {
                               color: Colors.grey[200],
                               child: const Icon(
                                 Icons.image_not_supported,
-                                size: 50,
+                                size: 3,
                                 color: Colors.grey,
                               ),
                             );
@@ -77,7 +75,7 @@ class DoctorImageAndText extends StatelessWidget {
 
                   // Title
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: width * 0.08),
+                    padding: EdgeInsets.symmetric(horizontal: 32.w),
                     child: Text(
                       title,
                       textAlign: TextAlign.center,
@@ -85,17 +83,17 @@ class DoctorImageAndText extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       softWrap: true,
                       style: TextStyle(
-                        fontSize: width * 0.065,
+                        fontSize: 26.sp,
                         fontWeight: FontWeight.bold,
                         color: ColorsManager.mainBlue,
                       ),
                     ),
                   ),
-                  SizedBox(height: height * 0.02),
+                  SizedBox(height: 16.h),
 
                   // Description
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: width * 0.05),
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
                     child: Text(
                       description,
                       textAlign: TextAlign.center,
@@ -103,7 +101,7 @@ class DoctorImageAndText extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       softWrap: true,
                       style: TextStyle(
-                        fontSize: width * 0.04,
+                        fontSize: 16.sp,
                         color: Colors.grey[600],
                         height: 1.5,
                       ),

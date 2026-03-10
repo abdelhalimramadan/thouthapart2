@@ -1,3 +1,4 @@
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thotha_mobile_app/features/onboarding/widgets/doctor_image_and_text.dart';
 import 'package:flutter/material.dart';
 
@@ -54,10 +55,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final height = size.height;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -114,7 +111,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
             // Page Indicator
             Positioned(
-              bottom: height * 0.15,
+              bottom: 120.h,
               left: 0,
               right: 0,
               child: PageIndicator(
@@ -125,11 +122,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
             // Action Buttons Container
             Positioned(
-              bottom: height * 0.05,
+              bottom: 40.h,
               left: 0,
               right: 0,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: width * 0.08),
+                padding: EdgeInsets.symmetric(horizontal: 32.w),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -155,7 +152,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           'ندخل في الموضوع علي طول',
                           style: TextStyle(
                             color: ColorsManager.darkBlue,
-                            fontSize: width * 0.04,
+                            fontSize: 16.sp,
                             fontFamily: 'Cairo',
                             fontWeight: FontWeight.bold,
                           ),
@@ -184,21 +181,20 @@ class PageIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
         pageCount,
         (index) => AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          margin: EdgeInsets.symmetric(horizontal: width * 0.01),
-          width: currentPage == index ? width * 0.05 : width * 0.02,
-          height: width * 0.02,
+          margin: EdgeInsets.symmetric(horizontal: 4.w),
+          width: currentPage == index ? 20.w : 8.w,
+          height: 8.h,
           decoration: BoxDecoration(
             color: currentPage == index
                 ? ColorsManager.mainBlue
                 : Colors.grey.withAlpha(76),
-            borderRadius: BorderRadius.circular(width * 0.01),
+            borderRadius: BorderRadius.circular(4.r),
           ),
         ),
       ),
@@ -218,16 +214,15 @@ class GetStartedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
     return SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 52.h,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: ColorsManager.mainBlue,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
           ),
           elevation: 0,
         ),
@@ -235,7 +230,7 @@ class GetStartedButton extends StatelessWidget {
           isLastPage ? 'ابدأ الآن' : 'التالي',
           style: TextStyle(
             color: Colors.white,
-            fontSize: width * 0.04,
+            fontSize: 16.sp,
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
           ),
