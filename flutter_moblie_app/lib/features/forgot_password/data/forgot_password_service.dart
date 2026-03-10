@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:thotha_mobile_app/core/helpers/phone_helper.dart';
 import 'package:thotha_mobile_app/core/networking/api_constants.dart';
 
@@ -9,25 +11,41 @@ import 'package:thotha_mobile_app/core/networking/api_constants.dart';
 ///   2. [verifyOtp]      → POST /api/password-reset/verify-otp
 ///   3. [changePassword] → POST /api/password-reset/change-password
 class PasswordResetService {
-  PasswordResetService._();
+  PasswordResetService._() {
+    _initDio();
+  }
   static final PasswordResetService instance = PasswordResetService._();
 
-  // Fresh public Dio — no auth header, no interceptors
-  Dio get _dio => Dio(BaseOptions(
-        baseUrl: ApiConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-        contentType: 'application/json',          // ← يضمن JSON encoding للـ body
-        responseType: ResponseType.json,
-        headers: const {'Accept': 'application/json'},
-        validateStatus: (status) => status != null,
-      ));
+  // Persistent Dio instance with cookie support for session management
+  late final Dio _dio;
+  late final CookieJar _cookieJar;
+
+  void _initDio() {
+    _cookieJar = CookieJar();
+    _dio = Dio(BaseOptions(
+      baseUrl: ApiConstants.baseUrl,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+      contentType: 'application/json',
+      responseType: ResponseType.json,
+      headers: const {'Accept': 'application/json'},
+      validateStatus: (status) => status != null,
+    ))..interceptors.add(CookieManager(_cookieJar));
+  }
+
+  /// Clear cookies (useful when starting a new password reset flow)
+  void clearSession() {
+    _cookieJar.deleteAll();
+  }
 
   // ── Step 1: Request OTP ─────────────────────────────────────────────────
 
   /// Sends an OTP to the user's WhatsApp.
   /// [phone] is normalised to +2xxxxxxxxxx before sending.
   Future<Map<String, dynamic>> requestReset(String phone) async {
+    // Clear any previous session
+    clearSession();
+
     final normalised = PhoneHelper.normalizeEgyptPhone(phone);
     try {
       final res = await _dio.post(

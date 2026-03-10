@@ -1,25 +1,16 @@
 class CaseRequestBody {
-  final String description; // Specialization or Details
-  final String date;
-  final String time;
-  final String location;
-  final String specialization;
+  final String description;
+  final String dateTime; // "2026-03-10T15:30:00"
 
   CaseRequestBody({
     required this.description,
-    required this.date,
-    required this.time,
-    required this.location,
-    required this.specialization,
+    required this.dateTime,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'description': description,
-      'date': date,
-      'time': time,
-      'location': location,
-      'specialization': specialization,
+      'dateTime': dateTime,
     };
   }
 }

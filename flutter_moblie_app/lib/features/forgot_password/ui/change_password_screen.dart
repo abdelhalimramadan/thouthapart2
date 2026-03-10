@@ -4,16 +4,17 @@ import 'package:flutter/services.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
 import '../../../core/widgets/app_text_button.dart';
+import '../../home_screen/doctor_home/ui/doctor_profile.dart';
 import '../data/forgot_password_service.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
+class ChangePasswordScreen extends StatefulWidget {
+  const ChangePasswordScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _formKey        = GlobalKey<FormState>();
   final _phoneCtrl      = TextEditingController();
 
@@ -25,7 +26,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     _phoneCtrl.dispose();
     super.dispose();
   }
-
 
   // ── Validation ──────────────────────────────────────────────────────────
   String? _validatePhone(String? value) {
@@ -76,9 +76,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      appBar: AppBar(
+        backgroundColor: isDark ? const Color(0xFF2D2D2D) : Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+            color: isDark ? Colors.white : Colors.black),
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const DoctorProfile(),
+              ),
+            );
+          },
+        ),
+      ),
       body: Stack(
         children: [
-          // Background gradients (unchanged from original design)
+          // Background gradients
           _gradient(const Alignment(-0.7, -0.7), ColorsManager.layerBlur1),
           _gradient(const Alignment(0.7, 0.7),   ColorsManager.layerBlur2),
 
@@ -123,7 +138,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                           // Title
                           Text(
-                            'نسيت كلمة المرور',
+                            'تغيير كلمة المرور',
                             style: TextStyle(
                               fontSize: fs * 1.5, fontWeight: FontWeight.bold,
                               color: isDark ? Colors.white : ColorsManager.mainBlue,
@@ -236,18 +251,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                         ),
                                 ),
 
-                                // Back to login
+                                // Back to profile
                                 const SizedBox(height: 12),
                                 Center(
                                   child: TextButton(
                                     onPressed: () {
-                                      Navigator.of(context).pushNamedAndRemoveUntil(
-                                        Routes.loginScreen,
-                                        (route) => false,
+                                      Navigator.of(context).pushReplacement(
+                                        MaterialPageRoute(
+                                          builder: (context) => const DoctorProfile(),
+                                        ),
                                       );
                                     },
                                     child: Text(
-                                      'العودة لتسجيل الدخول',
+                                      'العودة للملف الشخصي',
                                       style: TextStyle(
                                         fontSize: fs * 0.8,
                                         color: ColorsManager.mainBlue,
@@ -284,3 +300,4 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
       );
 }
+

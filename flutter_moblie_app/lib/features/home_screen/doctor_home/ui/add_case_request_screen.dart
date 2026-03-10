@@ -10,9 +10,6 @@ import 'package:thotha_mobile_app/core/widgets/app_text_button.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_body.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/repositories/doctor_repository.dart';
-import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
-import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 
 class AddCaseRequestScreen extends StatefulWidget {
   final String? initialSpecialization;
@@ -24,160 +21,165 @@ class AddCaseRequestScreen extends StatefulWidget {
 
 class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
   final _formKey = GlobalKey<FormState>();
-  String? _selectedCategory;
-  int? _selectedCityId;
-  List<CityModel> _cities = [];
-  List<CategoryModel> _categoriesList = [];
-  bool _isLoadingData = false;
+  final TextEditingController _descriptionController = TextEditingController();
 
-  final TextEditingController _dateController = TextEditingController();
-  final TextEditingController _timeController = TextEditingController();
+  // Doctor info loaded from SharedPreferences
+  String _firstName    = '';
+  String _lastName     = '';
+  String _category     = '';
+  bool   _isLoadingInfo = true;
+
+  // Selected date & time
+  DateTime? _selectedDate;
+  TimeOfDay? _selectedTime;
 
   @override
   void initState() {
     super.initState();
-    _selectedCategory = widget.initialSpecialization;
-    _fetchInitialData();
-  }
-
-  Future<void> _fetchInitialData() async {
-    setState(() {
-      _isLoadingData = true;
-    });
-    try {
-      final repo = getIt<DoctorRepository>();
-      final citiesFuture = repo.getCities();
-      final categoriesFuture = repo.getCategories();
-      
-      final results = await Future.wait([citiesFuture, categoriesFuture]);
-      
-      if (mounted) {
-        setState(() {
-          _cities = results[0] as List<CityModel>;
-          _categoriesList = results[1] as List<CategoryModel>;
-          _isLoadingData = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoadingData = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('فشل في تحميل البيانات')),
-        );
-      }
-    }
+    _loadDoctorInfo();
   }
 
   @override
   void dispose() {
-    _dateController.dispose();
-    _timeController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+  Future<void> _loadDoctorInfo() async {
+    final firstName = await SharedPrefHelper.getString('first_name') ?? '';
+    final lastName  = await SharedPrefHelper.getString('last_name')  ?? '';
+    final category  = await SharedPrefHelper.getString('category')   ?? '';
+
+    // fallback to initialSpecialization if SharedPref empty
+    if (mounted) {
+      setState(() {
+        _firstName    = firstName;
+        _lastName     = lastName;
+        _category     = category.isNotEmpty
+            ? category
+            : (widget.initialSpecialization ?? '');
+        _isLoadingInfo = false;
+      });
+    }
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
+  String get _formattedDate => _selectedDate != null
+      ? DateFormat('yyyy-MM-dd').format(_selectedDate!)
+      : '';
+
+  String get _formattedTime => _selectedTime != null
+      ? '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}'
+      : '';
+
+  /// Builds "2026-03-10T15:30:00" format
+  String get _dateTimeIso {
+    if (_selectedDate == null || _selectedTime == null) return '';
+    return '${_formattedDate}T${_formattedTime}:00';
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
+      initialDate: now,
+      firstDate: now,
       lastDate: DateTime(2101),
       locale: const Locale('ar', 'EG'),
     );
-    if (picked != null) {
-      setState(() {
-        _dateController.text = DateFormat('yyyy-MM-dd').format(picked);
-      });
-    }
+    if (picked != null) setState(() => _selectedDate = picked);
   }
 
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
-      builder: (context, child) {
-        return Localizations.override(
-          context: context,
-          locale: const Locale('ar', 'EG'),
-          child: child,
-        );
-      },
+      builder: (ctx, child) => Localizations.override(
+        context: ctx,
+        locale: const Locale('ar', 'EG'),
+        child: child,
+      ),
     );
-    if (picked != null) {
-      setState(() {
-        _timeController.text = picked.format(context);
-      });
-    }
+    if (picked != null) setState(() => _selectedTime = picked);
   }
 
-  void _publishRequest() async {
-    if (!_formKey.currentState!.validate()) {
+  // ── Publish ───────────────────────────────────────────────────────────────
+
+  Future<void> _publishRequest() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_selectedDate == null || _selectedTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('يرجى اختيار التاريخ والوقت',
+              style: TextStyle(fontFamily: 'Cairo')),
+          backgroundColor: Colors.orange,
+        ),
+      );
       return;
     }
 
-    final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-    
-    if (token.isEmpty ) {
+    final token =
+        await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+    if (token.isEmpty) {
       _showLoginDialog();
-    } else {
-      try {
+      return;
+    }
+
+    try {
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      final body = CaseRequestBody(
+        description: _descriptionController.text.trim().isEmpty
+            ? 'لا توجد تفاصيل إضافية'
+            : _descriptionController.text.trim(),
+        dateTime: _dateTimeIso,
+      );
+
+      final repo   = getIt<CaseRequestRepo>();
+      final result = await repo.createCaseRequest(body);
+
+      if (mounted) Navigator.pop(context);
+
+      if (result['success'] == true) {
         if (mounted) {
-           showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => const Center(child: CircularProgressIndicator()),
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('تم نشر الطلب بنجاح!',
+                  style: TextStyle(fontFamily: 'Cairo')),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['error'] ?? 'فشل في نشر الطلب',
+                  style: const TextStyle(fontFamily: 'Cairo')),
+              backgroundColor: Colors.red,
+            ),
           );
         }
-
-        final selectedCityName = _cities
-            .firstWhere((c) => c.id == _selectedCityId,
-                orElse: () => CityModel(id: -1, name: ''))
-            .name;
-
-        final body = CaseRequestBody(
-          specialization: _selectedCategory!,
-          date: _dateController.text,
-          time: _timeController.text,
-          location: selectedCityName,
-          description: 'No details', 
+      }
+    } catch (_) {
+      if (mounted) Navigator.pop(context);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('حدث خطأ غير متوقع',
+                style: TextStyle(fontFamily: 'Cairo')),
+            backgroundColor: Colors.red,
+          ),
         );
-
-        final repo = getIt<CaseRequestRepo>();
-        final result = await repo.createCaseRequest(body);
-
-        if (mounted) Navigator.pop(context);
-
-        if (result['success'] == true) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('تم نشر الطلب بنجاح!'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            Navigator.pop(context);
-          }
-        } else {
-           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(result['error'] ?? 'فشل في نشر الطلب'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        if (mounted) Navigator.pop(context); 
-         if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('حدث خطأ غير متوقع'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
       }
     }
   }
@@ -185,41 +187,41 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
   void _showLoginDialog() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return Directionality(
-          textDirection: ui.TextDirection.rtl,
-          child: AlertDialog(
-            title: Text('تسجيل الدخول مطلوب', style: TextStyles.font18DarkBlueBold),
-            content: Text(
-              'يجب عليك تسجيل الدخول أولاً لتتمكن من نشر طلب حالة.',
-              style: TextStyles.font14GrayRegular,
-            ),
-            actions: [
-              TextButton(
-                child: Text('إلغاء', style: TextStyles.font14GrayRegular),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: Text('تسجيل الدخول', style: TextStyles.font14BlueSemiBold),
-                onPressed: () {
-                  Navigator.of(context).pop(); 
-                  Navigator.of(context).pushNamed(Routes.loginScreen);
-                },
-              ),
-            ],
+      builder: (ctx) => Directionality(
+        textDirection: ui.TextDirection.rtl,
+        child: AlertDialog(
+          title: Text('تسجيل الدخول مطلوب',
+              style: TextStyles.font18DarkBlueBold),
+          content: Text(
+            'يجب عليك تسجيل الدخول أولاً لتتمكن من نشر طلب حالة.',
+            style: TextStyles.font14GrayRegular,
           ),
-        );
-      },
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text('إلغاء', style: TextStyles.font14GrayRegular),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                Navigator.of(context).pushNamed(Routes.loginScreen);
+              },
+              child: Text('تسجيل الدخول',
+                  style: TextStyles.font14BlueSemiBold),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
+  // ── Build ─────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
+    final width        = MediaQuery.of(context).size.width;
     final baseFontSize = width * 0.04;
+    final isDark       = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -227,34 +229,38 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
           'إضافة طلب حالة',
           style: TextStyles.font18DarkBlueBold.copyWith(
             fontFamily: 'Cairo',
-            fontSize: baseFontSize * 1.125, // 18sp
+            fontSize: baseFontSize * 1.125,
+            color: isDark ? Colors.white : null,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF2D2D2D) : Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: ColorsManager.darkBlue),
+        iconTheme:
+            IconThemeData(color: isDark ? Colors.white : ColorsManager.darkBlue),
       ),
-      backgroundColor: ColorsManager.offWhite,
+      backgroundColor:
+          isDark ? const Color(0xFF1E1E1E) : ColorsManager.offWhite,
       body: SafeArea(
         child: Directionality(
           textDirection: ui.TextDirection.rtl,
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(width * 0.06), // 24.w
+            padding: EdgeInsets.all(width * 0.06),
             child: Form(
               key: _formKey,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxWidth: width >= 600 ? 500 : double.infinity,
-                ),
+                    maxWidth: width >= 600 ? 500 : double.infinity),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ── Header ────────────────────────────────────────
                     Text(
                       'بيانات الحالة',
                       style: TextStyles.font18DarkBlueBold.copyWith(
                         fontFamily: 'Cairo',
                         fontSize: baseFontSize * 1.125,
+                        color: isDark ? Colors.white : null,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -263,102 +269,44 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                       style: TextStyles.font14GrayRegular.copyWith(
                         fontFamily: 'Cairo',
                         fontSize: baseFontSize * 0.875,
+                        color: isDark ? Colors.grey[400] : null,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // ── Doctor Info Card (auto-filled) ────────────────
+                    _buildInfoCard(isDark, baseFontSize),
+                    const SizedBox(height: 24),
+
+                    // ── DateTime picker ───────────────────────────────
+                    _buildLabel('التاريخ والوقت', baseFontSize, isDark),
+                    const SizedBox(height: 8),
+                    _buildDateTimePicker(isDark, baseFontSize, width),
+                    const SizedBox(height: 20),
+
+                    // ── Description ───────────────────────────────────
+                    _buildLabel('وصف الحالة (اختياري)', baseFontSize, isDark),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _descriptionController,
+                      maxLines: 4,
+                      maxLength: 500,
+                      textDirection: ui.TextDirection.rtl,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                      decoration: _buildDecoration(
+                        hint: 'أضف وصفاً تفصيلياً للحالة...',
+                        icon: Icons.description_outlined,
+                        isDark: isDark,
+                        width: width,
+                        baseFontSize: baseFontSize,
                       ),
                     ),
                     const SizedBox(height: 32),
 
-                    // Specialization
-                    _buildLabel('التخصص', baseFontSize),
-                    const SizedBox(height: 8),
-                    _isLoadingData
-                        ? const Center(child: CircularProgressIndicator())
-                        : DropdownButtonFormField<String>(
-                            value: _selectedCategory,
-                            decoration: _buildInputDecoration(
-                              hint: 'اختر التخصص',
-                              prefixIcon: Icons.medical_services_outlined,
-                              width: width,
-                              baseFontSize: baseFontSize,
-                            ),
-                            items: _categoriesList
-                                .map((c) => DropdownMenuItem(
-                                    value: c.name, child: Text(c.name, style: const TextStyle(fontFamily: 'Cairo'))))
-                                .toList(),
-                            onChanged: (v) =>
-                                setState(() => _selectedCategory = v),
-                            validator: (value) =>
-                                value == null ? 'يرجى اختيار التخصص' : null,
-                            icon: const Icon(Icons.keyboard_arrow_down,
-                                color: ColorsManager.gray),
-                          ),
-                    const SizedBox(height: 16),
-
-                    // Date
-                    _buildLabel('التاريخ المتاح', baseFontSize),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _dateController,
-                      readOnly: true,
-                      onTap: () => _selectDate(context),
-                      decoration: _buildInputDecoration(
-                        hint: 'يوم / شهر / سنة',
-                        prefixIcon: Icons.calendar_today_outlined,
-                        width: width,
-                        baseFontSize: baseFontSize,
-                      ),
-                      validator: (value) =>
-                          value!.isEmpty ? 'يرجى اختيار التاريخ' : null,
-                      style: const TextStyle(fontFamily: 'Cairo'),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Time
-                    _buildLabel('الوقت المتاح', baseFontSize),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _timeController,
-                      readOnly: true,
-                      onTap: () => _selectTime(context),
-                      decoration: _buildInputDecoration(
-                        hint: '00:00',
-                        prefixIcon: Icons.access_time_outlined,
-                        width: width,
-                        baseFontSize: baseFontSize,
-                      ),
-                      validator: (value) =>
-                          value!.isEmpty ? 'يرجى اختيار الوقت' : null,
-                      style: const TextStyle(fontFamily: 'Cairo'),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Location / City
-                    _buildLabel('المكان / المدينة', baseFontSize),
-                    const SizedBox(height: 8),
-                    _isLoadingData
-                        ? const Center(child: CircularProgressIndicator())
-                        : DropdownButtonFormField<int>(
-                            value: _selectedCityId,
-                            decoration: _buildInputDecoration(
-                              hint: 'اختر المدينة',
-                              prefixIcon: Icons.location_on_outlined,
-                              width: width,
-                              baseFontSize: baseFontSize,
-                            ),
-                            items: _cities
-                                .map((c) => DropdownMenuItem(
-                                      value: c.id,
-                                      child: Text(c.name, style: const TextStyle(fontFamily: 'Cairo')),
-                                    ))
-                                .toList(),
-                            onChanged: (v) => setState(() => _selectedCityId = v),
-                            validator: (value) =>
-                                value == null ? 'يرجى اختيار المدينة' : null,
-                            icon: const Icon(Icons.keyboard_arrow_down,
-                                color: ColorsManager.gray),
-                          ),
-                    const SizedBox(height: 40),
-
-                    // Publish Button
+                    // ── Publish Button ────────────────────────────────
                     AppTextButton(
                       buttonText: 'نشر الطلب',
                       textStyle: TextStyles.font16WhiteSemiBold.copyWith(
@@ -378,52 +326,227 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
     );
   }
 
-  InputDecoration _buildInputDecoration({
-    required String hint,
-    required IconData prefixIcon,
-    required double width,
-    required double baseFontSize,
-  }) {
-    return InputDecoration(
-      isDense: true,
-      contentPadding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 18),
-      focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: ColorsManager.mainBlue, width: 1.3),
-        borderRadius: BorderRadius.circular(16.0),
+  // ── Doctor Info Card ──────────────────────────────────────────────────────
+
+  Widget _buildInfoCard(bool isDark, double baseFontSize) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF2D2D2D) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      enabledBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: ColorsManager.lighterGray, width: 1.3),
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.red, width: 1.3),
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.red, width: 1.3),
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      hintStyle: TextStyles.font14LightGrayRegular.copyWith(
-        fontFamily: 'Cairo',
-        fontSize: baseFontSize * 0.875,
-      ),
-      hintText: hint,
-      prefixIcon: Icon(
-        prefixIcon,
-        color: ColorsManager.mainBlue,
-        size: 22,
-      ),
-      fillColor: ColorsManager.moreLighterGray,
-      filled: true,
+      child: _isLoadingInfo
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                _buildInfoRow(
+                  icon: Icons.person_outline,
+                  label: 'الاسم',
+                  value: '$_firstName $_lastName',
+                  isDark: isDark,
+                  baseFontSize: baseFontSize,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoRow(
+                  icon: Icons.medical_services_outlined,
+                  label: 'التخصص',
+                  value: _category.isNotEmpty ? _category : 'غير محدد',
+                  isDark: isDark,
+                  baseFontSize: baseFontSize,
+                ),
+              ],
+            ),
     );
   }
 
-  Widget _buildLabel(String label, double baseFontSize) {
+  Widget _buildInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required bool isDark,
+    required double baseFontSize,
+  }) {
+    return Row(
+      children: [
+        Icon(icon,
+            color: isDark ? Colors.grey[400] : ColorsManager.mainBlue,
+            size: 20),
+        const SizedBox(width: 10),
+        Text(
+          '$label: ',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: baseFontSize * 0.875,
+            color: isDark ? Colors.grey[400] : Colors.grey[600],
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: baseFontSize * 0.875,
+              color: isDark ? Colors.white : Colors.black87,
+              fontWeight: FontWeight.w600,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── DateTime Picker ───────────────────────────────────────────────────────
+
+  Widget _buildDateTimePicker(bool isDark, double baseFontSize, double width) {
+    final hasDate = _selectedDate != null;
+    final hasTime = _selectedTime != null;
+
+    return Row(
+      children: [
+        // Date
+        Expanded(
+          child: GestureDetector(
+            onTap: _pickDate,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark ? Colors.grey.shade700 : ColorsManager.lighterGray,
+                  width: 1.3,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.calendar_today_outlined,
+                      size: 18,
+                      color: isDark ? Colors.grey[400] : ColorsManager.mainBlue),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      hasDate ? _formattedDate : 'التاريخ',
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: baseFontSize * 0.8,
+                        color: hasDate
+                            ? (isDark ? Colors.white : Colors.black87)
+                            : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Time
+        Expanded(
+          child: GestureDetector(
+            onTap: _pickTime,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark ? Colors.grey.shade700 : ColorsManager.lighterGray,
+                  width: 1.3,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.access_time_outlined,
+                      size: 18,
+                      color: isDark ? Colors.grey[400] : ColorsManager.mainBlue),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      hasTime ? _formattedTime : 'الوقت',
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: baseFontSize * 0.8,
+                        color: hasTime
+                            ? (isDark ? Colors.white : Colors.black87)
+                            : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  Widget _buildLabel(String label, double baseFontSize, bool isDark) {
     return Text(
       label,
       style: TextStyles.font14DarkBlueMedium.copyWith(
         fontFamily: 'Cairo',
         fontSize: baseFontSize * 0.875,
+        color: isDark ? Colors.white : null,
+      ),
+    );
+  }
+
+  InputDecoration _buildDecoration({
+    required String hint,
+    required IconData icon,
+    required bool isDark,
+    required double width,
+    required double baseFontSize,
+  }) {
+    return InputDecoration(
+      isDense: true,
+      contentPadding:
+          EdgeInsets.symmetric(horizontal: width * 0.04, vertical: 16),
+      hintText: hint,
+      hintStyle: TextStyle(
+        fontFamily: 'Cairo',
+        fontSize: baseFontSize * 0.875,
+        color: isDark ? Colors.grey[500] : Colors.grey[400],
+      ),
+      prefixIcon: Icon(icon,
+          color: isDark ? Colors.grey[400] : ColorsManager.mainBlue, size: 22),
+      fillColor: isDark ? const Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
+      filled: true,
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+            color: isDark ? Colors.grey.shade700 : ColorsManager.lighterGray,
+            width: 1.3),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide:
+            const BorderSide(color: ColorsManager.mainBlue, width: 1.3),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Colors.red, width: 1.3),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Colors.red, width: 1.3),
+        borderRadius: BorderRadius.circular(16),
       ),
     );
   }
