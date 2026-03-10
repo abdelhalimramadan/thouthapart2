@@ -3,6 +3,7 @@ import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
+import 'package:thotha_mobile_app/features/booking/ui/booking_confirmation_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/add_case_request_screen.dart';
@@ -117,6 +118,32 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     ).then((_) => _loadRequests());
   }
 
+  /// Opens a bottom sheet with full case details + Book Now button.
+  void _showCaseDetails(CaseRequestModel req) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _CaseDetailsSheet(
+        req: req,
+        onBookNow: () {
+          Navigator.pop(context); // close sheet
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BookingConfirmationScreen(
+                doctorName: req.doctorFullName,
+                date: req.formattedDate,
+                time: req.formattedTime,
+                specialty: req.categoryName,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -166,13 +193,16 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                           itemCount: _requests.length,
                           separatorBuilder: (_, __) => const SizedBox(height: 12),
                           itemBuilder: (context, index) {
-                            return _buildRequestCard(
-                              context,
-                              _requests[index],
-                              width,
-                              baseFontSize,
-                              isDark,
-                              theme,
+                            return GestureDetector(
+                              onTap: () => _showCaseDetails(_requests[index]),
+                              child: _buildRequestCard(
+                                context,
+                                _requests[index],
+                                width,
+                                baseFontSize,
+                                isDark,
+                                theme,
+                              ),
                             );
                           },
                         ),
@@ -448,3 +478,179 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _CaseDetailsSheet — Bottom sheet with full case details + Book Now button
+// ─────────────────────────────────────────────────────────────────────────────
+class _CaseDetailsSheet extends StatelessWidget {
+  final CaseRequestModel req;
+  final VoidCallback onBookNow;
+
+  const _CaseDetailsSheet({required this.req, required this.onBookNow});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final width = MediaQuery.of(context).size.width;
+    final baseFontSize = width * 0.04;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(context).viewInsets.bottom + 24),
+      child: SingleChildScrollView(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Drag handle ──
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+
+              // ── Title ──
+              Center(
+                child: Text(
+                  'تفاصيل الحالة',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: baseFontSize * 1.2,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Divider(color: isDark ? Colors.grey[700] : Colors.grey[200]),
+              const SizedBox(height: 8),
+
+              // ── Details rows ──
+              _DetailRow(icon: Icons.medical_services_outlined, label: 'التخصص',  value: req.categoryName,         isDark: isDark, baseFontSize: baseFontSize),
+              _DetailRow(icon: Icons.person_outline,             label: 'الطبيب',  value: req.doctorFullName,        isDark: isDark, baseFontSize: baseFontSize),
+              _DetailRow(icon: Icons.phone_outlined,             label: 'الهاتف',  value: req.doctorPhoneNumber,     isDark: isDark, baseFontSize: baseFontSize),
+              _DetailRow(icon: Icons.location_city_outlined,     label: 'المدينة', value: req.doctorCityName,        isDark: isDark, baseFontSize: baseFontSize),
+              _DetailRow(icon: Icons.school_outlined,            label: 'الجامعة', value: req.doctorUniversityName,  isDark: isDark, baseFontSize: baseFontSize),
+              _DetailRow(icon: Icons.calendar_today_outlined,    label: 'التاريخ', value: req.formattedDate,         isDark: isDark, baseFontSize: baseFontSize),
+              _DetailRow(icon: Icons.access_time_outlined,       label: 'الوقت',   value: req.formattedTime,         isDark: isDark, baseFontSize: baseFontSize),
+
+              // ── Description ──
+              if (req.description.isNotEmpty && req.description != 'No details') ...[
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey[850] : const Color(0xFFF9FAFB),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
+                  ),
+                  child: Text(
+                    req.description,
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: baseFontSize * 0.9,
+                      color: isDark ? Colors.grey[200] : Colors.grey[800],
+                      height: 1.6,
+                    ),
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 24),
+
+              // ── Book Now button ──
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: onBookNow,
+                  icon: const Icon(Icons.calendar_month_rounded, color: Colors.white),
+                  label: Text(
+                    'احجز الآن',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: baseFontSize * 1.05,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorsManager.mainBlue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    elevation: 2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _DetailRow — single info row in the bottom sheet
+// ─────────────────────────────────────────────────────────────────────────────
+class _DetailRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool isDark;
+  final double baseFontSize;
+
+  const _DetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.isDark,
+    required this.baseFontSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (value.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: ColorsManager.mainBlue),
+          const SizedBox(width: 10),
+          Text(
+            '$label: ',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: baseFontSize * 0.88,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.grey[300] : Colors.grey[700],
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: baseFontSize * 0.88,
+                color: isDark ? Colors.grey[100] : Colors.grey[900],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
