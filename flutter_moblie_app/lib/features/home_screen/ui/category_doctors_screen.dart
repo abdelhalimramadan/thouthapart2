@@ -14,6 +14,7 @@ class CategoryDoctorsScreen extends StatefulWidget {
   final int? categoryId;
   final int? cityId;
   final String? cityName;
+  final bool showAddCaseButton;
 
   const CategoryDoctorsScreen({
     super.key,
@@ -21,6 +22,7 @@ class CategoryDoctorsScreen extends StatefulWidget {
     this.categoryId,
     this.cityId,
     this.cityName,
+    this.showAddCaseButton = false,
   });
 
   @override
@@ -176,7 +178,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
         ),
         centerTitle: true,
       ),
-      floatingActionButton: _isUserLoggedIn
+      floatingActionButton: (widget.showAddCaseButton && _isUserLoggedIn)
           ? FloatingActionButton.extended(
               onPressed: () => _updateCategoryAndNavigate(),
               label: const Text(

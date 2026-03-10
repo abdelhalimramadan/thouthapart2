@@ -9,19 +9,22 @@ import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/features/home_screen/logic/doctor_cubit.dart';
 
 import 'package:thotha_mobile_app/features/home_screen/logic/doctor_state.dart';
+import 'package:thotha_mobile_app/core/helpers/constants.dart';
+import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
+import 'package:thotha_mobile_app/features/login/ui/login_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
 
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, this.drawer = const HomeDrawer(), this.showAddCaseCategory = false});
+class SecondaryHomeScreen extends StatefulWidget {
+  const SecondaryHomeScreen({super.key, this.drawer = const HomeDrawer(), this.showAddCaseCategory = false});
 
   final Widget drawer;
   final bool showAddCaseCategory;
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<SecondaryHomeScreen> createState() => _SecondaryHomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -44,7 +47,26 @@ class _HomeScreenState extends State<HomeScreen> {
     required int? categoryId,
     required String? cityName,
   }) async {
-    // Navigation restricted to CategoryDoctorsScreen
+    if (widget.showAddCaseCategory && _isAddCaseCategory(categoryName)) {
+      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      if (token.isEmpty) {
+        if (!mounted) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LoginScreen(
+              nextScreen: const SecondaryHomeScreen(
+                drawer: DoctorDrawer(),
+                showAddCaseCategory: true,
+              ),
+              nextRouteSettings: const RouteSettings(name: 'add-case'),
+            ),
+          ),
+        );
+        return;
+      }
+    }
+
     if (!mounted) return;
     Navigator.push(
       context,
@@ -54,6 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
           categoryId: categoryId,
           cityId: _selectedCityId,
           cityName: cityName,
+          showAddCaseButton: true,
         ),
       ),
     );
@@ -164,6 +187,15 @@ class _HomeScreenState extends State<HomeScreen> {
     _searchFocusNode.dispose();
     super.dispose();
   }
+
+  bool _isAddCaseCategory(String name) {
+    final compact = name.replaceAll(' ', '');
+    return name.contains('نشر حالة جديدة') ||
+        name.contains('إضافة حالة جديدة') ||
+        compact.contains('نشرحالةجديدة') ||
+        compact.contains('اضافةحالةجديدة');
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -191,6 +223,15 @@ class _HomeScreenState extends State<HomeScreen> {
               _scaffoldKey.currentState?.openDrawer();
             },
           ),
+          title: Text(
+            'نشر حالة جديدة',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontWeight: FontWeight.bold,
+              fontSize: baseFontSize * 1.1,
+            ),
+          ),
+          centerTitle: true,
         ),
         drawer: widget.drawer,
         body: SafeArea(
@@ -210,9 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         .where((c) => c.name.contains(_searchController.text))
                         .toList();
 
-                final visibleCategories = filteredCategories
-                    
-                    .toList();
+                final visibleCategories = filteredCategories;
 
                 return SingleChildScrollView(
                   child: Padding(
@@ -226,8 +265,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           margin: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 10),
                           decoration: BoxDecoration(
                             color: isDark
-                                ? Colors.grey[800]?.withValues(alpha: 0.5)
-                                : const Color(0xFFD9D9D9).withValues(alpha: 0.3),
+                                ? Colors.grey[800]?.withAlpha(128)
+                                : const Color(0xFFD9D9D9).withAlpha(77),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
@@ -269,143 +308,80 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
 
-                        // Gradient Card
-                        Container(
-                          width: double.infinity,
-                          height: 140,
-                          margin: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 12),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            gradient: const LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [Color(0xFF95F8C9), Color(0xFF54CAF7)],
-                            ),
-                          ),
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                left: 0,
-                                top: 10,
-                                bottom: 10,
-                                child: Image.asset(
-                                  'assets/images/دكتور.png',
-                                  width: width * 0.4,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                              Positioned(
-                                right: 20,
-                                top: 20,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      'احجز و سجل',
-                                      style: TextStyle(
-                                        fontFamily: 'Cairo',
-                                        color: Colors.white,
-                                        fontSize: baseFontSize * 0.9375, // 15sp
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.right,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    SizedBox(
-                                      width: width * 0.4,
-                                      child: Text(
-                                        'مع افضل الاطباء في نطاقك',
-                                        style: TextStyle(
-                                          fontFamily: 'Cairo',
-                                          color: Colors.white,
-                                          fontSize: baseFontSize * 0.8125, // 13sp
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.right,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        'احجز الان',
-                                        style: TextStyle(
-                                          fontFamily: 'Cairo',
-                                          color: Colors.black,
-                                          fontSize: baseFontSize * 0.7, // 11sp
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
                         // City Dropdown
                         Container(
                           width: double.infinity,
                           margin: EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 16),
-                          child: Container(
-                            height: 52,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: isDark ? Colors.grey[700]! : const Color(0xFFD1D5DC),
-                                width: 1.1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<int>(
-                                value: _selectedCityId,
-                                hint: Text(
-                                  'اختر المدينة',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(right: 4, bottom: 8),
+                                child: Text(
+                                  'اختر المحافظة',
+                                  style: TextStyle(
                                     fontFamily: 'Cairo',
-                                    fontSize: baseFontSize * 0.875,
-                                    fontWeight: FontWeight.w600,
+                                    fontSize: baseFontSize * 0.9,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                isExpanded: true,
-                                icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).iconTheme.color),
-                                items: cities.map((city) {
-                                  return DropdownMenuItem<int>(
-                                    value: city.id,
-                                    child: Text(
-                                      city.name,
+                              ),
+                              Container(
+                                height: 52,
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isDark ? Colors.grey[700]! : const Color(0xFFD1D5DC),
+                                    width: 1.1,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Theme.of(context).colorScheme.primary.withAlpha(77),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<int>(
+                                    value: _selectedCityId,
+                                    hint: Text(
+                                      'اختر المدينة',
                                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                         fontFamily: 'Cairo',
                                         fontSize: baseFontSize * 0.875,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      textAlign: TextAlign.right,
                                     ),
-                                  );
-                                }).toList(),
-                                onChanged: (val) {
-                                  setState(() {
-                                    _selectedCityId = val;
-                                  });
-                                  if (val != null) {
-                                    context.read<DoctorCubit>().filterByCity(val);
-                                  }
-                                },
+                                    isExpanded: true,
+                                    icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).iconTheme.color),
+                                    items: cities.map((city) {
+                                      return DropdownMenuItem<int>(
+                                        value: city.id,
+                                        child: Text(
+                                          city.name,
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                            fontFamily: 'Cairo',
+                                            fontSize: baseFontSize * 0.875,
+                                          ),
+                                          textAlign: TextAlign.right,
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: (val) {
+                                      setState(() {
+                                        _selectedCityId = val;
+                                      });
+                                      if (val != null) {
+                                        context.read<DoctorCubit>().filterByCity(val);
+                                      }
+                                    },
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
 
@@ -414,7 +390,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           width: double.infinity,
                           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           child: Text(
-                            'الخدمات المتوفرة',
+                            'اختر التخصص لنشر الحالة',
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontFamily: 'Cairo',
                               fontWeight: FontWeight.bold,
@@ -471,7 +447,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 100), // Reserve space at bottom
                       ],
                     ),
                   ),
