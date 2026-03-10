@@ -134,8 +134,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final fs    = width * 0.04;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
       body: Stack(
         children: [
           // Background gradients
@@ -151,9 +153,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   constraints: BoxConstraints(maxWidth: width >= 600 ? 500 : double.infinity),
                   padding: EdgeInsets.all(width * 0.06),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? const Color(0xFF2D2D2D) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))],
+                    boxShadow: [BoxShadow(
+                      color: isDark
+                        ? Colors.black.withValues(alpha: 0.3)
+                        : Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4)
+                    )],
                   ),
                   child: Directionality(
                     textDirection: TextDirection.rtl,
@@ -175,14 +183,22 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           Center(
                             child: Text(
                               'إعادة تعيين كلمة المرور',
-                              style: TextStyles.font24BlueBold.copyWith(fontFamily: 'Cairo', fontSize: fs * 1.5),
+                              style: TextStyles.font24BlueBold.copyWith(
+                                fontFamily: 'Cairo',
+                                fontSize: fs * 1.5,
+                                color: isDark ? Colors.white : null,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 8),
                           Center(
                             child: Text(
                               'أنشئ كلمة مرور جديدة لا تقل عن 6 أحرف',
-                              style: TextStyles.font14GrayRegular.copyWith(fontFamily: 'Cairo', fontSize: fs * 0.875),
+                              style: TextStyles.font14GrayRegular.copyWith(
+                                fontFamily: 'Cairo',
+                                fontSize: fs * 0.875,
+                                color: isDark ? Colors.grey[400] : null,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -279,10 +295,17 @@ class _FieldLabel extends StatelessWidget {
   const _FieldLabel({required this.text, required this.fs});
 
   @override
-  Widget build(BuildContext context) => Text(
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Text(
         text,
-        style: TextStyles.font14DarkBlueMedium.copyWith(fontFamily: 'Cairo', fontSize: fs * 0.875),
+        style: TextStyles.font14DarkBlueMedium.copyWith(
+          fontFamily: 'Cairo',
+          fontSize: fs * 0.875,
+          color: isDark ? Colors.white : null,
+        ),
       );
+  }
 }
 
 // ── Reusable password field ─────────────────────────────────────────────────
@@ -303,18 +326,42 @@ class _PasswordField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return TextFormField(
       controller: controller,
       obscureText: obscure,
-      style: const TextStyle(fontFamily: 'Cairo'),
+      style: TextStyle(
+        fontFamily: 'Cairo',
+        color: isDark ? Colors.white : Colors.black,
+      ),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(fontFamily: 'Cairo', color: Colors.grey),
+        hintStyle: TextStyle(
+          fontFamily: 'Cairo',
+          color: isDark ? Colors.grey[500] : Colors.grey,
+        ),
+        filled: true,
+        fillColor: isDark ? const Color(0xFF3D3D3D) : Colors.grey[50],
         suffixIcon: IconButton(
-          icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+          icon: Icon(
+            obscure ? Icons.visibility_off : Icons.visibility,
+            color: isDark ? Colors.grey[400] : Colors.grey[600],
+          ),
           onPressed: onToggle,
         ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+          ),
+        ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: ColorsManager.mainBlue, width: 2),

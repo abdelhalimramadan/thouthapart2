@@ -32,6 +32,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
 
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
   @override
   void initState() {
@@ -74,6 +75,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
   void dispose() {
     _dateController.dispose();
     _timeController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -105,8 +107,11 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
       },
     );
     if (picked != null) {
+      // تحويل الوقت لتنسيق 24 ساعة HH:mm
+      final hour   = picked.hour.toString().padLeft(2, '0');
+      final minute = picked.minute.toString().padLeft(2, '0');
       setState(() {
-        _timeController.text = picked.format(context);
+        _timeController.text = '$hour:$minute';
       });
     }
   }
@@ -140,7 +145,9 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
           date: _dateController.text,
           time: _timeController.text,
           location: selectedCityName,
-          description: 'No details', 
+          description: _descriptionController.text.trim().isEmpty
+              ? 'لا توجد تفاصيل إضافية'
+              : _descriptionController.text.trim(),
         );
 
         final repo = getIt<CaseRequestRepo>();
@@ -220,6 +227,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final baseFontSize = width * 0.04;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -228,14 +236,17 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
           style: TextStyles.font18DarkBlueBold.copyWith(
             fontFamily: 'Cairo',
             fontSize: baseFontSize * 1.125, // 18sp
+            color: isDark ? Colors.white : null,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF2D2D2D) : Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: ColorsManager.darkBlue),
+        iconTheme: IconThemeData(
+          color: isDark ? Colors.white : ColorsManager.darkBlue,
+        ),
       ),
-      backgroundColor: ColorsManager.offWhite,
+      backgroundColor: isDark ? const Color(0xFF1E1E1E) : ColorsManager.offWhite,
       body: SafeArea(
         child: Directionality(
           textDirection: ui.TextDirection.rtl,
@@ -255,6 +266,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                       style: TextStyles.font18DarkBlueBold.copyWith(
                         fontFamily: 'Cairo',
                         fontSize: baseFontSize * 1.125,
+                        color: isDark ? Colors.white : null,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -263,6 +275,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                       style: TextStyles.font14GrayRegular.copyWith(
                         fontFamily: 'Cairo',
                         fontSize: baseFontSize * 0.875,
+                        color: isDark ? Colors.grey[400] : null,
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -282,7 +295,15 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                             ),
                             items: _categoriesList
                                 .map((c) => DropdownMenuItem(
-                                    value: c.name, child: Text(c.name, style: const TextStyle(fontFamily: 'Cairo'))))
+                                    value: c.name,
+                                    child: Text(
+                                      c.name,
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
+                                        color: isDark ? Colors.white : Colors.black,
+                                      ),
+                                    ),
+                                ))
                                 .toList(),
                             onChanged: (v) =>
                                 setState(() => _selectedCategory = v),
@@ -308,7 +329,10 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                       ),
                       validator: (value) =>
                           value!.isEmpty ? 'يرجى اختيار التاريخ' : null,
-                      style: const TextStyle(fontFamily: 'Cairo'),
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
@@ -327,7 +351,10 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                       ),
                       validator: (value) =>
                           value!.isEmpty ? 'يرجى اختيار الوقت' : null,
-                      style: const TextStyle(fontFamily: 'Cairo'),
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
@@ -347,7 +374,13 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                             items: _cities
                                 .map((c) => DropdownMenuItem(
                                       value: c.id,
-                                      child: Text(c.name, style: const TextStyle(fontFamily: 'Cairo')),
+                                      child: Text(
+                                        c.name,
+                                        style: TextStyle(
+                                          fontFamily: 'Cairo',
+                                          color: isDark ? Colors.white : Colors.black,
+                                        ),
+                                      ),
                                     ))
                                 .toList(),
                             onChanged: (v) => setState(() => _selectedCityId = v),
@@ -356,6 +389,27 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                             icon: const Icon(Icons.keyboard_arrow_down,
                                 color: ColorsManager.gray),
                           ),
+                    const SizedBox(height: 16),
+
+                    // Description
+                    _buildLabel('وصف الحالة (اختياري)', baseFontSize),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _descriptionController,
+                      maxLines: 4,
+                      maxLength: 500,
+                      decoration: _buildInputDecoration(
+                        hint: 'أضف وصفاً تفصيلياً للحالة...',
+                        prefixIcon: Icons.description_outlined,
+                        width: width,
+                        baseFontSize: baseFontSize,
+                      ),
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                      textDirection: ui.TextDirection.rtl,
+                    ),
                     const SizedBox(height: 40),
 
                     // Publish Button
@@ -384,6 +438,8 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
     required double width,
     required double baseFontSize,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InputDecoration(
       isDense: true,
       contentPadding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 18),
@@ -392,7 +448,10 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         borderRadius: BorderRadius.circular(16.0),
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: ColorsManager.lighterGray, width: 1.3),
+        borderSide: BorderSide(
+          color: isDark ? Colors.grey[700]! : ColorsManager.lighterGray,
+          width: 1.3
+        ),
         borderRadius: BorderRadius.circular(16.0),
       ),
       errorBorder: OutlineInputBorder(
@@ -406,24 +465,28 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
       hintStyle: TextStyles.font14LightGrayRegular.copyWith(
         fontFamily: 'Cairo',
         fontSize: baseFontSize * 0.875,
+        color: isDark ? Colors.grey[500] : null,
       ),
       hintText: hint,
       prefixIcon: Icon(
         prefixIcon,
-        color: ColorsManager.mainBlue,
+        color: isDark ? Colors.grey[400] : ColorsManager.mainBlue,
         size: 22,
       ),
-      fillColor: ColorsManager.moreLighterGray,
+      fillColor: isDark ? const Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
       filled: true,
     );
   }
 
   Widget _buildLabel(String label, double baseFontSize) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Text(
       label,
       style: TextStyles.font14DarkBlueMedium.copyWith(
         fontFamily: 'Cairo',
         fontSize: baseFontSize * 0.875,
+        color: isDark ? Colors.white : null,
       ),
     );
   }

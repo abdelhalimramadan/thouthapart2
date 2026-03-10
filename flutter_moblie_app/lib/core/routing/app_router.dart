@@ -8,6 +8,7 @@ import '../../features/sign_up/ui/sign_up_screen.dart';
 import '../../features/splash_screen/splash_screen.dart';
 import '../../features/chat/ui/chat_screen.dart';
 import '../../features/forgot_password/ui/forgot_password_screen.dart';
+import '../../features/forgot_password/ui/change_password_screen.dart';
 import '../../features/reset_password/ui/reset_password_screen.dart';
 import '../../features/home_screen/ui/home_screen.dart';
 import '../../features/notifications/ui/notifications_screen.dart';
@@ -38,6 +39,10 @@ class AppRouter {
       case Routes.forgotPasswordScreen:
         return MaterialPageRoute(
           builder: (context) => const ForgotPasswordScreen(),
+        );
+      case Routes.changePasswordScreen:
+        return MaterialPageRoute(
+          builder: (context) => const ChangePasswordScreen(),
         );
       case Routes.otpVerificationScreen:
         final args = settings.arguments as Map<String, dynamic>? ?? {};
