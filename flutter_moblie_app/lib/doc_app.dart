@@ -26,7 +26,7 @@ class DocApp extends StatelessWidget {
             builder: (context, child) {
               return MaterialApp(
                 navigatorKey: NavigatorService.navigatorKey,
-                title: 'Doc App',
+                title: 'ثوثة',
                 debugShowCheckedModeBanner: false,
                 theme: AppTheme.lightTheme,
                 darkTheme: AppTheme.darkTheme,
