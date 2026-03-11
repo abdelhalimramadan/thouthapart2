@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
@@ -36,7 +38,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
   List<CaseRequestModel> _requests = [];
   bool _isLoading = false;
   String? _error;
-  bool _isUserLoggedIn = false;
+  bool _isDoctorLoggedIn = false;
 
   @override
   void initState() {
@@ -46,12 +48,21 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
   }
 
   Future<void> _checkLoginStatus() async {
-    final token =
-        await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-    if (mounted) {
-      setState(() {
-        _isUserLoggedIn = token.isNotEmpty;
-      });
+    try {
+      final token =
+          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      
+      // If we have a token, we are logged in.
+      // If we were also told to show the add button, we treat the user as a doctor.
+      final isLoggedIn = token.isNotEmpty && token != 'null';
+      
+      if (mounted) {
+        setState(() {
+          _isDoctorLoggedIn = isLoggedIn && widget.showAddCaseButton;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error in _checkLoginStatus: $e');
     }
   }
 
@@ -190,14 +201,18 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     Navigator.pop(context); // dismiss loading overlay
 
     if (result['success'] == true) {
-      setState(() => _requests.removeWhere((r) => r.id == req.id));
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content:
-              Text('تم حذف الطلب بنجاح', style: TextStyle(fontFamily: 'Cairo')),
+        SnackBar(
+          content: Text(
+            'تم حذف الطلب بنجاح',
+            textAlign: TextAlign.right,
+            style: const TextStyle(fontFamily: 'Cairo'),
+          ),
           backgroundColor: Colors.green,
         ),
       );
+      // Automatically refresh the list from server to ensure accuracy
+      _loadRequests();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -220,8 +235,8 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
       builder: (_) => _CaseDetailsSheet(
         req: req,
         // doctor (logged-in) sees delete icon → no Book Now
-        // patient (not logged-in) sees Book Now → no delete icon
-        showBookNow: !_isUserLoggedIn,
+        // patient/guest sees Book Now → no delete icon
+        showBookNow: !_isDoctorLoggedIn,
         onBookNow: () {
           Navigator.pop(context); // close sheet
           Navigator.push(
@@ -244,6 +259,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final width = size.width;
+    final height = size.height;
     final baseFontSize = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
@@ -260,7 +276,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
         ),
         centerTitle: true,
       ),
-      floatingActionButton: (widget.showAddCaseButton && _isUserLoggedIn)
+      floatingActionButton: (widget.showAddCaseButton && _isDoctorLoggedIn)
           ? FloatingActionButton.extended(
               onPressed: () => _updateCategoryAndNavigate(),
               label: const Text(
@@ -274,15 +290,28 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
           : null,
       body: Directionality(
         textDirection: TextDirection.rtl,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _error != null
-                ? _buildError(baseFontSize)
-                : _requests.isEmpty
-                    ? _buildEmpty(baseFontSize, width)
-                    : RefreshIndicator(
-                        onRefresh: _loadRequests,
-                        child: ListView.separated(
+        child: RefreshIndicator(
+          onRefresh: _loadRequests,
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(height: height * 0.2),
+                        _buildError(baseFontSize),
+                      ],
+                    )
+                  : _requests.isEmpty
+                      ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(height: height * 0.2),
+                            _buildEmpty(baseFontSize, width),
+                          ],
+                        )
+                      : ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
                           padding: EdgeInsets.fromLTRB(
                             width * 0.04,
                             16,
@@ -290,8 +319,8 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                             100, // space for FAB
                           ),
                           itemCount: _requests.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 12),
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 16),
                           itemBuilder: (context, index) {
                             return GestureDetector(
                               onTap: () => _showCaseDetails(_requests[index]),
@@ -302,12 +331,12 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                                 baseFontSize,
                                 isDark,
                                 theme,
-                                _isUserLoggedIn,
+                                _isDoctorLoggedIn,
                               ),
                             );
                           },
                         ),
-                      ),
+        ),
       ),
     );
   }
@@ -327,7 +356,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -364,7 +393,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 3),
                         decoration: BoxDecoration(
-                          color: ColorsManager.mainBlue.withValues(alpha: 0.1),
+                          color: ColorsManager.mainBlue.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -380,7 +409,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                     if (isLoggedIn) ...[
                       const SizedBox(width: 8),
                       Material(
-                        color: Colors.red.withValues(alpha: 0.08),
+                        color: Colors.red.withOpacity(0.08),
                         shape: const CircleBorder(),
                         child: IconButton(
                           icon: const Icon(
@@ -489,24 +518,66 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
 
             const SizedBox(height: 12),
             const Divider(height: 1),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
-            // Date and time chips
+            // Date and time chips + Book Now (for Guest)
             Row(
               children: [
-                _buildChip(
-                  icon: Icons.calendar_today_outlined,
-                  text: req.formattedDate,
-                  baseFontSize: baseFontSize,
-                  isDark: isDark,
+                Expanded(
+                  child: Row(
+                    children: [
+                      _buildChip(
+                        icon: Icons.calendar_today_outlined,
+                        text: req.formattedDate,
+                        baseFontSize: baseFontSize,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(width: 10),
+                      if (req.formattedTime.isNotEmpty)
+                        _buildChip(
+                          icon: Icons.access_time_outlined,
+                          text: req.formattedTime,
+                          baseFontSize: baseFontSize,
+                          isDark: isDark,
+                        ),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 10),
-                if (req.formattedTime.isNotEmpty)
-                  _buildChip(
-                    icon: Icons.access_time_outlined,
-                    text: req.formattedTime,
-                    baseFontSize: baseFontSize,
-                    isDark: isDark,
+                if (!isLoggedIn)
+                  SizedBox(
+                    height: 36.h,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BookingConfirmationScreen(
+                              doctorName: req.doctorFullName,
+                              date: req.formattedDate,
+                              time: req.formattedTime,
+                              specialty: req.categoryName,
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorsManager.mainBlue,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 16.w),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'احجز الآن',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -572,6 +643,16 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
             style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: baseFontSize * 0.85,
+              color: ColorsManager.mainBlue,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'كن أول من ينشر حالة!',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 14,
               color: ColorsManager.mainBlue,
               fontWeight: FontWeight.w600,
             ),
