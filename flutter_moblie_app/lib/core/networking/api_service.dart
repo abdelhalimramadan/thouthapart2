@@ -270,17 +270,21 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> deleteRequest(int id) async {
+  Future<Map<String, dynamic>> deleteRequest(int id, {int? doctorId}) async {
     try {
       await DioFactory.addDioHeaders();
+      final params = <String, dynamic>{'id': id};
+      if (doctorId != null && doctorId != 0) params['doctorId'] = doctorId;
       final res = await _dio.delete(
         ApiConstants.deleteRequest,
-        queryParameters: {'id': id},
+        queryParameters: params,
       );
       if (res.statusCode == 200 || res.statusCode == 204) return {'success': true};
+      if (res.statusCode == 403) return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: 403);
       return _fail('فشل في حذف الطلب', code: res.statusCode);
     } on DioException catch (e) {
       final code = e.response?.statusCode;
+      if (code == 403) return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: code);
       if (code == 404) return _fail('الطلب غير موجود', code: code);
       if (code == 500) return _fail('خطأ في الخادم، حاول مرة أخرى', code: code);
       return _fail(_dioError(e), code: code);

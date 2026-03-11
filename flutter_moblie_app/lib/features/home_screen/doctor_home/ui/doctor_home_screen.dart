@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import '../../../../core/helpers/constants.dart';
 import '../../../../core/helpers/shared_pref_helper.dart';
-import '../../../../core/networking/dio_factory.dart';
 import '../../../../core/utils/notification_helper.dart';
 import '../drawer/doctor_drawer_screen.dart';
 import '../../../notifications/ui/notifications_screen.dart';
@@ -46,43 +48,49 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     try {
       // Try cache first — avoids unnecessary network call
       final cached = await SharedPrefHelper.getString('first_name');
-      if (cached.isNotEmpty) {
-        if (mounted) setState(() { _firstName = cached; _isLoadingName = false; });
+      final cachedDoctorId = await SharedPrefHelper.getInt('doctor_id');
+      if (cached.isNotEmpty && cachedDoctorId != 0) {
+        if (mounted)
+          setState(() {
+            _firstName = cached;
+            _isLoadingName = false;
+          });
         return;
       }
 
-      final dio = DioFactory.getDio();
-      dynamic response;
-
-      // Try /me then /profile as fallback
-      for (final path in ['/me', '/profile']) {
+      // Decode JWT token directly — no extra HTTP call needed
+      final token =
+          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      if (token != null && token.isNotEmpty) {
         try {
-          response = await dio.get(path);
-          if ((response?.statusCode ?? 0) == 200) break;
+          final parts = token.split('.');
+          if (parts.length == 3) {
+            String payload = parts[1];
+            while (payload.length % 4 != 0) {
+              payload += '=';
+            }
+            final decoded =
+                json.decode(utf8.decode(base64Url.decode(payload))) as Map?;
+            if (decoded != null) {
+              // Extract name
+              final fn = (decoded['firstName'] ??
+                      decoded['first_name'] ??
+                      decoded['name'])
+                  ?.toString();
+              if (fn != null && fn.isNotEmpty) {
+                await SharedPrefHelper.setData('first_name', fn);
+                if (mounted) setState(() => _firstName = fn);
+              }
+              // Extract and cache doctor ID
+              final rawId =
+                  decoded['id'] ?? decoded['doctorId'] ?? decoded['doctor_id'];
+              final did = int.tryParse(rawId?.toString() ?? '');
+              if (did != null && did != 0) {
+                await SharedPrefHelper.setData('doctor_id', did);
+              }
+            }
+          }
         } catch (_) {}
-      }
-
-      if (response != null && response.statusCode == 200) {
-        final data = response.data;
-        if (data is Map) {
-          // Extract first name (supports top-level or nested under 'user')
-          final nested = data['user'];
-          String? fn = (data['firstName'] ?? data['first_name'])?.toString();
-          if ((fn == null || fn.isEmpty) && nested is Map) {
-            fn = (nested['firstName'] ?? nested['first_name'])?.toString();
-          }
-
-          // Persist first name
-          if (fn != null && fn.isNotEmpty) {
-            await SharedPrefHelper.setData('first_name', fn);
-            if (mounted) setState(() => _firstName = fn);
-          }
-
-          // Persist doctor ID for subsequent screens
-          final rawId = data['id'] ?? (nested is Map ? nested['id'] : null);
-          final did = int.tryParse(rawId?.toString() ?? '');
-          if (did != null) await SharedPrefHelper.setData('doctor_id', did);
-        }
       }
     } catch (_) {
       // Silently fail — UI shows fallback "دكتور"
@@ -93,7 +101,10 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
 
   Future<void> _fetchCaseRequests() async {
     if (!mounted) return;
-    setState(() { _isLoadingCases = true; _casesError = null; });
+    setState(() {
+      _isLoadingCases = true;
+      _casesError = null;
+    });
 
     try {
       int doctorId = await SharedPrefHelper.getInt('doctor_id');
@@ -103,7 +114,11 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       }
 
       if (doctorId == 0) {
-        if (mounted) setState(() { _isLoadingCases = false; _casesError = 'تعذر تحديد هوية الطبيب'; });
+        if (mounted)
+          setState(() {
+            _isLoadingCases = false;
+            _casesError = 'تعذر تحديد هوية الطبيب';
+          });
         return;
       }
 
@@ -122,7 +137,11 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         });
       }
     } catch (_) {
-      if (mounted) setState(() { _isLoadingCases = false; _casesError = 'حدث خطأ غير متوقع'; });
+      if (mounted)
+        setState(() {
+          _isLoadingCases = false;
+          _casesError = 'حدث خطأ غير متوقع';
+        });
     }
   }
 
@@ -139,19 +158,22 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
 
   void _openNotifications() {
     NotificationHelper.hasUnreadNotifications = false;
-    Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()))
-        .then((_) { if (mounted) setState(() {}); });
+    Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const NotificationsScreen()))
+        .then((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   // ── Build ──────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final width        = MediaQuery.of(context).size.width;
-    final theme        = Theme.of(context);
-    final cs           = theme.colorScheme;
-    final tt           = theme.textTheme;
+    final width = MediaQuery.of(context).size.width;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final baseFontSize = width * 0.04;
-    final unreadCount  = NotificationHelper.getUnreadCount();
+    final unreadCount = NotificationHelper.getUnreadCount();
 
     return Scaffold(
       key: _scaffoldKey,
@@ -225,18 +247,22 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
           ),
           if (unreadCount > 0)
             Positioned(
-              right: 8, top: 10,
+              right: 8,
+              top: 10,
               child: Container(
-                width: 16, height: 16,
-                decoration: BoxDecoration(color: Theme.of(context).colorScheme.error, shape: BoxShape.circle),
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.error,
+                    shape: BoxShape.circle),
                 child: Center(
                   child: Text(
                     unreadCount > 9 ? '9+' : '$unreadCount',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onError,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          color: Theme.of(context).colorScheme.onError,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
               ),
@@ -256,9 +282,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     return Padding(
       padding: EdgeInsets.fromLTRB(width * 0.05, 20, width * 0.05, 10),
       child: _isLoadingName
-          ? const SizedBox(height: 30, child: CircularProgressIndicator(strokeWidth: 2))
+          ? const SizedBox(
+              height: 30, child: CircularProgressIndicator(strokeWidth: 2))
           : Text(
-              _firstName != null ? 'مرحباً، د/ $_firstName 👋' : 'مرحباً، دكتور 👋',
+              _firstName != null
+                  ? 'مرحباً، د/ $_firstName 👋'
+                  : 'مرحباً، دكتور 👋',
               textAlign: TextAlign.right,
               textDirection: TextDirection.rtl,
               style: TextStyle(
@@ -304,13 +333,16 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 16),
         child: Column(
           children: [
-            Text(_casesError!, textAlign: TextAlign.center,
-                style: const TextStyle(fontFamily: 'Cairo', color: Colors.redAccent)),
+            Text(_casesError!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontFamily: 'Cairo', color: Colors.redAccent)),
             const SizedBox(height: 8),
             TextButton.icon(
               onPressed: _fetchCaseRequests,
               icon: const Icon(Icons.refresh),
-              label: const Text('إعادة المحاولة', style: TextStyle(fontFamily: 'Cairo')),
+              label: const Text('إعادة المحاولة',
+                  style: TextStyle(fontFamily: 'Cairo')),
             ),
           ],
         ),
@@ -323,11 +355,13 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         child: Center(
           child: Column(
             children: [
-              Icon(Icons.calendar_today_outlined, size: 48, color: Colors.grey[300]),
+              Icon(Icons.calendar_today_outlined,
+                  size: 48, color: Colors.grey[300]),
               const SizedBox(height: 12),
               const Text(
                 'لا توجد حالات مسجلة حالياً',
-                style: TextStyle(fontFamily: 'Cairo', color: Colors.grey, fontSize: 15),
+                style: TextStyle(
+                    fontFamily: 'Cairo', color: Colors.grey, fontSize: 15),
               ),
             ],
           ),
@@ -379,7 +413,10 @@ class _CaseCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: const Color(0xFFE5E7EB)),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 3)),
+            BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 3)),
           ],
         ),
         child: Column(
@@ -389,7 +426,8 @@ class _CaseCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (req.id != null) _IdBadge(id: req.id!, baseFontSize: baseFontSize),
+                if (req.id != null)
+                  _IdBadge(id: req.id!, baseFontSize: baseFontSize),
                 Text(
                   req.categoryName,
                   style: TextStyle(
@@ -411,7 +449,10 @@ class _CaseCard extends StatelessWidget {
                   req.doctorFullName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize * 0.8, color: Colors.grey[600]),
+                  style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: baseFontSize * 0.8,
+                      color: Colors.grey[600]),
                 ),
               ),
             ]),
@@ -419,35 +460,49 @@ class _CaseCard extends StatelessWidget {
             if (req.doctorCityName.isNotEmpty) ...[
               const SizedBox(height: 4),
               Row(children: [
-                Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[500]),
+                Icon(Icons.location_on_outlined,
+                    size: 14, color: Colors.grey[500]),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     req.doctorCityName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize * 0.8, color: Colors.grey[600]),
+                    style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: baseFontSize * 0.8,
+                        color: Colors.grey[600]),
                   ),
                 ),
               ]),
             ],
             // Description (optional)
-            if (req.description.isNotEmpty && req.description != 'No details') ...[
+            if (req.description.isNotEmpty &&
+                req.description != 'No details') ...[
               const SizedBox(height: 6),
               Text(
                 req.description,
                 textAlign: TextAlign.right,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize * 0.82, color: Colors.grey[700]),
+                style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: baseFontSize * 0.82,
+                    color: Colors.grey[700]),
               ),
             ],
             const SizedBox(height: 10),
             // Time + Date chips
             Row(children: [
-              _InfoChip(icon: Icons.access_time_outlined,    text: req.formattedTime, baseFontSize: baseFontSize),
+              _InfoChip(
+                  icon: Icons.access_time_outlined,
+                  text: req.formattedTime,
+                  baseFontSize: baseFontSize),
               const SizedBox(width: 8),
-              _InfoChip(icon: Icons.calendar_today_outlined, text: req.formattedDate, baseFontSize: baseFontSize),
+              _InfoChip(
+                  icon: Icons.calendar_today_outlined,
+                  text: req.formattedDate,
+                  baseFontSize: baseFontSize),
             ]),
           ],
         ),
@@ -470,7 +525,7 @@ class _IdBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        '#${id ?? ""}', 
+        '#${id ?? ""}',
         style: TextStyle(
           fontFamily: 'Cairo',
           fontSize: baseFontSize * 0.68,
@@ -486,17 +541,23 @@ class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String text;
   final double baseFontSize;
-  const _InfoChip({required this.icon, required this.text, required this.baseFontSize});
+  const _InfoChip(
+      {required this.icon, required this.text, required this.baseFontSize});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(
+          color: Colors.grey[100], borderRadius: BorderRadius.circular(8)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(icon, size: 13, color: const Color(0xFF1D61E7)),
         const SizedBox(width: 4),
-        Text(text, style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize * 0.72, color: Colors.grey[800])),
+        Text(text,
+            style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: baseFontSize * 0.72,
+                color: Colors.grey[800])),
       ]),
     );
   }
@@ -526,26 +587,53 @@ class _CaseDetailsSheet extends StatelessWidget {
           // Drag handle
           Center(
             child: Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(4)),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(4)),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             'تفاصيل الحالة',
-            style: TextStyle(fontFamily: 'Cairo', fontSize: 18, fontWeight: FontWeight.bold,
+            style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
                 color: isDark ? Colors.white : Colors.black87),
           ),
           const SizedBox(height: 12),
           const Divider(),
           const SizedBox(height: 10),
-          _DetailRow(icon: Icons.medical_services_outlined, label: 'التخصص',    value: req.categoryName),
-          _DetailRow(icon: Icons.person_outline,             label: 'الطبيب',    value: req.doctorFullName),
-          _DetailRow(icon: Icons.phone_outlined,             label: 'الهاتف',    value: req.doctorPhoneNumber),
-          _DetailRow(icon: Icons.location_on_outlined,       label: 'المدينة',   value: req.doctorCityName),
-          _DetailRow(icon: Icons.school_outlined,            label: 'الجامعة',   value: req.doctorUniversityName),
-          _DetailRow(icon: Icons.calendar_today_outlined,    label: 'التاريخ',   value: req.formattedDate),
-          _DetailRow(icon: Icons.access_time_outlined,       label: 'الوقت',     value: req.formattedTime),
+          _DetailRow(
+              icon: Icons.medical_services_outlined,
+              label: 'التخصص',
+              value: req.categoryName),
+          _DetailRow(
+              icon: Icons.person_outline,
+              label: 'الطبيب',
+              value: req.doctorFullName),
+          _DetailRow(
+              icon: Icons.phone_outlined,
+              label: 'الهاتف',
+              value: req.doctorPhoneNumber),
+          _DetailRow(
+              icon: Icons.location_on_outlined,
+              label: 'المدينة',
+              value: req.doctorCityName),
+          _DetailRow(
+              icon: Icons.school_outlined,
+              label: 'الجامعة',
+              value: req.doctorUniversityName),
+          _DetailRow(
+              icon: Icons.calendar_today_outlined,
+              label: 'التاريخ',
+              value: req.formattedDate),
+          _DetailRow(
+              icon: Icons.access_time_outlined,
+              label: 'الوقت',
+              value: req.formattedTime),
           if (req.description.isNotEmpty) ...[
             const SizedBox(height: 10),
             Container(
@@ -558,15 +646,26 @@ class _CaseDetailsSheet extends StatelessWidget {
               child: Text(
                 req.description,
                 textAlign: TextAlign.right,
-                style: TextStyle(fontFamily: 'Cairo', fontSize: 14, color: isDark ? Colors.grey[200] : Colors.grey[800]),
+                style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 14,
+                    color: isDark ? Colors.grey[200] : Colors.grey[800]),
               ),
             ),
           ],
           const SizedBox(height: 20),
           Row(children: [
-            Expanded(child: _SheetButton(label: 'رفض الحالة',  color: Colors.red.shade600,   onTap: () => Navigator.pop(context))),
+            Expanded(
+                child: _SheetButton(
+                    label: 'رفض الحالة',
+                    color: Colors.red.shade600,
+                    onTap: () => Navigator.pop(context))),
             const SizedBox(width: 12),
-            Expanded(child: _SheetButton(label: 'قبول الحالة', color: Colors.green.shade600, onTap: () => Navigator.pop(context))),
+            Expanded(
+                child: _SheetButton(
+                    label: 'قبول الحالة',
+                    color: Colors.green.shade600,
+                    onTap: () => Navigator.pop(context))),
           ]),
         ],
       ),
@@ -578,7 +677,8 @@ class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  const _DetailRow({required this.icon, required this.label, required this.value});
+  const _DetailRow(
+      {required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -587,10 +687,16 @@ class _DetailRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Flexible(child: Text(value, textAlign: TextAlign.right,
-              style: const TextStyle(fontFamily: 'Cairo', fontSize: 14))),
+          Flexible(
+              child: Text(value,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 14))),
           const SizedBox(width: 8),
-          Text('$label:', style: const TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.bold)),
+          Text('$label:',
+              style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold)),
           const SizedBox(width: 8),
           Icon(icon, size: 18, color: const Color(0xFF1D61E7)),
         ],
@@ -603,7 +709,8 @@ class _SheetButton extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
-  const _SheetButton({required this.label, required this.color, required this.onTap});
+  const _SheetButton(
+      {required this.label, required this.color, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -615,7 +722,9 @@ class _SheetButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      child: Text(label, style: const TextStyle(fontFamily: 'Cairo', fontSize: 15, fontWeight: FontWeight.bold)),
+      child: Text(label,
+          style: const TextStyle(
+              fontFamily: 'Cairo', fontSize: 15, fontWeight: FontWeight.bold)),
     );
   }
 }

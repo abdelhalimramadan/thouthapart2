@@ -86,15 +86,29 @@ class AuthService {
             fa = (userMap['faculty'] ?? userMap['college']) as String?;
             c = (userMap['category'] ?? userMap['specialization'])?.toString();
 
+            // Save doctor_id immediately on login so all subsequent screens can use it
+            final rawId =
+                userMap['id'] ?? userMap['doctorId'] ?? userMap['doctor_id'];
+            final doctorIdFromLogin = int.tryParse(rawId?.toString() ?? '');
+            if (doctorIdFromLogin != null && doctorIdFromLogin != 0) {
+              await SharedPrefHelper.setData('doctor_id', doctorIdFromLogin);
+            }
+
             if (f != null && f.isNotEmpty) {
               await SharedPrefHelper.setData('first_name', f);
               await SharedPrefHelper.setData('last_name', l ?? '');
-              if (e != null && e.isNotEmpty) await SharedPrefHelper.setData('email', e);
-              if (p != null && p.isNotEmpty) await SharedPrefHelper.setData('phone', p);
-              if (y != null && y.isNotEmpty) await SharedPrefHelper.setData('year', y);
-              if (g != null && g.isNotEmpty) await SharedPrefHelper.setData('governorate', g);
-              if (fa != null && fa.isNotEmpty) await SharedPrefHelper.setData('faculty', fa);
-              if (c != null && c.isNotEmpty) await SharedPrefHelper.setData('category', c);
+              if (e != null && e.isNotEmpty)
+                await SharedPrefHelper.setData('email', e);
+              if (p != null && p.isNotEmpty)
+                await SharedPrefHelper.setData('phone', p);
+              if (y != null && y.isNotEmpty)
+                await SharedPrefHelper.setData('year', y);
+              if (g != null && g.isNotEmpty)
+                await SharedPrefHelper.setData('governorate', g);
+              if (fa != null && fa.isNotEmpty)
+                await SharedPrefHelper.setData('faculty', fa);
+              if (c != null && c.isNotEmpty)
+                await SharedPrefHelper.setData('category', c);
             }
           }
         } catch (_) {
@@ -226,12 +240,15 @@ class AuthService {
         try {
           if (first_name != null && first_name.isNotEmpty) {
             await SharedPrefHelper.setData('first_name', first_name);
-            if (last_name != null) await SharedPrefHelper.setData('last_name', last_name);
+            if (last_name != null)
+              await SharedPrefHelper.setData('last_name', last_name);
             await SharedPrefHelper.setData('email', email.trim());
             if (phone != null) await SharedPrefHelper.setData('phone', phone);
-            if (faculty != null) await SharedPrefHelper.setData('faculty', faculty);
+            if (faculty != null)
+              await SharedPrefHelper.setData('faculty', faculty);
             if (year != null) await SharedPrefHelper.setData('year', year);
-            if (governorate != null) await SharedPrefHelper.setData('governorate', governorate);
+            if (governorate != null)
+              await SharedPrefHelper.setData('governorate', governorate);
           }
         } catch (_) {}
 

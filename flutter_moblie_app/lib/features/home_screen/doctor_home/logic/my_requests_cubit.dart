@@ -81,7 +81,14 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
   Future<void> deleteRequest(CaseRequestModel request) async {
     final currentList = List<CaseRequestModel>.from(_visibleRequests);
 
-    final result = await _repo.deleteRequest(request.id ?? 0);
+    // Read cached doctorId so the backend can verify ownership
+    int doctorId = await SharedPrefHelper.getInt('doctor_id');
+    if (doctorId == 0) {
+      final s = await SharedPrefHelper.getString('doctor_id');
+      doctorId = int.tryParse(s) ?? 0;
+    }
+
+    final result = await _repo.deleteRequest(request.id ?? 0, doctorId: doctorId == 0 ? null : doctorId);
 
     if (result['success'] == true) {
       currentList.removeWhere((r) => r.id == request.id);
@@ -109,10 +116,10 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
     return [];
   }
 
-  /// Resolves the doctor's numeric ID using three fallback strategies:
-  ///  1. SharedPreferences integer
+  /// Resolves the doctor's numeric ID using three strategies:
+  ///  1. SharedPreferences integer (fastest — cached from previous login)
   ///  2. SharedPreferences string
-  ///  3. Base64-decoded JWT payload (most reliable)
+  ///  3. Base64-decoded JWT payload (authoritative — no extra HTTP call)
   Future<int> _resolveDoctorId(String token) async {
     // Strategy 1 – stored as int
     int id = await SharedPrefHelper.getInt('doctor_id');
@@ -123,7 +130,7 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
     id = int.tryParse(idStr) ?? 0;
     if (id != 0) return id;
 
-    // Strategy 3 – decode JWT payload
+    // Strategy 3 – decode JWT payload directly (no HTTP call)
     try {
       final parts = token.split('.');
       if (parts.length == 3) {
@@ -134,10 +141,12 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
         final decoded =
             json.decode(utf8.decode(base64Url.decode(payload))) as Map?;
         if (decoded != null) {
-          final raw = decoded['id'] ?? decoded['doctorId'] ?? decoded['sub'];
+          final raw = decoded['id'] ??
+              decoded['doctorId'] ??
+              decoded['doctor_id'] ??
+              decoded['sub'];
           final fromToken = int.tryParse(raw?.toString() ?? '');
           if (fromToken != null && fromToken != 0) {
-            // Cache for subsequent calls
             await SharedPrefHelper.setData('doctor_id', fromToken);
             return fromToken;
           }
