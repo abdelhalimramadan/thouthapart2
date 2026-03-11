@@ -34,7 +34,8 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
     _slideAnim = Tween<Offset>(
       begin: const Offset(0, 0.1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
+    ).animate(
+        CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
     _animController.forward();
   }
 
@@ -45,11 +46,18 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
   }
 
   Future<void> _deleteAccount() async {
-    setState(() { _isLoading = true; _errorMessage = null; });
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
     try {
-      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      final token =
+          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
       if (token == null || token.isEmpty) {
-        setState(() { _errorMessage = 'خطأ في المصادقة، يرجى تسجيل الدخول مجدداً'; _isLoading = false; });
+        setState(() {
+          _errorMessage = 'خطأ في المصادقة، يرجى تسجيل الدخول مجدداً';
+          _isLoading = false;
+        });
         return;
       }
 
@@ -88,7 +96,6 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
     }
   }
 
-
   void _showSnack(String msg, {bool isError = false}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -107,7 +114,8 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0D1117) : const Color(0xFFF5F6FA),
+      backgroundColor:
+          isDark ? const Color(0xFF0D1117) : const Color(0xFFF5F6FA),
       body: Directionality(
         textDirection: TextDirection.rtl,
         child: CustomScrollView(
@@ -167,7 +175,8 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                                 color: Colors.red.withValues(alpha: 0.2),
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                    color: Colors.red.withValues(alpha: 0.4), width: 2),
+                                    color: Colors.red.withValues(alpha: 0.4),
+                                    width: 2),
                               ),
                               child: const Icon(
                                 Icons.delete_forever_rounded,
@@ -246,7 +255,8 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                             if (_errorMessage != null)
                               Container(
                                 alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8),
                                 child: Text(
                                   _errorMessage!,
                                   style: TextStyle(
@@ -386,7 +396,6 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
     );
   }
 
-
   Widget _buildDeleteButton() {
     return SizedBox(
       width: double.infinity,
@@ -409,8 +418,8 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
           onPressed: _isLoading ? null : _deleteAccount,
           child: _isLoading

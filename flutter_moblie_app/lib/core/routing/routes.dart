@@ -17,4 +17,5 @@ class Routes {
   static const String helpAndSupportScreen = '/help_and_support';
   static const String termsAndConditionsScreen = '/terms_and_conditions';
   static const String notificationsScreen = '/notifications';
+  static const String accountDeletionScreen = '/account-deletion';
 }

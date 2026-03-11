@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:thotha_mobile_app/core/networking/api_constants.dart';
 import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
+import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
+import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
@@ -304,6 +306,9 @@ class ApiService {
       }
       return _fail('فشل في تحميل الطلبات', code: res.statusCode);
     } on DioException catch (e) {
+      print('=== deleteDoctor error body ===');
+      print('status code: ${e.response?.statusCode}');
+      print('response data: ${e.response?.data}');
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
       return _fail('حدث خطأ غير متوقع');
@@ -357,15 +362,37 @@ class ApiService {
       if (code == 403)
         return _fail('ممنوع الوصول: تأكد من صلاحياتك', code: code);
       return _fail(_dioError(e), code: code);
-    } catch (_) {
+    } catch (e) {
+      print('=== deleteDoctor unexpected error: $e ===');
       return _fail('حدث خطأ غير متوقع');
     }
   }
 
   Future<Map<String, dynamic>> deleteDoctor() async {
     try {
-      await DioFactory.addDioHeaders();
-      final res = await _dio.delete(ApiConstants.deleteDoctor);
+      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+
+      // Clean Isolation: Using a fresh Dio instance to match web's 'fetch' behavior exactly
+      // This avoids interference from global interceptors or default headers
+      final isolatedDio = Dio(BaseOptions(
+        baseUrl: ApiConstants.baseUrl,
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
+      ));
+
+      final fullUrl = '${ApiConstants.baseUrl}${ApiConstants.deleteDoctor}';
+      print('=== deleteDoctor calling URL: $fullUrl ===');
+      
+      final res = await isolatedDio.delete(
+        fullUrl,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
       if (res.statusCode == 200 || res.statusCode == 204)
         return {'success': true};
       return _fail('فشل في حذف الحساب', code: res.statusCode);

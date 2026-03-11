@@ -12,6 +12,7 @@ import '../../features/forgot_password/ui/change_password_screen.dart';
 import '../../features/reset_password/ui/reset_password_screen.dart';
 import '../../features/home_screen/ui/home_screen.dart';
 import '../../features/notifications/ui/notifications_screen.dart';
+import '../../features/home_screen/doctor_home/ui/account_deletion_screen.dart';
 
 class AppRouter {
   Route generateRoute(RouteSettings settings) {
@@ -66,6 +67,10 @@ class AppRouter {
       case Routes.notificationsScreen:
         return MaterialPageRoute(
           builder: (context) => const NotificationsScreen(),
+        );
+      case Routes.accountDeletionScreen:
+        return MaterialPageRoute(
+          builder: (context) => const AccountDeletionScreen(),
         );
 
       default:
