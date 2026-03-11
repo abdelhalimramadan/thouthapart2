@@ -50,7 +50,10 @@ class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
   }
 
   Future<void> updateProfile(Map<String, dynamic> body) async {
-    emit(ProfileState.loading(cachedData: state.whenOrNull(success: (p, _, __) => p, loading: (p, _, __) => p)));
+    emit(ProfileState.loading(cachedData: state.whenOrNull(
+      success: (data, universities, cities) => data,
+      loading: (cachedData, universities, cities) => cachedData,
+    )));
     try {
       await _repository.updateProfile(body);
       

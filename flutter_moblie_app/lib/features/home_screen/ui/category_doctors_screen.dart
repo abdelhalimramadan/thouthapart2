@@ -46,7 +46,8 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
   }
 
   Future<void> _checkLoginStatus() async {
-    final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+    final token =
+        await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
     if (mounted) {
       setState(() {
         _isUserLoggedIn = token.isNotEmpty;
@@ -94,20 +95,20 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     }
 
     final firstName = await SharedPrefHelper.getString('first_name') ?? '';
-    final lastName  = await SharedPrefHelper.getString('last_name')  ?? '';
-    final phone     = await SharedPrefHelper.getString('phone')      ?? '';
-    final faculty   = await SharedPrefHelper.getString('faculty')    ?? '';
-    final year      = await SharedPrefHelper.getString('year')       ?? '';
+    final lastName = await SharedPrefHelper.getString('last_name') ?? '';
+    final phone = await SharedPrefHelper.getString('phone') ?? '';
+    final faculty = await SharedPrefHelper.getString('faculty') ?? '';
+    final year = await SharedPrefHelper.getString('year') ?? '';
     final governorate = await SharedPrefHelper.getString('governorate') ?? '';
 
     final body = <String, dynamic>{
-      if (doctorId != 0)     'id':             doctorId,
-      if (firstName.isNotEmpty) 'firstName':   firstName,
-      if (lastName.isNotEmpty)  'lastName':    lastName,
-      if (phone.isNotEmpty)     'phoneNumber': phone,
-      if (year.isNotEmpty)      'studyYear':   year,
-      if (faculty.isNotEmpty)   'universityName': faculty,
-      if (governorate.isNotEmpty) 'cityName':  governorate,
+      if (doctorId != 0) 'id': doctorId,
+      if (firstName.isNotEmpty) 'firstName': firstName,
+      if (lastName.isNotEmpty) 'lastName': lastName,
+      if (phone.isNotEmpty) 'phoneNumber': phone,
+      if (year.isNotEmpty) 'studyYear': year,
+      if (faculty.isNotEmpty) 'universityName': faculty,
+      if (governorate.isNotEmpty) 'cityName': governorate,
       'categoryName': widget.categoryName,
     };
 
@@ -130,6 +131,84 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
         ),
       ),
     ).then((_) => _loadRequests());
+  }
+
+  /// Asks for confirmation then deletes [req] via the authenticated API.
+  Future<void> _deleteRequest(CaseRequestModel req) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text(
+            'حذف الطلب',
+            style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+          ),
+          content: const Text(
+            'هل أنت متأكد من حذف هذا الطلب؟',
+            style: TextStyle(fontFamily: 'Cairo'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text(
+                'إلغاء',
+                style: TextStyle(fontFamily: 'Cairo', color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text(
+                'حذف',
+                style: TextStyle(fontFamily: 'Cairo', color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final result = await _repo.deleteRequest(req.id ?? 0);
+
+    if (!mounted) return;
+    Navigator.pop(context); // dismiss loading overlay
+
+    if (result['success'] == true) {
+      setState(() => _requests.removeWhere((r) => r.id == req.id));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('تم حذف الطلب بنجاح', style: TextStyle(fontFamily: 'Cairo')),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result['error']?.toString() ?? 'فشل في حذف الطلب',
+            style: const TextStyle(fontFamily: 'Cairo'),
+          ),
+          backgroundColor: Colors.red[700],
+        ),
+      );
+    }
   }
 
   /// Opens a bottom sheet with full case details + Book Now button.
@@ -183,7 +262,8 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
               onPressed: () => _updateCategoryAndNavigate(),
               label: const Text(
                 'نشر حالة جديدة',
-                style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
               ),
               icon: const Icon(Icons.add_task_rounded, color: Colors.white),
               backgroundColor: ColorsManager.mainBlue,
@@ -207,7 +287,8 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                             100, // space for FAB
                           ),
                           itemCount: _requests.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             return GestureDetector(
                               onTap: () => _showCaseDetails(_requests[index]),
@@ -218,6 +299,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                                 baseFontSize,
                                 isDark,
                                 theme,
+                                _isUserLoggedIn,
                               ),
                             );
                           },
@@ -234,6 +316,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     double baseFontSize,
     bool isDark,
     ThemeData theme,
+    bool isLoggedIn,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -255,7 +338,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header row: categoryName + id badge
+            // Header row: categoryName + id badge + delete (when logged in)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -270,23 +353,45 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                     ),
                   ),
                 ),
-                if (req.id != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: ColorsManager.mainBlue.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '#${req.id}',
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: baseFontSize * 0.72,
-                        fontWeight: FontWeight.bold,
-                        color: ColorsManager.mainBlue,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (req.id != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: ColorsManager.mainBlue.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '#${req.id}',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: baseFontSize * 0.72,
+                            fontWeight: FontWeight.bold,
+                            color: ColorsManager.mainBlue,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+                    if (isLoggedIn) ...[
+                      const SizedBox(width: 8),
+                      Material(
+                        color: Colors.red.withValues(alpha: 0.08),
+                        shape: const CircleBorder(),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.delete_outline_rounded,
+                            color: Colors.red,
+                            size: 20,
+                          ),
+                          tooltip: 'حذف الطلب',
+                          onPressed: () => _deleteRequest(req),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ],
             ),
 
@@ -312,11 +417,13 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
             ),
 
             // City · University
-            if (req.doctorCityName.isNotEmpty || req.doctorUniversityName.isNotEmpty) ...[
+            if (req.doctorCityName.isNotEmpty ||
+                req.doctorUniversityName.isNotEmpty) ...[
               const SizedBox(height: 5),
               Row(
                 children: [
-                  Icon(Icons.location_on_outlined, size: 15, color: Colors.grey[500]),
+                  Icon(Icons.location_on_outlined,
+                      size: 15, color: Colors.grey[500]),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
@@ -355,7 +462,8 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
             ],
 
             // Description
-            if (req.description.isNotEmpty && req.description != 'No details') ...[
+            if (req.description.isNotEmpty &&
+                req.description != 'No details') ...[
               const SizedBox(height: 10),
               Container(
                 width: double.infinity,
@@ -475,19 +583,23 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline_rounded, size: 56, color: Colors.redAccent),
+          const Icon(Icons.error_outline_rounded,
+              size: 56, color: Colors.redAccent),
           const SizedBox(height: 12),
           Text(
             _error ?? 'حدث خطأ غير متوقع',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontFamily: 'Cairo', color: Colors.redAccent),
+            style:
+                const TextStyle(fontFamily: 'Cairo', color: Colors.redAccent),
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: _loadRequests,
             icon: const Icon(Icons.refresh),
-            label: const Text('إعادة المحاولة', style: TextStyle(fontFamily: 'Cairo')),
-            style: ElevatedButton.styleFrom(backgroundColor: ColorsManager.mainBlue),
+            label: const Text('إعادة المحاولة',
+                style: TextStyle(fontFamily: 'Cairo')),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: ColorsManager.mainBlue),
           ),
         ],
       ),
@@ -515,7 +627,8 @@ class _CaseDetailsSheet extends StatelessWidget {
         color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(context).viewInsets.bottom + 24),
+      padding: EdgeInsets.fromLTRB(
+          20, 12, 20, MediaQuery.of(context).viewInsets.bottom + 24),
       child: SingleChildScrollView(
         child: Directionality(
           textDirection: TextDirection.rtl,
@@ -553,16 +666,52 @@ class _CaseDetailsSheet extends StatelessWidget {
               const SizedBox(height: 8),
 
               // ── Details rows ──
-              _DetailRow(icon: Icons.medical_services_outlined, label: 'التخصص',  value: req.categoryName,         isDark: isDark, baseFontSize: baseFontSize),
-              _DetailRow(icon: Icons.person_outline,             label: 'الطبيب',  value: req.doctorFullName,        isDark: isDark, baseFontSize: baseFontSize),
-              _DetailRow(icon: Icons.phone_outlined,             label: 'الهاتف',  value: req.doctorPhoneNumber,     isDark: isDark, baseFontSize: baseFontSize),
-              _DetailRow(icon: Icons.location_city_outlined,     label: 'المدينة', value: req.doctorCityName,        isDark: isDark, baseFontSize: baseFontSize),
-              _DetailRow(icon: Icons.school_outlined,            label: 'الجامعة', value: req.doctorUniversityName,  isDark: isDark, baseFontSize: baseFontSize),
-              _DetailRow(icon: Icons.calendar_today_outlined,    label: 'التاريخ', value: req.formattedDate,         isDark: isDark, baseFontSize: baseFontSize),
-              _DetailRow(icon: Icons.access_time_outlined,       label: 'الوقت',   value: req.formattedTime,         isDark: isDark, baseFontSize: baseFontSize),
+              _DetailRow(
+                  icon: Icons.medical_services_outlined,
+                  label: 'التخصص',
+                  value: req.categoryName,
+                  isDark: isDark,
+                  baseFontSize: baseFontSize),
+              _DetailRow(
+                  icon: Icons.person_outline,
+                  label: 'الطبيب',
+                  value: req.doctorFullName,
+                  isDark: isDark,
+                  baseFontSize: baseFontSize),
+              _DetailRow(
+                  icon: Icons.phone_outlined,
+                  label: 'الهاتف',
+                  value: req.doctorPhoneNumber,
+                  isDark: isDark,
+                  baseFontSize: baseFontSize),
+              _DetailRow(
+                  icon: Icons.location_city_outlined,
+                  label: 'المدينة',
+                  value: req.doctorCityName,
+                  isDark: isDark,
+                  baseFontSize: baseFontSize),
+              _DetailRow(
+                  icon: Icons.school_outlined,
+                  label: 'الجامعة',
+                  value: req.doctorUniversityName,
+                  isDark: isDark,
+                  baseFontSize: baseFontSize),
+              _DetailRow(
+                  icon: Icons.calendar_today_outlined,
+                  label: 'التاريخ',
+                  value: req.formattedDate,
+                  isDark: isDark,
+                  baseFontSize: baseFontSize),
+              _DetailRow(
+                  icon: Icons.access_time_outlined,
+                  label: 'الوقت',
+                  value: req.formattedTime,
+                  isDark: isDark,
+                  baseFontSize: baseFontSize),
 
               // ── Description ──
-              if (req.description.isNotEmpty && req.description != 'No details') ...[
+              if (req.description.isNotEmpty &&
+                  req.description != 'No details') ...[
                 const SizedBox(height: 12),
                 Container(
                   width: double.infinity,
@@ -570,7 +719,10 @@ class _CaseDetailsSheet extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isDark ? Colors.grey[850] : const Color(0xFFF9FAFB),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
+                    border: Border.all(
+                        color: isDark
+                            ? Colors.grey[700]!
+                            : const Color(0xFFE5E7EB)),
                   ),
                   child: Text(
                     req.description,
@@ -592,7 +744,8 @@ class _CaseDetailsSheet extends StatelessWidget {
                 height: 52,
                 child: ElevatedButton.icon(
                   onPressed: onBookNow,
-                  icon: const Icon(Icons.calendar_month_rounded, color: Colors.white),
+                  icon: const Icon(Icons.calendar_month_rounded,
+                      color: Colors.white),
                   label: Text(
                     'احجز الآن',
                     style: TextStyle(
@@ -604,7 +757,8 @@ class _CaseDetailsSheet extends StatelessWidget {
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorsManager.mainBlue,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
                     elevation: 2,
                   ),
                 ),
@@ -669,4 +823,3 @@ class _DetailRow extends StatelessWidget {
     );
   }
 }
-

@@ -34,6 +34,7 @@ class DioFactory {
         await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
     final headers = <String, dynamic>{
       'Accept': 'application/json',
+      'Content-Type': 'application/json',
     };
     if (token != null && token is String && token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';

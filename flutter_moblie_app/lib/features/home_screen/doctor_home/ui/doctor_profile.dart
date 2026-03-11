@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
-import 'package:thotha_mobile_app/core/theming/styles.dart';
 import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/profile_cubit.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/profile_state.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/account_deletion_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
 
 class DoctorProfileScreen extends StatelessWidget {
@@ -50,8 +50,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     
     DoctorProfileModel? currentProfile;
     currentState.whenOrNull(
-      success: (p, _, __) => currentProfile = p,
-      loading: (p, _, __) => currentProfile = p,
+      success: (data, universities, cities) => currentProfile = data,
+      loading: (cachedData, universities, cities) => currentProfile = cachedData,
     );
 
     final body = <String, dynamic>{
@@ -67,7 +67,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     // Remove nulls to avoid backend errors
     body.removeWhere((key, value) => value == null);
 
-    cubit.updateProfile(body);
+    final profileCubit = context.read<ProfileCubit>();
+    profileCubit.updateProfile(body);
   }
 
   void _showSelectionDialog({
@@ -150,7 +151,12 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
         centerTitle: true,
         title: Text(
           'الملف الشخصي',
-          style: TextStyles.font18BlackBold.copyWith(fontFamily: 'Cairo'),
+          style: const TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 20.sp),
@@ -166,12 +172,12 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
         child: BlocConsumer<ProfileCubit, ProfileState<DoctorProfileModel>>(
           listener: (context, state) {
             state.whenOrNull(
-              success: (p, _, __) {
+              success: (p, universities, cities) {
                 _universityCtrl.text = p.faculty ?? '';
                 _yearCtrl.text       = p.year ?? '';
                 _cityCtrl.text       = p.governorate ?? '';
               },
-              error: (msg, _) {
+              error: (msg, type) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(msg), backgroundColor: Colors.red),
                 );
@@ -179,14 +185,14 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
             );
           },
           builder: (context, state) {
-            return state.maybeWhen(
-              loading: (cachedData, universities, cities) => cachedData != null 
-                  ? _buildContent(cachedData, universities, cities) 
-                  : const Center(child: CircularProgressIndicator()),
-              success: (profile, universities, cities) => _buildContent(profile, universities, cities),
-              error: (msg, _) => Center(child: Text(msg)),
-              orElse: () => const SizedBox.shrink(),
+            final loadingWidget = state.mapOrNull(
+              loading: (s) => s.cachedData != null
+                  ? _buildContent(s.cachedData!, s.universities, s.cities)
+                  : null,
+              success: (s) => _buildContent(s.data, s.universities, s.cities),
+              error: (s) => Center(child: Text(s.error)),
             );
+            return loadingWidget ?? const Center(child: CircularProgressIndicator());
           },
         ),
       ),
@@ -202,37 +208,76 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
             ),
           ],
         ),
-        child: InkWell(
-          onTap: _onSave,
-          borderRadius: BorderRadius.circular(12.r),
-          child: Container(
-            width: double.infinity,
-            height: 54.h,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF1D61E7), Color(0xFF0B8FAC)],
-              ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ── Save Button ───────────────────────────────────────────────
+            InkWell(
+              onTap: _onSave,
               borderRadius: BorderRadius.circular(12.r),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF1D61E7).withValues(alpha: 0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
+              child: Container(
+                width: double.infinity,
+                height: 54.h,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF1D61E7), Color(0xFF0B8FAC)],
+                  ),
+                  borderRadius: BorderRadius.circular(12.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF1D61E7).withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                'حفظ',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                child: Center(
+                  child: Text(
+                    'حفظ',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
+            SizedBox(height: 10.h),
+            // ── Delete Account Button ─────────────────────────────────────
+            SizedBox(
+              width: double.infinity,
+              height: 50.h,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.red, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AccountDeletionScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.delete_forever_rounded,
+                    color: Colors.red, size: 20),
+                label: Text(
+                  'حذف الحساب',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

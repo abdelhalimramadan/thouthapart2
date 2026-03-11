@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/helpers/constants.dart';
-import 'package:thotha_mobile_app/core/networking/api_constants.dart';
-import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
-import 'package:thotha_mobile_app/features/login/ui/login_screen.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
 
 import '../../../../core/routing/routes.dart';
@@ -17,12 +14,8 @@ class AccountDeletionScreen extends StatefulWidget {
 
 class _AccountDeletionScreenState extends State<AccountDeletionScreen>
     with SingleTickerProviderStateMixin {
-  final _passwordController = TextEditingController();
-  final _confirmController = TextEditingController();
-  bool _obscurePassword = true;
-  bool _obscureConfirm = true;
   bool _isLoading = false;
-  bool _agreedToTerms = false;
+  String? _errorMessage; // ← inline error shown in UI
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
@@ -48,161 +41,53 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
   @override
   void dispose() {
     _animController.dispose();
-    _passwordController.dispose();
-    _confirmController.dispose();
     super.dispose();
   }
 
   Future<void> _deleteAccount() async {
-    if (!_agreedToTerms) {
-      _showSnack('يرجى الموافقة على شروط حذف الحساب أولاً', isError: true);
-      return;
-    }
-    if (_passwordController.text.isEmpty) {
-      _showSnack('يرجى إدخال كلمة المرور للتأكيد', isError: true);
-      return;
-    }
-    if (_passwordController.text != _confirmController.text) {
-      _showSnack('كلمات المرور غير متطابقة', isError: true);
-      return;
-    }
-
-    // Show final confirmation dialog
-    final confirmed = await _showFinalConfirmDialog();
-    if (!confirmed) return;
-
-    setState(() => _isLoading = true);
+    setState(() { _isLoading = true; _errorMessage = null; });
     try {
       final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
       if (token == null || token.isEmpty) {
-        _showSnack('خطأ في المصادقة، يرجى تسجيل الدخول مجدداً', isError: true);
-        setState(() => _isLoading = false);
+        setState(() { _errorMessage = 'خطأ في المصادقة، يرجى تسجيل الدخول مجدداً'; _isLoading = false; });
         return;
       }
 
-      // Use the correct API endpoint via ApiService
-      // Note: We don't send password in body as the endpoint is likely token-based authenticated
-      // The password check above serves as a client-side confirm.
       final result = await ApiService().deleteDoctor();
 
       if (result['success'] == true) {
-        // Clear all stored data
         await SharedPrefHelper.clearAllSecuredData();
-
         if (!mounted) return;
         _showSnack('تم حذف الحساب بنجاح');
         await Future.delayed(const Duration(seconds: 1));
         if (!mounted) return;
-
         Navigator.of(context).pushNamedAndRemoveUntil(
           Routes.loginScreen,
           (Route<dynamic> route) => false,
         );
       } else {
-        _showSnack(result['error'] ?? 'فشل في حذف الحساب', isError: true);
+        final code = result['statusCode'] as int?;
+        final String msg;
+        if (code == 400) {
+          msg = 'طلب غير صحيح، تأكد من البيانات';
+        } else if (code == 401) {
+          msg = 'غير مصرح: يرجى تسجيل الدخول مجدداً';
+        } else if (code == 403) {
+          msg = 'ممنوع الوصول، تأكد من صلاحياتك';
+        } else if (code == 404) {
+          msg = 'الطبيب غير موجود';
+        } else {
+          msg = result['error'] ?? 'فشل في حذف الحساب';
+        }
+        setState(() => _errorMessage = msg);
       }
     } catch (_) {
-      _showSnack('حدث خطأ غير متوقع', isError: true);
+      setState(() => _errorMessage = 'حدث خطأ أثناء الاتصال بالخادم');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  Future<bool> _showFinalConfirmDialog() async {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final result = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          backgroundColor: isDark ? const Color(0xFF1C2128) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Column(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.warning_amber_rounded,
-                    color: Colors.red, size: 32),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'تأكيد الحذف النهائي',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 17,
-                  color: Colors.red,
-                ),
-              ),
-            ],
-          ),
-          content: Text(
-            'هذا الإجراء لا يمكن التراجع عنه.\nسيتم حذف حسابك وجميع بياناتك بشكل نهائي.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 14,
-              color: isDark ? Colors.white70 : const Color(0xFF374151),
-              height: 1.6,
-            ),
-          ),
-          actionsAlignment: MainAxisAlignment.center,
-          actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: isDark ? Colors.grey[600]! : Colors.grey[300]!),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    onPressed: () => Navigator.of(ctx).pop(false),
-                    child: Text(
-                      'إلغاء',
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        color: isDark ? Colors.grey[400] : Colors.grey[700],
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      elevation: 0,
-                    ),
-                    onPressed: () => Navigator.of(ctx).pop(true),
-                    child: const Text(
-                      'حذف نهائياً',
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-    return result ?? false;
-  }
 
   void _showSnack(String msg, {bool isError = false}) {
     if (!mounted) return;
@@ -220,8 +105,6 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0D1117) : const Color(0xFFF5F6FA),
@@ -255,7 +138,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                           height: 140,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.04),
+                            color: Colors.white.withValues(alpha: 0.04),
                           ),
                         ),
                       ),
@@ -267,7 +150,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                           height: 80,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.03),
+                            color: Colors.white.withValues(alpha: 0.03),
                           ),
                         ),
                       ),
@@ -281,10 +164,10 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                               width: 60,
                               height: 60,
                               decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.2),
+                                color: Colors.red.withValues(alpha: 0.2),
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                    color: Colors.red.withOpacity(0.4), width: 2),
+                                    color: Colors.red.withValues(alpha: 0.4), width: 2),
                               ),
                               child: const Icon(
                                 Icons.delete_forever_rounded,
@@ -308,7 +191,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                               style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 13,
-                                color: Colors.white.withOpacity(0.65),
+                                color: Colors.white.withValues(alpha: 0.65),
                               ),
                             ),
                             const SizedBox(height: 20),
@@ -326,7 +209,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.12),
+                      color: Colors.white.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.arrow_back_ios_new_rounded,
@@ -355,18 +238,27 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
 
                         // ── What Will Be Deleted ─────────────────────────
                         _buildWillBeDeletedCard(isDark),
-                        const SizedBox(height: 16),
-
-                        // ── Password Confirmation ────────────────────────
-                        _buildPasswordCard(isDark, width),
-                        const SizedBox(height: 16),
-
-                        // ── Agreement Checkbox ───────────────────────────
-                        _buildAgreementCard(isDark),
                         const SizedBox(height: 24),
 
                         // ── Delete Button ────────────────────────────────
-                        _buildDeleteButton(),
+                        Column(
+                          children: [
+                            if (_errorMessage != null)
+                              Container(
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                child: Text(
+                                  _errorMessage!,
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 14,
+                                    color: Colors.redAccent,
+                                  ),
+                                ),
+                              ),
+                            _buildDeleteButton(),
+                          ],
+                        ),
                         const SizedBox(height: 12),
 
                         // ── Cancel Button ────────────────────────────────
@@ -394,12 +286,12 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
           colors: [
-            Colors.red.withOpacity(isDark ? 0.18 : 0.08),
-            Colors.orange.withOpacity(isDark ? 0.10 : 0.04),
+            Colors.red.withValues(alpha: isDark ? 0.18 : 0.08),
+            Colors.orange.withValues(alpha: isDark ? 0.10 : 0.04),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.red.withOpacity(0.25)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.25)),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -409,7 +301,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.15),
+              color: Colors.red.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.warning_amber_rounded,
@@ -471,7 +363,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(item.$1, size: 16, color: Colors.red[400]),
@@ -494,191 +386,24 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
     );
   }
 
-  // ── Password Confirmation Card ────────────────────────────────────────────
-  Widget _buildPasswordCard(bool isDark, double width) {
-    return _buildSectionCard(
-      isDark: isDark,
-      title: 'تأكيد الهوية',
-      icon: Icons.lock_outline_rounded,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'أدخل كلمة المرور للتحقق من هويتك قبل حذف الحساب.',
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 12.5,
-              color: isDark ? Colors.white54 : Colors.grey[600],
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 14),
-          _buildPasswordField(
-            controller: _passwordController,
-            label: 'كلمة المرور',
-            obscure: _obscurePassword,
-            onToggle: () =>
-                setState(() => _obscurePassword = !_obscurePassword),
-            isDark: isDark,
-          ),
-          const SizedBox(height: 12),
-          _buildPasswordField(
-            controller: _confirmController,
-            label: 'تأكيد كلمة المرور',
-            obscure: _obscureConfirm,
-            onToggle: () =>
-                setState(() => _obscureConfirm = !_obscureConfirm),
-            isDark: isDark,
-            isConfirm: true,
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildPasswordField({
-    required TextEditingController controller,
-    required String label,
-    required bool obscure,
-    required VoidCallback onToggle,
-    required bool isDark,
-    bool isConfirm = false,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: obscure,
-      style: TextStyle(
-        fontFamily: 'Cairo',
-        color: isDark ? Colors.white : const Color(0xFF111827),
-      ),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(
-          fontFamily: 'Cairo',
-          color: isDark ? Colors.white54 : Colors.grey[600],
-          fontSize: 13,
-        ),
-        prefixIcon: Icon(
-          isConfirm ? Icons.lock_reset_outlined : Icons.lock_outline,
-          color: const Color(0xFF021433),
-          size: 20,
-        ),
-        suffixIcon: IconButton(
-          icon: Icon(
-            obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-            color: Colors.grey,
-            size: 20,
-          ),
-          onPressed: onToggle,
-        ),
-        filled: true,
-        fillColor: isDark ? const Color(0xFF0D1117) : const Color(0xFFF9FAFB),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              const BorderSide(color: Color(0xFF021433), width: 1.5),
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      ),
-    );
-  }
-
-  // ── Agreement Card ────────────────────────────────────────────────────────
-  Widget _buildAgreementCard(bool isDark) {
-    return GestureDetector(
-      onTap: () => setState(() => _agreedToTerms = !_agreedToTerms),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF161B22) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: _agreedToTerms
-                ? const Color(0xFF021433).withOpacity(0.5)
-                : (isDark ? Colors.grey[800]! : const Color(0xFFE5E7EB)),
-            width: _agreedToTerms ? 1.5 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isDark
-                  ? Colors.black.withOpacity(0.2)
-                  : Colors.grey.withOpacity(0.07),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: _agreedToTerms
-                    ? const Color(0xFF021433)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: _agreedToTerms
-                      ? const Color(0xFF021433)
-                      : (isDark ? Colors.grey[600]! : Colors.grey[400]!),
-                  width: 2,
-                ),
-              ),
-              child: _agreedToTerms
-                  ? const Icon(Icons.check_rounded,
-                      color: Colors.white, size: 15)
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'أفهم أن حذف الحساب نهائي ولا يمكن التراجع عنه، وأوافق على فقدان جميع بياناتي.',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 13,
-                  height: 1.6,
-                  color: isDark ? Colors.white70 : const Color(0xFF374151),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── Delete Button ─────────────────────────────────────────────────────────
   Widget _buildDeleteButton() {
     return SizedBox(
       width: double.infinity,
       height: 52,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+      child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: _agreedToTerms
-                ? [Colors.red[700]!, Colors.red[500]!]
-                : [Colors.grey[400]!, Colors.grey[300]!],
+            colors: [Colors.red[700]!, Colors.red[500]!],
           ),
           borderRadius: BorderRadius.circular(14),
-          boxShadow: _agreedToTerms
-              ? [
-                  BoxShadow(
-                    color: Colors.red.withOpacity(0.35),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  )
-                ]
-              : [],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.red.withValues(alpha: 0.35),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -687,7 +412,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14)),
           ),
-          onPressed: (_isLoading || !_agreedToTerms) ? null : _deleteAccount,
+          onPressed: _isLoading ? null : _deleteAccount,
           child: _isLoading
               ? const SizedBox(
                   width: 22,
@@ -759,8 +484,8 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.grey.withOpacity(0.07),
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.grey.withValues(alpha: 0.07),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

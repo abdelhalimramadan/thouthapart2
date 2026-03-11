@@ -18,8 +18,8 @@ class ApiService {
   // Public Dio — no auth, used for open reference-data endpoints
   Dio get _public => Dio(BaseOptions(
         baseUrl: ApiConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
         headers: const {'Accept': 'application/json', 'Content-Type': 'application/json'},
       ));
 
@@ -273,11 +273,17 @@ class ApiService {
   Future<Map<String, dynamic>> deleteRequest(int id) async {
     try {
       await DioFactory.addDioHeaders();
-      final res = await _dio.delete('${ApiConstants.deleteRequest}/$id');
+      final res = await _dio.delete(
+        ApiConstants.deleteRequest,
+        queryParameters: {'id': id},
+      );
       if (res.statusCode == 200 || res.statusCode == 204) return {'success': true};
       return _fail('فشل في حذف الطلب', code: res.statusCode);
     } on DioException catch (e) {
-      return _fail(_dioError(e), code: e.response?.statusCode);
+      final code = e.response?.statusCode;
+      if (code == 404) return _fail('الطلب غير موجود', code: code);
+      if (code == 500) return _fail('خطأ في الخادم، حاول مرة أخرى', code: code);
+      return _fail(_dioError(e), code: code);
     } catch (_) {
       return _fail('حدث خطأ غير متوقع');
     }
@@ -303,7 +309,11 @@ class ApiService {
       if (res.statusCode == 200 || res.statusCode == 204) return {'success': true};
       return _fail('فشل في حذف الحساب', code: res.statusCode);
     } on DioException catch (e) {
-      return _fail(_dioError(e), code: e.response?.statusCode);
+      final code = e.response?.statusCode;
+      if (code == 404) return _fail('الطبيب غير موجود', code: code);
+      if (code == 401) return _fail('غير مصرح: يرجى تسجيل الدخول مجدداً', code: code);
+      if (code == 403) return _fail('ممنوع الوصول، تأكد من صلاحياتك', code: code);
+      return _fail(_dioError(e), code: code);
     } catch (_) {
       return _fail('حدث خطأ غير متوقع');
     }
