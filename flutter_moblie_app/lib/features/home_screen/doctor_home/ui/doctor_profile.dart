@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
+
 import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/profile_cubit.dart';
@@ -31,11 +32,32 @@ class DoctorProfileBody extends StatefulWidget {
 }
 
 class _DoctorProfileBodyState extends State<DoctorProfileBody> {
-
   final _universityCtrl = TextEditingController();
-  final _yearCtrl       = TextEditingController();
-  final _cityCtrl       = TextEditingController();
+  final _yearCtrl = TextEditingController();
+  final _cityCtrl = TextEditingController();
 
+  // Original values — set once when profile loads
+  String _origUniversity = '';
+  String _origYear = '';
+  String _origCity = '';
+
+  bool _hasChanges = false;
+  bool _isSaving = false; // true while a save request is in-flight
+
+  @override
+  void initState() {
+    super.initState();
+    _universityCtrl.addListener(_checkChanges);
+    _yearCtrl.addListener(_checkChanges);
+    _cityCtrl.addListener(_checkChanges);
+  }
+
+  void _checkChanges() {
+    final changed = _universityCtrl.text.trim() != _origUniversity ||
+        _yearCtrl.text.trim() != _origYear ||
+        _cityCtrl.text.trim() != _origCity;
+    if (changed != _hasChanges) setState(() => _hasChanges = changed);
+  }
 
   @override
   void dispose() {
@@ -45,31 +67,39 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     super.dispose();
   }
 
-  void _onSave() {
+  Future<void> _onSave() async {
     final cubit = context.read<ProfileCubit>();
     final currentState = cubit.state;
-    
+
     DoctorProfileModel? currentProfile;
     currentState.whenOrNull(
-      success: (data, universities, cities) => currentProfile = data,
-      loading: (cachedData, universities, cities) => currentProfile = cachedData,
+      success: (data, universities, cities, categories) =>
+          currentProfile = data,
+      loading: (cachedData, universities, cities, categories) =>
+          currentProfile = cachedData,
     );
 
-    final body = <String, dynamic>{
-      'firstName':      currentProfile?.firstName,
-      'lastName':       currentProfile?.lastName,
-      'phoneNumber':    currentProfile?.phone,
-      'email':          currentProfile?.email,
-      'universityName': _universityCtrl.text.trim(),
-      'studyYear':      _yearCtrl.text.trim(),
-      'cityName':       _cityCtrl.text.trim(),
-    };
-    
-    // Remove nulls to avoid backend errors
-    body.removeWhere((key, value) => value == null);
+    // Resolve doctorId — needed by backend to verify ownership
+    int doctorId = currentProfile?.id ?? 0;
 
-    final profileCubit = context.read<ProfileCubit>();
-    profileCubit.updateProfile(body);
+    final body = <String, dynamic>{
+      if (doctorId != 0) 'id': doctorId,
+      if (doctorId != 0) 'doctorId': doctorId,
+      'firstName': currentProfile?.firstName,
+      'lastName': currentProfile?.lastName,
+      'phoneNumber': currentProfile?.phone,
+      'email': currentProfile?.email,
+      'universityName': _universityCtrl.text.trim(),
+      'studyYear': _yearCtrl.text.trim(),
+      'cityName': _cityCtrl.text.trim(),
+    };
+
+    // Remove nulls/empty to avoid backend errors
+    body.removeWhere((key, value) => value == null || value == '');
+
+    if (!mounted) return;
+    setState(() => _isSaving = true);
+    cubit.updateProfile(body);
   }
 
   void _showSelectionDialog({
@@ -84,28 +114,37 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             final filteredItems = items
-                .where((item) => item.toLowerCase().contains(searchQuery.toLowerCase()))
+                .where((item) =>
+                    item.toLowerCase().contains(searchQuery.toLowerCase()))
                 .toList();
-            
+
             return Directionality(
               textDirection: TextDirection.rtl,
               child: AlertDialog(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-                title: Text(title, style: TextStyle(fontFamily: 'Cairo', fontSize: 18.sp, fontWeight: FontWeight.bold)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.r)),
+                title: Text(title,
+                    style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold)),
                 content: SizedBox(
                   width: double.maxFinite,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextField(
-                        onChanged: (val) => setDialogState(() => searchQuery = val),
+                        onChanged: (val) =>
+                            setDialogState(() => searchQuery = val),
                         textAlign: TextAlign.right,
                         decoration: InputDecoration(
                           hintText: 'بحث...',
-                          hintStyle: TextStyle(fontFamily: 'Cairo', fontSize: 14.sp),
+                          hintStyle:
+                              TextStyle(fontFamily: 'Cairo', fontSize: 14.sp),
                           prefixIcon: const Icon(Icons.search),
                           isDense: true,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r)),
                         ),
                       ),
                       SizedBox(height: 12.h),
@@ -114,18 +153,20 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                         child: ListView.separated(
                           shrinkWrap: true,
                           itemCount: filteredItems.length,
-                          separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey[200]),
+                          separatorBuilder: (_, __) =>
+                              Divider(height: 1, color: Colors.grey[200]),
                           itemBuilder: (context, index) {
                             return ListTile(
                               title: Text(
                                 filteredItems[index],
-                                style: TextStyle(fontFamily: 'Cairo', fontSize: 16.sp),
+                                style: TextStyle(
+                                    fontFamily: 'Cairo', fontSize: 16.sp),
                                 textAlign: TextAlign.right,
                               ),
                               onTap: () {
                                 controller.text = filteredItems[index];
                                 Navigator.pop(context);
-                                _onSave(); // Auto save on selection
+                                // No auto-save — user must press save button
                               },
                             );
                           },
@@ -160,7 +201,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 20.sp),
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: Colors.black, size: 20.sp),
           onPressed: () {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (_) => const DoctorHomeScreen()),
@@ -173,14 +215,45 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
         child: BlocConsumer<ProfileCubit, ProfileState<DoctorProfileModel>>(
           listener: (context, state) {
             state.whenOrNull(
-              success: (p, universities, cities) {
-                _universityCtrl.text = p.faculty ?? '';
-                _yearCtrl.text       = p.year ?? '';
-                _cityCtrl.text       = p.governorate ?? '';
+              success: (p, universities, cities, categories) {
+                final uni = p.faculty ?? '';
+                final yr = p.year ?? '';
+                final city = p.governorate ?? '';
+                _universityCtrl.text = uni;
+                _yearCtrl.text = yr;
+                _cityCtrl.text = city;
+                _origUniversity = uni;
+                _origYear = yr;
+                _origCity = city;
+                if (_hasChanges) setState(() => _hasChanges = false);
+                // Show success snackbar only after a save, not on first load
+                if (_isSaving) {
+                  _isSaving = false;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text(
+                        'تم حفظ التغييرات بنجاح',
+                        style: TextStyle(fontFamily: 'Cairo'),
+                      ),
+                      backgroundColor: Colors.green[700],
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                  );
+                }
               },
               error: (msg, type) {
+                _isSaving = false;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(msg), backgroundColor: Colors.red),
+                  SnackBar(
+                    content:
+                        Text(msg, style: const TextStyle(fontFamily: 'Cairo')),
+                    backgroundColor: Colors.red[700],
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
                 );
               },
             );
@@ -193,7 +266,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
               success: (s) => _buildContent(s.data, s.universities, s.cities),
               error: (s) => Center(child: Text(s.error)),
             );
-            return loadingWidget ?? const Center(child: CircularProgressIndicator());
+            return loadingWidget ??
+                const Center(child: CircularProgressIndicator());
           },
         ),
       ),
@@ -214,19 +288,26 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
           children: [
             // ── Save Button ───────────────────────────────────────────────
             InkWell(
-              onTap: _onSave,
+              onTap: _hasChanges ? _onSave : null,
               borderRadius: BorderRadius.circular(12.r),
-              child: Container(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
                 width: double.infinity,
                 height: 54.h,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1D61E7), Color(0xFF0B8FAC)],
-                  ),
+                  gradient: _hasChanges
+                      ? const LinearGradient(
+                          colors: [Color(0xFF1D61E7), Color(0xFF0B8FAC)],
+                        )
+                      : LinearGradient(
+                          colors: [Colors.grey.shade400, Colors.grey.shade400],
+                        ),
                   borderRadius: BorderRadius.circular(12.r),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF1D61E7).withValues(alpha: 0.2),
+                      color: _hasChanges
+                          ? const Color(0xFF1D61E7).withValues(alpha: 0.2)
+                          : Colors.transparent,
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -317,7 +398,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     );
   }
 
-  Widget _buildContent(DoctorProfileModel profile, List<UniversityModel> universities, List<CityModel> cities) {
+  Widget _buildContent(DoctorProfileModel profile,
+      List<UniversityModel> universities, List<CityModel> cities) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.w),
       child: Column(
@@ -348,13 +430,19 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
             ),
             child: Column(
               children: [
-                _buildFieldItem(label: 'الإيميل', value: profile.email ?? '', isRtl: false),
+                _buildFieldItem(
+                    label: 'الإيميل', value: profile.email ?? '', isRtl: false),
                 _divider(),
-                _buildFieldItem(label: 'الاسم الأول', value: profile.firstName ?? ''),
+                _buildFieldItem(
+                    label: 'الاسم الأول', value: profile.firstName ?? ''),
                 _divider(),
-                _buildFieldItem(label: 'اسم العائلة', value: profile.lastName ?? ''),
+                _buildFieldItem(
+                    label: 'اسم العائلة', value: profile.lastName ?? ''),
                 _divider(),
-                _buildFieldItem(label: 'رقم الهاتف', value: profile.phone ?? '', isVerified: true),
+                _buildFieldItem(
+                    label: 'رقم الهاتف',
+                    value: profile.phone ?? '',
+                    isVerified: true),
                 _divider(),
                 _buildEditableField(
                   label: 'الجامعة',
@@ -373,7 +461,15 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                   displayValue: profile.year,
                   onTap: () => _showSelectionDialog(
                     title: 'اختر السنة الدراسية',
-                    items: const ['الأولى', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة', 'امتياز', 'مزاول'],
+                    items: const [
+                      'الأولى',
+                      'الثانية',
+                      'الثالثة',
+                      'الرابعة',
+                      'الخامسة',
+                      'امتياز',
+                      'مزاول'
+                    ],
                     controller: _yearCtrl,
                   ),
                 ),
@@ -419,7 +515,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
           ),
           SizedBox(height: 4.h),
           Row(
-            mainAxisAlignment: isRtl ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment:
+                isRtl ? MainAxisAlignment.end : MainAxisAlignment.start,
             children: [
               if (isVerified) ...[
                 Icon(Icons.check_circle, color: Colors.green, size: 16.sp),
@@ -484,7 +581,9 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
           GestureDetector(
             onTap: onTap,
             child: Text(
-              (displayValue == null || displayValue.isEmpty) ? 'غير محدد' : displayValue,
+              (displayValue == null || displayValue.isEmpty)
+                  ? 'غير محدد'
+                  : displayValue,
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 16.sp,

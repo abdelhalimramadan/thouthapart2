@@ -1,4 +1,3 @@
-import 'package:thotha_mobile_app/core/networking/api_service.dart';
 import 'dart:developer';
 
 abstract class INotificationRepo {
@@ -6,8 +5,7 @@ abstract class INotificationRepo {
 }
 
 class NotificationRepo implements INotificationRepo {
-  final ApiService _apiService;
-  NotificationRepo(this._apiService);
+  NotificationRepo();
 
   @override
   Future<bool> sendTokenToBackend(String token) async {

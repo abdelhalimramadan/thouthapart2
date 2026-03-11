@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theming/colors.dart';
-import '../../../../core/theming/styles.dart';
 import '../../../../core/widgets/app_text_button.dart';
 import '../logic/sign_up_cubit.dart';
 import '../../../../core/networking/api_service.dart';
@@ -273,7 +272,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    prefixIcon: const Icon(Icons.person_outline),
+                                    prefixIcon:
+                                        const Icon(Icons.person_outline),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -292,7 +292,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    prefixIcon: const Icon(Icons.person_outline),
+                                    prefixIcon:
+                                        const Icon(Icons.person_outline),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -311,7 +312,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    prefixIcon: const Icon(Icons.email_outlined),
+                                    prefixIcon:
+                                        const Icon(Icons.email_outlined),
                                   ),
                                   validator: (value) {
                                     if (value == null ||
@@ -332,7 +334,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    prefixIcon: const Icon(Icons.phone_outlined),
+                                    prefixIcon:
+                                        const Icon(Icons.phone_outlined),
                                   ),
                                   validator: (value) {
                                     if (value == null ||
@@ -346,22 +349,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 SizedBox(height: height * 0.02),
                                 // University/College Dropdown
                                 _isLoadingUniversities
-                                    ? const Center(key: ValueKey('uni_loading'), child: CircularProgressIndicator())
+                                    ? const Center(
+                                        key: ValueKey('uni_loading'),
+                                        child: CircularProgressIndicator())
                                     : DropdownButtonFormField<String>(
                                         key: const ValueKey('uni_dropdown'),
                                         isExpanded: true,
                                         decoration: InputDecoration(
                                           labelText: 'اختر الكلية',
                                           border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                         ),
                                         items: _universities
                                             .map((u) => DropdownMenuItem(
-                                                value: u.name, child: Text(u.name)))
+                                                value: u.name,
+                                                child: Text(u.name)))
                                             .toList(),
-                                        onChanged: (v) =>
-                                            setState(() => _selectedCollege = v),
+                                        onChanged: (v) => setState(
+                                            () => _selectedCollege = v),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
                                             return 'الرجاء اختيار الكلية';
@@ -395,14 +402,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 SizedBox(height: height * 0.02),
                                 // City/Governorate Dropdown
                                 _isLoadingCities
-                                    ? const Center(key: ValueKey('city_loading'), child: CircularProgressIndicator())
+                                    ? const Center(
+                                        key: ValueKey('city_loading'),
+                                        child: CircularProgressIndicator())
                                     : DropdownButtonFormField<String>(
                                         key: const ValueKey('city_dropdown'),
                                         isExpanded: true,
                                         decoration: InputDecoration(
                                           labelText: 'اختر المحافظة',
                                           border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                         ),
                                         items: _cities
@@ -410,8 +420,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 value: city.name,
                                                 child: Text(city.name)))
                                             .toList(),
-                                        onChanged: (v) =>
-                                            setState(() => _selectedGovernorate = v),
+                                        onChanged: (v) => setState(
+                                            () => _selectedGovernorate = v),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
                                             return 'الرجاء اختيار المحافظة';
@@ -422,14 +432,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 SizedBox(height: height * 0.02),
                                 // Category/Specialty Dropdown
                                 _isLoadingCategories
-                                    ? const Center(key: ValueKey('cat_loading'), child: CircularProgressIndicator())
+                                    ? const Center(
+                                        key: ValueKey('cat_loading'),
+                                        child: CircularProgressIndicator())
                                     : DropdownButtonFormField<String>(
                                         key: const ValueKey('cat_dropdown'),
                                         isExpanded: true,
                                         decoration: InputDecoration(
                                           labelText: 'اختر التخصص',
                                           border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                         ),
                                         items: _categories
@@ -437,8 +450,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 value: cat.name,
                                                 child: Text(cat.name)))
                                             .toList(),
-                                        onChanged: (v) =>
-                                            setState(() => _selectedCategory = v),
+                                        onChanged: (v) => setState(
+                                            () => _selectedCategory = v),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
                                             return 'الرجاء اختيار التخصص';
@@ -453,12 +466,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   obscureText: _obscurePassword,
                                   onChanged: (password) {
                                     setState(() {
-                                      hasLowerCase = AppRegex.hasLowerCase(password);
-                                      hasUpperCase = AppRegex.hasUpperCase(password);
+                                      hasLowerCase =
+                                          AppRegex.hasLowerCase(password);
+                                      hasUpperCase =
+                                          AppRegex.hasUpperCase(password);
                                       hasSpecialCharacters =
-                                          AppRegex.hasSpecialCharacter(password);
+                                          AppRegex.hasSpecialCharacter(
+                                              password);
                                       hasNumber = AppRegex.hasNumber(password);
-                                      hasMinLength = AppRegex.hasMinLength(password);
+                                      hasMinLength =
+                                          AppRegex.hasMinLength(password);
                                     });
                                   },
                                   decoration: InputDecoration(
@@ -504,7 +521,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       height: 52,
                                       child: state is SignUpLoading
                                           ? const Center(
-                                              child: CircularProgressIndicator())
+                                              child:
+                                                  CircularProgressIndicator())
                                           : AppTextButton(
                                               buttonText: 'إنشاء حساب',
                                               textStyle: const TextStyle(
@@ -514,41 +532,54 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 fontFamily: 'Cairo',
                                               ),
                                               onPressed: () {
-                                                if (_formKey.currentState!.validate()) {
+                                                if (_formKey.currentState!
+                                                    .validate()) {
                                                   if (!hasLowerCase ||
                                                       !hasUpperCase ||
                                                       !hasSpecialCharacters ||
                                                       !hasNumber ||
                                                       !hasMinLength) {
-                                                    ScaffoldMessenger.of(context)
+                                                    ScaffoldMessenger.of(
+                                                            context)
                                                         .showSnackBar(
                                                       const SnackBar(
                                                         content: Text(
                                                             'يرجى التأكد من استكمال جميع شروط كلمة المرور'),
-                                                        backgroundColor: Colors.red,
+                                                        backgroundColor:
+                                                            Colors.red,
                                                       ),
                                                     );
                                                     return;
                                                   }
 
-                                                  context.read<SignUpCubit>().signUp(
-                                                        email: emailController.text
+                                                  context
+                                                      .read<SignUpCubit>()
+                                                      .signUp(
+                                                        email: emailController
+                                                            .text
                                                             .trim(),
                                                         password:
-                                                            passwordController.text,
-                                                        firstName: firstNameController
+                                                            passwordController
+                                                                .text,
+                                                        firstName:
+                                                            firstNameController
+                                                                .text
+                                                                .trim(),
+                                                        lastName:
+                                                            lastNameController
+                                                                .text
+                                                                .trim(),
+                                                        phone: phoneController
                                                             .text
                                                             .trim(),
-                                                        lastName: lastNameController
-                                                            .text
-                                                            .trim(),
-                                                        phone: phoneController.text
-                                                            .trim(),
-                                                        college: _selectedCollege,
-                                                        studyYear: _selectedStudyYear,
+                                                        college:
+                                                            _selectedCollege,
+                                                        studyYear:
+                                                            _selectedStudyYear,
                                                         governorate:
                                                             _selectedGovernorate,
-                                                        category: _selectedCategory,
+                                                        category:
+                                                            _selectedCategory,
                                                       );
                                                 }
                                               },

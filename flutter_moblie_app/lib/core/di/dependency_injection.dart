@@ -22,7 +22,7 @@ Future<void> setupGetIt() async {
     () => CaseRequestRepo(getIt()),
   );
   getIt.registerLazySingleton<INotificationRepo>(
-    () => NotificationRepo(getIt()),
+    () => NotificationRepo(),
   );
   getIt.registerLazySingleton<ProfileRepository>(
     () => ProfileRepository(),

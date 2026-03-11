@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/models/doctor_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/repositories/doctor_repository.dart';
 import 'package:thotha_mobile_app/features/home_screen/logic/doctor_state.dart';
 
@@ -127,7 +126,8 @@ class DoctorCubit extends Cubit<DoctorState> {
     }
   }
 
-  Future<void> filterByCategoryNameAndCity(String categoryName, String cityName) async {
+  Future<void> filterByCategoryNameAndCity(
+      String categoryName, String cityName) async {
     emit(DoctorLoading());
     try {
       if (_categories.isEmpty) {
@@ -144,12 +144,11 @@ class DoctorCubit extends Cubit<DoctorState> {
         emit(DoctorError('عفواً، هذا التخصص غير متوفر حالياً'));
       }
     } catch (e) {
-       print('=== DoctorCubit Error ===');
-       print('Error type: ${e.runtimeType}');
-       print('Error message: ${e.toString()}');
-       print('Stack trace: ${StackTrace.current}');
-       emit(DoctorError('حدث خطأ: ${e.toString()}'));
+      print('=== DoctorCubit Error ===');
+      print('Error type: ${e.runtimeType}');
+      print('Error message: ${e.toString()}');
+      print('Stack trace: ${StackTrace.current}');
+      emit(DoctorError('حدث خطأ: ${e.toString()}'));
     }
   }
-
 }

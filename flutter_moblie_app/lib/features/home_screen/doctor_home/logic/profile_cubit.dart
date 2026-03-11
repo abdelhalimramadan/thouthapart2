@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
+import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/profile_state.dart';
@@ -11,28 +12,30 @@ class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
 
   ProfileCubit(this._repository) : super(const ProfileState.initial());
 
-  /// Implements Stale-While-Revalidate caching strategy
   Future<void> fetchProfile() async {
     // 1. Instantly load cached data to improve perceived performance
     final cachedProfile = await _repository.getCachedProfile();
     emit(ProfileState.loading(cachedData: cachedProfile));
 
-    // 2. Fetch fresh data (Profile, Universities, Cities)
+    // 2. Fetch fresh data (Profile, Universities, Cities, Categories)
     try {
       final results = await Future.wait([
         _repository.fetchProfile(),
         _repository.getUniversities(),
         _repository.getCities(),
+        _repository.getCategories(),
       ]);
 
       final freshProfile = results[0] as DoctorProfileModel;
       final universities = results[1] as List<UniversityModel>;
-      final cities       = results[2] as List<CityModel>;
+      final cities = results[2] as List<CityModel>;
+      final categories = results[3] as List<CategoryModel>;
 
       emit(ProfileState.success(
         freshProfile,
         universities: universities,
         cities: cities,
+        categories: categories,
       ));
     } on DioException catch (e) {
       emit(ProfileState.error(
@@ -41,8 +44,8 @@ class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
       ));
     } catch (e) {
       emit(ProfileState.error(
-        error: e.toString().contains('Exception:') 
-            ? e.toString().split('Exception:').last.trim() 
+        error: e.toString().contains('Exception:')
+            ? e.toString().split('Exception:').last.trim()
             : "حدث خطأ غير متوقع",
         type: null,
       ));
@@ -50,30 +53,50 @@ class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
   }
 
   Future<void> updateProfile(Map<String, dynamic> body) async {
-    emit(ProfileState.loading(cachedData: state.whenOrNull(
-      success: (data, universities, cities) => data,
-      loading: (cachedData, universities, cities) => cachedData,
-    )));
+    // Preserve existing profile & lists before emitting loading
+    DoctorProfileModel? prevProfile;
+    List<UniversityModel> prevUniversities = [];
+    List<CityModel> prevCities = [];
+    List<CategoryModel> prevCategories = [];
+    state.whenOrNull(
+      success: (d, u, c, cats) {
+        prevProfile = d;
+        prevUniversities = u;
+        prevCities = c;
+        prevCategories = cats;
+      },
+      loading: (d, u, c, cats) {
+        prevProfile = d;
+        prevUniversities = u;
+        prevCities = c;
+        prevCategories = cats;
+      },
+    );
+
+    emit(ProfileState.loading(cachedData: prevProfile));
+
     try {
       await _repository.updateProfile(body);
-      
-      // Get current dropdown lists to preserve them in the success state
-      final currentUniversities = state.maybeWhen(
-        success: (_, u, c) => u,
-        loading: (_, u, c) => u,
-        orElse: () => <UniversityModel>[],
-      );
-      final currentCities = state.maybeWhen(
-        success: (_, u, c) => c,
-        loading: (_, u, c) => c,
-        orElse: () => <CityModel>[],
+
+      // Build the updated profile directly from the saved body
+      // (do NOT call fetchProfile — it decodes stale JWT and overwrites fresh data)
+      final updatedProfile = DoctorProfileModel(
+        id: prevProfile?.id,
+        firstName: body['firstName']?.toString() ?? prevProfile?.firstName,
+        lastName: body['lastName']?.toString() ?? prevProfile?.lastName,
+        email: body['email']?.toString() ?? prevProfile?.email,
+        phone: body['phoneNumber']?.toString() ?? prevProfile?.phone,
+        faculty: body['universityName']?.toString() ?? prevProfile?.faculty,
+        year: body['studyYear']?.toString() ?? prevProfile?.year,
+        governorate: body['cityName']?.toString() ?? prevProfile?.governorate,
+        category: prevProfile?.category,
       );
 
-      final freshProfile = await _repository.fetchProfile();
       emit(ProfileState.success(
-        freshProfile,
-        universities: currentUniversities,
-        cities: currentCities,
+        updatedProfile,
+        universities: prevUniversities,
+        cities: prevCities,
+        categories: prevCategories,
       ));
     } on DioException catch (e) {
       emit(ProfileState.error(
@@ -82,16 +105,15 @@ class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
       ));
     } catch (e) {
       emit(ProfileState.error(
-        error: e.toString().contains('Exception:') 
-            ? e.toString().split('Exception:').last.trim() 
-            : "حدث خطأ أثناء تحديث البيانات: $e",
+        error: e.toString().contains('Exception:')
+            ? e.toString().split('Exception:').last.trim()
+            : 'حدث خطأ أثناء تحديث البيانات',
         type: null,
       ));
     }
   }
 
   String _getErrorMessage(DioException e) {
-
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
       return "انتهت مهلة الاتصال. تحقق من جودة الإنترنت وحاول مرة أخرى.";

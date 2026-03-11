@@ -7,8 +7,8 @@ import 'package:thotha_mobile_app/core/networking/api_service.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
+import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
-
 
 class ProfileRepository {
   final Dio _dio = DioFactory.getDio();
@@ -18,29 +18,32 @@ class ProfileRepository {
     Response? response;
     // Ordered by specificity
     final endpoints = [
-      '/api/auth/profile', 
+      '/api/auth/profile',
       '/api/doctor/profile',
-      '/api/user/me', 
+      '/api/user/me',
       '/api/me',
-      '/profile', 
+      '/profile',
       '/me'
     ];
 
     for (final path in endpoints) {
       try {
         response = await _dio.get(path);
-        
+
         // Ensure we actually got JSON data
-        if (response.statusCode == 200 && response.data != null && response.data is Map<String, dynamic>) {
+        if (response.statusCode == 200 &&
+            response.data != null &&
+            response.data is Map<String, dynamic>) {
           final data = response.data;
           Map<String, dynamic> jsonData = data as Map<String, dynamic>;
-          
+
           // Unwrap if nested under 'user', 'data', or 'doctor'
           if (jsonData.containsKey('user') && jsonData['user'] is Map) {
             jsonData = Map<String, dynamic>.from(jsonData['user']);
           } else if (jsonData.containsKey('data') && jsonData['data'] is Map) {
             jsonData = Map<String, dynamic>.from(jsonData['data']);
-          } else if (jsonData.containsKey('doctor') && jsonData['doctor'] is Map) {
+          } else if (jsonData.containsKey('doctor') &&
+              jsonData['doctor'] is Map) {
             jsonData = Map<String, dynamic>.from(jsonData['doctor']);
           }
 
@@ -53,13 +56,43 @@ class ProfileRepository {
       }
     }
 
-    // FINAL FALLBACK: Decode the JWT token if API fails
-    // This is very reliable as the token contains profile info
+    // FINAL FALLBACK: Decode the JWT token if API fails.
+    // Only use token data for fields that are NOT already cached locally
+    // to avoid overwriting freshly saved data with stale JWT values.
     try {
       final tokenProfile = await _getProfileFromToken();
       if (tokenProfile != null) {
-        await _cacheProfileLocally(tokenProfile);
-        return tokenProfile;
+        final cached = await getCachedProfile();
+        // Merge: prefer local cache over JWT (cache has latest saved values)
+        final merged = DoctorProfileModel(
+          id: tokenProfile.id ?? cached.id,
+          firstName: (cached.firstName?.isNotEmpty == true)
+              ? cached.firstName
+              : tokenProfile.firstName,
+          lastName: (cached.lastName?.isNotEmpty == true)
+              ? cached.lastName
+              : tokenProfile.lastName,
+          email: (cached.email?.isNotEmpty == true)
+              ? cached.email
+              : tokenProfile.email,
+          phone: (cached.phone?.isNotEmpty == true)
+              ? cached.phone
+              : tokenProfile.phone,
+          faculty: (cached.faculty?.isNotEmpty == true)
+              ? cached.faculty
+              : tokenProfile.faculty,
+          year: (cached.year?.isNotEmpty == true)
+              ? cached.year
+              : tokenProfile.year,
+          governorate: (cached.governorate?.isNotEmpty == true)
+              ? cached.governorate
+              : tokenProfile.governorate,
+          category: (cached.category?.isNotEmpty == true)
+              ? cached.category
+              : tokenProfile.category,
+        );
+        await _cacheProfileLocally(merged);
+        return merged;
       }
     } catch (_) {}
 
@@ -74,7 +107,8 @@ class ProfileRepository {
 
   Future<DoctorProfileModel?> _getProfileFromToken() async {
     try {
-      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      final token =
+          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
       if (token == null || token.isEmpty) return null;
 
       final parts = token.split('.');
@@ -86,9 +120,10 @@ class ProfileRepository {
       while (payload.length % 4 != 0) {
         payload += '=';
       }
-      
-      final Map<String, dynamic> decoded = json.decode(utf8.decode(base64Url.decode(payload)));
-      
+
+      final Map<String, dynamic> decoded =
+          json.decode(utf8.decode(base64Url.decode(payload)));
+
       return DoctorProfileModel(
         id: int.tryParse(decoded['id']?.toString() ?? ''),
         firstName: (decoded['firstName'] ?? decoded['first_name'])?.toString(),
@@ -97,7 +132,8 @@ class ProfileRepository {
         phone: (decoded['phoneNumber'] ?? decoded['phone'])?.toString(),
         faculty: (decoded['universityName'] ?? decoded['faculty'])?.toString(),
         year: (decoded['studyYear'] ?? decoded['year'])?.toString(),
-        governorate: (decoded['cityName'] ?? decoded['governorate'])?.toString(),
+        governorate:
+            (decoded['cityName'] ?? decoded['governorate'])?.toString(),
         category: (decoded['categoryName'] ?? decoded['category'])?.toString(),
       );
     } catch (_) {
@@ -106,15 +142,24 @@ class ProfileRepository {
   }
 
   Future<void> _cacheProfileLocally(DoctorProfileModel profile) async {
-    if (profile.id != null) await SharedPrefHelper.setData('doctor_id', profile.id!);
-    if (profile.firstName != null) await SharedPrefHelper.setData('first_name', profile.firstName!);
-    if (profile.lastName != null) await SharedPrefHelper.setData('last_name', profile.lastName!);
-    if (profile.email != null) await SharedPrefHelper.setData('email', profile.email!);
-    if (profile.phone != null) await SharedPrefHelper.setData('phone', profile.phone!);
-    if (profile.faculty != null) await SharedPrefHelper.setData('faculty', profile.faculty!);
-    if (profile.year != null) await SharedPrefHelper.setData('year', profile.year!);
-    if (profile.governorate != null) await SharedPrefHelper.setData('governorate', profile.governorate!);
-    if (profile.category != null) await SharedPrefHelper.setData('category', profile.category!);
+    if (profile.id != null)
+      await SharedPrefHelper.setData('doctor_id', profile.id!);
+    if (profile.firstName != null)
+      await SharedPrefHelper.setData('first_name', profile.firstName!);
+    if (profile.lastName != null)
+      await SharedPrefHelper.setData('last_name', profile.lastName!);
+    if (profile.email != null)
+      await SharedPrefHelper.setData('email', profile.email!);
+    if (profile.phone != null)
+      await SharedPrefHelper.setData('phone', profile.phone!);
+    if (profile.faculty != null)
+      await SharedPrefHelper.setData('faculty', profile.faculty!);
+    if (profile.year != null)
+      await SharedPrefHelper.setData('year', profile.year!);
+    if (profile.governorate != null)
+      await SharedPrefHelper.setData('governorate', profile.governorate!);
+    if (profile.category != null)
+      await SharedPrefHelper.setData('category', profile.category!);
   }
 
   Future<DoctorProfileModel> getCachedProfile() async {
@@ -138,6 +183,7 @@ class ProfileRepository {
       category: cachedCat,
     );
   }
+
   Future<void> updateProfile(Map<String, dynamic> body) async {
     final result = await getIt<ApiService>().updateDoctor(body);
     if (result['success'] == true) {
@@ -172,5 +218,12 @@ class ProfileRepository {
     }
     throw Exception(result['error'] ?? 'فشل في تحميل قائمة المدن');
   }
-}
 
+  Future<List<CategoryModel>> getCategories() async {
+    final result = await getIt<ApiService>().getCategories();
+    if (result['success'] == true) {
+      return result['data'] as List<CategoryModel>;
+    }
+    throw Exception(result['error'] ?? 'فشل في تحميل قائمة التخصصات');
+  }
+}

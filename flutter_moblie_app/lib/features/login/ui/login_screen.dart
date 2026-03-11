@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../core/helpers/spacing.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
-import '../../../core/theming/styles.dart';
 import '../../auth/data/auth_service.dart';
 import '../../home_screen/doctor_home/ui/doctor_home_screen.dart';
 
@@ -259,11 +257,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                       decoration: BoxDecoration(
                                         color: Colors.red[50],
                                         borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: Colors.red[200]!),
+                                        border:
+                                            Border.all(color: Colors.red[200]!),
                                       ),
                                       child: Row(
                                         children: [
-                                          const Icon(Icons.error_outline, color: Colors.red),
+                                          const Icon(Icons.error_outline,
+                                              color: Colors.red),
                                           const SizedBox(width: 8),
                                           Expanded(
                                             child: Text(
@@ -285,16 +285,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                     keyboardType: TextInputType.emailAddress,
                                     decoration: InputDecoration(
                                       labelText: 'البريد الإلكتروني',
-                                      prefixIcon: const Icon(Icons.email_outlined),
+                                      prefixIcon:
+                                          const Icon(Icons.email_outlined),
                                       border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
                                       ),
                                     ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return 'الرجاء إدخال البريد الإلكتروني';
                                       }
-                                      if (!RegExp(r'^[^@]+@[^\s]+\.[^\s]+$').hasMatch(value)) {
+                                      if (!RegExp(r'^[^@]+@[^\s]+\.[^\s]+$')
+                                          .hasMatch(value)) {
                                         return 'الرجاء إدخال بريد إلكتروني صالح';
                                       }
                                       return null;
@@ -308,10 +311,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                     obscureText: isObscureText,
                                     decoration: InputDecoration(
                                       labelText: 'كلمة المرور',
-                                      prefixIcon: const Icon(Icons.lock_outline),
+                                      prefixIcon:
+                                          const Icon(Icons.lock_outline),
                                       suffixIcon: IconButton(
                                         icon: Icon(
-                                          isObscureText ? Icons.visibility_off : Icons.visibility,
+                                          isObscureText
+                                              ? Icons.visibility_off
+                                              : Icons.visibility,
                                         ),
                                         onPressed: () {
                                           setState(() {
@@ -320,7 +326,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                         },
                                       ),
                                       border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
                                       ),
                                     ),
                                     validator: (value) {
@@ -337,19 +344,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                   // Forgot Password & Remember Me
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Flexible(
                                         child: TextButton(
                                           onPressed: () {
-                                            Navigator.of(context).pushNamed(Routes.forgotPasswordScreen);
+                                            Navigator.of(context).pushNamed(
+                                                Routes.forgotPasswordScreen);
                                           },
                                           child: Text(
                                             'نسيت كلمة المرور؟',
                                             style: TextStyle(
                                               fontSize: baseFontSize * 0.8,
                                               color: ColorsManager.mainBlue,
-                                              decoration: TextDecoration.underline,
+                                              decoration:
+                                                  TextDecoration.underline,
                                               fontFamily: 'Cairo',
                                             ),
                                             maxLines: 1,
@@ -364,9 +374,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                             child: Checkbox(
                                               value: rememberMe,
                                               onChanged: (bool? value) {
-                                                _handleRememberMe(value ?? false);
+                                                _handleRememberMe(
+                                                    value ?? false);
                                               },
-                                              activeColor: ColorsManager.mainBlue,
+                                              activeColor:
+                                                  ColorsManager.mainBlue,
                                             ),
                                           ),
                                           Text(
@@ -393,7 +405,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: ColorsManager.mainBlue,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8.0),
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
                                         ),
                                       ),
                                       child: isLoading
@@ -432,7 +445,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   // Sign up link
                                   Wrap(
                                     alignment: WrapAlignment.center,
-                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
                                     children: [
                                       Text(
                                         'هل ليس لديك حساب بالفعل؟ ',
@@ -445,7 +459,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                       GestureDetector(
                                         onTap: () {
-                                          Navigator.pushNamed(context, Routes.signUpScreen);
+                                          Navigator.pushNamed(
+                                              context, Routes.signUpScreen);
                                         },
                                         child: Text(
                                           'إنشاء حساب',
@@ -453,7 +468,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                             fontSize: baseFontSize * 0.8,
                                             color: ColorsManager.mainBlue,
                                             fontWeight: FontWeight.bold,
-                                            decoration: TextDecoration.underline,
+                                            decoration:
+                                                TextDecoration.underline,
                                             fontFamily: 'Cairo',
                                           ),
                                         ),
@@ -474,7 +490,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               (route) => false,
                             );
                           },
-
                           child: Container(
                             width: double.infinity,
                             constraints: BoxConstraints(

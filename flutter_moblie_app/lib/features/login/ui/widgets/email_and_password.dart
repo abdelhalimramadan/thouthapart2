@@ -10,9 +10,9 @@ class EmailAndPassword extends StatelessWidget {
   final bool isObscureText;
   final VoidCallback onTogglePasswordVisibility;
   final ValueChanged<bool> onRememberMeChanged;
-  bool _rememberMe = false;
+  final bool _rememberMe;
 
-   EmailAndPassword({
+  EmailAndPassword({
     super.key,
     required this.emailController,
     required this.passwordController,
@@ -20,77 +20,76 @@ class EmailAndPassword extends StatelessWidget {
     required this.isObscureText,
     required this.onTogglePasswordVisibility,
     required this.onRememberMeChanged,
-  });
+    bool rememberMe = false,
+  }) : _rememberMe = rememberMe;
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      child: Column(
-        children: [
-          TextFormField(
-            controller: emailController,
-            decoration: InputDecoration(
-              labelText: 'البريد الإلكتروني',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+    return Column(
+      children: [
+        TextFormField(
+          controller: emailController,
+          decoration: InputDecoration(
+            labelText: 'البريد الإلكتروني',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
-            keyboardType: TextInputType.emailAddress,
           ),
-          verticalSpace(16),
-          TextFormField(
-            controller: passwordController,
-            decoration: InputDecoration(
-              labelText: 'كلمة المرور',
-              errorText: passwordError,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  isObscureText ? Icons.visibility_off : Icons.visibility,
-                ),
-                onPressed: onTogglePasswordVisibility,
-              ),
+          keyboardType: TextInputType.emailAddress,
+        ),
+        verticalSpace(16),
+        TextFormField(
+          controller: passwordController,
+          decoration: InputDecoration(
+            labelText: 'كلمة المرور',
+            errorText: passwordError,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
-            obscureText: isObscureText,
-          ),
-          verticalSpace(5),
-          // Forgot Password & Remember Me
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'هل نسيت كلمة المرور؟',
-                style: TextStyles.font13BlueRegular,
+            suffixIcon: IconButton(
+              icon: Icon(
+                isObscureText ? Icons.visibility_off : Icons.visibility,
               ),
-              Row(
-                children: [
-                  Transform.scale(
-                    scale: 0.9,
-                    child: StatefulBuilder(
-                      builder: (context, setState) => Checkbox(
-                        value: _rememberMe,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _rememberMe = value ?? false;
-                          });
-                          onRememberMeChanged(_rememberMe);
-                        },
-                        activeColor: Colors.blue,
-                      ),
+              onPressed: onTogglePasswordVisibility,
+            ),
+          ),
+          obscureText: isObscureText,
+        ),
+        verticalSpace(5),
+        // Forgot Password & Remember Me
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'هل نسيت كلمة المرور؟',
+              style: TextStyles.font13BlueRegular,
+            ),
+            Row(
+              children: [
+                Transform.scale(
+                  scale: 0.9,
+                  child: StatefulBuilder(
+                    builder: (context, setState) => Checkbox(
+                      value: _rememberMe,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          // Can't modify final _rememberMe, need to track in parent state
+                          onRememberMeChanged(value ?? false);
+                        });
+                      },
+                      activeColor: Colors.blue,
                     ),
                   ),
-                  Text(
-                    'تذكرني',
-                    style: TextStyles.font13DarkBlueRegular,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
+                ),
+                Text(
+                  'تذكرني',
+                  style: TextStyles.font13DarkBlueRegular,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
