@@ -9,6 +9,7 @@ import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/profile
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/account_deletion_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
+import 'package:thotha_mobile_app/features/forgot_password/ui/change_password_screen.dart';
 
 class DoctorProfileScreen extends StatelessWidget {
   const DoctorProfileScreen({super.key});
@@ -240,6 +241,39 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 10.h),
+            // ── Change Password Button ────────────────────────────────────
+            SizedBox(
+              width: double.infinity,
+              height: 50.h,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF1D61E7), width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ChangePasswordScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.lock_reset_rounded,
+                    color: Color(0xFF1D61E7), size: 20),
+                label: Text(
+                  'تغيير كلمة المرور',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1D61E7),
                   ),
                 ),
               ),
