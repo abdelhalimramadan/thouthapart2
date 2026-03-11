@@ -18,6 +18,20 @@ class CaseRequestRepo {
     }
   }
 
+  Future<Map<String, dynamic>> updateCaseRequest(
+      int requestId, CaseRequestBody body) async {
+    try {
+      final response =
+          await _apiService.updateCaseRequest(requestId, body.toJson());
+      return response;
+    } catch (e) {
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
   Future<Map<String, dynamic>> getRequestById(int id) async {
     try {
       return await _apiService.getRequestById(id);

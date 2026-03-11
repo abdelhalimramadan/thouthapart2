@@ -220,6 +220,25 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> updateCaseRequest(
+      int requestId, Map<String, dynamic> body) async {
+    try {
+      final res = await _dio.put(
+        ApiConstants.updateCaseRequest,
+        queryParameters: {'id': requestId},
+        data: body,
+      );
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        return _okData(res.data)..['message'] = 'تم تحديث الطلب بنجاح';
+      }
+      return _fail('فشل في تحديث الطلب', code: res.statusCode);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
   Future<Map<String, dynamic>> getRequestById(int id) async {
     try {
       final res = await _dio.get('${ApiConstants.getRequestById}/$id');
