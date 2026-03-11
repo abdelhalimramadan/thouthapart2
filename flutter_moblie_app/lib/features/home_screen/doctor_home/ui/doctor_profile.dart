@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:convert';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 
+import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
+import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
+import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/profile_cubit.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/profile_state.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
@@ -35,11 +39,17 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
   final _universityCtrl = TextEditingController();
   final _yearCtrl = TextEditingController();
   final _cityCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+  final _categoryCtrl = TextEditingController();
+
+  late final FocusNode _phoneFocusNode;
 
   // Original values — set once when profile loads
   String _origUniversity = '';
   String _origYear = '';
   String _origCity = '';
+  String _origPhone = '';
+  String _origCategory = '';
 
   bool _hasChanges = false;
   bool _isSaving = false; // true while a save request is in-flight
@@ -47,15 +57,20 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
   @override
   void initState() {
     super.initState();
+    _phoneFocusNode = FocusNode();
     _universityCtrl.addListener(_checkChanges);
     _yearCtrl.addListener(_checkChanges);
     _cityCtrl.addListener(_checkChanges);
+    _phoneCtrl.addListener(_checkChanges);
+    _categoryCtrl.addListener(_checkChanges);
   }
 
   void _checkChanges() {
     final changed = _universityCtrl.text.trim() != _origUniversity ||
         _yearCtrl.text.trim() != _origYear ||
-        _cityCtrl.text.trim() != _origCity;
+        _cityCtrl.text.trim() != _origCity ||
+        _phoneCtrl.text.trim() != _origPhone ||
+        _categoryCtrl.text.trim() != _origCategory;
     if (changed != _hasChanges) setState(() => _hasChanges = changed);
   }
 
@@ -64,6 +79,9 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     _universityCtrl.dispose();
     _yearCtrl.dispose();
     _cityCtrl.dispose();
+    _phoneCtrl.dispose();
+    _categoryCtrl.dispose();
+    _phoneFocusNode.dispose();
     super.dispose();
   }
 
@@ -82,16 +100,33 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     // Resolve doctorId — needed by backend to verify ownership
     int doctorId = currentProfile?.id ?? 0;
 
+    // Fallback 1: try to get from SharedPreferences if not in profile
+    if (doctorId == 0) {
+      doctorId = await SharedPrefHelper.getInt('doctor_id');
+      if (doctorId == 0) {
+        final docIdStr = await SharedPrefHelper.getString('doctor_id');
+        doctorId = int.tryParse(docIdStr) ?? 0;
+      }
+    }
+
+    // Fallback 2: extract from JWT token as last resort
+    if (doctorId == 0) {
+      doctorId = await _extractDoctorIdFromToken();
+    }
+
     final body = <String, dynamic>{
       if (doctorId != 0) 'id': doctorId,
       if (doctorId != 0) 'doctorId': doctorId,
       'firstName': currentProfile?.firstName,
       'lastName': currentProfile?.lastName,
-      'phoneNumber': currentProfile?.phone,
+      'phoneNumber': _phoneCtrl.text.trim().isNotEmpty
+          ? _phoneCtrl.text.trim()
+          : currentProfile?.phone,
       'email': currentProfile?.email,
       'universityName': _universityCtrl.text.trim(),
       'studyYear': _yearCtrl.text.trim(),
       'cityName': _cityCtrl.text.trim(),
+      'categoryName': _categoryCtrl.text.trim(),
     };
 
     // Remove nulls/empty to avoid backend errors
@@ -100,6 +135,32 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     if (!mounted) return;
     setState(() => _isSaving = true);
     cubit.updateProfile(body);
+  }
+
+  Future<int> _extractDoctorIdFromToken() async {
+    try {
+      final token =
+          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      if (token == null || token.isEmpty) return 0;
+
+      final parts = token.split('.');
+      if (parts.length != 3) return 0;
+
+      String payload = parts[1];
+      while (payload.length % 4 != 0) {
+        payload += '=';
+      }
+
+      final decoded =
+          json.decode(utf8.decode(base64Url.decode(payload))) as Map?;
+      if (decoded == null) return 0;
+
+      final rawId =
+          decoded['id'] ?? decoded['doctorId'] ?? decoded['doctor_id'];
+      return int.tryParse(rawId?.toString() ?? '') ?? 0;
+    } catch (_) {
+      return 0;
+    }
   }
 
   void _showSelectionDialog({
@@ -219,12 +280,18 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 final uni = p.faculty ?? '';
                 final yr = p.year ?? '';
                 final city = p.governorate ?? '';
+                final phone = p.phone ?? '';
+                final category = p.category ?? '';
                 _universityCtrl.text = uni;
                 _yearCtrl.text = yr;
                 _cityCtrl.text = city;
+                _phoneCtrl.text = phone;
+                _categoryCtrl.text = category;
                 _origUniversity = uni;
                 _origYear = yr;
                 _origCity = city;
+                _origPhone = phone;
+                _origCategory = category;
                 if (_hasChanges) setState(() => _hasChanges = false);
                 // Show success snackbar only after a save, not on first load
                 if (_isSaving) {
@@ -261,9 +328,11 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
           builder: (context, state) {
             final loadingWidget = state.mapOrNull(
               loading: (s) => s.cachedData != null
-                  ? _buildContent(s.cachedData!, s.universities, s.cities)
+                  ? _buildContent(
+                      s.cachedData!, s.universities, s.cities, s.categories)
                   : null,
-              success: (s) => _buildContent(s.data, s.universities, s.cities),
+              success: (s) =>
+                  _buildContent(s.data, s.universities, s.cities, s.categories),
               error: (s) => Center(child: Text(s.error)),
             );
             return loadingWidget ??
@@ -398,8 +467,11 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     );
   }
 
-  Widget _buildContent(DoctorProfileModel profile,
-      List<UniversityModel> universities, List<CityModel> cities) {
+  Widget _buildContent(
+      DoctorProfileModel profile,
+      List<UniversityModel> universities,
+      List<CityModel> cities,
+      List<CategoryModel> categories) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.w),
       child: Column(
@@ -439,10 +511,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 _buildFieldItem(
                     label: 'اسم العائلة', value: profile.lastName ?? ''),
                 _divider(),
-                _buildFieldItem(
-                    label: 'رقم الهاتف',
-                    value: profile.phone ?? '',
-                    isVerified: true),
+                _buildEditablePhoneField(),
                 _divider(),
                 _buildEditableField(
                   label: 'الجامعة',
@@ -482,6 +551,17 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                     title: 'اختر المحافظة',
                     items: cities.map((c) => c.name).toList(),
                     controller: _cityCtrl,
+                  ),
+                ),
+                _divider(),
+                _buildEditableField(
+                  label: 'التخصص',
+                  id: 'category',
+                  displayValue: profile.category,
+                  onTap: () => _showSelectionDialog(
+                    title: 'اختر التخصص',
+                    items: categories.map((c) => c.name).toList(),
+                    controller: _categoryCtrl,
                   ),
                 ),
               ],
@@ -591,6 +671,92 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 color: const Color(0xFF1F2937),
               ),
               textDirection: TextDirection.rtl,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditablePhoneField() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 12.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  // Focus on phone input field
+                  FocusScope.of(context).requestFocus(_phoneFocusNode);
+                },
+                child: ShaderMask(
+                  shaderCallback: (bounds) => const LinearGradient(
+                    colors: [Color(0xFF1D61E7), Color(0xFF0B8FAC)],
+                  ).createShader(bounds),
+                  child: Icon(
+                    Icons.edit_outlined,
+                    size: 20.sp,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              Text(
+                'رقم الهاتف',
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 14.sp,
+                  color: const Color(0xFF9CA3AF),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          TextField(
+            focusNode: _phoneFocusNode,
+            controller: _phoneCtrl,
+            keyboardType: TextInputType.phone,
+            textDirection: TextDirection.ltr,
+            textAlign: TextAlign.left,
+            decoration: InputDecoration(
+              hintText: 'أدخل رقم الهاتف',
+              hintStyle: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 14.sp,
+                color: const Color(0xFFD1D5DB),
+              ),
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.r),
+                borderSide: const BorderSide(
+                  color: Color(0xFFE5E7EB),
+                  width: 1.2,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.r),
+                borderSide: const BorderSide(
+                  color: Color(0xFFE5E7EB),
+                  width: 1.2,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.r),
+                borderSide: const BorderSide(
+                  color: Color(0xFF1D61E7),
+                  width: 1.5,
+                ),
+              ),
+            ),
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF1F2937),
             ),
           ),
         ],
