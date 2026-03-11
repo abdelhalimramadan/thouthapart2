@@ -119,6 +119,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         doctorId = await _extractDoctorIdFromToken();
       }
 
+      print('=== DEBUG: doctorId = $doctorId ===');
+
       if (doctorId == 0) {
         if (mounted)
           setState(() {
@@ -128,25 +130,35 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         return;
       }
 
+      print('=== DEBUG: Calling getRequestsByDoctorId($doctorId) ===');
       final result = await _caseRepo.getRequestsByDoctorId(doctorId);
+
+      print('=== DEBUG: API Response: $result ===');
+
       if (!mounted) return;
 
       if (result['success'] == true) {
+        final data = result['data'];
+        print('=== DEBUG: Data received: $data ===');
         setState(() {
-          _caseRequests = List<CaseRequestModel>.from(result['data'] as List);
+          _caseRequests = List<CaseRequestModel>.from(data as List);
           _isLoadingCases = false;
         });
       } else {
+        final error = result['error']?.toString() ?? 'فشل في تحميل الحالات';
+        print('=== DEBUG: API Error: $error ===');
         setState(() {
-          _casesError = result['error']?.toString() ?? 'فشل في تحميل الحالات';
+          _casesError = error;
           _isLoadingCases = false;
         });
       }
-    } catch (_) {
+    } catch (e, stack) {
+      print('=== DEBUG: Exception: $e ===');
+      print('=== DEBUG: Stack trace: $stack ===');
       if (mounted)
         setState(() {
           _isLoadingCases = false;
-          _casesError = 'حدث خطأ غير متوقع';
+          _casesError = 'حدث خطأ غير متوقع: $e';
         });
     }
   }

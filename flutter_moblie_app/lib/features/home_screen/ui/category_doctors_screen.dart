@@ -219,6 +219,9 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) => _CaseDetailsSheet(
         req: req,
+        // doctor (logged-in) sees delete icon → no Book Now
+        // patient (not logged-in) sees Book Now → no delete icon
+        showBookNow: !_isUserLoggedIn,
         onBookNow: () {
           Navigator.pop(context); // close sheet
           Navigator.push(
@@ -613,8 +616,13 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
 class _CaseDetailsSheet extends StatelessWidget {
   final CaseRequestModel req;
   final VoidCallback onBookNow;
+  final bool showBookNow;
 
-  const _CaseDetailsSheet({required this.req, required this.onBookNow});
+  const _CaseDetailsSheet({
+    required this.req,
+    required this.onBookNow,
+    this.showBookNow = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -739,30 +747,31 @@ class _CaseDetailsSheet extends StatelessWidget {
               const SizedBox(height: 24),
 
               // ── Book Now button ──
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: onBookNow,
-                  icon: const Icon(Icons.calendar_month_rounded,
-                      color: Colors.white),
-                  label: Text(
-                    'احجز الآن',
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: baseFontSize * 1.05,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+              if (showBookNow)
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: onBookNow,
+                    icon: const Icon(Icons.calendar_month_rounded,
+                        color: Colors.white),
+                    label: Text(
+                      'احجز الآن',
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: baseFontSize * 1.05,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorsManager.mainBlue,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                      elevation: 2,
                     ),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorsManager.mainBlue,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                    elevation: 2,
-                  ),
                 ),
-              ),
             ],
           ),
         ),
