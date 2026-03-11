@@ -20,7 +20,10 @@ class ApiService {
         baseUrl: ApiConstants.baseUrl,
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
-        headers: const {'Accept': 'application/json', 'Content-Type': 'application/json'},
+        headers: const {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
       ));
 
   // ── Helpers ──────────────────────────────────────────────────────────────
@@ -67,7 +70,8 @@ class ApiService {
         queryParameters: {'cityId': cityId},
       );
       if (res.statusCode == 200) {
-        return _okList((res.data as List).map((j) => DoctorModel.fromJson(j)).toList());
+        return _okList(
+            (res.data as List).map((j) => DoctorModel.fromJson(j)).toList());
       }
       return _fail('فشل في تحميل الأطباء', code: res.statusCode);
     } on DioException catch (e) {
@@ -84,7 +88,8 @@ class ApiService {
         queryParameters: {'categoryId': categoryId},
       );
       if (res.statusCode == 200) {
-        return _okList((res.data as List).map((j) => DoctorModel.fromJson(j)).toList());
+        return _okList(
+            (res.data as List).map((j) => DoctorModel.fromJson(j)).toList());
       }
       return _fail('فشل في تحميل الأطباء', code: res.statusCode);
     } on DioException catch (e) {
@@ -100,7 +105,8 @@ class ApiService {
     try {
       final res = await _public.get(ApiConstants.getCategories);
       if (res.statusCode == 200) {
-        return _okList((res.data as List).map((j) => CategoryModel.fromJson(j)).toList());
+        return _okList(
+            (res.data as List).map((j) => CategoryModel.fromJson(j)).toList());
       }
       return _fail('فشل في تحميل التخصصات', code: res.statusCode);
     } on DioException catch (e) {
@@ -114,7 +120,8 @@ class ApiService {
     try {
       final res = await _public.get(ApiConstants.getCities);
       if (res.statusCode == 200) {
-        return _okList((res.data as List).map((j) => CityModel.fromJson(j)).toList());
+        return _okList(
+            (res.data as List).map((j) => CityModel.fromJson(j)).toList());
       }
       return _fail('فشل في تحميل المدن', code: res.statusCode);
     } on DioException catch (e) {
@@ -128,7 +135,9 @@ class ApiService {
     try {
       final res = await _public.get(ApiConstants.getUniversities);
       if (res.statusCode == 200) {
-        return _okList((res.data as List).map((j) => UniversityModel.fromJson(j)).toList());
+        return _okList((res.data as List)
+            .map((j) => UniversityModel.fromJson(j))
+            .toList());
       }
       return _fail('فشل في تحميل الجامعات', code: res.statusCode);
     } on DioException catch (e) {
@@ -160,7 +169,10 @@ class ApiService {
         final List? raw = data is List
             ? data
             : (data is Map
-                ? (data['data'] ?? data['content'] ?? data['items'] ?? data['requests']) as List?
+                ? (data['data'] ??
+                    data['content'] ??
+                    data['items'] ??
+                    data['requests']) as List?
                 : null);
         if (raw != null) {
           final List<CaseRequestModel> parsed = [];
@@ -193,7 +205,8 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> createCaseRequest(Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> createCaseRequest(
+      Map<String, dynamic> body) async {
     try {
       final res = await _dio.post(ApiConstants.createCaseRequest, data: body);
       if (res.statusCode == 200 || res.statusCode == 201) {
@@ -211,7 +224,8 @@ class ApiService {
     try {
       final res = await _dio.get('${ApiConstants.getRequestById}/$id');
       if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
-        return _okData(CaseRequestModel.fromJson(res.data as Map<String, dynamic>));
+        return _okData(
+            CaseRequestModel.fromJson(res.data as Map<String, dynamic>));
       }
       return _fail('فشل في تحميل الطلب', code: res.statusCode);
     } on DioException catch (e) {
@@ -227,7 +241,8 @@ class ApiService {
       if (res.statusCode == 200 && res.data is List) {
         return _okList(
           (res.data as List)
-              .map((e) => CaseRequestModel.fromJson(Map<String, dynamic>.from(e as Map)))
+              .map((e) => CaseRequestModel.fromJson(
+                  Map<String, dynamic>.from(e as Map)))
               .toList(),
         );
       }
@@ -253,11 +268,17 @@ class ApiService {
         final List? raw = data is List
             ? data
             : (data is Map
-                ? (data['data'] ?? data['content'] ?? data['items'] ?? data['requests']) as List?
+                ? (data['data'] ??
+                    data['content'] ??
+                    data['items'] ??
+                    data['requests']) as List?
                 : null);
         if (raw != null) {
           return _okList(
-            raw.map((e) => CaseRequestModel.fromJson(Map<String, dynamic>.from(e as Map))).toList(),
+            raw
+                .map((e) => CaseRequestModel.fromJson(
+                    Map<String, dynamic>.from(e as Map)))
+                .toList(),
           );
         }
         return _fail('صيغة البيانات غير صحيحة', code: res.statusCode);
@@ -279,12 +300,15 @@ class ApiService {
         ApiConstants.deleteRequest,
         queryParameters: params,
       );
-      if (res.statusCode == 200 || res.statusCode == 204) return {'success': true};
-      if (res.statusCode == 403) return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: 403);
+      if (res.statusCode == 200 || res.statusCode == 204)
+        return {'success': true};
+      if (res.statusCode == 403)
+        return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: 403);
       return _fail('فشل في حذف الطلب', code: res.statusCode);
     } on DioException catch (e) {
       final code = e.response?.statusCode;
-      if (code == 403) return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: code);
+      if (code == 403)
+        return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: code);
       if (code == 404) return _fail('الطلب غير موجود', code: code);
       if (code == 500) return _fail('خطأ في الخادم، حاول مرة أخرى', code: code);
       return _fail(_dioError(e), code: code);
@@ -297,7 +321,8 @@ class ApiService {
     try {
       await DioFactory.addDioHeaders();
       final res = await _dio.put(ApiConstants.updateDoctor, data: body);
-      if (res.statusCode == 200 || res.statusCode == 201) return _okData(res.data);
+      if (res.statusCode == 200 || res.statusCode == 201)
+        return _okData(res.data);
       return _fail('فشل في تحديث بيانات الطبيب', code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
@@ -310,13 +335,16 @@ class ApiService {
     try {
       await DioFactory.addDioHeaders();
       final res = await _dio.delete(ApiConstants.deleteDoctor);
-      if (res.statusCode == 200 || res.statusCode == 204) return {'success': true};
+      if (res.statusCode == 200 || res.statusCode == 204)
+        return {'success': true};
       return _fail('فشل في حذف الحساب', code: res.statusCode);
     } on DioException catch (e) {
       final code = e.response?.statusCode;
       if (code == 404) return _fail('الطبيب غير موجود', code: code);
-      if (code == 401) return _fail('غير مصرح: يرجى تسجيل الدخول مجدداً', code: code);
-      if (code == 403) return _fail('ممنوع الوصول، تأكد من صلاحياتك', code: code);
+      if (code == 401)
+        return _fail('غير مصرح: يرجى تسجيل الدخول مجدداً', code: code);
+      if (code == 403)
+        return _fail('ممنوع الوصول، تأكد من صلاحياتك', code: code);
       return _fail(_dioError(e), code: code);
     } catch (_) {
       return _fail('حدث خطأ غير متوقع');

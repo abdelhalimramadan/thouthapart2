@@ -88,7 +88,8 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
       doctorId = int.tryParse(s) ?? 0;
     }
 
-    final result = await _repo.deleteRequest(request.id ?? 0, doctorId: doctorId == 0 ? null : doctorId);
+    final result = await _repo.deleteRequest(request.id ?? 0,
+        doctorId: doctorId == 0 ? null : doctorId);
 
     if (result['success'] == true) {
       currentList.removeWhere((r) => r.id == request.id);
