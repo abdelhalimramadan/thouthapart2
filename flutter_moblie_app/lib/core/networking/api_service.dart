@@ -344,13 +344,9 @@ class ApiService {
   Future<Map<String, dynamic>> updateDoctor(Map<String, dynamic> body) async {
     try {
       await DioFactory.addDioHeaders();
-      // Pass doctorId as query param too so backend can verify ownership
-      final doctorId = body['id'] ?? body['doctorId'];
-      final params = (doctorId != null) ? {'doctorId': doctorId} : null;
       final res = await _dio.put(
         ApiConstants.updateDoctor,
         data: body,
-        queryParameters: params,
       );
       if (res.statusCode == 200 || res.statusCode == 201)
         return _okData(res.data);
@@ -363,7 +359,7 @@ class ApiService {
         return _fail('ممنوع الوصول: تأكد من صلاحياتك', code: code);
       return _fail(_dioError(e), code: code);
     } catch (e) {
-      print('=== deleteDoctor unexpected error: $e ===');
+      debugPrint('updateDoctor unexpected error: $e');
       return _fail('حدث خطأ غير متوقع');
     }
   }
