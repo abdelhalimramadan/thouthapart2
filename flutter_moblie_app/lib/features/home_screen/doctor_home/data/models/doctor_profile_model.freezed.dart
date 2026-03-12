@@ -15,13 +15,17 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DoctorProfileModel {
   int? get id;
+  @JsonKey(readValue: readFirstName)
   String? get firstName;
   @JsonKey(readValue: readLastName)
   String? get lastName;
+  @JsonKey(readValue: readEmail)
   String? get email;
   @JsonKey(readValue: readPhone)
   String? get phone;
+  @JsonKey(readValue: readFaculty)
   String? get faculty;
+  @JsonKey(readValue: readYear)
   String? get year;
   @JsonKey(readValue: readGov)
   String? get governorate;
@@ -78,12 +82,12 @@ abstract mixin class $DoctorProfileModelCopyWith<$Res> {
   @useResult
   $Res call(
       {int? id,
-      String? firstName,
+      @JsonKey(readValue: readFirstName) String? firstName,
       @JsonKey(readValue: readLastName) String? lastName,
-      String? email,
+      @JsonKey(readValue: readEmail) String? email,
       @JsonKey(readValue: readPhone) String? phone,
-      String? faculty,
-      String? year,
+      @JsonKey(readValue: readFaculty) String? faculty,
+      @JsonKey(readValue: readYear) String? year,
       @JsonKey(readValue: readGov) String? governorate,
       @JsonKey(readValue: readCat) String? category});
 }
@@ -247,12 +251,12 @@ extension DoctorProfileModelPatterns on DoctorProfileModel {
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
             int? id,
-            String? firstName,
+            @JsonKey(readValue: readFirstName) String? firstName,
             @JsonKey(readValue: readLastName) String? lastName,
-            String? email,
+            @JsonKey(readValue: readEmail) String? email,
             @JsonKey(readValue: readPhone) String? phone,
-            String? faculty,
-            String? year,
+            @JsonKey(readValue: readFaculty) String? faculty,
+            @JsonKey(readValue: readYear) String? year,
             @JsonKey(readValue: readGov) String? governorate,
             @JsonKey(readValue: readCat) String? category)?
         $default, {
@@ -293,12 +297,12 @@ extension DoctorProfileModelPatterns on DoctorProfileModel {
   TResult when<TResult extends Object?>(
     TResult Function(
             int? id,
-            String? firstName,
+            @JsonKey(readValue: readFirstName) String? firstName,
             @JsonKey(readValue: readLastName) String? lastName,
-            String? email,
+            @JsonKey(readValue: readEmail) String? email,
             @JsonKey(readValue: readPhone) String? phone,
-            String? faculty,
-            String? year,
+            @JsonKey(readValue: readFaculty) String? faculty,
+            @JsonKey(readValue: readYear) String? year,
             @JsonKey(readValue: readGov) String? governorate,
             @JsonKey(readValue: readCat) String? category)
         $default,
@@ -337,12 +341,12 @@ extension DoctorProfileModelPatterns on DoctorProfileModel {
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
             int? id,
-            String? firstName,
+            @JsonKey(readValue: readFirstName) String? firstName,
             @JsonKey(readValue: readLastName) String? lastName,
-            String? email,
+            @JsonKey(readValue: readEmail) String? email,
             @JsonKey(readValue: readPhone) String? phone,
-            String? faculty,
-            String? year,
+            @JsonKey(readValue: readFaculty) String? faculty,
+            @JsonKey(readValue: readYear) String? year,
             @JsonKey(readValue: readGov) String? governorate,
             @JsonKey(readValue: readCat) String? category)?
         $default,
@@ -371,12 +375,12 @@ extension DoctorProfileModelPatterns on DoctorProfileModel {
 class _DoctorProfileModel implements DoctorProfileModel {
   const _DoctorProfileModel(
       {this.id,
-      this.firstName,
+      @JsonKey(readValue: readFirstName) this.firstName,
       @JsonKey(readValue: readLastName) this.lastName,
-      this.email,
+      @JsonKey(readValue: readEmail) this.email,
       @JsonKey(readValue: readPhone) this.phone,
-      this.faculty,
-      this.year,
+      @JsonKey(readValue: readFaculty) this.faculty,
+      @JsonKey(readValue: readYear) this.year,
       @JsonKey(readValue: readGov) this.governorate,
       @JsonKey(readValue: readCat) this.category});
   factory _DoctorProfileModel.fromJson(Map<String, dynamic> json) =>
@@ -385,18 +389,22 @@ class _DoctorProfileModel implements DoctorProfileModel {
   @override
   final int? id;
   @override
+  @JsonKey(readValue: readFirstName)
   final String? firstName;
   @override
   @JsonKey(readValue: readLastName)
   final String? lastName;
   @override
+  @JsonKey(readValue: readEmail)
   final String? email;
   @override
   @JsonKey(readValue: readPhone)
   final String? phone;
   @override
+  @JsonKey(readValue: readFaculty)
   final String? faculty;
   @override
+  @JsonKey(readValue: readYear)
   final String? year;
   @override
   @JsonKey(readValue: readGov)
@@ -461,12 +469,12 @@ abstract mixin class _$DoctorProfileModelCopyWith<$Res>
   @useResult
   $Res call(
       {int? id,
-      String? firstName,
+      @JsonKey(readValue: readFirstName) String? firstName,
       @JsonKey(readValue: readLastName) String? lastName,
-      String? email,
+      @JsonKey(readValue: readEmail) String? email,
       @JsonKey(readValue: readPhone) String? phone,
-      String? faculty,
-      String? year,
+      @JsonKey(readValue: readFaculty) String? faculty,
+      @JsonKey(readValue: readYear) String? year,
       @JsonKey(readValue: readGov) String? governorate,
       @JsonKey(readValue: readCat) String? category});
 }

@@ -9,12 +9,12 @@ part of 'doctor_profile_model.dart';
 _DoctorProfileModel _$DoctorProfileModelFromJson(Map<String, dynamic> json) =>
     _DoctorProfileModel(
       id: (json['id'] as num?)?.toInt(),
-      firstName: json['firstName'] as String?,
+      firstName: readFirstName(json, 'firstName') as String?,
       lastName: readLastName(json, 'lastName') as String?,
-      email: json['email'] as String?,
+      email: readEmail(json, 'email') as String?,
       phone: readPhone(json, 'phone') as String?,
-      faculty: json['faculty'] as String?,
-      year: json['year'] as String?,
+      faculty: readFaculty(json, 'faculty') as String?,
+      year: readYear(json, 'year') as String?,
       governorate: readGov(json, 'governorate') as String?,
       category: readCat(json, 'category') as String?,
     );

@@ -1,6 +1,9 @@
 import 'dart:ui';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
 
@@ -27,6 +30,12 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int? _selectedCityId;
+  List<CityModel> _loadedCities = [];
+  bool _isDetecting = false;
+  bool _gpsFinished = false;
+  bool _autoSelectApplied = false;
+  List<String> _gpsNameCandidates = [];
+  String? _gpsFailureMessage;
 
   // Asset mapping for categories
   final Map<String, String> _categoryAssets = {
@@ -160,6 +169,184 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _autoDetectCity();
+  }
+
+  /// Strips common Arabic administrative prefixes
+  String _stripPrefix(String s) => s
+      .replaceAll(RegExp(r'^محافظة\s*'), '')
+      .replaceAll(RegExp(r'^مديرية\s*'), '')
+      .replaceAll(RegExp(r'^مدينة\s*'), '')
+      .replaceAll(RegExp(r'^قسم\s*'), '')
+      .replaceAll(RegExp(r'\s*محافظة$'), '')
+      .trim();
+
+  /// Returns true if [a] and [b] share enough characters
+  bool _namesMatch(String a, String b) {
+    final na = _stripPrefix(a.trim());
+    final nb = _stripPrefix(b.trim());
+    if (na.isEmpty || nb.isEmpty) return false;
+    if (na.contains(nb) || nb.contains(na)) return true;
+    for (int len = 3; len <= na.length && len <= nb.length; len++) {
+      for (int i = 0; i <= na.length - len; i++) {
+        if (nb.contains(na.substring(i, i + len))) return true;
+      }
+    }
+    return false;
+  }
+
+  /// Tries to match GPS candidates against loaded cities
+  void _tryAutoSelectCity() {
+    print('=== GPS: _tryAutoSelectCity called ===');
+    print('=== GPS: _autoSelectApplied = $_autoSelectApplied ===');
+    print('=== GPS: _selectedCityId = $_selectedCityId ===');
+    print('=== GPS: _gpsFinished = $_gpsFinished ===');
+    print('=== GPS: _loadedCities count = ${_loadedCities.length} ===');
+    print('=== GPS: candidates = $_gpsNameCandidates ===');
+    
+    if (_autoSelectApplied || _selectedCityId != null) {
+      print('=== GPS: Already applied or city selected, returning ===');
+      return;
+    }
+    if (!_gpsFinished || _loadedCities.isEmpty) {
+      print('=== GPS: GPS not finished or no cities loaded, returning ===');
+      return;
+    }
+
+    _autoSelectApplied = true;
+
+    CityModel? match;
+    outer:
+    for (final raw in _gpsNameCandidates) {
+      for (final c in _loadedCities) {
+        print('=== GPS: Comparing "$raw" with "${c.name}" ===');
+        if (_namesMatch(raw, c.name)) {
+          match = c;
+          print('=== GPS: MATCH FOUND! ${c.name} (id: ${c.id}) ===');
+          break outer;
+        }
+      }
+    }
+
+    if (match != null && mounted) {
+      print('=== GPS: Setting city to ${match.name} ===');
+      setState(() {
+        _selectedCityId = match!.id;
+        _gpsFailureMessage = null;
+      });
+      context.read<DoctorCubit>().filterByCity(match.id);
+    } else {
+      print('=== GPS: No match found ===');
+    }
+  }
+
+  /// Gets GPS coordinates and auto-selects city
+  Future<void> _autoDetectCity() async {
+    print('=== GPS: Starting auto detection ===');
+    if (!mounted) {
+      print('=== GPS: Not mounted, returning ===');
+      return;
+    }
+    setState(() => _isDetecting = true);
+    try {
+      print('=== GPS: Checking permission ===');
+      LocationPermission perm = await Geolocator.checkPermission();
+      print('=== GPS: Current permission = $perm ===');
+      if (perm == LocationPermission.denied) {
+        print('=== GPS: Permission denied, requesting ===');
+        perm = await Geolocator.requestPermission();
+        print('=== GPS: After request permission = $perm ===');
+      }
+      if (perm == LocationPermission.deniedForever || perm == LocationPermission.denied) {
+        print('=== GPS: Permission still denied ===');
+        if (mounted) {
+          setState(() {
+            _gpsFinished = true;
+            _gpsFailureMessage = 'لا يمكن تحديد الموقع دون منح إذن الوصول';
+          });
+        }
+        return;
+      }
+
+      print('=== GPS: Checking if service enabled ===');
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      print('=== GPS: Service enabled = $serviceEnabled ===');
+      if (!serviceEnabled) {
+        if (mounted) {
+          setState(() {
+            _gpsFinished = true;
+            _gpsFailureMessage = 'خدمة الموقع معطّلة';
+          });
+        }
+        return;
+      }
+
+      print('=== GPS: Getting current position ===');
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+          timeLimit: Duration(seconds: 15),
+        ),
+      );
+      print('=== GPS: Position = ${pos.latitude}, ${pos.longitude} ===');
+
+      print('=== GPS: Calling Nominatim API ===');
+      final dio = Dio();
+      final res = await dio.get(
+        'https://nominatim.openstreetmap.org/reverse',
+        queryParameters: {
+          'lat': pos.latitude,
+          'lon': pos.longitude,
+          'format': 'json',
+          'accept-language': 'ar',
+        },
+        options: Options(
+          headers: {'User-Agent': 'ThothaApp/1.0'},
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+      );
+      print('=== GPS: API status = ${res.statusCode} ===');
+      print('=== GPS: API data = ${res.data} ===');
+
+      final candidates = <String>[];
+      const addressKeys = ['state', 'county', 'city', 'town', 'village', 'state_district', 'region', 'municipality'];
+
+      if (res.statusCode == 200 && res.data is Map) {
+        final address = res.data['address'] as Map?;
+        print('=== GPS: Address = $address ===');
+        if (address != null) {
+          for (final key in addressKeys) {
+            final v = address[key];
+            if (v is String && v.isNotEmpty) {
+              candidates.add(v);
+              print('=== GPS: Found candidate - $key: $v ===');
+            }
+          }
+        }
+      }
+
+      print('=== GPS: Total candidates = ${candidates.length} ===');
+      if (mounted) {
+        setState(() => _gpsNameCandidates = candidates);
+      }
+    } catch (e, stack) {
+      print('=== GPS: ERROR = $e ===');
+      print('=== GPS: STACK = $stack ===');
+    } finally {
+      print('=== GPS: Finished, calling _tryAutoSelectCity ===');
+      if (mounted) {
+        setState(() {
+          _gpsFinished = true;
+          _isDetecting = false;
+        });
+      }
+      _tryAutoSelectCity();
+    }
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     _searchFocusNode.dispose();
@@ -192,10 +379,54 @@ class _HomeScreenState extends State<HomeScreen> {
               _scaffoldKey.currentState?.openDrawer();
             },
           ),
+          actions: [
+            if (_selectedCityId != null)
+              BlocBuilder<DoctorCubit, DoctorState>(
+                builder: (context, state) {
+                  String? cityName;
+                  if (state is DoctorSuccess) {
+                    final selectedCity = state.cities.firstWhere(
+                      (c) => c.id == _selectedCityId,
+                      orElse: () => state.cities.first,
+                    );
+                    cityName = selectedCity.name;
+                  }
+                  if (cityName == null) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          cityName,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontFamily: 'Cairo',
+                            fontSize: baseFontSize * 0.85,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.location_on,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+          ],
         ),
         drawer: widget.drawer,
         body: SafeArea(
-          child: BlocBuilder<DoctorCubit, DoctorState>(
+          child: BlocConsumer<DoctorCubit, DoctorState>(
+            listener: (context, state) {
+              if (state is DoctorSuccess && state.cities.isNotEmpty) {
+                _loadedCities = state.cities;
+                _tryAutoSelectCity();
+              }
+            },
             builder: (context, state) {
               if (state is DoctorLoading) {
                 return const Center(child: CircularProgressIndicator());
@@ -353,60 +584,97 @@ class _HomeScreenState extends State<HomeScreen> {
                         Container(
                           width: double.infinity,
                           margin: EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 16),
-                          child: Container(
-                            height: 52,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: isDark ? Colors.grey[700]! : const Color(0xFFD1D5DC),
-                                width: 1.1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<int>(
-                                value: _selectedCityId,
-                                hint: Text(
-                                  'اختر المدينة',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontFamily: 'Cairo',
-                                    fontSize: baseFontSize * 0.875,
-                                    fontWeight: FontWeight.w600,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              if (_isDetecting || _gpsFailureMessage != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 4, bottom: 8),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (_isDetecting)
+                                        SizedBox(
+                                          width: 14,
+                                          height: 14,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Theme.of(context).colorScheme.primary,
+                                          ),
+                                        ),
+                                      if (_isDetecting) const SizedBox(width: 8),
+                                      Text(
+                                        _isDetecting
+                                            ? 'جارٍ تحديد موقعك...'
+                                            : _gpsFailureMessage ?? '',
+                                        style: TextStyle(
+                                          fontFamily: 'Cairo',
+                                          fontSize: baseFontSize * 0.8,
+                                          color: _gpsFailureMessage != null
+                                              ? Colors.orange
+                                              : Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                isExpanded: true,
-                                icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).iconTheme.color),
-                                items: cities.map((city) {
-                                  return DropdownMenuItem<int>(
-                                    value: city.id,
-                                    child: Text(
-                                      city.name,
+                              Container(
+                                height: 52,
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isDark ? Colors.grey[700]! : const Color(0xFFD1D5DC),
+                                    width: 1.1,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<int>(
+                                    value: _selectedCityId,
+                                    hint: Text(
+                                      'اختر المدينة',
                                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                         fontFamily: 'Cairo',
                                         fontSize: baseFontSize * 0.875,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      textAlign: TextAlign.right,
                                     ),
-                                  );
-                                }).toList(),
-                                onChanged: (val) {
-                                  setState(() {
-                                    _selectedCityId = val;
-                                  });
-                                  if (val != null) {
-                                    context.read<DoctorCubit>().filterByCity(val);
-                                  }
-                                },
+                                    isExpanded: true,
+                                    icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).iconTheme.color),
+                                    items: cities.map((city) {
+                                      return DropdownMenuItem<int>(
+                                        value: city.id,
+                                        child: Text(
+                                          city.name,
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                            fontFamily: 'Cairo',
+                                            fontSize: baseFontSize * 0.875,
+                                          ),
+                                          textAlign: TextAlign.right,
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: (val) {
+                                      setState(() {
+                                        _selectedCityId = val;
+                                        _gpsFailureMessage = null;
+                                      });
+                                      if (val != null) {
+                                        context.read<DoctorCubit>().filterByCity(val);
+                                      }
+                                    },
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
 

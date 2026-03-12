@@ -26,6 +26,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
 
   // ── State ──────────────────────────────────────────────────────
   String? _firstName;
+  String? _governorate;
   bool _isLoadingName = true;
 
   List<CaseRequestModel> _caseRequests = [];
@@ -48,11 +49,13 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     try {
       // Try cache first — avoids unnecessary network call
       final cached = await SharedPrefHelper.getString('first_name');
+      final cachedGov = await SharedPrefHelper.getString('governorate');
       final cachedDoctorId = await SharedPrefHelper.getInt('doctor_id');
       if (cached.isNotEmpty && cachedDoctorId != 0) {
         if (mounted)
           setState(() {
             _firstName = cached;
+            _governorate = cachedGov.isNotEmpty ? cachedGov : null;
             _isLoadingName = false;
           });
         return;
@@ -77,9 +80,19 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                       decoded['first_name'] ??
                       decoded['name'])
                   ?.toString();
+              // Extract governorate
+              final gov = (decoded['governorate'] ??
+                      decoded['cityName'] ??
+                      decoded['city_name'] ??
+                      decoded['city'])
+                  ?.toString();
               if (fn != null && fn.isNotEmpty) {
                 await SharedPrefHelper.setData('first_name', fn);
                 if (mounted) setState(() => _firstName = fn);
+              }
+              if (gov != null && gov.isNotEmpty) {
+                await SharedPrefHelper.setData('governorate', gov);
+                if (mounted) setState(() => _governorate = gov);
               }
               // Extract and cache doctor ID
               final rawId =
@@ -263,11 +276,9 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       backgroundColor: Colors.white,
       foregroundColor: cs.onSurface,
       automaticallyImplyLeading: false,
-      leading: Builder(
-        builder: (ctx) => IconButton(
-          icon: const Icon(Icons.menu, size: 24),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
+      leading: IconButton(
+        icon: const Icon(Icons.menu, size: 24),
+        onPressed: () => _scaffoldKey.currentState?.openDrawer(),
       ),
       titleSpacing: 0,
       title: Row(
@@ -291,6 +302,30 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         ],
       ),
       actions: [
+        if (_governorate != null && _governorate!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _governorate!,
+                  style: tt.bodyMedium?.copyWith(
+                    fontFamily: 'Cairo',
+                    fontSize: baseFontSize * 0.85,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.location_on,
+                  size: 20,
+                  color: cs.primary,
+                ),
+              ],
+            ),
+          ),
         Stack(children: [
           IconButton(
             icon: const Icon(Icons.notifications_none, size: 24),

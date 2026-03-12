@@ -24,7 +24,7 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
   ///  1. Emit [MyRequestsLoading].
   ///  2. Guard: abort with [MyRequestsError] if JWT token is absent.
   ///  3. Resolve doctorId from SharedPreferences or JWT payload.
-  ///  4. Call GET /api/request/getRequestsByDoctorId?doctorId=<id>.
+  ///  4. Call GET /api/request/getRequestsByDoctorId?doctorId=&lt;id&gt;.
   ///  5. Emit [MyRequestsSuccess], [MyRequestsEmpty], or [MyRequestsError].
   Future<void> loadRequests() async {
     emit(MyRequestsLoading());
