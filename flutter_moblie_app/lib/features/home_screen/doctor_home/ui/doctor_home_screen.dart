@@ -1,6 +1,7 @@
 import 'dart:convert';
-
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../../core/helpers/constants.dart';
 import '../../../../core/helpers/shared_pref_helper.dart';
 import '../../../../core/utils/notification_helper.dart';
@@ -29,6 +30,13 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   String? _governorate;
   bool _isLoadingName = true;
 
+  // GPS State
+  bool _isDetecting = false;
+  bool _gpsFinished = false;
+  bool _autoSelectApplied = false;
+  String? _gpsFailureMessage;
+  List<String> _gpsNameCandidates = [];
+
   List<CaseRequestModel> _caseRequests = [];
   bool _isLoadingCases = true;
   String? _casesError;
@@ -39,6 +47,147 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     super.initState();
     // Run both fetches in parallel — faster startup
     Future.wait([_fetchDoctorName(), _fetchCaseRequests()]);
+    _autoDetectCity();
+  }
+
+  /// Strips common Arabic administrative prefixes
+  String _stripPrefix(String s) => s
+      .replaceAll(RegExp(r'^محافظة\s*'), '')
+      .replaceAll(RegExp(r'^مديرية\s*'), '')
+      .replaceAll(RegExp(r'^مدينة\s*'), '')
+      .replaceAll(RegExp(r'^قسم\s*'), '')
+      .replaceAll(RegExp(r'\s*محافظة$'), '')
+      .trim();
+
+  /// Returns true if [a] and [b] share enough characters
+  bool _namesMatch(String a, String b) {
+    final na = _stripPrefix(a.trim());
+    final nb = _stripPrefix(b.trim());
+    if (na.isEmpty || nb.isEmpty) return false;
+    if (na.contains(nb) || nb.contains(na)) return true;
+    for (int len = 3; len <= na.length && len <= nb.length; len++) {
+      for (int i = 0; i <= na.length - len; i++) {
+        if (nb.contains(na.substring(i, i + len))) return true;
+      }
+    }
+    return false;
+  }
+
+  /// Gets GPS coordinates and auto-detects governorate
+  Future<void> _autoDetectCity() async {
+    print('=== DOCTOR GPS: Starting auto detection ===');
+    if (!mounted) return;
+    
+    setState(() => _isDetecting = true);
+    
+    try {
+      print('=== DOCTOR GPS: Checking permission ===');
+      LocationPermission perm = await Geolocator.checkPermission();
+      print('=== DOCTOR GPS: Current permission = $perm ===');
+      
+      if (perm == LocationPermission.denied) {
+        print('=== DOCTOR GPS: Permission denied, requesting ===');
+        perm = await Geolocator.requestPermission();
+        print('=== DOCTOR GPS: After request permission = $perm ===');
+      }
+      
+      if (perm == LocationPermission.deniedForever || perm == LocationPermission.denied) {
+        print('=== DOCTOR GPS: Permission still denied ===');
+        if (mounted) {
+          setState(() {
+            _gpsFinished = true;
+            _gpsFailureMessage = 'لا يمكن تحديد الموقع';
+            _isDetecting = false;
+          });
+        }
+        return;
+      }
+
+      print('=== DOCTOR GPS: Checking if service enabled ===');
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      print('=== DOCTOR GPS: Service enabled = $serviceEnabled ===');
+      
+      if (!serviceEnabled) {
+        if (mounted) {
+          setState(() {
+            _gpsFinished = true;
+            _gpsFailureMessage = 'GPS معطل';
+            _isDetecting = false;
+          });
+        }
+        return;
+      }
+
+      print('=== DOCTOR GPS: Getting current position ===');
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+          timeLimit: Duration(seconds: 15),
+        ),
+      );
+      print('=== DOCTOR GPS: Position = ${pos.latitude}, ${pos.longitude} ===');
+
+      print('=== DOCTOR GPS: Calling Nominatim API ===');
+      final dio = Dio();
+      final res = await dio.get(
+        'https://nominatim.openstreetmap.org/reverse',
+        queryParameters: {
+          'lat': pos.latitude,
+          'lon': pos.longitude,
+          'format': 'json',
+          'accept-language': 'ar',
+        },
+        options: Options(
+          headers: {'User-Agent': 'ThothaApp/1.0'},
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+      );
+      
+      print('=== DOCTOR GPS: API status = ${res.statusCode} ===');
+      print('=== DOCTOR GPS: API data = ${res.data} ===');
+
+      final candidates = <String>[];
+      const addressKeys = ['state', 'county', 'city', 'town', 'village', 'state_district', 'region', 'municipality'];
+
+      if (res.statusCode == 200 && res.data is Map) {
+        final address = res.data['address'] as Map?;
+        print('=== DOCTOR GPS: Address = $address ===');
+        if (address != null) {
+          for (final key in addressKeys) {
+            final v = address[key];
+            if (v is String && v.isNotEmpty) {
+              candidates.add(v);
+              print('=== DOCTOR GPS: Found candidate - $key: $v ===');
+            }
+          }
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _gpsNameCandidates = candidates;
+          _gpsFinished = true;
+          _isDetecting = false;
+        });
+      }
+      
+      // Try to set governorate from first candidate
+      if (candidates.isNotEmpty && mounted) {
+        setState(() {
+          _governorate = candidates.first;
+        });
+        print('=== DOCTOR GPS: Set governorate to $_governorate ===');
+      }
+    } catch (e, stack) {
+      print('=== DOCTOR GPS: ERROR = $e ===');
+      print('=== DOCTOR GPS: STACK = $stack ===');
+      if (mounted) {
+        setState(() {
+          _gpsFinished = true;
+          _isDetecting = false;
+        });
+      }
+    }
   }
 
   // ── Data Fetching ──────────────────────────────────────────────
@@ -302,6 +451,22 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         ],
       ),
       actions: [
+        // GPS Loading indicator
+        if (_isDetecting)
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: Center(
+              child: SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: cs.primary,
+                ),
+              ),
+            ),
+          ),
+        // Location display
         if (_governorate != null && _governorate!.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(left: 12),
