@@ -1,6 +1,8 @@
 import 'dart:ui';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
 
@@ -15,7 +17,10 @@ import 'package:thotha_mobile_app/features/login/ui/login_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
 
 class SecondaryHomeScreen extends StatefulWidget {
-  const SecondaryHomeScreen({super.key, this.drawer = const HomeDrawer(), this.showAddCaseCategory = false});
+  const SecondaryHomeScreen(
+      {super.key,
+      this.drawer = const HomeDrawer(),
+      this.showAddCaseCategory = false});
 
   final Widget drawer;
   final bool showAddCaseCategory;
@@ -30,6 +35,77 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int? _selectedCityId;
+  String? _detectedCityName;
+  bool _autoSelectApplied = false;
+  bool _isLoggedIn = false;
+  bool _isDetecting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final token =
+        await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+    if (mounted) {
+      setState(() {
+        _isLoggedIn = token.isNotEmpty && token != 'null';
+      });
+      if (!_isLoggedIn) {
+        _autoDetectCity();
+      }
+    }
+  }
+
+  /// Gets GPS coordinates, reverse-geocodes via Nominatim with Arabic locale,
+  /// and stores the detected governorate name for auto-selection.
+  Future<void> _autoDetectCity() async {
+    if (mounted) setState(() => _isDetecting = true);
+    try {
+      LocationPermission perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) return;
+
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
+
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+          timeLimit: Duration(seconds: 15),
+        ),
+      );
+
+      final dio = Dio();
+      final res = await dio.get(
+        'https://nominatim.openstreetmap.org/reverse',
+        queryParameters: {
+          'lat': pos.latitude,
+          'lon': pos.longitude,
+          'format': 'json',
+          'accept-language': 'ar',
+        },
+        options: Options(headers: {'User-Agent': 'ThothaApp/1.0'}),
+      );
+
+      if (res.statusCode == 200 && res.data is Map) {
+        final address = res.data['address'] as Map?;
+        final state = address?['state'] as String?;
+        if (state != null && state.isNotEmpty && mounted) {
+          setState(() => _detectedCityName = state);
+        }
+      }
+    } catch (_) {
+      // GPS or network failure — skip auto-selection silently
+    } finally {
+      if (mounted) setState(() => _isDetecting = false);
+    }
+  }
 
   // Asset mapping for categories
   final Map<String, String> _categoryAssets = {
@@ -48,7 +124,8 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
     required String? cityName,
   }) async {
     if (widget.showAddCaseCategory && _isAddCaseCategory(categoryName)) {
-      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      final token =
+          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
       if (token.isEmpty) {
         if (!mounted) return;
         Navigator.push(
@@ -82,13 +159,8 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
     );
   }
 
-  Widget _buildSquareCategory(
-      String assetPath, 
-      int index, 
-      String categoryName,
-      double width,
-      double height,
-      double baseFontSize,
+  Widget _buildSquareCategory(String assetPath, int index, String categoryName,
+      double width, double height, double baseFontSize,
       {int? categoryId, String? cityName}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -112,7 +184,8 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
       'تركيبات الأسنان',
     ];
 
-    final fileName = index < svgFiles.length ? svgFiles[index] : 'placeholder.svg';
+    final fileName =
+        index < svgFiles.length ? svgFiles[index] : 'placeholder.svg';
     final resolvedAssetPath =
         assetPath.isNotEmpty ? assetPath : 'assets/svg/$fileName';
     final resolvedCategoryName = categoryName.isNotEmpty
@@ -138,7 +211,9 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1),
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.grey.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -240,12 +315,36 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
               if (state is DoctorLoading) {
                 return const Center(child: CircularProgressIndicator());
               } else if (state is DoctorError) {
-                return Center(child: Text(state.error, style: const TextStyle(fontFamily: 'Cairo')));
+                return Center(
+                    child: Text(state.error,
+                        style: const TextStyle(fontFamily: 'Cairo')));
               } else if (state is DoctorSuccess) {
                 final categories = state.categories;
                 final cities = state.cities;
-
-                final filteredCategories = (_searchController.text.isEmpty || categories.isEmpty)
+                // Auto-select detected governorate once cities are loaded
+                if (!_autoSelectApplied &&
+                    _selectedCityId == null &&
+                    _detectedCityName != null &&
+                    cities.isNotEmpty) {
+                  _autoSelectApplied = true;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+                    try {
+                      final match = cities.firstWhere(
+                        (c) =>
+                            _detectedCityName!.contains(c.name) ||
+                            c.name.contains(_detectedCityName!),
+                      );
+                      // Just update _selectedCityId — no filterByCity to avoid
+                      // an unnecessary DoctorLoading flash on the patient screen
+                      setState(() => _selectedCityId = match.id);
+                    } catch (_) {
+                      // No matching city found — leave unselected
+                    }
+                  });
+                }
+                final filteredCategories = (_searchController.text.isEmpty ||
+                        categories.isEmpty)
                     ? categories
                     : categories
                         .where((c) => c.name.contains(_searchController.text))
@@ -262,7 +361,8 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                         // Search Bar
                         Container(
                           height: 48,
-                          margin: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 10),
+                          margin: EdgeInsets.symmetric(
+                              horizontal: width * 0.05, vertical: 10),
                           decoration: BoxDecoration(
                             color: isDark
                                 ? Colors.grey[800]?.withAlpha(128)
@@ -273,7 +373,8 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                             children: [
                               const Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 12),
-                                child: Icon(Icons.search, color: Colors.grey, size: 22),
+                                child: Icon(Icons.search,
+                                    color: Colors.grey, size: 22),
                               ),
                               Expanded(
                                 child: TextField(
@@ -284,7 +385,10 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                   },
                                   textAlign: TextAlign.right,
                                   textDirection: TextDirection.rtl,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontFamily: 'Cairo'),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(fontFamily: 'Cairo'),
                                   decoration: InputDecoration(
                                     hintText: 'ابحث عن قسم...',
                                     hintStyle: TextStyle(
@@ -293,12 +397,14 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                       fontSize: baseFontSize * 0.9,
                                     ),
                                     border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        vertical: 14),
                                   ),
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.mic, color: Colors.grey, size: 22),
+                                icon: const Icon(Icons.mic,
+                                    color: Colors.grey, size: 22),
                                 onPressed: () {},
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
@@ -308,95 +414,140 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                           ),
                         ),
 
-                        // City Dropdown
-                        Container(
-                          width: double.infinity,
-                          margin: EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(right: 4, bottom: 8),
-                                child: Text(
-                                  'اختر المحافظة',
-                                  style: TextStyle(
-                                    fontFamily: 'Cairo',
-                                    fontSize: baseFontSize * 0.9,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                height: 52,
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: isDark ? Colors.grey[700]! : const Color(0xFFD1D5DC),
-                                    width: 1.1,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Theme.of(context).colorScheme.primary.withAlpha(77),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 1),
+                        // City Dropdown — only visible when NOT logged in
+                        if (!_isLoggedIn)
+                          Container(
+                            width: double.infinity,
+                            margin: EdgeInsets.symmetric(
+                                horizontal: width * 0.06, vertical: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      right: 4, bottom: 8),
+                                  child: Text(
+                                    'اختر المحافظة',
+                                    style: TextStyle(
+                                      fontFamily: 'Cairo',
+                                      fontSize: baseFontSize * 0.9,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ],
+                                  ),
                                 ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<int>(
-                                    value: _selectedCityId,
-                                    hint: Text(
-                                      'اختر المدينة',
-                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        fontFamily: 'Cairo',
-                                        fontSize: baseFontSize * 0.875,
-                                        fontWeight: FontWeight.w600,
+                                Container(
+                                  height: 52,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        Theme.of(context).colorScheme.surface,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? Colors.grey[700]!
+                                          : const Color(0xFFD1D5DC),
+                                      width: 1.1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withAlpha(77),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 1),
                                       ),
-                                    ),
-                                    isExpanded: true,
-                                    icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).iconTheme.color),
-                                    items: cities.map((city) {
-                                      return DropdownMenuItem<int>(
-                                        value: city.id,
-                                        child: Text(
-                                          city.name,
-                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                            fontFamily: 'Cairo',
-                                            fontSize: baseFontSize * 0.875,
+                                    ],
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<int>(
+                                      value: _selectedCityId,
+                                      hint: Row(
+                                        children: [
+                                          Icon(
+                                            _isDetecting
+                                                ? Icons.location_searching
+                                                : Icons.my_location,
+                                            size: 16,
+                                            color: _isDetecting
+                                                ? Theme.of(context)
+                                                    .colorScheme
+                                                    .primary
+                                                : Colors.grey[500],
                                           ),
-                                          textAlign: TextAlign.right,
-                                        ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (val) {
-                                      setState(() {
-                                        _selectedCityId = val;
-                                      });
-                                      if (val != null) {
-                                        context.read<DoctorCubit>().filterByCity(val);
-                                      }
-                                    },
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            _isDetecting
+                                                ? 'جارٍ تحديد موقعك...'
+                                                : 'اختر المدينة',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium
+                                                ?.copyWith(
+                                                  fontFamily: 'Cairo',
+                                                  fontSize:
+                                                      baseFontSize * 0.875,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                      isExpanded: true,
+                                      icon: Icon(Icons.arrow_drop_down,
+                                          color: Theme.of(context)
+                                              .iconTheme
+                                              .color),
+                                      items: cities.map((city) {
+                                        return DropdownMenuItem<int>(
+                                          value: city.id,
+                                          child: Text(
+                                            city.name,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium
+                                                ?.copyWith(
+                                                  fontFamily: 'Cairo',
+                                                  fontSize:
+                                                      baseFontSize * 0.875,
+                                                ),
+                                            textAlign: TextAlign.right,
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (val) {
+                                        setState(() {
+                                          _selectedCityId = val;
+                                        });
+                                        if (val != null) {
+                                          context
+                                              .read<DoctorCubit>()
+                                              .filterByCity(val);
+                                        }
+                                      },
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
 
                         // Services Header
                         Container(
                           width: double.infinity,
-                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
                           child: Text(
                             'اختر التخصص لنشر الحالة',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontFamily: 'Cairo',
-                              fontWeight: FontWeight.bold,
-                              fontSize: baseFontSize * 1.06, // 17sp
-                              height: 1.2,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontFamily: 'Cairo',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: baseFontSize * 1.06, // 17sp
+                                  height: 1.2,
+                                ),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -404,14 +555,16 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                         // Categories Grid
                         if (visibleCategories.isNotEmpty)
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: width * 0.05),
+                            padding:
+                                EdgeInsets.symmetric(horizontal: width * 0.05),
                             child: LayoutBuilder(
                               builder: (context, constraints) {
                                 final crossAxisCount = width > 600 ? 4 : 2;
                                 return GridView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: crossAxisCount,
                                     mainAxisSpacing: 12,
                                     crossAxisSpacing: 12,
@@ -420,21 +573,23 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                   itemCount: visibleCategories.length,
                                   itemBuilder: (context, index) {
                                     final category = visibleCategories[index];
-                                    final asset = _categoryAssets[category.name] ??
-                                        'assets/svg/فحص شامل.svg';
+                                    final asset =
+                                        _categoryAssets[category.name] ??
+                                            'assets/svg/فحص شامل.svg';
 
                                     String? selectedCityName;
                                     if (_selectedCityId != null) {
                                       try {
                                         selectedCityName = cities
-                                            .firstWhere((c) => c.id == _selectedCityId)
+                                            .firstWhere(
+                                                (c) => c.id == _selectedCityId)
                                             .name;
                                       } catch (_) {}
                                     }
 
                                     return _buildSquareCategory(
-                                        asset, 
-                                        index, 
+                                        asset,
+                                        index,
                                         category.name,
                                         width,
                                         height,

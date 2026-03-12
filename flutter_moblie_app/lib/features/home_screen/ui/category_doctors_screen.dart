@@ -51,11 +51,11 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     try {
       final token =
           await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-      
+
       // If we have a token, we are logged in.
       // If we were also told to show the add button, we treat the user as a doctor.
       final isLoggedIn = token.isNotEmpty && token != 'null';
-      
+
       if (mounted) {
         setState(() {
           _isDoctorLoggedIn = isLoggedIn && widget.showAddCaseButton;
@@ -83,8 +83,12 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     if (!mounted) return;
 
     if (result['success'] == true) {
+      final all = List<CaseRequestModel>.from(result['data'] as List);
+      final filtered = (widget.cityName != null && widget.cityName!.isNotEmpty)
+          ? all.where((r) => r.doctorCityName == widget.cityName).toList()
+          : all;
       setState(() {
-        _requests = List<CaseRequestModel>.from(result['data'] as List);
+        _requests = filtered;
         _isLoading = false;
       });
     } else {
@@ -98,26 +102,39 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
   /// Updates the doctor's categoryName to the current category then opens
   /// the AddCaseRequestScreen. All other doctor fields are kept as-is.
   Future<void> _updateCategoryAndNavigate() async {
+    // Show loading indicator while calling the API
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     // Load all doctor info from SharedPreferences
     int doctorId = await SharedPrefHelper.getInt('doctor_id');
     if (doctorId == 0) {
       final idStr = await SharedPrefHelper.getString('doctor_id');
-      doctorId = int.tryParse(idStr ?? '') ?? 0;
+      doctorId = int.tryParse(idStr) ?? 0;
     }
 
-    final firstName = await SharedPrefHelper.getString('first_name') ?? '';
-    final lastName = await SharedPrefHelper.getString('last_name') ?? '';
-    final phone = await SharedPrefHelper.getString('phone') ?? '';
-    final faculty = await SharedPrefHelper.getString('faculty') ?? '';
-    final year = await SharedPrefHelper.getString('year') ?? '';
-    final governorate = await SharedPrefHelper.getString('governorate') ?? '';
+    final firstName = await SharedPrefHelper.getString('first_name');
+    final lastName = await SharedPrefHelper.getString('last_name');
+    final phone = await SharedPrefHelper.getString('phone');
+    final faculty = await SharedPrefHelper.getString('faculty');
+    final yearString = await SharedPrefHelper.getString('year');
+    final governorate = await SharedPrefHelper.getString('governorate');
+
+    // studyYear must be an integer per the API contract
+    final dynamic studyYear =
+        int.tryParse(yearString) ?? (yearString.isNotEmpty ? yearString : null);
 
     final body = <String, dynamic>{
       if (doctorId != 0) 'id': doctorId,
       if (firstName.isNotEmpty) 'firstName': firstName,
       if (lastName.isNotEmpty) 'lastName': lastName,
       if (phone.isNotEmpty) 'phoneNumber': phone,
-      if (year.isNotEmpty) 'studyYear': year,
+      if (studyYear != null) 'studyYear': studyYear,
       if (faculty.isNotEmpty) 'universityName': faculty,
       if (governorate.isNotEmpty) 'cityName': governorate,
       'categoryName': widget.categoryName,
@@ -125,12 +142,24 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
 
     final result = await _apiService.updateDoctor(body);
 
+    // Dismiss loading indicator
+    if (mounted) Navigator.of(context, rootNavigator: true).pop();
+
     if (result['success'] == true) {
-      // Update cached category in SharedPreferences
       await SharedPrefHelper.setData('category', widget.categoryName);
     } else {
-      // Silently continue even on failure – don't block navigation
       debugPrint('updateDoctor failed: ${result['error']}');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['error']?.toString() ?? 'فشل في تحديث التخصص',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
 
     if (!mounted) return;

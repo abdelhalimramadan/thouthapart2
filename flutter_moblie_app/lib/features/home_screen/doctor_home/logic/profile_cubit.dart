@@ -89,7 +89,7 @@ class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
         faculty: body['universityName']?.toString() ?? prevProfile?.faculty,
         year: body['studyYear']?.toString() ?? prevProfile?.year,
         governorate: body['cityName']?.toString() ?? prevProfile?.governorate,
-        category: prevProfile?.category,
+        category: body['categoryName']?.toString() ?? prevProfile?.category,
       );
 
       emit(ProfileState.success(

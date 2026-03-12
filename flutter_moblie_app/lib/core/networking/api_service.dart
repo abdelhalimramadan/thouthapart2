@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:thotha_mobile_app/core/networking/api_constants.dart';
 import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
@@ -344,13 +345,9 @@ class ApiService {
   Future<Map<String, dynamic>> updateDoctor(Map<String, dynamic> body) async {
     try {
       await DioFactory.addDioHeaders();
-      // Pass doctorId as query param too so backend can verify ownership
-      final doctorId = body['id'] ?? body['doctorId'];
-      final params = (doctorId != null) ? {'doctorId': doctorId} : null;
       final res = await _dio.put(
         ApiConstants.updateDoctor,
         data: body,
-        queryParameters: params,
       );
       if (res.statusCode == 200 || res.statusCode == 201)
         return _okData(res.data);
@@ -363,14 +360,15 @@ class ApiService {
         return _fail('ممنوع الوصول: تأكد من صلاحياتك', code: code);
       return _fail(_dioError(e), code: code);
     } catch (e) {
-      print('=== deleteDoctor unexpected error: $e ===');
+      debugPrint('updateDoctor unexpected error: $e');
       return _fail('حدث خطأ غير متوقع');
     }
   }
 
   Future<Map<String, dynamic>> deleteDoctor() async {
     try {
-      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      final token =
+          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
 
       // Clean Isolation: Using a fresh Dio instance to match web's 'fetch' behavior exactly
       // This avoids interference from global interceptors or default headers
@@ -382,7 +380,7 @@ class ApiService {
 
       final fullUrl = '${ApiConstants.baseUrl}${ApiConstants.deleteDoctor}';
       print('=== deleteDoctor calling URL: $fullUrl ===');
-      
+
       final res = await isolatedDio.delete(
         fullUrl,
         options: Options(

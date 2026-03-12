@@ -171,8 +171,12 @@ class ProfileRepository {
     final cachedYear = await SharedPrefHelper.getString('year');
     final cachedGov = await SharedPrefHelper.getString('governorate');
     final cachedCat = await SharedPrefHelper.getString('category');
+    final cachedIdRaw = await SharedPrefHelper.getInt('doctor_id');
+    final cachedId =
+        (cachedIdRaw is int && cachedIdRaw != 0) ? cachedIdRaw : null;
 
     return DoctorProfileModel(
+      id: cachedId,
       firstName: cachedFirst,
       lastName: cachedLast,
       email: cachedEmail,
@@ -196,6 +200,7 @@ class ProfileRepository {
         faculty: body['universityName']?.toString(),
         year: body['studyYear']?.toString(),
         governorate: body['cityName']?.toString(),
+        category: body['categoryName']?.toString(),
       );
       await _cacheProfileLocally(updatedProfile);
     } else {

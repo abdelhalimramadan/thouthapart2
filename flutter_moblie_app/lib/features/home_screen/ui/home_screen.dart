@@ -54,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
           categoryId: categoryId,
           cityId: _selectedCityId,
           cityName: cityName,
+          showAddCaseButton: widget.showAddCaseCategory,
         ),
       ),
     );
