@@ -73,7 +73,25 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
       .replaceAll(RegExp(r'^مديرية\s*'), '')
       .replaceAll(RegExp(r'^مدينة\s*'), '')
       .replaceAll(RegExp(r'^قسم\s*'), '')
+      .replaceAll(RegExp(r'\s*محافظة$'), '')
       .trim();
+
+  /// Returns true if [a] and [b] share enough characters to be considered
+  /// the same governorate (handles partial/different spellings).
+  bool _namesMatch(String a, String b) {
+    final na = _stripPrefix(a.trim());
+    final nb = _stripPrefix(b.trim());
+    if (na.isEmpty || nb.isEmpty) return false;
+    // Direct containment
+    if (na.contains(nb) || nb.contains(na)) return true;
+    // Share at least 3 consecutive characters (handles spelling variants)
+    for (int len = 3; len <= na.length && len <= nb.length; len++) {
+      for (int i = 0; i <= na.length - len; i++) {
+        if (nb.contains(na.substring(i, i + len))) return true;
+      }
+    }
+    return false;
+  }
 
   /// Tries to match any GPS candidate against the loaded cities list.
   /// Safe to call multiple times — stops after first successful match.
@@ -82,18 +100,13 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
     // Wait until BOTH GPS and cities are ready
     if (!_gpsFinished || _loadedCities.isEmpty) return;
 
-    _autoSelectApplied = true; // mark done regardless of outcome
+    _autoSelectApplied = true;
 
     CityModel? match;
     outer:
     for (final raw in _gpsNameCandidates) {
-      final normalized = _stripPrefix(raw);
       for (final c in _loadedCities) {
-        final cNorm = _stripPrefix(c.name);
-        if (raw.contains(c.name) ||
-            c.name.contains(raw) ||
-            normalized.contains(cNorm) ||
-            cNorm.contains(normalized)) {
+        if (_namesMatch(raw, c.name)) {
           match = c;
           break outer;
         }
@@ -161,7 +174,9 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
       );
 
       final dio = Dio();
-      final res = await dio.get(
+
+      // Fetch Arabic response
+      final resAr = await dio.get(
         'https://nominatim.openstreetmap.org/reverse',
         queryParameters: {
           'lat': pos.latitude,
@@ -175,30 +190,33 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
         ),
       );
 
-      if (res.statusCode == 200 && res.data is Map) {
-        final address = res.data['address'] as Map?;
+      final candidates = <String>[];
+      const addressKeys = [
+        'state',
+        'county',
+        'city',
+        'town',
+        'village',
+        'state_district',
+        'region',
+        'municipality',
+      ];
+
+      if (resAr.statusCode == 200 && resAr.data is Map) {
+        final address = resAr.data['address'] as Map?;
         if (address != null) {
-          // Collect every useful field Nominatim might return
-          final candidates = <String>[];
-          for (final key in [
-            'state',
-            'county',
-            'city',
-            'town',
-            'village',
-            'state_district',
-            'region'
-          ]) {
+          for (final key in addressKeys) {
             final v = address[key];
             if (v is String && v.isNotEmpty) candidates.add(v);
           }
-          if (mounted) {
-            setState(() => _gpsNameCandidates = candidates);
-          }
         }
       }
+
+      if (mounted) {
+        setState(() => _gpsNameCandidates = candidates);
+      }
     } catch (_) {
-      // Network or GPS failure — leave _gpsFailureMessage null, just skip
+      // Network or GPS failure — leave banner null, skip silently
     } finally {
       if (mounted) {
         setState(() {
