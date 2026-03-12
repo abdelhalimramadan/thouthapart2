@@ -58,6 +58,14 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
     if (mounted) {
       setState(() {
         _isLoggedIn = token.isNotEmpty && token != 'null';
+        if (_isLoggedIn) {
+          _selectedCityId = null;
+          _gpsNameCandidates = [];
+          _gpsFinished = false;
+          _autoSelectApplied = false;
+          _isDetecting = false;
+          _gpsFailureMessage = null;
+        }
       });
       if (!_isLoggedIn) {
         _autoDetectCity();
@@ -76,26 +84,24 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
       .replaceAll(RegExp(r'\s*محافظة$'), '')
       .trim();
 
-  /// Returns true if [a] and [b] share enough characters to be considered
-  /// the same governorate (handles partial/different spellings).
+  /// Returns true if [a] and [b] refer to the same governorate.
+  /// Uses containment only (after stripping prefixes) to avoid false positives
+  /// like "القاهرة" matching "القليوبية" via shared leading characters.
   bool _namesMatch(String a, String b) {
     final na = _stripPrefix(a.trim());
     final nb = _stripPrefix(b.trim());
-    if (na.isEmpty || nb.isEmpty) return false;
-    // Direct containment
-    if (na.contains(nb) || nb.contains(na)) return true;
-    // Share at least 3 consecutive characters (handles spelling variants)
-    for (int len = 3; len <= na.length && len <= nb.length; len++) {
-      for (int i = 0; i <= na.length - len; i++) {
-        if (nb.contains(na.substring(i, i + len))) return true;
-      }
-    }
+    if (na.isEmpty || nb.isEmpty) return false;// Exact match after stripping
+    if (na == nb) return true;
+    // One fully contains the other (require ≥4 chars to avoid "ال" false hits)
+    if (na.length >= 4 && nb.contains(na)) return true;
+    if (nb.length >= 4 && na.contains(nb)) return true;
     return false;
   }
 
   /// Tries to match any GPS candidate against the loaded cities list.
   /// Safe to call multiple times — stops after first successful match.
   void _tryAutoSelectCity() {
+    if (_isLoggedIn) return;
     if (_autoSelectApplied || _selectedCityId != null) return;
     // Wait until BOTH GPS and cities are ready
     if (!_gpsFinished || _loadedCities.isEmpty) return;
@@ -128,6 +134,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
 
   /// Gets GPS coordinates → reverse-geocodes via Nominatim → populates candidates.
   Future<void> _autoDetectCity() async {
+    if (_isLoggedIn) return;
     if (mounted) setState(() => _isDetecting = true);
     try {
       LocationPermission perm = await Geolocator.checkPermission();
@@ -168,8 +175,8 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
 
       final pos = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.low,
-          timeLimit: Duration(seconds: 15),
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
         ),
       );
 
@@ -433,7 +440,9 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
         body: SafeArea(
           child: BlocConsumer<DoctorCubit, DoctorState>(
             listener: (context, state) {
-              if (state is DoctorSuccess && state.cities.isNotEmpty) {
+              if (!_isLoggedIn &&
+                  state is DoctorSuccess &&
+                  state.cities.isNotEmpty) {
                 _loadedCities = state.cities;
                 _tryAutoSelectCity();
               }

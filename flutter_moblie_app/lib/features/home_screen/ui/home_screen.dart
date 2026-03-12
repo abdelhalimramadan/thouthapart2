@@ -13,9 +13,11 @@ import 'package:thotha_mobile_app/features/home_screen/logic/doctor_cubit.dart';
 
 import 'package:thotha_mobile_app/features/home_screen/logic/doctor_state.dart';
 
-
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, this.drawer = const HomeDrawer(), this.showAddCaseCategory = false});
+  const HomeScreen(
+      {super.key,
+      this.drawer = const HomeDrawer(),
+      this.showAddCaseCategory = false});
 
   final Widget drawer;
   final bool showAddCaseCategory;
@@ -69,13 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSquareCategory(
-      String assetPath, 
-      int index, 
-      String categoryName,
-      double width,
-      double height,
-      double baseFontSize,
+  Widget _buildSquareCategory(String assetPath, int index, String categoryName,
+      double width, double height, double baseFontSize,
       {int? categoryId, String? cityName}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -99,7 +96,8 @@ class _HomeScreenState extends State<HomeScreen> {
       'تركيبات الأسنان',
     ];
 
-    final fileName = index < svgFiles.length ? svgFiles[index] : 'placeholder.svg';
+    final fileName =
+        index < svgFiles.length ? svgFiles[index] : 'placeholder.svg';
     final resolvedAssetPath =
         assetPath.isNotEmpty ? assetPath : 'assets/svg/$fileName';
     final resolvedCategoryName = categoryName.isNotEmpty
@@ -125,7 +123,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1),
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.grey.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -188,12 +188,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final na = _stripPrefix(a.trim());
     final nb = _stripPrefix(b.trim());
     if (na.isEmpty || nb.isEmpty) return false;
-    if (na.contains(nb) || nb.contains(na)) return true;
-    for (int len = 3; len <= na.length && len <= nb.length; len++) {
-      for (int i = 0; i <= na.length - len; i++) {
-        if (nb.contains(na.substring(i, i + len))) return true;
-      }
-    }
+    // Exact match after stripping
+    if (na == nb) return true;
+    // One fully contains the other (require ≥4 chars to avoid "ال" false hits)
+    if (na.length >= 5 && nb.contains(na)) return true;
+    if (nb.length >= 5 && na.contains(nb)) return true;
     return false;
   }
 
@@ -205,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
     print('=== GPS: _gpsFinished = $_gpsFinished ===');
     print('=== GPS: _loadedCities count = ${_loadedCities.length} ===');
     print('=== GPS: candidates = $_gpsNameCandidates ===');
-    
+
     if (_autoSelectApplied || _selectedCityId != null) {
       print('=== GPS: Already applied or city selected, returning ===');
       return;
@@ -259,7 +258,8 @@ class _HomeScreenState extends State<HomeScreen> {
         perm = await Geolocator.requestPermission();
         print('=== GPS: After request permission = $perm ===');
       }
-      if (perm == LocationPermission.deniedForever || perm == LocationPermission.denied) {
+      if (perm == LocationPermission.deniedForever ||
+          perm == LocationPermission.denied) {
         print('=== GPS: Permission still denied ===');
         if (mounted) {
           setState(() {
@@ -286,8 +286,8 @@ class _HomeScreenState extends State<HomeScreen> {
       print('=== GPS: Getting current position ===');
       final pos = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.low,
-          timeLimit: Duration(seconds: 15),
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
         ),
       );
       print('=== GPS: Position = ${pos.latitude}, ${pos.longitude} ===');
@@ -311,7 +311,16 @@ class _HomeScreenState extends State<HomeScreen> {
       print('=== GPS: API data = ${res.data} ===');
 
       final candidates = <String>[];
-      const addressKeys = ['state', 'county', 'city', 'town', 'village', 'state_district', 'region', 'municipality'];
+      const addressKeys = [
+        'state',
+        'county',
+        'city',
+        'town',
+        'village',
+        'state_district',
+        'region',
+        'municipality'
+      ];
 
       if (res.statusCode == 200 && res.data is Map) {
         final address = res.data['address'] as Map?;
@@ -352,6 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _searchFocusNode.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -379,44 +389,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _scaffoldKey.currentState?.openDrawer();
             },
           ),
-          actions: [
-            if (_selectedCityId != null)
-              BlocBuilder<DoctorCubit, DoctorState>(
-                builder: (context, state) {
-                  String? cityName;
-                  if (state is DoctorSuccess) {
-                    final selectedCity = state.cities.firstWhere(
-                      (c) => c.id == _selectedCityId,
-                      orElse: () => state.cities.first,
-                    );
-                    cityName = selectedCity.name;
-                  }
-                  if (cityName == null) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 16),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          cityName,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontFamily: 'Cairo',
-                            fontSize: baseFontSize * 0.85,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          Icons.location_on,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-          ],
+          actions: const [],
         ),
         drawer: widget.drawer,
         body: SafeArea(
@@ -431,20 +404,21 @@ class _HomeScreenState extends State<HomeScreen> {
               if (state is DoctorLoading) {
                 return const Center(child: CircularProgressIndicator());
               } else if (state is DoctorError) {
-                return Center(child: Text(state.error, style: const TextStyle(fontFamily: 'Cairo')));
+                return Center(
+                    child: Text(state.error,
+                        style: const TextStyle(fontFamily: 'Cairo')));
               } else if (state is DoctorSuccess) {
                 final categories = state.categories;
                 final cities = state.cities;
 
-                final filteredCategories = (_searchController.text.isEmpty || categories.isEmpty)
+                final filteredCategories = (_searchController.text.isEmpty ||
+                        categories.isEmpty)
                     ? categories
                     : categories
                         .where((c) => c.name.contains(_searchController.text))
                         .toList();
 
-                final visibleCategories = filteredCategories
-                    
-                    .toList();
+                final visibleCategories = filteredCategories.toList();
 
                 return SingleChildScrollView(
                   child: Padding(
@@ -455,18 +429,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         // Search Bar
                         Container(
                           height: 48,
-                          margin: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 10),
+                          margin: EdgeInsets.symmetric(
+                              horizontal: width * 0.05, vertical: 10),
                           decoration: BoxDecoration(
                             color: isDark
                                 ? Colors.grey[800]?.withValues(alpha: 0.5)
-                                : const Color(0xFFD9D9D9).withValues(alpha: 0.3),
+                                : const Color(0xFFD9D9D9)
+                                    .withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
                             children: [
                               const Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 12),
-                                child: Icon(Icons.search, color: Colors.grey, size: 22),
+                                child: Icon(Icons.search,
+                                    color: Colors.grey, size: 22),
                               ),
                               Expanded(
                                 child: TextField(
@@ -477,7 +454,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   },
                                   textAlign: TextAlign.right,
                                   textDirection: TextDirection.rtl,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontFamily: 'Cairo'),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(fontFamily: 'Cairo'),
                                   decoration: InputDecoration(
                                     hintText: 'ابحث عن قسم...',
                                     hintStyle: TextStyle(
@@ -486,12 +466,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                       fontSize: baseFontSize * 0.9,
                                     ),
                                     border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        vertical: 14),
                                   ),
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.mic, color: Colors.grey, size: 22),
+                                icon: const Icon(Icons.mic,
+                                    color: Colors.grey, size: 22),
                                 onPressed: () {},
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
@@ -505,7 +487,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         Container(
                           width: double.infinity,
                           height: 140,
-                          margin: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 12),
+                          margin: EdgeInsets.symmetric(
+                              horizontal: width * 0.05, vertical: 12),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             gradient: const LinearGradient(
@@ -550,7 +533,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         style: TextStyle(
                                           fontFamily: 'Cairo',
                                           color: Colors.white,
-                                          fontSize: baseFontSize * 0.8125, // 13sp
+                                          fontSize:
+                                              baseFontSize * 0.8125, // 13sp
                                           fontWeight: FontWeight.bold,
                                         ),
                                         textAlign: TextAlign.right,
@@ -558,7 +542,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     const SizedBox(height: 12),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 4),
                                       decoration: BoxDecoration(
                                         color: Colors.white,
                                         borderRadius: BorderRadius.circular(4),
@@ -583,13 +568,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         // City Dropdown
                         Container(
                           width: double.infinity,
-                          margin: EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 16),
+                          margin: EdgeInsets.symmetric(
+                              horizontal: width * 0.06, vertical: 16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               if (_isDetecting || _gpsFailureMessage != null)
                                 Padding(
-                                  padding: const EdgeInsets.only(right: 4, bottom: 8),
+                                  padding: const EdgeInsets.only(
+                                      right: 4, bottom: 8),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -599,10 +586,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                           height: 14,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            color: Theme.of(context).colorScheme.primary,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
                                           ),
                                         ),
-                                      if (_isDetecting) const SizedBox(width: 8),
+                                      if (_isDetecting)
+                                        const SizedBox(width: 8),
                                       Text(
                                         _isDetecting
                                             ? 'جارٍ تحديد موقعك...'
@@ -620,17 +610,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               Container(
                                 height: 52,
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).colorScheme.surface,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: isDark ? Colors.grey[700]! : const Color(0xFFD1D5DC),
+                                    color: isDark
+                                        ? Colors.grey[700]!
+                                        : const Color(0xFFD1D5DC),
                                     width: 1.1,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withValues(alpha: 0.3),
                                       blurRadius: 4,
                                       offset: const Offset(0, 1),
                                     ),
@@ -641,23 +637,31 @@ class _HomeScreenState extends State<HomeScreen> {
                                     value: _selectedCityId,
                                     hint: Text(
                                       'اختر المدينة',
-                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        fontFamily: 'Cairo',
-                                        fontSize: baseFontSize * 0.875,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontFamily: 'Cairo',
+                                            fontSize: baseFontSize * 0.875,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                     ),
                                     isExpanded: true,
-                                    icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).iconTheme.color),
+                                    icon: Icon(Icons.arrow_drop_down,
+                                        color:
+                                            Theme.of(context).iconTheme.color),
                                     items: cities.map((city) {
                                       return DropdownMenuItem<int>(
                                         value: city.id,
                                         child: Text(
                                           city.name,
-                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                            fontFamily: 'Cairo',
-                                            fontSize: baseFontSize * 0.875,
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                fontFamily: 'Cairo',
+                                                fontSize: baseFontSize * 0.875,
+                                              ),
                                           textAlign: TextAlign.right,
                                         ),
                                       );
@@ -668,7 +672,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         _gpsFailureMessage = null;
                                       });
                                       if (val != null) {
-                                        context.read<DoctorCubit>().filterByCity(val);
+                                        context
+                                            .read<DoctorCubit>()
+                                            .filterByCity(val);
                                       }
                                     },
                                   ),
@@ -681,15 +687,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         // Services Header
                         Container(
                           width: double.infinity,
-                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
                           child: Text(
                             'الخدمات المتوفرة',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontFamily: 'Cairo',
-                              fontWeight: FontWeight.bold,
-                              fontSize: baseFontSize * 1.06, // 17sp
-                              height: 1.2,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontFamily: 'Cairo',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: baseFontSize * 1.06, // 17sp
+                                  height: 1.2,
+                                ),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -697,14 +707,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         // Categories Grid
                         if (visibleCategories.isNotEmpty)
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: width * 0.05),
+                            padding:
+                                EdgeInsets.symmetric(horizontal: width * 0.05),
                             child: LayoutBuilder(
                               builder: (context, constraints) {
                                 final crossAxisCount = width > 600 ? 4 : 2;
                                 return GridView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: crossAxisCount,
                                     mainAxisSpacing: 12,
                                     crossAxisSpacing: 12,
@@ -713,21 +725,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                   itemCount: visibleCategories.length,
                                   itemBuilder: (context, index) {
                                     final category = visibleCategories[index];
-                                    final asset = _categoryAssets[category.name] ??
-                                        'assets/svg/فحص شامل.svg';
+                                    final asset =
+                                        _categoryAssets[category.name] ??
+                                            'assets/svg/فحص شامل.svg';
 
                                     String? selectedCityName;
                                     if (_selectedCityId != null) {
                                       try {
                                         selectedCityName = cities
-                                            .firstWhere((c) => c.id == _selectedCityId)
+                                            .firstWhere(
+                                                (c) => c.id == _selectedCityId)
                                             .name;
                                       } catch (_) {}
                                     }
 
                                     return _buildSquareCategory(
-                                        asset, 
-                                        index, 
+                                        asset,
+                                        index,
                                         category.name,
                                         width,
                                         height,

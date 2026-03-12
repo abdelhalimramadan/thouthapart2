@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import '../../../../core/helpers/constants.dart';
 import '../../../../core/helpers/shared_pref_helper.dart';
@@ -26,7 +25,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
 
   // ── State ──────────────────────────────────────────────────────
   String? _firstName;
-  String? _governorate;
   bool _isLoadingName = true;
 
   List<CaseRequestModel> _caseRequests = [];
@@ -49,13 +47,11 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     try {
       // Try cache first — avoids unnecessary network call
       final cached = await SharedPrefHelper.getString('first_name');
-      final cachedGov = await SharedPrefHelper.getString('governorate');
       final cachedDoctorId = await SharedPrefHelper.getInt('doctor_id');
       if (cached.isNotEmpty && cachedDoctorId != 0) {
         if (mounted)
           setState(() {
             _firstName = cached;
-            _governorate = cachedGov.isNotEmpty ? cachedGov : null;
             _isLoadingName = false;
           });
         return;
@@ -80,19 +76,9 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                       decoded['first_name'] ??
                       decoded['name'])
                   ?.toString();
-              // Extract governorate
-              final gov = (decoded['governorate'] ??
-                      decoded['cityName'] ??
-                      decoded['city_name'] ??
-                      decoded['city'])
-                  ?.toString();
               if (fn != null && fn.isNotEmpty) {
                 await SharedPrefHelper.setData('first_name', fn);
                 if (mounted) setState(() => _firstName = fn);
-              }
-              if (gov != null && gov.isNotEmpty) {
-                await SharedPrefHelper.setData('governorate', gov);
-                if (mounted) setState(() => _governorate = gov);
               }
               // Extract and cache doctor ID
               final rawId =
@@ -302,30 +288,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         ],
       ),
       actions: [
-        if (_governorate != null && _governorate!.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(left: 12),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _governorate!,
-                  style: tt.bodyMedium?.copyWith(
-                    fontFamily: 'Cairo',
-                    fontSize: baseFontSize * 0.85,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.location_on,
-                  size: 20,
-                  color: cs.primary,
-                ),
-              ],
-            ),
-          ),
         Stack(children: [
           IconButton(
             icon: const Icon(Icons.notifications_none, size: 24),
@@ -542,26 +504,6 @@ class _CaseCard extends StatelessWidget {
                 ),
               ),
             ]),
-            // City · University
-            if (req.doctorCityName.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Row(children: [
-                Icon(Icons.location_on_outlined,
-                    size: 14, color: Colors.grey[500]),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    req.doctorCityName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: baseFontSize * 0.8,
-                        color: Colors.grey[600]),
-                  ),
-                ),
-              ]),
-            ],
             // Description (optional)
             if (req.description.isNotEmpty &&
                 req.description != 'No details') ...[
@@ -704,10 +646,6 @@ class _CaseDetailsSheet extends StatelessWidget {
               icon: Icons.phone_outlined,
               label: 'الهاتف',
               value: req.doctorPhoneNumber),
-          _DetailRow(
-              icon: Icons.location_on_outlined,
-              label: 'المدينة',
-              value: req.doctorCityName),
           _DetailRow(
               icon: Icons.school_outlined,
               label: 'الجامعة',
