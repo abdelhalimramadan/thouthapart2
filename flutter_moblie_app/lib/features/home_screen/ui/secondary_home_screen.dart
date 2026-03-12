@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
 
@@ -35,10 +36,15 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int? _selectedCityId;
-  String? _detectedCityName;
+  // All candidate strings returned by Nominatim (state, county, city, etc.)
+  List<String> _gpsNameCandidates = [];
+  bool _gpsFinished =
+      false; // true once GPS attempt completes (success or fail)
   bool _autoSelectApplied = false;
   bool _isLoggedIn = false;
   bool _isDetecting = false;
+  String? _gpsFailureMessage; // non-null → show failure banner
+  List<CityModel> _loadedCities = [];
 
   @override
   void initState() {
@@ -59,8 +65,55 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
     }
   }
 
-  /// Gets GPS coordinates, reverse-geocodes via Nominatim with Arabic locale,
-  /// and stores the detected governorate name for auto-selection.
+  // ── GPS helpers ──────────────────────────────────────────────────────────
+
+  /// Strips common Arabic administrative prefixes Nominatim adds.
+  String _stripPrefix(String s) => s
+      .replaceAll(RegExp(r'^محافظة\s*'), '')
+      .replaceAll(RegExp(r'^مديرية\s*'), '')
+      .replaceAll(RegExp(r'^مدينة\s*'), '')
+      .replaceAll(RegExp(r'^قسم\s*'), '')
+      .trim();
+
+  /// Tries to match any GPS candidate against the loaded cities list.
+  /// Safe to call multiple times — stops after first successful match.
+  void _tryAutoSelectCity() {
+    if (_autoSelectApplied || _selectedCityId != null) return;
+    // Wait until BOTH GPS and cities are ready
+    if (!_gpsFinished || _loadedCities.isEmpty) return;
+
+    _autoSelectApplied = true; // mark done regardless of outcome
+
+    CityModel? match;
+    outer:
+    for (final raw in _gpsNameCandidates) {
+      final normalized = _stripPrefix(raw);
+      for (final c in _loadedCities) {
+        final cNorm = _stripPrefix(c.name);
+        if (raw.contains(c.name) ||
+            c.name.contains(raw) ||
+            normalized.contains(cNorm) ||
+            cNorm.contains(normalized)) {
+          match = c;
+          break outer;
+        }
+      }
+    }
+
+    if (match != null) {
+      setState(() {
+        _selectedCityId = match!.id;
+        _gpsFailureMessage = null;
+      });
+    } else {
+      setState(() {
+        _gpsFailureMessage =
+            'لم يتمكن التطبيق من تحديد المحافظة تلقائيًا،\nيرجى الاختيار يدويًا';
+      });
+    }
+  }
+
+  /// Gets GPS coordinates → reverse-geocodes via Nominatim → populates candidates.
   Future<void> _autoDetectCity() async {
     if (mounted) setState(() => _isDetecting = true);
     try {
@@ -68,11 +121,37 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
       if (perm == LocationPermission.denied) {
         perm = await Geolocator.requestPermission();
       }
-      if (perm == LocationPermission.denied ||
-          perm == LocationPermission.deniedForever) return;
+      if (perm == LocationPermission.deniedForever) {
+        if (mounted) {
+          setState(() {
+            _gpsFinished = true;
+            _gpsFailureMessage =
+                'تم رفض إذن الموقع بشكل دائم، يرجى تفعيله من إعدادات التطبيق';
+          });
+        }
+        return;
+      }
+      if (perm == LocationPermission.denied) {
+        if (mounted) {
+          setState(() {
+            _gpsFinished = true;
+            _gpsFailureMessage = 'لا يمكن تحديد الموقع دون منح إذن الوصول';
+          });
+        }
+        return;
+      }
 
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return;
+      if (!serviceEnabled) {
+        if (mounted) {
+          setState(() {
+            _gpsFinished = true;
+            _gpsFailureMessage =
+                'خدمة الموقع معطّلة، يرجى تفعيلها لتحديد المحافظة تلقائيًا';
+          });
+        }
+        return;
+      }
 
       final pos = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
@@ -90,20 +169,44 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
           'format': 'json',
           'accept-language': 'ar',
         },
-        options: Options(headers: {'User-Agent': 'ThothaApp/1.0'}),
+        options: Options(
+          headers: {'User-Agent': 'ThothaApp/1.0'},
+          receiveTimeout: const Duration(seconds: 10),
+        ),
       );
 
       if (res.statusCode == 200 && res.data is Map) {
         final address = res.data['address'] as Map?;
-        final state = address?['state'] as String?;
-        if (state != null && state.isNotEmpty && mounted) {
-          setState(() => _detectedCityName = state);
+        if (address != null) {
+          // Collect every useful field Nominatim might return
+          final candidates = <String>[];
+          for (final key in [
+            'state',
+            'county',
+            'city',
+            'town',
+            'village',
+            'state_district',
+            'region'
+          ]) {
+            final v = address[key];
+            if (v is String && v.isNotEmpty) candidates.add(v);
+          }
+          if (mounted) {
+            setState(() => _gpsNameCandidates = candidates);
+          }
         }
       }
     } catch (_) {
-      // GPS or network failure — skip auto-selection silently
+      // Network or GPS failure — leave _gpsFailureMessage null, just skip
     } finally {
-      if (mounted) setState(() => _isDetecting = false);
+      if (mounted) {
+        setState(() {
+          _gpsFinished = true;
+          _isDetecting = false;
+        });
+        _tryAutoSelectCity();
+      }
     }
   }
 
@@ -310,7 +413,13 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
         ),
         drawer: widget.drawer,
         body: SafeArea(
-          child: BlocBuilder<DoctorCubit, DoctorState>(
+          child: BlocConsumer<DoctorCubit, DoctorState>(
+            listener: (context, state) {
+              if (state is DoctorSuccess && state.cities.isNotEmpty) {
+                _loadedCities = state.cities;
+                _tryAutoSelectCity();
+              }
+            },
             builder: (context, state) {
               if (state is DoctorLoading) {
                 return const Center(child: CircularProgressIndicator());
@@ -321,28 +430,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
               } else if (state is DoctorSuccess) {
                 final categories = state.categories;
                 final cities = state.cities;
-                // Auto-select detected governorate once cities are loaded
-                if (!_autoSelectApplied &&
-                    _selectedCityId == null &&
-                    _detectedCityName != null &&
-                    cities.isNotEmpty) {
-                  _autoSelectApplied = true;
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (!mounted) return;
-                    try {
-                      final match = cities.firstWhere(
-                        (c) =>
-                            _detectedCityName!.contains(c.name) ||
-                            c.name.contains(_detectedCityName!),
-                      );
-                      // Just update _selectedCityId — no filterByCity to avoid
-                      // an unnecessary DoctorLoading flash on the patient screen
-                      setState(() => _selectedCityId = match.id);
-                    } catch (_) {
-                      // No matching city found — leave unselected
-                    }
-                  });
-                }
+
                 final filteredCategories = (_searchController.text.isEmpty ||
                         categories.isEmpty)
                     ? categories
@@ -415,7 +503,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                         ),
 
                         // City Dropdown — only visible when NOT logged in
-                        if (!_isLoggedIn)
+                        if (!_isLoggedIn) ...[
                           Container(
                             width: double.infinity,
                             margin: EdgeInsets.symmetric(
@@ -477,27 +565,41 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                                 : Colors.grey[500],
                                           ),
                                           const SizedBox(width: 6),
-                                          Text(
-                                            _isDetecting
-                                                ? 'جارٍ تحديد موقعك...'
-                                                : 'اختر المدينة',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium
-                                                ?.copyWith(
-                                                  fontFamily: 'Cairo',
-                                                  fontSize:
-                                                      baseFontSize * 0.875,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                          Expanded(
+                                            child: Text(
+                                              _isDetecting
+                                                  ? 'جارٍ تحديد موقعك...'
+                                                  : 'اختر المدينة',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium
+                                                  ?.copyWith(
+                                                    fontFamily: 'Cairo',
+                                                    fontSize:
+                                                        baseFontSize * 0.875,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ),
                                         ],
                                       ),
                                       isExpanded: true,
-                                      icon: Icon(Icons.arrow_drop_down,
-                                          color: Theme.of(context)
-                                              .iconTheme
-                                              .color),
+                                      icon: _isDetecting
+                                          ? SizedBox(
+                                              width: 18,
+                                              height: 18,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                              ),
+                                            )
+                                          : Icon(Icons.arrow_drop_down,
+                                              color: Theme.of(context)
+                                                  .iconTheme
+                                                  .color),
                                       items: cities.map((city) {
                                         return DropdownMenuItem<int>(
                                           value: city.id,
@@ -518,6 +620,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                       onChanged: (val) {
                                         setState(() {
                                           _selectedCityId = val;
+                                          _gpsFailureMessage = null;
                                         });
                                         if (val != null) {
                                           context
@@ -531,6 +634,39 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                               ],
                             ),
                           ),
+                          // GPS failure banner
+                          if (_gpsFailureMessage != null)
+                            Container(
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: width * 0.06),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withAlpha(30),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                    color: Colors.orange.shade300, width: 1),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.location_off,
+                                      color: Colors.orange, size: 18),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _gpsFailureMessage!,
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontSize: baseFontSize * 0.8,
+                                        color: Colors.orange.shade800,
+                                      ),
+                                      textDirection: TextDirection.rtl,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
 
                         // Services Header
                         Container(
