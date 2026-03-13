@@ -26,7 +26,7 @@ class ApiConstants {
   // ── Doctor (authenticated) ────────────────────────────────────
   static const String getDoctorById = '/api/doctor/getDoctorById';
   static const String updateDoctor = '/api/doctor/updateDoctor';
-  static const String deleteDoctor = '/api/doctor/deleteDoctor/';
+  static const String deleteDoctor = '/api/doctor/deleteDoctor';
 
   // ── Reference data ────────────────────────────────────────────
   static const String getUniversities = '/api/university/getAllUniversities';

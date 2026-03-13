@@ -112,12 +112,6 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     }
 
     // Load all doctor info from SharedPreferences
-    int doctorId = await SharedPrefHelper.getInt('doctor_id');
-    if (doctorId == 0) {
-      final idStr = await SharedPrefHelper.getString('doctor_id');
-      doctorId = int.tryParse(idStr) ?? 0;
-    }
-
     final firstName = await SharedPrefHelper.getString('first_name');
     final lastName = await SharedPrefHelper.getString('last_name');
     final phone = await SharedPrefHelper.getString('phone');
@@ -130,7 +124,6 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
         int.tryParse(yearString) ?? (yearString.isNotEmpty ? yearString : null);
 
     final body = <String, dynamic>{
-      if (doctorId != 0) 'id': doctorId,
       if (firstName.isNotEmpty) 'firstName': firstName,
       if (lastName.isNotEmpty) 'lastName': lastName,
       if (phone.isNotEmpty) 'phoneNumber': phone,

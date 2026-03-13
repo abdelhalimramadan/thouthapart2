@@ -13,56 +13,20 @@ import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/d
 class ProfileRepository {
   final Dio _dio = DioFactory.getDio();
 
-  Future<int> _resolveDoctorId() async {
-    int doctorId = await SharedPrefHelper.getInt('doctor_id');
-    if (doctorId == 0) {
-      final cachedString = await SharedPrefHelper.getString('doctor_id');
-      doctorId = int.tryParse(cachedString) ?? 0;
-    }
-    if (doctorId == 0) {
-      doctorId = await _extractDoctorIdFromToken();
-    }
-    return doctorId;
-  }
-
-  Future<int> _extractDoctorIdFromToken() async {
-    try {
-      final token =
-          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-      if (token.isEmpty) return 0;
-
-      final parts = token.split('.');
-      if (parts.length != 3) return 0;
-
-      String payload = parts[1];
-      while (payload.length % 4 != 0) {
-        payload += '=';
-      }
-
-      final decoded =
-          json.decode(utf8.decode(base64Url.decode(payload))) as Map?;
-      if (decoded == null) return 0;
-
-      final rawId =
-          decoded['id'] ?? decoded['doctorId'] ?? decoded['doctor_id'];
-      return int.tryParse(rawId?.toString() ?? '') ?? 0;
-    } catch (_) {
-      return 0;
-    }
-  }
-
   /// Centralized logic to fetch profile with fallbacks and strict model parsing
   Future<DoctorProfileModel> fetchProfile() async {
-    final doctorId = await _resolveDoctorId();
-    if (doctorId != 0) {
-      final profileResult = await getIt<ApiService>().getDoctorById(doctorId);
+    // Try getDoctorById أولاً (يستخدم Token من الـ headers)
+    // الـ Token موجود في headers تلقائياً من DioFactory
+    try {
+      final profileResult = await getIt<ApiService>().getDoctorById();
       if (profileResult['success'] == true &&
           profileResult['data'] is DoctorProfileModel) {
         final profile = profileResult['data'] as DoctorProfileModel;
-        await _cacheProfileLocally(
-            profile.copyWith(id: profile.id ?? doctorId));
-        return profile.copyWith(id: profile.id ?? doctorId);
+        await _cacheProfileLocally(profile);
+        return profile;
       }
+    } catch (_) {
+      // Continue to next endpoint
     }
 
     Response? response;
@@ -78,6 +42,7 @@ class ProfileRepository {
 
     for (final path in endpoints) {
       try {
+        print('=== fetchProfile: Trying fallback endpoint: $path ===');
         response = await _dio.get(path);
 
         // Ensure we actually got JSON data
@@ -97,11 +62,15 @@ class ProfileRepository {
             jsonData = Map<String, dynamic>.from(jsonData['doctor']);
           }
 
+          print('=== fetchProfile: Fallback JSON from $path = $jsonData ===');
           final profile = DoctorProfileModel.fromJson(jsonData);
+          print(
+              '=== fetchProfile: Fallback parsed phone=${profile.phone}, faculty=${profile.faculty}, year=${profile.year}, category=${profile.category} ===');
           await _cacheProfileLocally(profile);
           return profile;
         }
-      } catch (_) {
+      } catch (e) {
+        print('=== fetchProfile: Fallback endpoint $path failed: $e ===');
         // Continue to next endpoint
       }
     }
@@ -192,8 +161,7 @@ class ProfileRepository {
   }
 
   Future<void> _cacheProfileLocally(DoctorProfileModel profile) async {
-    if (profile.id != null)
-      await SharedPrefHelper.setData('doctor_id', profile.id!);
+    // لا تحفظ الـ ID - التوكن هو المصدر الوحيد للهوية
     if (profile.firstName != null)
       await SharedPrefHelper.setData('first_name', profile.firstName!);
     if (profile.lastName != null)
@@ -221,12 +189,10 @@ class ProfileRepository {
     final cachedYear = await SharedPrefHelper.getString('year');
     final cachedGov = await SharedPrefHelper.getString('governorate');
     final cachedCat = await SharedPrefHelper.getString('category');
-    final cachedIdRaw = await SharedPrefHelper.getInt('doctor_id');
-    final cachedId =
-        (cachedIdRaw is int && cachedIdRaw != 0) ? cachedIdRaw : null;
 
     return DoctorProfileModel(
-      id: cachedId,
+      id: null,
+      // لا نحفظ الـ ID - التوكن كافي
       firstName: cachedFirst,
       lastName: cachedLast,
       email: cachedEmail,

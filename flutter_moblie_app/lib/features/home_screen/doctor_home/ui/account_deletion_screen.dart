@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
-import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
 
 import '../../../../core/routing/routes.dart';
@@ -51,20 +50,13 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
       _errorMessage = null;
     });
     try {
-      final token =
-          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-      if (token == null || token.isEmpty) {
-        setState(() {
-          _errorMessage = 'خطأ في المصادقة، يرجى تسجيل الدخول مجدداً';
-          _isLoading = false;
-        });
-        return;
-      }
-
       final result = await ApiService().deleteDoctor();
 
       if (result['success'] == true) {
-        await SharedPrefHelper.clearAllSecuredData();
+        // حذف جميع البيانات من الـ cache
+        await SharedPrefHelper.clearAllData(); // حذف SharedPreferences
+        await SharedPrefHelper
+            .clearAllSecuredData(); // حذف FlutterSecureStorage (التوكن)
         if (!mounted) return;
         _showSnack('تم حذف الحساب بنجاح');
         await Future.delayed(const Duration(seconds: 1));
@@ -75,8 +67,11 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
         );
       } else {
         final code = result['statusCode'] as int?;
+        final backendError = result['error']?.toString();
         final String msg;
-        if (code == 400) {
+        if (backendError != null && backendError.isNotEmpty) {
+          msg = backendError;
+        } else if (code == 400) {
           msg = 'طلب غير صحيح، تأكد من البيانات';
         } else if (code == 401) {
           msg = 'غير مصرح: يرجى تسجيل الدخول مجدداً';
@@ -93,6 +88,42 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
       setState(() => _errorMessage = 'حدث خطأ أثناء الاتصال بالخادم');
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _confirmDeleteAccount() async {
+    if (_isLoading) return;
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        final isDark = Theme.of(dialogContext).brightness == Brightness.dark;
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF161B22) : Colors.white,
+          title: const Text(
+            'تأكيد حذف الحساب',
+            style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+          ),
+          content: const Text(
+            'هل أنت متأكد أنك تريد حذف الحساب نهائياً؟ هذا الإجراء لا يمكن التراجع عنه.',
+            style: TextStyle(fontFamily: 'Cairo', height: 1.5),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo')),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red[700]),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('حذف', style: TextStyle(fontFamily: 'Cairo')),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete == true) {
+      await _deleteAccount();
     }
   }
 
@@ -421,7 +452,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
-          onPressed: _isLoading ? null : _deleteAccount,
+          onPressed: _isLoading ? null : _confirmDeleteAccount,
           child: _isLoading
               ? const SizedBox(
                   width: 22,

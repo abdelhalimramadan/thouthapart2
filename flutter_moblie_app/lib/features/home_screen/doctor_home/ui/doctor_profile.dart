@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'dart:convert';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 
-import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
-import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
@@ -175,36 +172,9 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     }
 
     final cubit = context.read<ProfileCubit>();
-    final currentState = cubit.state;
 
-    DoctorProfileModel? currentProfile;
-    currentState.whenOrNull(
-      success: (data, universities, cities, categories) =>
-          currentProfile = data,
-      loading: (cachedData, universities, cities, categories) =>
-          currentProfile = cachedData,
-    );
-
-    // Resolve doctorId — needed by backend to verify ownership
-    int doctorId = currentProfile?.id ?? 0;
-
-    // Fallback 1: try to get from SharedPreferences if not in profile
-    if (doctorId == 0) {
-      doctorId = await SharedPrefHelper.getInt('doctor_id');
-      if (doctorId == 0) {
-        final docIdStr = await SharedPrefHelper.getString('doctor_id');
-        doctorId = int.tryParse(docIdStr) ?? 0;
-      }
-    }
-
-    // Fallback 2: extract from JWT token as last resort
-    if (doctorId == 0) {
-      doctorId = await _extractDoctorIdFromToken();
-    }
-
+    // Build update body - التوكن في headers يكفي للـ API
     final body = <String, dynamic>{
-      if (doctorId != 0) 'id': doctorId,
-      if (doctorId != 0) 'doctorId': doctorId,
       'firstName': _firstNameCtrl.text.trim(),
       'lastName': _lastNameCtrl.text.trim(),
       'phoneNumber': _phoneCtrl.text.trim(),
@@ -215,38 +185,9 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
       'categoryName': _categoryCtrl.text.trim(),
     };
 
-    // Keep full payload for consistency across all modules.
-    body.removeWhere((key, value) => value == null);
-
     if (!mounted) return;
     setState(() => _isSaving = true);
     cubit.updateProfile(body);
-  }
-
-  Future<int> _extractDoctorIdFromToken() async {
-    try {
-      final token =
-          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-      if (token == null || token.isEmpty) return 0;
-
-      final parts = token.split('.');
-      if (parts.length != 3) return 0;
-
-      String payload = parts[1];
-      while (payload.length % 4 != 0) {
-        payload += '=';
-      }
-
-      final decoded =
-          json.decode(utf8.decode(base64Url.decode(payload))) as Map?;
-      if (decoded == null) return 0;
-
-      final rawId =
-          decoded['id'] ?? decoded['doctorId'] ?? decoded['doctor_id'];
-      return int.tryParse(rawId?.toString() ?? '') ?? 0;
-    } catch (_) {
-      return 0;
-    }
   }
 
   void _showSelectionDialog({
@@ -694,52 +635,6 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
             ),
           ),
           SizedBox(height: 20.h),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFieldItem({
-    required String label,
-    required String value,
-    bool isRtl = true,
-    bool isVerified = false,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 12.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 14.sp,
-              color: const Color(0xFF9CA3AF),
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Row(
-            mainAxisAlignment:
-                isRtl ? MainAxisAlignment.end : MainAxisAlignment.start,
-            children: [
-              if (isVerified) ...[
-                Icon(Icons.check_circle, color: Colors.green, size: 16.sp),
-                SizedBox(width: 4.w),
-              ],
-              Text(
-                value,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1F2937),
-                ),
-                textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
-              ),
-            ],
-          ),
         ],
       ),
     );

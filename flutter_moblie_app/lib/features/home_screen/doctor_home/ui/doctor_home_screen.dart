@@ -42,13 +42,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   // ── Data Fetching ──────────────────────────────────────────────
 
   /// Fetches the doctor's first name from cache or API, then saves the
-  /// doctor's ID if found in the response (useful for the cases screen).
+  /// Fetch doctor's name from cache or token
   Future<void> _fetchDoctorName() async {
     try {
       // Try cache first — avoids unnecessary network call
       final cached = await SharedPrefHelper.getString('first_name');
-      final cachedDoctorId = await SharedPrefHelper.getInt('doctor_id');
-      if (cached.isNotEmpty && cachedDoctorId != 0) {
+      if (cached.isNotEmpty) {
         if (mounted)
           setState(() {
             _firstName = cached;
@@ -79,13 +78,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               if (fn != null && fn.isNotEmpty) {
                 await SharedPrefHelper.setData('first_name', fn);
                 if (mounted) setState(() => _firstName = fn);
-              }
-              // Extract and cache doctor ID
-              final rawId =
-                  decoded['id'] ?? decoded['doctorId'] ?? decoded['doctor_id'];
-              final did = int.tryParse(rawId?.toString() ?? '');
-              if (did != null && did != 0) {
-                await SharedPrefHelper.setData('doctor_id', did);
               }
             }
           }

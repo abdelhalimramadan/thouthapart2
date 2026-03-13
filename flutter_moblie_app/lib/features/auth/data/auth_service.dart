@@ -86,13 +86,8 @@ class AuthService {
             fa = (userMap['faculty'] ?? userMap['college']) as String?;
             c = (userMap['category'] ?? userMap['specialization'])?.toString();
 
-            // Save doctor_id immediately on login so all subsequent screens can use it
-            final rawId =
-                userMap['id'] ?? userMap['doctorId'] ?? userMap['doctor_id'];
-            final doctorIdFromLogin = int.tryParse(rawId?.toString() ?? '');
-            if (doctorIdFromLogin != null && doctorIdFromLogin != 0) {
-              await SharedPrefHelper.setData('doctor_id', doctorIdFromLogin);
-            }
+            // احفظ التوكن في الـ cache أيضاً (بالإضافة للـ secure storage)
+            await SharedPrefHelper.setData('auth_token', token);
 
             if (f != null && f.isNotEmpty) {
               await SharedPrefHelper.setData('first_name', f);
