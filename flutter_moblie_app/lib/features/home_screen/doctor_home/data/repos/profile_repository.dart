@@ -204,3 +204,4 @@ class ProfileRepository {
     throw Exception(result['error'] ?? 'فشل في تحميل قائمة التخصصات');
   }
 }
+
