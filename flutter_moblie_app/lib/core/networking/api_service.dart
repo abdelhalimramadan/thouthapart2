@@ -9,6 +9,7 @@ import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/models/doctor_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
 
 /// Centralised API service.
 ///
@@ -337,6 +338,66 @@ class ApiService {
       if (code == 404) return _fail('الطلب غير موجود', code: code);
       if (code == 500) return _fail('خطأ في الخادم، حاول مرة أخرى', code: code);
       return _fail(_dioError(e), code: code);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
+  int? _doctorIdFromJson(Map<String, dynamic> json) {
+    final raw = json['id'] ?? json['doctorId'] ?? json['doctor_id'];
+    return int.tryParse(raw?.toString() ?? '');
+  }
+
+  Future<Map<String, dynamic>> getDoctorById(int doctorId) async {
+    try {
+      await DioFactory.addDioHeaders();
+
+      final attempts = <Map<String, dynamic>>[
+        {'doctorId': doctorId},
+        {'id': doctorId},
+        {'doctor_id': doctorId},
+      ];
+
+      for (final params in attempts) {
+        try {
+          final res = await _dio.get(
+            ApiConstants.getDoctorById,
+            queryParameters: params,
+          );
+
+          if (res.statusCode != 200) {
+            continue;
+          }
+
+          Map<String, dynamic>? jsonData;
+          final payload = res.data;
+          if (payload is Map) {
+            if (payload['doctor'] is Map) {
+              jsonData = Map<String, dynamic>.from(payload['doctor'] as Map);
+            } else if (payload['data'] is Map) {
+              jsonData = Map<String, dynamic>.from(payload['data'] as Map);
+            } else {
+              jsonData = Map<String, dynamic>.from(payload);
+            }
+          }
+
+          if (jsonData == null) {
+            return _fail('صيغة بيانات الطبيب غير صحيحة', code: res.statusCode);
+          }
+
+          final parsed = DoctorProfileModel.fromJson(jsonData);
+          final parsedId = parsed.id ?? _doctorIdFromJson(jsonData) ?? doctorId;
+          return _okData(parsed.copyWith(id: parsedId));
+        } on DioException catch (e) {
+          final code = e.response?.statusCode;
+          if (code == 400 || code == 404) {
+            continue;
+          }
+          return _fail(_dioError(e), code: code);
+        }
+      }
+
+      return _fail('تعذر تحميل بيانات الطبيب');
     } catch (_) {
       return _fail('حدث خطأ غير متوقع');
     }

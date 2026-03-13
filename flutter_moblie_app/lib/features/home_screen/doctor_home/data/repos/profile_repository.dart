@@ -13,8 +13,58 @@ import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/d
 class ProfileRepository {
   final Dio _dio = DioFactory.getDio();
 
+  Future<int> _resolveDoctorId() async {
+    int doctorId = await SharedPrefHelper.getInt('doctor_id');
+    if (doctorId == 0) {
+      final cachedString = await SharedPrefHelper.getString('doctor_id');
+      doctorId = int.tryParse(cachedString) ?? 0;
+    }
+    if (doctorId == 0) {
+      doctorId = await _extractDoctorIdFromToken();
+    }
+    return doctorId;
+  }
+
+  Future<int> _extractDoctorIdFromToken() async {
+    try {
+      final token =
+          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      if (token.isEmpty) return 0;
+
+      final parts = token.split('.');
+      if (parts.length != 3) return 0;
+
+      String payload = parts[1];
+      while (payload.length % 4 != 0) {
+        payload += '=';
+      }
+
+      final decoded =
+          json.decode(utf8.decode(base64Url.decode(payload))) as Map?;
+      if (decoded == null) return 0;
+
+      final rawId =
+          decoded['id'] ?? decoded['doctorId'] ?? decoded['doctor_id'];
+      return int.tryParse(rawId?.toString() ?? '') ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   /// Centralized logic to fetch profile with fallbacks and strict model parsing
   Future<DoctorProfileModel> fetchProfile() async {
+    final doctorId = await _resolveDoctorId();
+    if (doctorId != 0) {
+      final profileResult = await getIt<ApiService>().getDoctorById(doctorId);
+      if (profileResult['success'] == true &&
+          profileResult['data'] is DoctorProfileModel) {
+        final profile = profileResult['data'] as DoctorProfileModel;
+        await _cacheProfileLocally(
+            profile.copyWith(id: profile.id ?? doctorId));
+        return profile.copyWith(id: profile.id ?? doctorId);
+      }
+    }
+
     Response? response;
     // Ordered by specificity
     final endpoints = [
@@ -192,15 +242,24 @@ class ProfileRepository {
     final result = await getIt<ApiService>().updateDoctor(body);
     if (result['success'] == true) {
       // Sync with local cache so drawer and home see the updates immediately
+      final cachedProfile = await getCachedProfile();
+      final rawId = body['id'] ?? body['doctorId'] ?? cachedProfile.id;
+      final updatedId =
+          int.tryParse(rawId?.toString() ?? '') ?? cachedProfile.id;
       final updatedProfile = DoctorProfileModel(
-        firstName: body['firstName']?.toString(),
-        lastName: body['lastName']?.toString(),
-        email: body['email']?.toString(),
-        phone: body['phoneNumber']?.toString(),
-        faculty: body['universityName']?.toString(),
-        year: body['studyYear']?.toString(),
-        governorate: body['cityName']?.toString(),
-        category: body['categoryName']?.toString(),
+        id: updatedId,
+        firstName:
+            body['firstName']?.toString() ?? cachedProfile.firstName ?? '',
+        lastName: body['lastName']?.toString() ?? cachedProfile.lastName ?? '',
+        email: body['email']?.toString() ?? cachedProfile.email ?? '',
+        phone: body['phoneNumber']?.toString() ?? cachedProfile.phone ?? '',
+        faculty:
+            body['universityName']?.toString() ?? cachedProfile.faculty ?? '',
+        year: body['studyYear']?.toString() ?? cachedProfile.year ?? '',
+        governorate:
+            body['cityName']?.toString() ?? cachedProfile.governorate ?? '',
+        category:
+            body['categoryName']?.toString() ?? cachedProfile.category ?? '',
       );
       await _cacheProfileLocally(updatedProfile);
     } else {

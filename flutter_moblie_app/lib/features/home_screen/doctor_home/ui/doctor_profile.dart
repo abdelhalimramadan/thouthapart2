@@ -36,15 +36,24 @@ class DoctorProfileBody extends StatefulWidget {
 }
 
 class _DoctorProfileBodyState extends State<DoctorProfileBody> {
+  final _firstNameCtrl = TextEditingController();
+  final _lastNameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
   final _universityCtrl = TextEditingController();
   final _yearCtrl = TextEditingController();
   final _cityCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _categoryCtrl = TextEditingController();
 
+  late final FocusNode _firstNameFocusNode;
+  late final FocusNode _lastNameFocusNode;
+  late final FocusNode _emailFocusNode;
   late final FocusNode _phoneFocusNode;
 
   // Original values — set once when profile loads
+  String _origFirstName = '';
+  String _origLastName = '';
+  String _origEmail = '';
   String _origUniversity = '';
   String _origYear = '';
   String _origCity = '';
@@ -57,7 +66,13 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
   @override
   void initState() {
     super.initState();
+    _firstNameFocusNode = FocusNode();
+    _lastNameFocusNode = FocusNode();
+    _emailFocusNode = FocusNode();
     _phoneFocusNode = FocusNode();
+    _firstNameCtrl.addListener(_checkChanges);
+    _lastNameCtrl.addListener(_checkChanges);
+    _emailCtrl.addListener(_checkChanges);
     _universityCtrl.addListener(_checkChanges);
     _yearCtrl.addListener(_checkChanges);
     _cityCtrl.addListener(_checkChanges);
@@ -66,7 +81,10 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
   }
 
   void _checkChanges() {
-    final changed = _universityCtrl.text.trim() != _origUniversity ||
+    final changed = _firstNameCtrl.text.trim() != _origFirstName ||
+        _lastNameCtrl.text.trim() != _origLastName ||
+        _emailCtrl.text.trim() != _origEmail ||
+        _universityCtrl.text.trim() != _origUniversity ||
         _yearCtrl.text.trim() != _origYear ||
         _cityCtrl.text.trim() != _origCity ||
         _phoneCtrl.text.trim() != _origPhone ||
@@ -76,16 +94,86 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
 
   @override
   void dispose() {
+    _firstNameCtrl.dispose();
+    _lastNameCtrl.dispose();
+    _emailCtrl.dispose();
     _universityCtrl.dispose();
     _yearCtrl.dispose();
     _cityCtrl.dispose();
     _phoneCtrl.dispose();
     _categoryCtrl.dispose();
+    _firstNameFocusNode.dispose();
+    _lastNameFocusNode.dispose();
+    _emailFocusNode.dispose();
     _phoneFocusNode.dispose();
     super.dispose();
   }
 
+  bool _isValidEmail(String value) {
+    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value);
+  }
+
+  bool _isValidPhone(String value) {
+    final normalized = value.replaceAll(RegExp(r'[\s-]'), '');
+    return RegExp(r'^\+?[0-9]{10,15}$').hasMatch(normalized);
+  }
+
+  String? _validateInputs() {
+    final firstName = _firstNameCtrl.text.trim();
+    final lastName = _lastNameCtrl.text.trim();
+    final email = _emailCtrl.text.trim();
+    final university = _universityCtrl.text.trim();
+    final year = _yearCtrl.text.trim();
+    final city = _cityCtrl.text.trim();
+    final phone = _phoneCtrl.text.trim();
+    final category = _categoryCtrl.text.trim();
+
+    if (firstName.isEmpty || firstName.length < 2) {
+      return 'يرجى إدخال الاسم الأول بشكل صحيح';
+    }
+    if (lastName.isEmpty || lastName.length < 2) {
+      return 'يرجى إدخال اسم العائلة بشكل صحيح';
+    }
+    if (email.isEmpty || !_isValidEmail(email)) {
+      return 'يرجى إدخال بريد إلكتروني صحيح';
+    }
+    if (phone.isEmpty || !_isValidPhone(phone)) {
+      return 'يرجى إدخال رقم هاتف صحيح';
+    }
+    if (university.isEmpty) {
+      return 'يرجى اختيار الجامعة';
+    }
+    if (year.isEmpty) {
+      return 'يرجى اختيار السنة الدراسية';
+    }
+    if (city.isEmpty) {
+      return 'يرجى اختيار المحافظة';
+    }
+    if (category.isEmpty) {
+      return 'يرجى اختيار التخصص';
+    }
+    return null;
+  }
+
   Future<void> _onSave() async {
+    if (_isSaving) return;
+
+    final validationError = _validateInputs();
+    if (validationError != null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(validationError,
+              style: const TextStyle(fontFamily: 'Cairo')),
+          backgroundColor: Colors.red[700],
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
+
     final cubit = context.read<ProfileCubit>();
     final currentState = cubit.state;
 
@@ -117,20 +205,18 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     final body = <String, dynamic>{
       if (doctorId != 0) 'id': doctorId,
       if (doctorId != 0) 'doctorId': doctorId,
-      'firstName': currentProfile?.firstName,
-      'lastName': currentProfile?.lastName,
-      'phoneNumber': _phoneCtrl.text.trim().isNotEmpty
-          ? _phoneCtrl.text.trim()
-          : currentProfile?.phone,
-      'email': currentProfile?.email,
+      'firstName': _firstNameCtrl.text.trim(),
+      'lastName': _lastNameCtrl.text.trim(),
+      'phoneNumber': _phoneCtrl.text.trim(),
+      'email': _emailCtrl.text.trim(),
       'universityName': _universityCtrl.text.trim(),
       'studyYear': _yearCtrl.text.trim(),
       'cityName': _cityCtrl.text.trim(),
       'categoryName': _categoryCtrl.text.trim(),
     };
 
-    // Remove nulls/empty to avoid backend errors
-    body.removeWhere((key, value) => value == null || value == '');
+    // Keep full payload for consistency across all modules.
+    body.removeWhere((key, value) => value == null);
 
     if (!mounted) return;
     setState(() => _isSaving = true);
@@ -277,16 +363,25 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
           listener: (context, state) {
             state.whenOrNull(
               success: (p, universities, cities, categories) {
+                final firstName = p.firstName ?? '';
+                final lastName = p.lastName ?? '';
+                final email = p.email ?? '';
                 final uni = p.faculty ?? '';
                 final yr = p.year ?? '';
                 final city = p.governorate ?? '';
                 final phone = p.phone ?? '';
                 final category = p.category ?? '';
+                _firstNameCtrl.text = firstName;
+                _lastNameCtrl.text = lastName;
+                _emailCtrl.text = email;
                 _universityCtrl.text = uni;
                 _yearCtrl.text = yr;
                 _cityCtrl.text = city;
                 _phoneCtrl.text = phone;
                 _categoryCtrl.text = category;
+                _origFirstName = firstName;
+                _origLastName = lastName;
+                _origEmail = email;
                 _origUniversity = uni;
                 _origYear = yr;
                 _origCity = city;
@@ -299,7 +394,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: const Text(
-                        'تم حفظ التغييرات بنجاح',
+                        'Profile Updated Successfully',
                         style: TextStyle(fontFamily: 'Cairo'),
                       ),
                       backgroundColor: Colors.green[700],
@@ -357,14 +452,14 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
           children: [
             // ── Save Button ───────────────────────────────────────────────
             InkWell(
-              onTap: _hasChanges ? _onSave : null,
+              onTap: (_hasChanges && !_isSaving) ? _onSave : null,
               borderRadius: BorderRadius.circular(12.r),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 width: double.infinity,
                 height: 54.h,
                 decoration: BoxDecoration(
-                  gradient: _hasChanges
+                  gradient: (_hasChanges && !_isSaving)
                       ? const LinearGradient(
                           colors: [Color(0xFF1D61E7), Color(0xFF0B8FAC)],
                         )
@@ -374,7 +469,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                   borderRadius: BorderRadius.circular(12.r),
                   boxShadow: [
                     BoxShadow(
-                      color: _hasChanges
+                      color: (_hasChanges && !_isSaving)
                           ? const Color(0xFF1D61E7).withValues(alpha: 0.2)
                           : Colors.transparent,
                       blurRadius: 8,
@@ -383,15 +478,24 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                   ],
                 ),
                 child: Center(
-                  child: Text(
-                    'حفظ',
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: _isSaving
+                      ? SizedBox(
+                          width: 20.w,
+                          height: 20.w,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2.2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          'حفظ',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
             ),
@@ -502,21 +606,38 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
             ),
             child: Column(
               children: [
-                _buildFieldItem(
-                    label: 'الإيميل', value: profile.email ?? '', isRtl: false),
+                _buildEditableInputField(
+                  label: 'الإيميل',
+                  controller: _emailCtrl,
+                  focusNode: _emailFocusNode,
+                  keyboardType: TextInputType.emailAddress,
+                  textDirection: TextDirection.ltr,
+                  textAlign: TextAlign.left,
+                  hintText: 'example@mail.com',
+                ),
                 _divider(),
-                _buildFieldItem(
-                    label: 'الاسم الأول', value: profile.firstName ?? ''),
+                _buildEditableInputField(
+                  label: 'الاسم الأول',
+                  controller: _firstNameCtrl,
+                  focusNode: _firstNameFocusNode,
+                  hintText: 'أدخل الاسم الأول',
+                ),
                 _divider(),
-                _buildFieldItem(
-                    label: 'اسم العائلة', value: profile.lastName ?? ''),
+                _buildEditableInputField(
+                  label: 'اسم العائلة',
+                  controller: _lastNameCtrl,
+                  focusNode: _lastNameFocusNode,
+                  hintText: 'أدخل اسم العائلة',
+                ),
                 _divider(),
                 _buildEditablePhoneField(),
                 _divider(),
                 _buildEditableField(
                   label: 'الجامعة',
                   id: 'university',
-                  displayValue: profile.faculty,
+                  displayValue: _universityCtrl.text.isNotEmpty
+                      ? _universityCtrl.text
+                      : profile.faculty,
                   onTap: () => _showSelectionDialog(
                     title: 'اختر الجامعة',
                     items: universities.map((u) => u.name).toList(),
@@ -527,7 +648,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 _buildEditableField(
                   label: 'السنة الدراسية',
                   id: 'year',
-                  displayValue: profile.year,
+                  displayValue:
+                      _yearCtrl.text.isNotEmpty ? _yearCtrl.text : profile.year,
                   onTap: () => _showSelectionDialog(
                     title: 'اختر السنة الدراسية',
                     items: const [
@@ -546,7 +668,9 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 _buildEditableField(
                   label: 'المحافظة',
                   id: 'city',
-                  displayValue: profile.governorate,
+                  displayValue: _cityCtrl.text.isNotEmpty
+                      ? _cityCtrl.text
+                      : profile.governorate,
                   onTap: () => _showSelectionDialog(
                     title: 'اختر المحافظة',
                     items: cities.map((c) => c.name).toList(),
@@ -557,7 +681,9 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 _buildEditableField(
                   label: 'التخصص',
                   id: 'category',
-                  displayValue: profile.category,
+                  displayValue: _categoryCtrl.text.isNotEmpty
+                      ? _categoryCtrl.text
+                      : profile.category,
                   onTap: () => _showSelectionDialog(
                     title: 'اختر التخصص',
                     items: categories.map((c) => c.name).toList(),
@@ -678,7 +804,15 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     );
   }
 
-  Widget _buildEditablePhoneField() {
+  Widget _buildEditableInputField({
+    required String label,
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    TextInputType keyboardType = TextInputType.text,
+    TextDirection textDirection = TextDirection.rtl,
+    TextAlign textAlign = TextAlign.right,
+    String hintText = '',
+  }) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -689,10 +823,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               GestureDetector(
-                onTap: () {
-                  // Focus on phone input field
-                  FocusScope.of(context).requestFocus(_phoneFocusNode);
-                },
+                onTap: () => FocusScope.of(context).requestFocus(focusNode),
                 child: ShaderMask(
                   shaderCallback: (bounds) => const LinearGradient(
                     colors: [Color(0xFF1D61E7), Color(0xFF0B8FAC)],
@@ -705,7 +836,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 ),
               ),
               Text(
-                'رقم الهاتف',
+                label,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 14.sp,
@@ -716,13 +847,13 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
           ),
           SizedBox(height: 8.h),
           TextField(
-            focusNode: _phoneFocusNode,
-            controller: _phoneCtrl,
-            keyboardType: TextInputType.phone,
-            textDirection: TextDirection.ltr,
-            textAlign: TextAlign.left,
+            focusNode: focusNode,
+            controller: controller,
+            keyboardType: keyboardType,
+            textDirection: textDirection,
+            textAlign: textAlign,
             decoration: InputDecoration(
-              hintText: 'أدخل رقم الهاتف',
+              hintText: hintText,
               hintStyle: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 14.sp,
@@ -761,6 +892,18 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildEditablePhoneField() {
+    return _buildEditableInputField(
+      label: 'رقم الهاتف',
+      controller: _phoneCtrl,
+      focusNode: _phoneFocusNode,
+      keyboardType: TextInputType.phone,
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.left,
+      hintText: 'أدخل رقم الهاتف',
     );
   }
 

@@ -73,15 +73,24 @@ class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
       },
     );
 
-    emit(ProfileState.loading(cachedData: prevProfile));
+    emit(ProfileState.loading(
+      cachedData: prevProfile,
+      universities: prevUniversities,
+      cities: prevCities,
+      categories: prevCategories,
+    ));
 
     try {
       await _repository.updateProfile(body);
 
+      final rawUpdatedId = body['id'] ?? body['doctorId'];
+      final updatedId =
+          int.tryParse(rawUpdatedId?.toString() ?? '') ?? prevProfile?.id;
+
       // Build the updated profile directly from the saved body
       // (do NOT call fetchProfile — it decodes stale JWT and overwrites fresh data)
       final updatedProfile = DoctorProfileModel(
-        id: prevProfile?.id,
+        id: updatedId,
         firstName: body['firstName']?.toString() ?? prevProfile?.firstName,
         lastName: body['lastName']?.toString() ?? prevProfile?.lastName,
         email: body['email']?.toString() ?? prevProfile?.email,
