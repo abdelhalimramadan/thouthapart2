@@ -353,30 +353,25 @@ class ApiService {
     return int.tryParse(raw?.toString() ?? '');
   }
 
-  Future<Map<String, dynamic>> getDoctorById(int doctorId) async {
+  /// Fetch current doctor profile using token from headers
+  /// If [doctorId] is provided, it will try with query parameters as fallback
+  /// If [doctorId] is null, it will use only the token from headers
+  Future<Map<String, dynamic>> getDoctorById([int? doctorId]) async {
     try {
       await DioFactory.addDioHeaders();
 
-      final attempts = <Map<String, dynamic>>[
-        {'doctorId': doctorId},
-        {'id': doctorId},
-        {'doctor_id': doctorId},
-      ];
-
-      for (final params in attempts) {
+      // If no doctorId provided, use just the token from headers
+      if (doctorId == null) {
         try {
           final res = await _dio.get(
             ApiConstants.getDoctorById,
-            queryParameters: params,
+            // No query parameters - token in header is enough
           );
 
-          if (res.statusCode != 200) {
-            continue;
-          }
-
-          Map<String, dynamic>? jsonData;
-          final payload = res.data;
-          if (payload is Map) {
+          if (res.statusCode == 200 && res.data is Map) {
+            Map<String, dynamic>? jsonData;
+            final payload = res.data;
+            
             if (payload['doctor'] is Map) {
               jsonData = Map<String, dynamic>.from(payload['doctor'] as Map);
             } else if (payload['data'] is Map) {
@@ -384,23 +379,67 @@ class ApiService {
             } else {
               jsonData = Map<String, dynamic>.from(payload);
             }
-          }
 
-          if (jsonData == null) {
-            return _fail('صيغة بيانات الطبيب غير صحيحة', code: res.statusCode);
+            if (jsonData != null) {
+              print('=== getDoctorById: Raw JSON (no params) = $jsonData ===');
+              final parsed = DoctorProfileModel.fromJson(jsonData);
+              print('=== getDoctorById: Parsed = id:${parsed.id}, phone:${parsed.phone}, faculty:${parsed.faculty}, year:${parsed.year}, category:${parsed.category} ===');
+              return _okData(parsed);
+            }
           }
-
-          print('=== getDoctorById: Raw JSON = $jsonData ===');
-          final parsed = DoctorProfileModel.fromJson(jsonData);
-          print('=== getDoctorById: Parsed = id:${parsed.id}, phone:${parsed.phone}, faculty:${parsed.faculty}, year:${parsed.year}, category:${parsed.category} ===');
-          final parsedId = parsed.id ?? _doctorIdFromJson(jsonData) ?? doctorId;
-          return _okData(parsed.copyWith(id: parsedId));
         } on DioException catch (e) {
-          final code = e.response?.statusCode;
-          if (code == 400 || code == 404) {
-            continue;
+          print('=== getDoctorById: Request without params failed: $e ===');
+          return _fail(_dioError(e), code: e.response?.statusCode);
+        }
+      }
+
+      // Fallback: try with doctorId query parameters if provided
+      if (doctorId != null) {
+        final attempts = <Map<String, dynamic>>[
+          {'doctorId': doctorId},
+          {'id': doctorId},
+          {'doctor_id': doctorId},
+        ];
+
+        for (final params in attempts) {
+          try {
+            final res = await _dio.get(
+              ApiConstants.getDoctorById,
+              queryParameters: params,
+            );
+
+            if (res.statusCode != 200) {
+              continue;
+            }
+
+            Map<String, dynamic>? jsonData;
+            final payload = res.data;
+            if (payload is Map) {
+              if (payload['doctor'] is Map) {
+                jsonData = Map<String, dynamic>.from(payload['doctor'] as Map);
+              } else if (payload['data'] is Map) {
+                jsonData = Map<String, dynamic>.from(payload['data'] as Map);
+              } else {
+                jsonData = Map<String, dynamic>.from(payload);
+              }
+            }
+
+            if (jsonData == null) {
+              return _fail('صيغة بيانات الطبيب غير صحيحة', code: res.statusCode);
+            }
+
+            print('=== getDoctorById: Raw JSON (with params) = $jsonData ===');
+            final parsed = DoctorProfileModel.fromJson(jsonData);
+            print('=== getDoctorById: Parsed = id:${parsed.id}, phone:${parsed.phone}, faculty:${parsed.faculty}, year:${parsed.year}, category:${parsed.category} ===');
+            final parsedId = parsed.id ?? _doctorIdFromJson(jsonData) ?? doctorId;
+            return _okData(parsed.copyWith(id: parsedId));
+          } on DioException catch (e) {
+            final code = e.response?.statusCode;
+            if (code == 400 || code == 404) {
+              continue;
+            }
+            return _fail(_dioError(e), code: code);
           }
-          return _fail(_dioError(e), code: code);
         }
       }
 

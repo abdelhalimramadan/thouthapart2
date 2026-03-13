@@ -13,11 +13,11 @@ class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
   ProfileCubit(this._repository) : super(const ProfileState.initial());
 
   Future<void> fetchProfile() async {
-    // 1. Instantly load cached data to improve perceived performance
-    final cachedProfile = await _repository.getCachedProfile();
-    emit(ProfileState.loading(cachedData: cachedProfile));
+    // Emit loading state without cached data - we want fresh data from server
+    emit(ProfileState.loading());
 
-    // 2. Fetch fresh data (Profile, Universities, Cities, Categories)
+    // Fetch fresh data from server (NO CACHING)
+    // Workflow: Use token in headers to get doctor data directly from server
     try {
       final results = await Future.wait([
         _repository.fetchProfile(),

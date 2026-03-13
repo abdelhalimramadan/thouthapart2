@@ -13,24 +13,29 @@ import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/d
 class ProfileRepository {
   final Dio _dio = DioFactory.getDio();
 
-  /// Centralized logic to fetch profile with fallbacks and strict model parsing
+  /// Centralized logic to fetch profile from server using token in headers
+  /// NO CACHING - Always fetches fresh data from the server
+  /// Workflow: Login (save token) -> Use token to fetch doctor data -> Display it
   Future<DoctorProfileModel> fetchProfile() async {
-    // Try getDoctorById أولاً (يستخدم Token من الـ headers)
+    // Primary: Try getDoctorById using token from headers (no request body)
     // الـ Token موجود في headers تلقائياً من DioFactory
+    print('=== fetchProfile: Attempting to fetch doctor profile using token ===');
     try {
       final profileResult = await getIt<ApiService>().getDoctorById();
       if (profileResult['success'] == true &&
           profileResult['data'] is DoctorProfileModel) {
         final profile = profileResult['data'] as DoctorProfileModel;
-        await _cacheProfileLocally(profile);
+        print('=== fetchProfile: Successfully fetched fresh doctor profile ===');
+        // NO CACHING - Return fresh data directly from server
         return profile;
       }
-    } catch (_) {
-      // Continue to next endpoint
+    } catch (e) {
+      print('=== fetchProfile: getDoctorById failed: $e ===');
+      // Continue to fallback endpoints
     }
 
+    // Fallback: Try other endpoints if primary fails
     Response? response;
-    // Ordered by specificity
     final endpoints = [
       '/api/auth/profile',
       '/api/doctor/profile',
@@ -45,7 +50,6 @@ class ProfileRepository {
         print('=== fetchProfile: Trying fallback endpoint: $path ===');
         response = await _dio.get(path);
 
-        // Ensure we actually got JSON data
         if (response.statusCode == 200 &&
             response.data != null &&
             response.data is Map<String, dynamic>) {
@@ -62,11 +66,9 @@ class ProfileRepository {
             jsonData = Map<String, dynamic>.from(jsonData['doctor']);
           }
 
-          print('=== fetchProfile: Fallback JSON from $path = $jsonData ===');
+          print('=== fetchProfile: Fallback endpoint $path succeeded ===');
           final profile = DoctorProfileModel.fromJson(jsonData);
-          print(
-              '=== fetchProfile: Fallback parsed phone=${profile.phone}, faculty=${profile.faculty}, year=${profile.year}, category=${profile.category} ===');
-          await _cacheProfileLocally(profile);
+          // NO CACHING - Return fresh data directly
           return profile;
         }
       } catch (e) {
@@ -75,51 +77,15 @@ class ProfileRepository {
       }
     }
 
-    // FINAL FALLBACK: Decode the JWT token if API fails.
-    // Only use token data for fields that are NOT already cached locally
-    // to avoid overwriting freshly saved data with stale JWT values.
+    // FINAL FALLBACK: Return cached data only if API completely fails
+    // This ensures the app doesn't crash, but users see stale data
     try {
-      final tokenProfile = await _getProfileFromToken();
-      if (tokenProfile != null) {
-        final cached = await getCachedProfile();
-        // Merge: prefer local cache over JWT (cache has latest saved values)
-        final merged = DoctorProfileModel(
-          id: tokenProfile.id ?? cached.id,
-          firstName: (cached.firstName?.isNotEmpty == true)
-              ? cached.firstName
-              : tokenProfile.firstName,
-          lastName: (cached.lastName?.isNotEmpty == true)
-              ? cached.lastName
-              : tokenProfile.lastName,
-          email: (cached.email?.isNotEmpty == true)
-              ? cached.email
-              : tokenProfile.email,
-          phone: (cached.phone?.isNotEmpty == true)
-              ? cached.phone
-              : tokenProfile.phone,
-          faculty: (cached.faculty?.isNotEmpty == true)
-              ? cached.faculty
-              : tokenProfile.faculty,
-          year: (cached.year?.isNotEmpty == true)
-              ? cached.year
-              : tokenProfile.year,
-          governorate: (cached.governorate?.isNotEmpty == true)
-              ? cached.governorate
-              : tokenProfile.governorate,
-          category: (cached.category?.isNotEmpty == true)
-              ? cached.category
-              : tokenProfile.category,
-        );
-        await _cacheProfileLocally(merged);
-        return merged;
+      final cached = await getCachedProfile();
+      if (cached.firstName != null && cached.firstName!.isNotEmpty) {
+        print('=== fetchProfile: All endpoints failed, returning cached profile ===');
+        return cached;
       }
     } catch (_) {}
-
-    // If everything fails, try to return cached data instead of throwing
-    final cached = await getCachedProfile();
-    if (cached.firstName != null && cached.firstName!.isNotEmpty) {
-      return cached;
-    }
 
     throw Exception('لا يمكن تحميل البيانات، يرجى التحقق من الاتصال');
   }
@@ -205,32 +171,13 @@ class ProfileRepository {
   }
 
   Future<void> updateProfile(Map<String, dynamic> body) async {
+    // NO CACHING - Just call the API to update the profile
+    // The UI will handle displaying the updated data without caching it
     final result = await getIt<ApiService>().updateDoctor(body);
-    if (result['success'] == true) {
-      // Sync with local cache so drawer and home see the updates immediately
-      final cachedProfile = await getCachedProfile();
-      final rawId = body['id'] ?? body['doctorId'] ?? cachedProfile.id;
-      final updatedId =
-          int.tryParse(rawId?.toString() ?? '') ?? cachedProfile.id;
-      final updatedProfile = DoctorProfileModel(
-        id: updatedId,
-        firstName:
-            body['firstName']?.toString() ?? cachedProfile.firstName ?? '',
-        lastName: body['lastName']?.toString() ?? cachedProfile.lastName ?? '',
-        email: body['email']?.toString() ?? cachedProfile.email ?? '',
-        phone: body['phoneNumber']?.toString() ?? cachedProfile.phone ?? '',
-        faculty:
-            body['universityName']?.toString() ?? cachedProfile.faculty ?? '',
-        year: body['studyYear']?.toString() ?? cachedProfile.year ?? '',
-        governorate:
-            body['cityName']?.toString() ?? cachedProfile.governorate ?? '',
-        category:
-            body['categoryName']?.toString() ?? cachedProfile.category ?? '',
-      );
-      await _cacheProfileLocally(updatedProfile);
-    } else {
+    if (result['success'] != true) {
       throw Exception(result['error']?.toString() ?? 'فشل تحديث البيانات');
     }
+    // Profile updated successfully - no caching, fresh data will be fetched when needed
   }
 
   Future<List<UniversityModel>> getUniversities() async {
