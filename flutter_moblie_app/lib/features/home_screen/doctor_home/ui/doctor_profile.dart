@@ -699,52 +699,6 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     );
   }
 
-  Widget _buildFieldItem({
-    required String label,
-    required String value,
-    bool isRtl = true,
-    bool isVerified = false,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 12.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 14.sp,
-              color: const Color(0xFF9CA3AF),
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Row(
-            mainAxisAlignment:
-                isRtl ? MainAxisAlignment.end : MainAxisAlignment.start,
-            children: [
-              if (isVerified) ...[
-                Icon(Icons.check_circle, color: Colors.green, size: 16.sp),
-                SizedBox(width: 4.w),
-              ],
-              Text(
-                value,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1F2937),
-                ),
-                textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEditableField({
     required String label,
     required String id,

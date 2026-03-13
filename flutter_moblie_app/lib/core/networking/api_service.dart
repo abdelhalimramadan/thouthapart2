@@ -2,8 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:thotha_mobile_app/core/networking/api_constants.dart';
 import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
-import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
-import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
@@ -53,8 +51,15 @@ class ApiService {
       case DioExceptionType.badResponse:
         final code = e.response?.statusCode;
         final serverMsg = e.response?.data is Map
-            ? (e.response!.data['message'] ?? e.response!.data['error'] ?? '')
+            ? (e.response!.data['messageAr'] ??
+                e.response!.data['messageEn'] ??
+                e.response!.data['message'] ??
+                e.response!.data['error'] ??
+                '')
             : e.response?.data?.toString() ?? '';
+        if (serverMsg.toString().contains('No static resource found')) {
+          return 'المسار غير صحيح على الخادم. يرجى المحاولة مرة أخرى';
+        }
         if (code == 401) return 'غير مصرح: يرجى تسجيل الدخول مجدداً (401)';
         if (code == 403) return 'ممنوع الوصول (403)';
         if (code == 404) return 'الرابط غير موجود (404)';
@@ -428,41 +433,43 @@ class ApiService {
 
   Future<Map<String, dynamic>> deleteDoctor() async {
     try {
-      final token =
-          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-
-      // Clean Isolation: Using a fresh Dio instance to match web's 'fetch' behavior exactly
-      // This avoids interference from global interceptors or default headers
-      final isolatedDio = Dio(BaseOptions(
-        baseUrl: ApiConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
-      ));
-
-      final fullUrl = '${ApiConstants.baseUrl}${ApiConstants.deleteDoctor}';
-      print('=== deleteDoctor calling URL: $fullUrl ===');
-
-      final res = await isolatedDio.delete(
-        fullUrl,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Accept': 'application/json',
-          },
-        ),
-      );
-
-      if (res.statusCode == 200 || res.statusCode == 204)
-        return {'success': true};
-      return _fail('فشل في حذف الحساب', code: res.statusCode);
-    } on DioException catch (e) {
-      final code = e.response?.statusCode;
-      if (code == 404) return _fail('الطبيب غير موجود', code: code);
-      if (code == 401)
-        return _fail('غير مصرح: يرجى تسجيل الدخول مجدداً', code: code);
-      if (code == 403)
-        return _fail('ممنوع الوصول، تأكد من صلاحياتك', code: code);
-      return _fail(_dioError(e), code: code);
+      await DioFactory.addDioHeaders();
+      // حاول POST أولاً (بعض الـ APIs تستخدم POST للحذف)
+      try {
+        final res = await _dio.delete(ApiConstants.deleteDoctor);
+        if (res.statusCode == 200 || res.statusCode == 204) {
+          return {'success': true};
+        }
+        return _fail('فشل في حذف الحساب', code: res.statusCode);
+      } on DioException catch (postError) {
+        // إذا فشل POST، حاول DELETE
+        if (postError.response?.statusCode == 404 ||
+            postError.response?.statusCode == 405) {
+          try {
+            final res = await _dio.delete(ApiConstants.deleteDoctor);
+            if (res.statusCode == 200 || res.statusCode == 204) {
+              return {'success': true};
+            }
+            return _fail('فشل في حذف الحساب', code: res.statusCode);
+          } on DioException catch (deleteError) {
+            final code = deleteError.response?.statusCode;
+            if (code == 404) return _fail('الطبيب غير موجود', code: code);
+            if (code == 401)
+              return _fail('غير مصرح: يرجى تسجيل الدخول مجدداً', code: code);
+            if (code == 403)
+              return _fail('ممنوع الوصول، تأكد من صلاحياتك', code: code);
+            return _fail(_dioError(deleteError), code: code);
+          }
+        }
+        // إذا كان الخطأ ليس 404 أو 405، أرجع الخطأ من POST
+        final code = postError.response?.statusCode;
+        if (code == 404) return _fail('الطبيب غير موجود', code: code);
+        if (code == 401)
+          return _fail('غير مصرح: يرجى تسجيل الدخول مجدداً', code: code);
+        if (code == 403)
+          return _fail('ممنوع الوصول، تأكد من صلاحياتك', code: code);
+        return _fail(_dioError(postError), code: code);
+      }
     } catch (_) {
       return _fail('حدث خطأ غير متوقع');
     }
