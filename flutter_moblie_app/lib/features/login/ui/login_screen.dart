@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
 import '../../auth/data/auth_service.dart';
-import '../../home_screen/doctor_home/ui/doctor_home_screen.dart';
+import '../../doctor/ui/doctor_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, this.nextScreen, this.nextRouteSettings});

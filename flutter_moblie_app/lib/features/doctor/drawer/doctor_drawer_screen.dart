@@ -1,0 +1,654 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:thotha_mobile_app/core/theming/theme_provider.dart';
+import 'package:thotha_mobile_app/features/doctor/ui/doctor_booking_records_screen.dart';
+import 'package:thotha_mobile_app/features/requests/ui/my_requests_screen.dart';
+import 'package:thotha_mobile_app/features/doctor/ui/doctor_home_screen.dart';
+import 'package:thotha_mobile_app/features/profile/ui/profile_screen.dart';
+import 'package:thotha_mobile_app/features/login/ui/login_screen.dart';
+import 'package:dio/dio.dart';
+import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
+import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
+
+import 'package:thotha_mobile_app/features/doctor/ui/doctor_next_booking_screen.dart';
+
+import 'package:thotha_mobile_app/features/doctor/ui/secondary_home_screen.dart';
+import 'package:thotha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
+import 'package:thotha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
+import 'package:thotha_mobile_app/features/about_app/ui/about_app_screen.dart';
+import 'package:thotha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart';
+
+class DoctorDrawer extends StatefulWidget {
+  const DoctorDrawer({super.key});
+
+  @override
+  State<DoctorDrawer> createState() => _DoctorDrawerState();
+}
+
+class _DoctorDrawerState extends State<DoctorDrawer> {
+  String? _firstName;
+  String? _lastName;
+  String? _email;
+  bool _isLoadingName = false;
+
+  static const _cCyan = Color(0xFF84E5F3);
+  static const _cGreen = Color(0xFF8DECB4);
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDoctorName();
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: Text(
+              'تأكيد تسجيل الخروج',
+              textAlign: TextAlign.right,
+              style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            content: Text(
+              'هل أنت متأكد من رغبتك في تسجيل الخروج؟',
+              textAlign: TextAlign.right,
+              style: textTheme.bodyMedium,
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text(
+                  'إلغاء',
+                  style: textTheme.bodyLarge?.copyWith(
+                    color: isDark ? Colors.grey[400] : Colors.grey[700],
+                  ),
+                ),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              TextButton(
+                child: Text(
+                  'تسجيل خروج',
+                  style: textTheme.bodyLarge?.copyWith(
+                    color: Colors.red,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
+                    (Route<dynamic> route) => false,
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _menuItem(
+      BuildContext context, {
+        required String title,
+        required IconData icon,
+        Color? iconColor,
+        Color? textColor,
+        bool isSelected = false,
+        VoidCallback? onTap,
+        required double width,
+        required double baseFontSize,
+      }) {
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isSelected 
+            ? _cCyan.withAlpha(26)
+            : null,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  color: isSelected ? _cCyan : (iconColor ?? Theme.of(context).iconTheme.color),
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.right,
+                    style: textTheme.bodyLarge?.copyWith(
+                      fontFamily: 'Cairo',
+                      fontSize: baseFontSize * 0.9,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color: isSelected 
+                          ? _cCyan 
+                          : textColor ?? Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                if (isSelected)
+                  Container(
+                    width: 4,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: _cCyan,
+                      borderRadius: const BorderRadius.horizontal(
+                        left: Radius.circular(4),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _toggleMenuItem(
+      BuildContext context, {
+        required String title,
+        required bool value,
+        required ValueChanged<bool> onChanged,
+        IconData? icon,
+        Color? iconColor,
+        required double width,
+        required double baseFontSize,
+      }) {
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                color: iconColor ?? Theme.of(context).iconTheme.color,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.right,
+                  style: textTheme.bodyLarge?.copyWith(
+                    fontFamily: 'Cairo',
+                    fontSize: baseFontSize * 0.9,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              Switch.adaptive(
+                value: value,
+                onChanged: onChanged,
+                activeTrackColor: const Color(0xFF10B981),
+                inactiveThumbColor: Colors.white,
+                inactiveTrackColor: Theme.of(context).dividerColor,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _fetchDoctorName() async {
+    setState(() => _isLoadingName = true);
+
+    try {
+      final cachedFirstName = await SharedPrefHelper.getString('first_name');
+      final cachedLastName = await SharedPrefHelper.getString('last_name');
+      final cachedEmail = await SharedPrefHelper.getString('email');
+
+      if (cachedFirstName != null && cachedFirstName.isNotEmpty) {
+        setState(() {
+          _firstName = cachedFirstName;
+          _lastName = cachedLastName;
+          _email = cachedEmail;
+        });
+        return;
+      }
+
+      final dio = DioFactory.getDio();
+      Response response;
+      try {
+        response = await dio.get('/me');
+      } catch (_) {
+        response = await dio.get('/profile');
+      }
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        String? f, l, e;
+
+        if (data is Map) {
+          f = (data['first_name'] ?? data['firstName']) as String?;
+          l = (data['last_name'] ?? data['lastName']) as String?;
+          e = (data['email'] ?? (data['user']?['email'])) as String?;
+
+          if ((f == null || f.isEmpty) && data['user'] != null) {
+            final user = data['user'];
+            f = user['first_name'] ?? user['firstName'];
+            l = user['last_name'] ?? user['lastName'];
+          }
+        }
+
+        setState(() {
+          _firstName = f;
+          _lastName = l;
+          _email = e;
+        });
+
+        if (f != null && f.isNotEmpty) {
+          await SharedPrefHelper.setData('first_name', f);
+          await SharedPrefHelper.setData('last_name', l ?? '');
+          if (e != null) await SharedPrefHelper.setData('email', e);
+        }
+      }
+    } catch (e) {
+      debugPrint('Exception: $e');
+    } finally {
+      setState(() => _isLoadingName = false);
+    }
+  }
+
+  int _getCurrentIndex() {
+    final currentRoute = ModalRoute.of(context)?.settings.name?.toLowerCase() ?? '';
+    if (currentRoute.contains('doctor-home')) return 0;
+    if (currentRoute.contains('add-case')) return 1;
+    if (currentRoute.contains('doctor-profile') || currentRoute.contains('profile')) return 2;
+    if (currentRoute.contains('upcoming-bookings')) return 3;
+    if (currentRoute.contains('booking-records') || currentRoute.contains('records')) return 4;
+    if (currentRoute.contains('doctor-requests')) return 5;
+    return 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textTheme = Theme.of(context).textTheme;
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
+    final double topPad = MediaQuery.of(context).padding.top;
+    final int currentIndex = _getCurrentIndex();
+
+    return Drawer(
+      child: Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              height: topPad + 160,
+              padding: EdgeInsets.only(top: topPad),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: [_cCyan, _cGreen],
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                   SizedBox(
+                    height: 56,
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Text(
+                            'القائمة',
+                            style: textTheme.titleLarge?.copyWith(
+                              fontFamily: 'Cairo',
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.surface,
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.close,
+                              color: Theme.of(context).colorScheme.surface,
+                            ),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: Container(
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surface
+                            .withAlpha(64),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: Row(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 12),
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.person_outline,
+                                color: _cCyan,
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    _isLoadingName
+                                        ? const SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : Text(
+                                            (_firstName != null && _firstName!.isNotEmpty)
+                                                ? 'د/ ${_firstName!} ${_lastName ?? ''}'
+                                                : 'دكتور',
+                                            style: textTheme.titleMedium
+                                                ?.copyWith(
+                                              fontFamily: 'Cairo',
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .surface,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      _email != null && _email!.isNotEmpty
+                                          ? _email!
+                                          : '********',
+                                      style: textTheme.bodySmall?.copyWith(
+                                        fontFamily: 'Cairo',
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surface,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _menuItem(
+                    context,
+                    title: 'الرئيسية',
+                    icon: Icons.home,
+                    isSelected: currentIndex == 0,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          settings: const RouteSettings(name: 'doctor-home'),
+                          builder: (context) => const DoctorHomeScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'إضافة حالة جديدة',
+                    icon: Icons.add_circle_outline,
+                    isSelected: currentIndex == 1,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          settings: const RouteSettings(name: 'add-case'),
+                          builder: (context) => const SecondaryHomeScreen(
+                            drawer: DoctorDrawer(),
+                            showAddCaseCategory: true,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'الملف الشخصي',
+                    icon: Icons.person_outline,
+                    isSelected: currentIndex == 2,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          settings: const RouteSettings(name: 'doctor-profile'),
+                          builder: (context) => const ProfileScreen(),
+                        ),
+                      );
+                    },
+
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'الحجوزات القادمة',
+                    icon: Icons.event_note_outlined,
+                    isSelected: currentIndex == 3,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          settings: const RouteSettings(name: 'upcoming-bookings'),
+                          builder: (context) => DoctorNextBookingScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'سجل الحجوزات',
+                    icon: Icons.list_alt_rounded,
+                    isSelected: currentIndex == 4,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          settings: const RouteSettings(name: 'booking-records'),
+                          builder: (context) => DoctorBookingRecordsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'طلباتي',
+                    icon: Icons.assignment_outlined,
+                    isSelected: currentIndex == 5,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          settings: const RouteSettings(name: 'doctor-requests'),
+                          builder: (context) => const MyRequestsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  Consumer<ThemeProvider>(
+                    builder: (context, themeProvider, _) {
+                      return _toggleMenuItem(
+                        context,
+                        title: 'الوضع الداكن',
+                        value: themeProvider.isDarkMode,
+                        onChanged: (value) => themeProvider.toggleTheme(value),
+                        icon: Icons.dark_mode_outlined,
+                        width: width,
+                        baseFontSize: baseFontSize,
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'حول التطبيق',
+                    icon: Icons.info_outline,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AboutAppScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'الشروط والأحكام',
+                    icon: Icons.description_outlined,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TermsAndConditionsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'سياسة الخصوصية',
+                    icon: Icons.shield_outlined,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PrivacyPolicyScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'المساعدة والدعم',
+                    icon: Icons.help_outline,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HelpAndSupportScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Divider(height: 24),
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'تسجيل الخروج',
+                    icon: Icons.logout_outlined,
+                    textColor: Colors.red,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showLogoutConfirmation(context);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Center(
+                child: Text(
+                  'الإصدار 1.0.2',
+                  style: textTheme.bodySmall?.copyWith(
+                    fontFamily: 'Cairo',
+                    color: isDark ? Colors.grey[400] : Colors.grey[700],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

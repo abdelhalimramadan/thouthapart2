@@ -9,9 +9,9 @@ import 'package:thotha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
-import 'package:thotha_mobile_app/features/home_screen/logic/doctor_cubit.dart';
+import 'package:thotha_mobile_app/features/doctor/logic/doctor_cubit.dart';
 
-import 'package:thotha_mobile_app/features/home_screen/logic/doctor_state.dart';
+import 'package:thotha_mobile_app/features/doctor/logic/doctor_state.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen(

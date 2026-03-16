@@ -6,9 +6,9 @@ import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
 import 'package:thotha_mobile_app/features/booking/ui/booking_confirmation_screen.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/add_case_request_screen.dart';
+import 'package:thotha_mobile_app/features/requests/data/models/case_request_model.dart';
+import 'package:thotha_mobile_app/features/requests/data/repos/case_request_repo.dart';
+import 'package:thotha_mobile_app/features/requests/ui/add_case_request_screen.dart';
 import 'package:thotha_mobile_app/core/helpers/constants.dart';
 
 class CategoryDoctorsScreen extends StatefulWidget {
@@ -265,6 +265,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
             context,
             MaterialPageRoute(
               builder: (_) => BookingConfirmationScreen(
+                doctorId: req.doctorId ?? 0,
                 doctorName: req.doctorFullName,
                 date: req.formattedDate,
                 time: req.formattedTime,
@@ -574,6 +575,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (_) => BookingConfirmationScreen(
+                              doctorId: req.doctorId ?? 0,
                               doctorName: req.doctorFullName,
                               date: req.formattedDate,
                               time: req.formattedTime,

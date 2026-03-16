@@ -1,5 +1,5 @@
 import 'package:thotha_mobile_app/features/booking/ui/otp_verification_dialog.dart';
-import 'package:thotha_mobile_app/features/appointments/data/appointments_service.dart';
+import 'package:thotha_mobile_app/core/networking/api_service.dart';
 import 'package:thotha_mobile_app/core/networking/otp_service.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class BookingConfirmationScreen extends StatefulWidget {
+  final int doctorId;
   final String doctorName;
   final String date;
   final String time;
@@ -14,6 +15,7 @@ class BookingConfirmationScreen extends StatefulWidget {
 
   const BookingConfirmationScreen({
     Key? key,
+    required this.doctorId,
     required this.doctorName,
     required this.date,
     required this.time,
@@ -31,6 +33,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
   final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
   final OtpService _otpService = OtpService();
+  final ApiService _apiService = ApiService();
   bool _isLoading = false;
   bool _isSendingOtp = false;
 
@@ -83,28 +86,32 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
     }
   }
 
-  void _completeBooking() {
+  void _completeBooking() async {
     setState(() {
       _isLoading = true;
     });
 
-    Future.delayed(const Duration(seconds: 2), () async {
-      final appointment = {
-        'doctorName': widget.doctorName,
-        'specialty': widget.specialty,
-        'date': widget.date,
-        'time': widget.time,
-        'status': 'مؤكد',
-      };
+    // إعداد بيانات الحجز حسب AppointmentDto
+    final appointmentBody = {
+      'doctorId': widget.doctorId,
+      'doctorFirstName': widget.doctorName.split(' ').first,
+      'doctorLastName': widget.doctorName.split(' ').length > 1
+          ? widget.doctorName.split(' ').sublist(1).join(' ')
+          : '',
+      'patientFirstName': _firstNameController.text,
+      'patientLastName': _lastNameController.text,
+      'patientPhoneNumber': _phoneController.text,
+    };
 
-      await AppointmentsService().addAppointment(appointment);
+    final result = await _apiService.createAppointment(appointmentBody);
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      setState(() {
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = false;
+    });
 
+    if (result['success'] == true) {
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -180,7 +187,19 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
           ],
         ),
       );
-    });
+    } else {
+      // عرض خطأ
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result['error'] ?? 'فشل في إنشاء الحجز',
+            style: const TextStyle(fontFamily: 'Cairo'),
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   @override

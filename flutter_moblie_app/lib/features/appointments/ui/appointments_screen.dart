@@ -1,4 +1,4 @@
-import 'package:thotha_mobile_app/features/appointments/data/appointments_service.dart';
+import 'package:thotha_mobile_app/core/networking/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -14,6 +14,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   List<Map<String, dynamic>> _allAppointments = [];
   bool _isLoading = true;
   String _selectedFilter = 'الكل';
+  final ApiService _apiService = ApiService();
 
   @override
   void initState() {
@@ -28,28 +29,48 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   }
 
   Future<void> _loadAppointments() async {
-    final savedAppointments = await AppointmentsService().getAppointments();
+    final result = await _apiService.getAllAppointments();
 
-    final processedAppointments = savedAppointments.map((appt) {
-      Color statusColor = Colors.grey;
-      if (appt['status'] == 'مؤكد') {
-        statusColor = Colors.green;
-      } else if (appt['status'] == 'قيد الانتظار') {
-        statusColor = Colors.orange;
+    if (result['success'] == true) {
+      final List<dynamic> data = result['data'] ?? [];
+      final processedAppointments = data.map((appt) {
+        Color statusColor = Colors.grey;
+        final status = appt['status'] ?? 'مؤكد';
+        if (status == 'مؤكد' || status == 'confirmed') {
+          statusColor = Colors.green;
+        } else if (status == 'قيد الانتظار' || status == 'pending') {
+          statusColor = Colors.orange;
+        }
+
+        return {
+          ...Map<String, dynamic>.from(appt),
+          'status': status == 'confirmed' ? 'مؤكد' : (status == 'pending' ? 'قيد الانتظار' : status),
+          'statusColor': statusColor,
+        };
+      }).toList();
+
+      if (mounted) {
+        setState(() {
+          _allAppointments = processedAppointments;
+          _applyFilter();
+          _isLoading = false;
+        });
       }
-
-      return {
-        ...appt,
-        'statusColor': statusColor,
-      };
-    }).toList();
-
-    if (mounted) {
-      setState(() {
-        _allAppointments = processedAppointments;
-        _applyFilter();
-        _isLoading = false;
-      });
+    } else {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['error'] ?? 'فشل في تحميل الحجوزات',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
