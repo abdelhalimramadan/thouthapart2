@@ -594,13 +594,9 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                   onTap: () => _showSelectionDialog(
                     title: 'اختر السنة الدراسية',
                     items: const [
-                      'الأولى',
-                      'الثانية',
-                      'الثالثة',
                       'الرابعة',
                       'الخامسة',
                       'امتياز',
-                      'مزاول'
                     ],
                     controller: _yearCtrl,
                   ),

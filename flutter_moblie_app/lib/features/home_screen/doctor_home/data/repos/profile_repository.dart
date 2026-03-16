@@ -19,13 +19,15 @@ class ProfileRepository {
   Future<DoctorProfileModel> fetchProfile() async {
     // Primary: Try getDoctorById using token from headers (no request body)
     // الـ Token موجود في headers تلقائياً من DioFactory
-    print('=== fetchProfile: Attempting to fetch doctor profile using token ===');
+    print(
+        '=== fetchProfile: Attempting to fetch doctor profile using token ===');
     try {
       final profileResult = await getIt<ApiService>().getDoctorById();
       if (profileResult['success'] == true &&
           profileResult['data'] is DoctorProfileModel) {
         final profile = profileResult['data'] as DoctorProfileModel;
-        print('=== fetchProfile: Successfully fetched fresh doctor profile ===');
+        print(
+            '=== fetchProfile: Successfully fetched fresh doctor profile ===');
         // NO CACHING - Return fresh data directly from server
         return profile;
       }
@@ -82,7 +84,8 @@ class ProfileRepository {
     try {
       final cached = await getCachedProfile();
       if (cached.firstName != null && cached.firstName!.isNotEmpty) {
-        print('=== fetchProfile: All endpoints failed, returning cached profile ===');
+        print(
+            '=== fetchProfile: All endpoints failed, returning cached profile ===');
         return cached;
       }
     } catch (_) {}
@@ -204,4 +207,3 @@ class ProfileRepository {
     throw Exception(result['error'] ?? 'فشل في تحميل قائمة التخصصات');
   }
 }
-
