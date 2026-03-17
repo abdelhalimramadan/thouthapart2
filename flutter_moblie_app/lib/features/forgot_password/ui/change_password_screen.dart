@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
 import '../../../core/widgets/app_text_button.dart';
-import '../../profile/ui/profile_screen.dart';
+import '../../home_screen/doctor_home/ui/doctor_profile.dart';
 
 import '../data/forgot_password_service.dart';
 
@@ -86,7 +86,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           onPressed: () {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (context) => const ProfileScreen(),
+                builder: (context) => const DoctorProfileScreen(),
 
               ),
             );
@@ -260,7 +260,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     onPressed: () {
                                       Navigator.of(context).pushReplacement(
                                         MaterialPageRoute(
-                                          builder: (context) => const ProfileScreen(),
+                                          builder: (context) => const DoctorProfileScreen(),
 
                                         ),
                                       );

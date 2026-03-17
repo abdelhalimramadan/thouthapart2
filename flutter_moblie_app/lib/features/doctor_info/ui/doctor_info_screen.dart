@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thotha_mobile_app/features/booking/ui/booking_confirmation_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/data/models/doctor_model.dart';
 import 'dart:ui';
-
-import '../../doctor/data/models/doctor_model.dart';
 
 class DoctorInfoContent extends StatefulWidget {
   final ScrollController controller;

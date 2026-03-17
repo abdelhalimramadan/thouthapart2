@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../../core/helpers/constants.dart';
 import '../../../../core/helpers/shared_pref_helper.dart';
 import '../../../../core/utils/notification_helper.dart';
-import '../../../requests/data/repos/case_request_repo.dart';
 import '../drawer/doctor_drawer_screen.dart';
 import '../../../notifications/ui/notifications_screen.dart';
 import '../../../home_screen/data/models/case_request_model.dart';
 import '../../../../core/di/dependency_injection.dart';
+import '../../../home_screen/data/repositories/case_request_repo.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DoctorHomeScreen
@@ -194,74 +194,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _CaseDetailsSheet(
-        req: req,
-        onAccept: () => _updateStatus(req, 'APPROVED'),
-        onReject: () => _updateStatus(req, 'REJECTED'),
-      ),
+      builder: (_) => _CaseDetailsSheet(req: req),
     );
-  }
-
-  Future<void> _updateStatus(CaseRequestModel req, String status) async {
-    Navigator.pop(context); // close the sheet
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
-
-    int doctorId = await SharedPrefHelper.getInt('doctor_id');
-    if (doctorId == 0) {
-      final s = await SharedPrefHelper.getString('doctor_id');
-      doctorId = int.tryParse(s ?? '') ?? 0;
-    }
-    if (doctorId == 0) {
-      doctorId = await _extractDoctorIdFromToken();
-    }
-
-    final result = await _caseRepo.updateAppointmentStatus(
-      req.id.toString(),
-      status,
-      doctorId.toString(),
-    );
-
-    if (!mounted) return;
-    Navigator.pop(context); // close loading dialog
-
-    if (result['success'] == true || result['statusCode'] == 200 || result['AppointmentId'] != null || result['Status'] != null || result['data'] != null || result['statusCode'] == 204) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            status == 'APPROVED' ? 'تم قبول الحالة بنجاح' : 'تم رفض الحالة',
-            style: const TextStyle(fontFamily: 'Cairo'),
-          ),
-          backgroundColor: status == 'APPROVED' ? Colors.green : Colors.orange,
-        ),
-      );
-      _fetchCaseRequests(); // refresh list
-    } else {
-      if (result['success'] == true || (result.containsKey('data') && result['error'] == null)) {
-           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
-               content: Text(
-                 status == 'APPROVED' ? 'تم قبول الحالة بنجاح' : 'تم رفض الحالة',
-                 style: const TextStyle(fontFamily: 'Cairo'),
-               ),
-               backgroundColor: status == 'APPROVED' ? Colors.green : Colors.orange,
-             ),
-           );
-           _fetchCaseRequests();
-      } else {
-        final error = result['error']?.toString() ?? 'حدث خطأ';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error, style: const TextStyle(fontFamily: 'Cairo')),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-      }
-    }
   }
 
   void _openNotifications() {
@@ -654,13 +588,7 @@ class _InfoChip extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 class _CaseDetailsSheet extends StatelessWidget {
   final CaseRequestModel req;
-  final VoidCallback onAccept;
-  final VoidCallback onReject;
-  const _CaseDetailsSheet({
-    required this.req,
-    required this.onAccept,
-    required this.onReject,
-  });
+  const _CaseDetailsSheet({required this.req});
 
   @override
   Widget build(BuildContext context) {
@@ -747,13 +675,13 @@ class _CaseDetailsSheet extends StatelessWidget {
                 child: _SheetButton(
                     label: 'رفض الحالة',
                     color: Colors.red.shade600,
-                    onTap: onReject)),
+                    onTap: () => Navigator.pop(context))),
             const SizedBox(width: 12),
             Expanded(
                 child: _SheetButton(
                     label: 'قبول الحالة',
                     color: Colors.green.shade600,
-                    onTap: onAccept)),
+                    onTap: () => Navigator.pop(context))),
           ]),
         ],
       ),

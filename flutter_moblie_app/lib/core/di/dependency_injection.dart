@@ -1,20 +1,18 @@
 import 'package:get_it/get_it.dart';
-import 'package:thotha_mobile_app/core/networking/api_service.dart';import 'package:thotha_mobile_app/features/doctor/data/repos/doctor_repository.dart';
-import 'package:thotha_mobile_app/features/requests/data/repos/case_request_repo.dart';
-import 'package:thotha_mobile_app/features/doctor/logic/doctor_cubit.dart';
+import 'package:thotha_mobile_app/core/networking/api_service.dart';
+import 'package:thotha_mobile_app/features/home_screen/data/repositories/doctor_repository.dart';
+import 'package:thotha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
+import 'package:thotha_mobile_app/features/home_screen/logic/doctor_cubit.dart';
 import 'package:thotha_mobile_app/features/notifications/data/repos/notification_repo.dart';
-import 'package:thotha_mobile_app/features/profile/data/repos/profile_repository.dart';
-import 'package:thotha_mobile_app/features/profile/logic/profile_cubit.dart';
-import 'package:thotha_mobile_app/features/requests/logic/my_requests_cubit.dart';
-import 'package:thotha_mobile_app/features/appointments/logic/appointments_cubit.dart';
-import 'package:thotha_mobile_app/features/appointments/data/appointments_service.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/repos/profile_repository.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/profile_cubit.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/my_requests_cubit.dart';
 
 final getIt = GetIt.instance;
 
 Future<void> setupGetIt() async {
   // Services
   getIt.registerLazySingleton<ApiService>(() => ApiService());
-  getIt.registerLazySingleton<AppointmentsService>(() => AppointmentsService(getIt()));
 
   // Repositories
   getIt.registerLazySingleton<DoctorRepository>(
@@ -39,8 +37,5 @@ Future<void> setupGetIt() async {
   );
   getIt.registerFactory<MyRequestsCubit>(
     () => MyRequestsCubit(getIt()),
-  );
-  getIt.registerFactory<AppointmentsCubit>(
-    () => AppointmentsCubit(getIt()),
   );
 }

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:thotha_mobile_app/core/utils/notification_helper.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
 import 'package:thotha_mobile_app/features/notifications/ui/notifications_screen.dart';
-import 'package:thotha_mobile_app/core/networking/api_service.dart';
-import 'package:thotha_mobile_app/features/appointments/data/models/appointment_model.dart';
 
 class DoctorBookingRecordsScreen extends StatefulWidget {
   const DoctorBookingRecordsScreen({super.key});
@@ -14,99 +12,8 @@ class DoctorBookingRecordsScreen extends StatefulWidget {
 
 class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final ApiService _apiService = ApiService();
-  List<AppointmentModel> _appointments = [];
-  bool _isLoading = true;
-  String? _error;
 
   @override
-  void initState() {
-    super.initState();
-    _fetchPendingAppointments();
-  }
-
-  Future<void> _fetchPendingAppointments() async {
-    if (!mounted) return;
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    final result = await _apiService.getPendingAppointments();
-
-    if (!mounted) return;
-
-    if (result['success'] == true) {
-      setState(() {
-        _appointments = result['data'] as List<AppointmentModel>;
-        _isLoading = false;
-      });
-    } else {
-      setState(() {
-        _error = result['error']?.toString() ?? 'فشل تحميل الحجوزات';
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _deleteAppointment(String appointmentId) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('حذف الحجز', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
-          content: const Text('هل أنت متأكد من حذف هذا الحجز نهائياً؟', style: TextStyle(fontFamily: 'Cairo')),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo', color: Colors.grey)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              ),
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('حذف', style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (confirmed != true || !mounted) return;
-
-    // Show loading
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
-
-    final result = await _apiService.deleteAppointment(appointmentId);
-
-    if (!mounted) return;
-    Navigator.of(context, rootNavigator: true).pop(); // Dismiss loading
-
-    if (result['success'] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تم حذف الحجز بنجاح', style: TextStyle(fontFamily: 'Cairo')),
-          backgroundColor: Colors.green,
-        ),
-      );
-      _fetchPendingAppointments();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['error']?.toString() ?? 'فشل حذف الحجز', style: const TextStyle(fontFamily: 'Cairo')),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final width = size.width;
@@ -156,14 +63,10 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
           ],
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.refresh, size: 24 * (size.width / 390)),
-            onPressed: _fetchPendingAppointments,
-          ),
           Stack(
             children: [
               IconButton(
-                icon: Icon(Icons.notifications_none, size: 24 * (size.width / 390)),
+                icon: Icon(Icons.notifications_none, size: 24 * (width / 390)),
                 onPressed: () {
                   NotificationHelper.hasUnreadNotifications = false;
                   Navigator.push(
@@ -179,8 +82,8 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
                 right: 8,
                 top: 10,
                 child: Container(
-                  width: 16 * (size.width / 390),
-                  height: 16 * (size.width / 390),
+                  width: 16 * (width / 390),
+                  height: 16 * (width / 390),
                   decoration: BoxDecoration(
                     color: colorScheme.error,
                     shape: BoxShape.circle,
@@ -380,7 +283,6 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
     required String profileImage,
     required double width,
     required double baseFontSize,
-    required VoidCallback onDelete,
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -464,19 +366,6 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            // Delete Action
-            IconButton(
-              onPressed: onDelete,
-              constraints: const BoxConstraints(),
-              padding: const EdgeInsets.all(8),
-              icon: const Icon(
-                Icons.delete_forever_outlined,
-                color: Colors.redAccent,
-                size: 22,
-              ),
-              tooltip: 'حذف الحجز',
-            ),
           ],
         ),
       ),
@@ -485,32 +374,6 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
 
   Widget _buildMainContent(BuildContext context, double width, double height, double baseFontSize) {
     final theme = Theme.of(context);
-
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 60, color: Colors.redAccent),
-            const SizedBox(height: 16),
-            Text(
-              _error!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _fetchPendingAppointments,
-              child: const Text('إعادة المحاولة', style: TextStyle(fontFamily: 'Cairo')),
-            ),
-          ],
-        ),
-      );
-    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -521,7 +384,7 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Text(
-              'الحجوزات القادمة',
+              'سجل الحجوزات',
               textAlign: TextAlign.right,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
@@ -532,42 +395,61 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
             ),
           ),
           const SizedBox(height: 12),
-          if (_appointments.isEmpty)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 100),
-                child: Column(
-                  children: [
-                    Icon(Icons.calendar_today_outlined, size: 80, color: Colors.grey[300]),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'لا توجد حجوزات منتظرة حالياً',
-                      style: TextStyle(fontFamily: 'Cairo', color: Colors.grey, fontSize: 18),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            ..._appointments.map((apt) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildBookingCard(
-                  context: context,
-                  patientName: apt.patientFullName,
-                  phone: apt.patientPhoneNumber,
-                  service: apt.status ?? 'حجز قادم',
-                  time: '', // The model might not have time field explicitly, using it as status
-                  date: apt.createdAt?.split('T').first ?? '',
-                  status: apt.displayStatus,
-                  statusColor: apt.status?.toLowerCase() == 'confirmed' ? Colors.greenAccent : Colors.orangeAccent,
-                  profileImage: 'assets/images/zozjpg.jpg', // Placeholder image
-                  width: width,
-                  baseFontSize: baseFontSize,
-                  onDelete: () => _deleteAppointment(apt.id ?? ''),
-                ),
-              );
-            }).toList(),
+          _buildBookingCard(
+            context: context,
+            patientName: 'زياد جمال',
+            phone: '01012345678',
+            service: 'تقويم اسنان',
+            time: '11:30 صباحا',
+            date: '2025-11-29',
+            status: 'مكتمل',
+            statusColor: Colors.greenAccent,
+            profileImage: 'assets/images/zozjpg.jpg',
+            width: width,
+            baseFontSize: baseFontSize,
+          ),
+          const SizedBox(height: 12),
+          _buildBookingCard(
+            context: context,
+            patientName: 'عبدالحليم رمضان',
+            phone: '01098765432',
+            service: 'حشو عصب',
+            time: '02:45 مساءً',
+            date: '2025-11-30',
+            status: 'انتظار',
+            statusColor: Colors.orangeAccent,
+            profileImage: 'assets/images/halim.jpg',
+            width: width,
+            baseFontSize: baseFontSize,
+          ),
+          const SizedBox(height: 12),
+          _buildBookingCard(
+            context: context,
+            patientName: 'محمد اشرف',
+            phone: '01156781234',
+            service: 'تنظيف أسنان',
+            time: '10:15 صباحا',
+            date: '2025-12-01',
+            status: 'ملغي',
+            statusColor: Colors.redAccent,
+            profileImage: 'assets/images/kateb.jpg',
+            width: width,
+            baseFontSize: baseFontSize,
+          ),
+          const SizedBox(height: 12),
+          _buildBookingCard(
+            context: context,
+            patientName: 'جوزيف جورح',
+            phone: '01234567890',
+            service: 'تركيب كوبري',
+            time: '04:30 مساءً',
+            date: '2025-12-02',
+            status: 'مكتمل',
+            statusColor: Colors.greenAccent,
+            profileImage: 'assets/images/joseoh.jpeg',
+            width: width,
+            baseFontSize: baseFontSize,
+          ),
           SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
         ],
       ),

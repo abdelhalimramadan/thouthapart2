@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thotha_mobile_app/core/theming/theme_provider.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_booking_records_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/my_requests_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_profile.dart';
 import 'package:thotha_mobile_app/features/login/ui/login_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
@@ -11,13 +13,11 @@ import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/doctor_next_booking_screen.dart';
 
+import 'package:thotha_mobile_app/features/home_screen/ui/secondary_home_screen.dart';
 import 'package:thotha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
 import 'package:thotha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
 import 'package:thotha_mobile_app/features/about_app/ui/about_app_screen.dart';
 import 'package:thotha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart';
-
-import '../../../doctor/ui/secondary_home_screen.dart';
-import '../../../profile/ui/profile_screen.dart';
 
 class DoctorDrawer extends StatefulWidget {
   const DoctorDrawer({super.key});
@@ -514,7 +514,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           settings: const RouteSettings(name: 'doctor-profile'),
-                          builder: (context) => const ProfileScreen(),
+                          builder: (context) => const DoctorProfileScreen(),
                         ),
                       );
                     },
@@ -554,7 +554,23 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       );
                     },
                   ),
-
+                  _menuItem(
+                    context,
+                    title: 'طلباتي',
+                    icon: Icons.assignment_outlined,
+                    isSelected: currentIndex == 5,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          settings: const RouteSettings(name: 'doctor-requests'),
+                          builder: (context) => const MyRequestsScreen(),
+                        ),
+                      );
+                    },
+                  ),
                   Consumer<ThemeProvider>(
                     builder: (context, themeProvider, _) {
                       return _toggleMenuItem(

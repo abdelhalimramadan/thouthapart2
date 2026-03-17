@@ -1,6 +1,5 @@
 class CaseRequestModel {
   final int? id;
-  final int? doctorId;
   final String doctorFirstName;
   final String doctorLastName;
   final String doctorPhoneNumber;
@@ -12,7 +11,6 @@ class CaseRequestModel {
 
   CaseRequestModel({
     this.id,
-    this.doctorId,
     required this.doctorFirstName,
     required this.doctorLastName,
     required this.doctorPhoneNumber,
@@ -50,10 +48,8 @@ class CaseRequestModel {
   }
 
   factory CaseRequestModel.fromJson(Map<String, dynamic> json) {
-    final did = json['doctorId'] ?? json['doctor_id'];
     return CaseRequestModel(
       id: json['id'] as int?,
-      doctorId: did is int ? did : (int.tryParse(did?.toString() ?? '')),
       doctorFirstName: json['doctorFirstName'] as String? ?? '',
       doctorLastName: json['doctorLastName'] as String? ?? '',
       doctorPhoneNumber: json['doctorPhoneNumber'] as String? ?? '',

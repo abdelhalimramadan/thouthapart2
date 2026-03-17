@@ -1,4 +1,4 @@
-
+import 'package:thotha_mobile_app/features/appointments/data/appointments_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -28,7 +28,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   }
 
   Future<void> _loadAppointments() async {
-    final List<Map<String, dynamic>> savedAppointments = [];
+    final savedAppointments = await AppointmentsService().getAppointments();
 
     final processedAppointments = savedAppointments.map((appt) {
       Color statusColor = Colors.grey;
