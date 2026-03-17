@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
@@ -584,14 +582,6 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-            color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
-          ),
-        ),
-      ),
-      body: _buildMainContent(context, width, height, baseFontSize),
     );
   }
 }
