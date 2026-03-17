@@ -21,8 +21,11 @@ class CaseRequestRepo {
   Future<Map<String, dynamic>> updateCaseRequest(
       int requestId, CaseRequestBody body) async {
     try {
-      final response =
-          await _apiService.updateCaseRequest(requestId, body.toJson());
+      final response = await _apiService.editRequest(
+        requestId,
+        body.description,
+        body.dateTime,
+      );
       return response;
     } catch (e) {
       return {

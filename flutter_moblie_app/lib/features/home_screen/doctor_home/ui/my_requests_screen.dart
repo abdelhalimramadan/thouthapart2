@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thotha_mobile_app/core/helpers/constants.dart';
+import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/my_requests_cubit.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/my_requests_state.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/add_case_request_screen.dart';
 
 // ── Entry point ──────────────────────────────────────────────────────────────
 
@@ -164,17 +167,24 @@ class _MyRequestsView extends StatelessWidget {
 
     return RefreshIndicator(
       onRefresh: () => context.read<MyRequestsCubit>().loadRequests(),
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: requests.length,
-        itemBuilder: (_, index) => _buildRequestCard(
-          context,
-          requests[index],
-          width,
-          baseFontSize,
-          isDark,
-        ),
+      child: FutureBuilder<bool>(
+        future: _isUserLoggedIn(),
+        builder: (context, snapshot) {
+          final isLoggedIn = snapshot.data ?? false;
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: requests.length,
+            itemBuilder: (_, index) => _buildRequestCard(
+              context,
+              requests[index],
+              width,
+              baseFontSize,
+              isDark,
+              isLoggedIn: isLoggedIn,
+            ),
+          );
+        },
       ),
     );
   }
@@ -240,8 +250,7 @@ class _MyRequestsView extends StatelessWidget {
                     vertical: 12,
                   ),
                 ),
-                onPressed: () =>
-                    context.read<MyRequestsCubit>().loadRequests(),
+                onPressed: () => context.read<MyRequestsCubit>().loadRequests(),
                 icon: const Icon(Icons.refresh, size: 18),
                 label: const Text(
                   'تحديث',
@@ -327,8 +336,7 @@ class _MyRequestsView extends StatelessWidget {
                     vertical: 12,
                   ),
                 ),
-                onPressed: () =>
-                    context.read<MyRequestsCubit>().loadRequests(),
+                onPressed: () => context.read<MyRequestsCubit>().loadRequests(),
                 icon: const Icon(Icons.refresh, size: 18),
                 label: const Text(
                   'إعادة المحاولة',
@@ -351,8 +359,9 @@ class _MyRequestsView extends StatelessWidget {
     CaseRequestModel req,
     double width,
     double baseFontSize,
-    bool isDark,
-  ) {
+    bool isDark, {
+    bool isLoggedIn = false,
+  }) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -385,8 +394,7 @@ class _MyRequestsView extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color:
-                              ColorsManager.mainBlue.withValues(alpha: 0.1),
+                          color: ColorsManager.mainBlue.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -400,20 +408,35 @@ class _MyRequestsView extends StatelessWidget {
                         ),
                       ),
                     const SizedBox(width: 8),
-                    Material(
-                      color: Colors.red.withValues(alpha: 0.08),
-                      shape: const CircleBorder(),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.delete_outline_rounded,
-                          color: Colors.red,
-                          size: 20,
+                    if (isLoggedIn) ...[
+                      Material(
+                        color: Colors.blue.withValues(alpha: 0.08),
+                        shape: const CircleBorder(),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.mode_edit_outline_rounded,
+                            color: Colors.blue,
+                            size: 20,
+                          ),
+                          tooltip: 'تعديل الطلب',
+                          onPressed: () => _navigateToEditRequest(context, req),
                         ),
-                        tooltip: 'حذف الطلب',
-                        onPressed: () =>
-                            _confirmAndDelete(context, req),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Material(
+                        color: Colors.red.withValues(alpha: 0.08),
+                        shape: const CircleBorder(),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.delete_outline_rounded,
+                            color: Colors.red,
+                            size: 20,
+                          ),
+                          tooltip: 'حذف الطلب',
+                          onPressed: () => _confirmAndDelete(context, req),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ],
@@ -545,8 +568,7 @@ class _MyRequestsView extends StatelessWidget {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text(
             'حذف الطلب',
-            style:
-                TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+            style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
           ),
           content: const Text(
             'هل أنت متأكد من حذف هذا الطلب؟',
@@ -590,5 +612,29 @@ class _MyRequestsView extends StatelessWidget {
     await cubit.deleteRequest(req);
 
     if (context.mounted) Navigator.pop(context); // dismiss the overlay
+  }
+
+  // ── Helper methods ────────────────────────────────────────────────────────
+
+  /// Checks if the user is currently logged in by checking for a token
+  Future<bool> _isUserLoggedIn() async {
+    final token =
+        await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+    return token != null && token.isNotEmpty;
+  }
+
+  /// Navigates to the edit screen with the request data
+  void _navigateToEditRequest(
+    BuildContext context,
+    CaseRequestModel request,
+  ) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddCaseRequestScreen(
+          requestToEdit: request,
+        ),
+      ),
+    );
   }
 }

@@ -43,4 +43,10 @@ class ApiConstants {
   static const String deleteRequest = '/api/request/deleteRequest';
   static const String getRequestsByDoctorId =
       '/api/request/getRequestsByDoctorId';
+  static const String editRequest = '/api/request/editRequest';
+
+  // ── Appointments ──────────────────────────────────────────────
+  static const String createAppointment = '/api/appointment/createAppointment';
+  static const String pendingAppointments =
+      '/api/appointment/pendingAppointments';
 }

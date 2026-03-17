@@ -9,11 +9,17 @@ import 'package:thotha_mobile_app/core/theming/styles.dart';
 import 'package:thotha_mobile_app/core/widgets/app_text_button.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_body.dart';
+import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
 
 class AddCaseRequestScreen extends StatefulWidget {
   final String? initialSpecialization;
-  const AddCaseRequestScreen({super.key, this.initialSpecialization});
+  final CaseRequestModel? requestToEdit;
+  const AddCaseRequestScreen({
+    super.key,
+    this.initialSpecialization,
+    this.requestToEdit,
+  });
 
   @override
   State<AddCaseRequestScreen> createState() => _AddCaseRequestScreenState();
@@ -24,19 +30,25 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
   final TextEditingController _descriptionController = TextEditingController();
 
   // Doctor info loaded from SharedPreferences
-  String _firstName    = '';
-  String _lastName     = '';
-  String _category     = '';
-  bool   _isLoadingInfo = true;
+  String _firstName = '';
+  String _lastName = '';
+  String _category = '';
+  bool _isLoadingInfo = true;
 
   // Selected date & time
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
 
+  // Edit mode flag
+  bool get _isEditMode => widget.requestToEdit != null;
+
   @override
   void initState() {
     super.initState();
     _loadDoctorInfo();
+    if (_isEditMode) {
+      _prefillFormForEditing();
+    }
   }
 
   @override
@@ -45,17 +57,32 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
     super.dispose();
   }
 
+  /// If editing, pre-fill the form with the request's data
+  void _prefillFormForEditing() {
+    final req = widget.requestToEdit;
+    if (req != null) {
+      _descriptionController.text = req.description;
+      try {
+        final dt = DateTime.parse(req.dateTime);
+        _selectedDate = DateTime(dt.year, dt.month, dt.day);
+        _selectedTime = TimeOfDay(hour: dt.hour, minute: dt.minute);
+      } catch (_) {
+        // If parsing fails, keep dates as null
+      }
+    }
+  }
+
   Future<void> _loadDoctorInfo() async {
     final firstName = await SharedPrefHelper.getString('first_name') ?? '';
-    final lastName  = await SharedPrefHelper.getString('last_name')  ?? '';
-    final category  = await SharedPrefHelper.getString('category')   ?? '';
+    final lastName = await SharedPrefHelper.getString('last_name') ?? '';
+    final category = await SharedPrefHelper.getString('category') ?? '';
 
     // fallback to initialSpecialization if SharedPref empty
     if (mounted) {
       setState(() {
-        _firstName    = firstName;
-        _lastName     = lastName;
-        _category     = category.isNotEmpty
+        _firstName = firstName;
+        _lastName = lastName;
+        _category = category.isNotEmpty
             ? category
             : (widget.initialSpecialization ?? '');
         _isLoadingInfo = false;
@@ -143,17 +170,21 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         dateTime: _dateTimeIso,
       );
 
-      final repo   = getIt<CaseRequestRepo>();
-      final result = await repo.createCaseRequest(body);
+      final repo = getIt<CaseRequestRepo>();
+      final result = _isEditMode
+          ? await repo.updateCaseRequest(widget.requestToEdit!.id ?? 0, body)
+          : await repo.createCaseRequest(body);
 
       if (mounted) Navigator.pop(context);
 
       if (result['success'] == true) {
         if (mounted) {
+          final message =
+              _isEditMode ? 'تم تحديث الطلب بنجاح!' : 'تم نشر الطلب بنجاح!';
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('تم نشر الطلب بنجاح!',
-                  style: TextStyle(fontFamily: 'Cairo')),
+            SnackBar(
+              content:
+                  Text(message, style: const TextStyle(fontFamily: 'Cairo')),
               backgroundColor: Colors.green,
             ),
           );
@@ -163,7 +194,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['error'] ?? 'فشل في نشر الطلب',
+              content: Text(result['error'] ?? 'فشل في معالجة الطلب',
                   style: const TextStyle(fontFamily: 'Cairo')),
               backgroundColor: Colors.red,
             ),
@@ -190,8 +221,8 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
       builder: (ctx) => Directionality(
         textDirection: ui.TextDirection.rtl,
         child: AlertDialog(
-          title: Text('تسجيل الدخول مطلوب',
-              style: TextStyles.font18DarkBlueBold),
+          title:
+              Text('تسجيل الدخول مطلوب', style: TextStyles.font18DarkBlueBold),
           content: Text(
             'يجب عليك تسجيل الدخول أولاً لتتمكن من نشر طلب حالة.',
             style: TextStyles.font14GrayRegular,
@@ -206,8 +237,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                 Navigator.of(ctx).pop();
                 Navigator.of(context).pushNamed(Routes.loginScreen);
               },
-              child: Text('تسجيل الدخول',
-                  style: TextStyles.font14BlueSemiBold),
+              child: Text('تسجيل الدخول', style: TextStyles.font14BlueSemiBold),
             ),
           ],
         ),
@@ -219,14 +249,14 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width        = MediaQuery.of(context).size.width;
+    final width = MediaQuery.of(context).size.width;
     final baseFontSize = width * 0.04;
-    final isDark       = Theme.of(context).brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'إضافة طلب حالة',
+          _isEditMode ? 'تعديل الطلب' : 'إضافة طلب حالة',
           style: TextStyles.font18DarkBlueBold.copyWith(
             fontFamily: 'Cairo',
             fontSize: baseFontSize * 1.125,
@@ -236,8 +266,8 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         centerTitle: true,
         backgroundColor: isDark ? const Color(0xFF2D2D2D) : Colors.white,
         elevation: 0,
-        iconTheme:
-            IconThemeData(color: isDark ? Colors.white : ColorsManager.darkBlue),
+        iconTheme: IconThemeData(
+            color: isDark ? Colors.white : ColorsManager.darkBlue),
       ),
       backgroundColor:
           isDark ? const Color(0xFF1E1E1E) : ColorsManager.offWhite,
@@ -308,7 +338,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
 
                     // ── Publish Button ────────────────────────────────
                     AppTextButton(
-                      buttonText: 'نشر الطلب',
+                      buttonText: _isEditMode ? 'تحديث الطلب' : 'نشر الطلب',
                       textStyle: TextStyles.font16WhiteSemiBold.copyWith(
                         fontFamily: 'Cairo',
                         fontSize: baseFontSize,
@@ -423,10 +453,13 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
+                color: isDark
+                    ? const Color(0xFF2D2D2D)
+                    : ColorsManager.moreLighterGray,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isDark ? Colors.grey.shade700 : ColorsManager.lighterGray,
+                  color:
+                      isDark ? Colors.grey.shade700 : ColorsManager.lighterGray,
                   width: 1.3,
                 ),
               ),
@@ -434,7 +467,8 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                 children: [
                   Icon(Icons.calendar_today_outlined,
                       size: 18,
-                      color: isDark ? Colors.grey[400] : ColorsManager.mainBlue),
+                      color:
+                          isDark ? Colors.grey[400] : ColorsManager.mainBlue),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -461,10 +495,13 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
+                color: isDark
+                    ? const Color(0xFF2D2D2D)
+                    : ColorsManager.moreLighterGray,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isDark ? Colors.grey.shade700 : ColorsManager.lighterGray,
+                  color:
+                      isDark ? Colors.grey.shade700 : ColorsManager.lighterGray,
                   width: 1.3,
                 ),
               ),
@@ -472,7 +509,8 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                 children: [
                   Icon(Icons.access_time_outlined,
                       size: 18,
-                      color: isDark ? Colors.grey[400] : ColorsManager.mainBlue),
+                      color:
+                          isDark ? Colors.grey[400] : ColorsManager.mainBlue),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -527,7 +565,8 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
       ),
       prefixIcon: Icon(icon,
           color: isDark ? Colors.grey[400] : ColorsManager.mainBlue, size: 22),
-      fillColor: isDark ? const Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
+      fillColor:
+          isDark ? const Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
       filled: true,
       enabledBorder: OutlineInputBorder(
         borderSide: BorderSide(
@@ -536,8 +575,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         borderRadius: BorderRadius.circular(16),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide:
-            const BorderSide(color: ColorsManager.mainBlue, width: 1.3),
+        borderSide: const BorderSide(color: ColorsManager.mainBlue, width: 1.3),
         borderRadius: BorderRadius.circular(16),
       ),
       errorBorder: OutlineInputBorder(

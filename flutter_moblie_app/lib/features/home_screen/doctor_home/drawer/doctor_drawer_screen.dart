@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thotha_mobile_app/core/theming/theme_provider.dart';
@@ -11,7 +13,7 @@ import 'package:dio/dio.dart';
 import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/doctor_next_booking_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/doctor_next_booking_screen.dart' hide Colors;
 
 import 'package:thotha_mobile_app/features/home_screen/ui/secondary_home_screen.dart';
 import 'package:thotha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';

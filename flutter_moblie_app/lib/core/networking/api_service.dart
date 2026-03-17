@@ -248,6 +248,37 @@ class ApiService {
     }
   }
 
+  /// PUT /api/request/editRequest/{requestId}
+  /// Body: { description, dateTime }
+  Future<Map<String, dynamic>> editRequest(
+    int requestId,
+    String description,
+    String dateTime,
+  ) async {
+    try {
+      await DioFactory.addDioHeaders();
+
+      final body = {
+        'description': description,
+        'dateTime': dateTime,
+      };
+
+      final res = await _dio.put(
+        '${ApiConstants.editRequest}/$requestId',
+        data: body,
+      );
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        return _okData(res.data)..['message'] = 'تم تحديث الطلب بنجاح';
+      }
+      return _fail('فشل في تحديث الطلب', code: res.statusCode);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
   Future<Map<String, dynamic>> getRequestById(int id) async {
     try {
       final res = await _dio.get('${ApiConstants.getRequestById}/$id');
@@ -371,7 +402,7 @@ class ApiService {
           if (res.statusCode == 200 && res.data is Map) {
             Map<String, dynamic>? jsonData;
             final payload = res.data;
-            
+
             if (payload['doctor'] is Map) {
               jsonData = Map<String, dynamic>.from(payload['doctor'] as Map);
             } else if (payload['data'] is Map) {
@@ -383,7 +414,8 @@ class ApiService {
             if (jsonData != null) {
               print('=== getDoctorById: Raw JSON (no params) = $jsonData ===');
               final parsed = DoctorProfileModel.fromJson(jsonData);
-              print('=== getDoctorById: Parsed = id:${parsed.id}, phone:${parsed.phone}, faculty:${parsed.faculty}, year:${parsed.year}, category:${parsed.category} ===');
+              print(
+                  '=== getDoctorById: Parsed = id:${parsed.id}, phone:${parsed.phone}, faculty:${parsed.faculty}, year:${parsed.year}, category:${parsed.category} ===');
               return _okData(parsed);
             }
           }
@@ -425,13 +457,16 @@ class ApiService {
             }
 
             if (jsonData == null) {
-              return _fail('صيغة بيانات الطبيب غير صحيحة', code: res.statusCode);
+              return _fail('صيغة بيانات الطبيب غير صحيحة',
+                  code: res.statusCode);
             }
 
             print('=== getDoctorById: Raw JSON (with params) = $jsonData ===');
             final parsed = DoctorProfileModel.fromJson(jsonData);
-            print('=== getDoctorById: Parsed = id:${parsed.id}, phone:${parsed.phone}, faculty:${parsed.faculty}, year:${parsed.year}, category:${parsed.category} ===');
-            final parsedId = parsed.id ?? _doctorIdFromJson(jsonData) ?? doctorId;
+            print(
+                '=== getDoctorById: Parsed = id:${parsed.id}, phone:${parsed.phone}, faculty:${parsed.faculty}, year:${parsed.year}, category:${parsed.category} ===');
+            final parsedId =
+                parsed.id ?? _doctorIdFromJson(jsonData) ?? doctorId;
             return _okData(parsed.copyWith(id: parsedId));
           } on DioException catch (e) {
             final code = e.response?.statusCode;
@@ -511,6 +546,65 @@ class ApiService {
           return _fail('ممنوع الوصول، تأكد من صلاحياتك', code: code);
         return _fail(_dioError(postError), code: code);
       }
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
+  // ── Appointments ─────────────────────────────────────────────────────────
+
+  /// Create an appointment for a case request
+  /// POST /api/appointment/createAppointment/{requestId}
+  /// Body: { patientFirstName, patientLastName, patientPhoneNumber }
+  Future<Map<String, dynamic>> createAppointment(
+    int requestId,
+    String patientFirstName,
+    String patientLastName,
+    String patientPhoneNumber,
+  ) async {
+    try {
+      await DioFactory.addDioHeaders();
+
+      final body = {
+        'patientFirstName': patientFirstName,
+        'patientLastName': patientLastName,
+        'patientPhoneNumber': patientPhoneNumber,
+      };
+
+      final res = await _dio.post(
+        '${ApiConstants.createAppointment}/$requestId',
+        data: body,
+      );
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        return _okData(res.data)..['message'] = 'تم حجز الموعد بنجاح';
+      }
+      return _fail('فشل في حجز الموعد', code: res.statusCode);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
+  /// GET /api/appointment/pendingAppointments
+  /// Requires: Bearer JWT_TOKEN
+  Future<Map<String, dynamic>> getPendingAppointments() async {
+    try {
+      await DioFactory.addDioHeaders();
+
+      final res = await _dio.get(ApiConstants.pendingAppointments);
+
+      if (res.statusCode == 200 && res.data is List) {
+        return _okList(
+          (res.data as List)
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList(),
+        );
+      }
+      return _fail('فشل في تحميل الحجوزات', code: res.statusCode);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
       return _fail('حدث خطأ غير متوقع');
     }

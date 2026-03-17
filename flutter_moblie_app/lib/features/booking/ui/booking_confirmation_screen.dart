@@ -1,6 +1,7 @@
-import 'package:thotha_mobile_app/features/booking/ui/otp_verification_dialog.dart';
 import 'package:thotha_mobile_app/features/appointments/data/appointments_service.dart';
-import 'package:thotha_mobile_app/core/networking/otp_service.dart';
+import 'package:thotha_mobile_app/core/networking/api_service.dart';
+import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
+import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
@@ -30,9 +31,49 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final OtpService _otpService = OtpService();
+
+  // Appointment-related variables
+  late ApiService _apiService;
+  List<CaseRequestModel> _requests = [];
+  CaseRequestModel? _selectedRequest;
+  bool _isLoadingRequests = true;
   bool _isLoading = false;
-  bool _isSendingOtp = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiService = getIt<ApiService>();
+    _fetchRequests();
+  }
+
+  Future<void> _fetchRequests() async {
+    try {
+      final result = await _apiService.getAllRequests();
+
+      if (result['success'] == true && result['data'] != null) {
+        final requests = (result['data'] as List)
+            .map((e) => CaseRequestModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+
+        setState(() {
+          _requests = requests;
+          _isLoadingRequests = false;
+          if (requests.isNotEmpty) {
+            _selectedRequest = requests.first;
+          }
+        });
+      } else {
+        setState(() {
+          _isLoadingRequests = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching requests: $e');
+      setState(() {
+        _isLoadingRequests = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -42,62 +83,49 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
     super.dispose();
   }
 
-  void _submitForm() async {
+  void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isSendingOtp = true;
-      });
-
-      final otpResult = await _otpService.sendOtp(_phoneController.text);
-
-      setState(() {
-        _isSendingOtp = false;
-      });
-
-      if (otpResult['success']) {
-        if (!mounted) return;
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => OtpVerificationDialog(
-            contactInfo: _phoneController.text,
-            onVerified: (code) {
-              _completeBooking();
-            },
-            onResend: (phoneNumber) {
-              // ignore
-            },
-          ),
-        );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(otpResult['error'] ?? 'فشل إرسال رمز التحقق',
-                style: const TextStyle(fontFamily: 'Cairo')),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
+      _completeBooking();
     }
   }
 
-  void _completeBooking() {
+  void _completeBooking() async {
+    if (_selectedRequest == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('يرجى تحديد طلب حالة أولاً',
+              style: TextStyle(fontFamily: 'Cairo')),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    if (_selectedRequest!.id == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('معرّف الطلب غير صحيح',
+              style: TextStyle(fontFamily: 'Cairo')),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
-    Future.delayed(const Duration(seconds: 2), () async {
-      final appointment = {
-        'doctorName': widget.doctorName,
-        'specialty': widget.specialty,
-        'date': widget.date,
-        'time': widget.time,
-        'status': 'مؤكد',
-      };
-
-      await AppointmentsService().addAppointment(appointment);
+    try {
+      // Call the API to create appointment
+      final result = await _apiService.createAppointment(
+        _selectedRequest!.id!,
+        _firstNameController.text,
+        _lastNameController.text,
+        _phoneController.text,
+      );
 
       if (!mounted) return;
 
@@ -105,17 +133,20 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
         _isLoading = false;
       });
 
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          titlePadding: const EdgeInsets.only(top: 20, left: 20, right: 20),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          actionsPadding:
-              const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+      if (result['success'] == true) {
+        // Success - show confirmation dialog
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            titlePadding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            actionsPadding:
+                const EdgeInsets.only(bottom: 16, left: 16, right: 16),
             title: Text(
               'تم الحجز بنجاح',
               textAlign: TextAlign.center,
@@ -152,35 +183,64 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 ),
               ],
             ),
-          actions: [
-            SizedBox(
-              width: 140.w,
-              height: 40.h,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorsManager.mainBlue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.r),
+            actions: [
+              SizedBox(
+                width: 140.w,
+                height: 40.h,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorsManager.mainBlue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                  child: Text(
+                    'حسناً',
+                    style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 14.sp,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700),
                   ),
                 ),
-                child: Text(
-                  'حسناً',
-                  style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 14.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700),
-                ),
               ),
+            ],
+          ),
+        );
+      } else {
+        // Error
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['message'] ?? 'فشل في إنشاء الموعد',
+              style: const TextStyle(fontFamily: 'Cairo'),
             ),
-          ],
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'حدث خطأ: ${e.toString()}',
+            style: const TextStyle(fontFamily: 'Cairo'),
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
         ),
       );
-    });
+    }
   }
 
   @override
@@ -302,11 +362,14 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 12),
-                                    _buildInfoRow('الطبيب:', widget.doctorName, 14.sp),
+                                    _buildInfoRow(
+                                        'الطبيب:', widget.doctorName, 14.sp),
                                     const SizedBox(height: 8),
-                                    _buildInfoRow('التخصص:', widget.specialty, 14.sp),
+                                    _buildInfoRow(
+                                        'التخصص:', widget.specialty, 14.sp),
                                     const SizedBox(height: 8),
-                                    _buildInfoRow('التاريخ:', widget.date, 14.sp),
+                                    _buildInfoRow(
+                                        'التاريخ:', widget.date, 14.sp),
                                     const SizedBox(height: 8),
                                     _buildInfoRow('الوقت:', widget.time, 14.sp),
                                   ],
@@ -322,6 +385,83 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+                            const SizedBox(height: 16),
+                            // Request Selection Dropdown
+                            if (_isLoadingRequests)
+                              Container(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                child: const Center(
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else if (_requests.isEmpty)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 16),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.red),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'لا توجد طلبات حالات. يرجى إنشاء طلب حالة أولاً',
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 14.sp,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              )
+                            else
+                              DropdownButtonFormField<CaseRequestModel>(
+                                value: _selectedRequest,
+                                hint: Text(
+                                  'اختر طلب حالة',
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 14.sp,
+                                  ),
+                                ),
+                                style: const TextStyle(fontFamily: 'Cairo'),
+                                items: _requests.map((request) {
+                                  return DropdownMenuItem<CaseRequestModel>(
+                                    value: request,
+                                    child: Text(
+                                      '${request.categoryName} - ${request.formattedDate}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontSize: 13.sp,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (request) {
+                                  setState(() {
+                                    _selectedRequest = request;
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(Icons.description_outlined,
+                                      color: theme.iconTheme.color),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null) {
+                                    return 'يرجى تحديد طلب حالة';
+                                  }
+                                  return null;
+                                },
+                              ),
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _firstNameController,
@@ -423,60 +563,33 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                               height: 48,
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: (_isLoading || _isSendingOtp)
-                                    ? null
-                                    : () => _submitForm(),
+                                onPressed:
+                                    _isLoading ? null : () => _submitForm(),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: colorScheme.primary,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.r),
                                   ),
                                 ),
-                                child: _isSendingOtp
-                                    ? Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Text(
-                                            'جاري إرسال رمز التحقق...',
-                                            style: theme.textTheme.titleMedium
-                                                ?.copyWith(
-                                              fontFamily: 'Cairo',
-                                              fontSize: 14.sp,
-                                              color: colorScheme.onPrimary,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
                                       )
-                                    : _isLoading
-                                        ? const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Colors.white,
-                                            ),
-                                          )
-                                        : Text(
-                                            'تأكيد الحجز',
-                                            style: theme.textTheme.titleMedium
-                                                ?.copyWith(
-                                              fontFamily: 'Cairo',
-                                              fontSize: 16.sp,
-                                              color: colorScheme.onPrimary,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
+                                    : Text(
+                                        'تأكيد الحجز',
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                          fontFamily: 'Cairo',
+                                          fontSize: 16.sp,
+                                          color: colorScheme.onPrimary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                               ),
                             ),
                           ],
@@ -500,19 +613,19 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
         Text(
           label,
           style: theme.textTheme.bodyMedium?.copyWith(
-                fontFamily: 'Cairo',
-                fontSize: fontSize,
-                color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-              ),
+            fontFamily: 'Cairo',
+            fontSize: fontSize,
+            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+          ),
         ),
         const SizedBox(width: 8),
         Text(
           value,
           style: theme.textTheme.bodyLarge?.copyWith(
-                fontFamily: 'Cairo',
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-              ),
+            fontFamily: 'Cairo',
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );

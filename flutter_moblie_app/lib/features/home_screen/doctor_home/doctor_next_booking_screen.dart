@@ -1,11 +1,62 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thotha_mobile_app/core/networking/api_service.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
 import 'package:thotha_mobile_app/features/notifications/ui/notifications_screen.dart';
 
-class DoctorNextBookingScreen extends StatelessWidget {
+class DoctorNextBookingScreen extends StatefulWidget {
   DoctorNextBookingScreen({super.key});
 
+  @override
+  State<DoctorNextBookingScreen> createState() => _DoctorNextBookingScreenState();
+}
+
+class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
+  late ApiService _apiService;
+  List<Map<String, dynamic>> _bookings = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _apiService = getIt<ApiService>();
+    _fetchPendingAppointments();
+  }
+
+  Future<void> _fetchPendingAppointments() async {
+    try {
+      final result = await _apiService.getPendingAppointments();
+
+      if (mounted) {
+        if (result['success'] == true && result['data'] != null) {
+          setState(() {
+            _bookings = List<Map<String, dynamic>>.from(result['data'] as List);
+            _isLoading = false;
+            _errorMessage = null;
+          });
+        } else {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = result['error'] ?? 'فشل في تحميل الحجوزات';
+            _bookings = [];
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'حدث خطأ: ${e.toString()}';
+          _bookings = [];
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +153,37 @@ class DoctorNextBookingScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: _buildMainContent(context, width, height, baseFontSize),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Colors.red[300],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontFamily: 'Cairo',
+                          color: Colors.red,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _fetchPendingAppointments,
+                        child: const Text('إعادة محاولة', style: TextStyle(fontFamily: 'Cairo')),
+                      ),
+                    ],
+                  ),
+                )
+              : _buildMainContent(context, width, height, baseFontSize),
     );
   }
 
@@ -431,85 +512,86 @@ class DoctorNextBookingScreen extends StatelessWidget {
   Widget _buildMainContent(BuildContext context, double width, double height, double baseFontSize) {
     final theme = Theme.of(context);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          // Header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Text(
-              'حجوزاتي القادمة',
-              textAlign: TextAlign.right,
-              style: theme.textTheme.titleLarge?.copyWith(
+    if (_bookings.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.calendar_today_outlined,
+              size: 64,
+              color: Colors.grey[300],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'لا توجد حجوزات قادمة',
+              style: TextStyle(
                 fontFamily: 'Cairo',
-                fontWeight: FontWeight.w700,
-                fontSize: baseFontSize * 1.5,
-                height: 1.5,
+                fontSize: baseFontSize * 1.125,
+                color: Colors.grey[600],
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          _buildBookingCard(
-            context: context,
-            patientName: 'زياد جمال',
-            phone: '01012345678',
-            service: 'تقويم اسنان',
-            time: '11:30 صباحا',
-            date: '2025-11-29',
-            status: 'قادم',
-            statusColor: const Color(0xFF84E5F3),
-            profileImage: 'assets/images/zozjpg.jpg',
-            width: width,
-            baseFontSize: baseFontSize,
-          ),
-          const SizedBox(height: 12),
-          _buildBookingCard(
-            context: context,
-            patientName: 'عبدالحليم رمضان',
-            phone: '01098765432',
-            service: 'حشو عصب',
-            time: '02:45 مساءً',
-            date: '2025-11-30',
-            status: 'قادم',
-            statusColor: const Color(0xFF84E5F3),
-            profileImage: 'assets/images/halim.jpg',
-            width: width,
-            baseFontSize: baseFontSize,
-          ),
-          const SizedBox(height: 12),
-          _buildBookingCard(
-            context: context,
-            patientName: 'محمد اشرف',
-            phone: '01156781234',
-            service: 'تنظيف أسنان',
-            time: '10:15 صباحا',
-            date: '2025-12-01',
-            status: 'قادم',
-            statusColor: const Color(0xFF84E5F3),
-            profileImage: 'assets/images/kateb.jpg',
-            width: width,
-            baseFontSize: baseFontSize,
-          ),
-          const SizedBox(height: 12),
-          _buildBookingCard(
-            context: context,
-            patientName: 'جوزيف جورح',
-            phone: '01234567890',
-            service: 'تركيب كوبري',
-            time: '04:30 مساءً',
-            date: '2025-12-02',
-            status: 'قادم',
-            statusColor: const Color(0xFF84E5F3),
-            profileImage: 'assets/images/joseoh.jpeg',
-            width: width,
-            baseFontSize: baseFontSize,
-          ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
-        ],
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _fetchPendingAppointments,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            // Header
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Text(
+                'حجوزاتي القادمة',
+                textAlign: TextAlign.right,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w700,
+                  fontSize: baseFontSize * 1.5,
+                  height: 1.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ..._bookings.asMap().entries.map((entry) {
+              final booking = entry.value;
+              return Column(
+                children: [
+                  _buildBookingCard(
+                    context: context,
+                    patientName: booking['patientFirstName'] ?? 'مريض',
+                    phone: booking['patientPhoneNumber'] ?? '',
+                    service: booking['specialty'] ?? 'تخصص',
+                    time: booking['time'] ?? '',
+                    date: booking['date'] ?? '',
+                    status: booking['status'] ?? 'قادم',
+                    statusColor: const Color(0xFF84E5F3),
+                    profileImage: 'assets/images/zozjpg.jpg',
+                    width: width,
+                    baseFontSize: baseFontSize,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              );
+            }),
+            SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+          ],
+        ),
       ),
+    );
+  }
+}
+            color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
+          ),
+        ),
+      ),
+      body: _buildMainContent(context, width, height, baseFontSize),
     );
   }
 }
