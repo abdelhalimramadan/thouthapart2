@@ -1,25 +1,24 @@
-import 'package:thotha_mobile_app/features/booking/ui/otp_verification_dialog.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
-import 'package:thotha_mobile_app/core/networking/otp_service.dart';
+import 'package:thotha_mobile_app/features/appointments/data/appointments_service.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class BookingConfirmationScreen extends StatefulWidget {
-  final int doctorId;
   final String doctorName;
   final String date;
   final String time;
   final String specialty;
+  final String requestId;
 
   const BookingConfirmationScreen({
     Key? key,
-    required this.doctorId,
     required this.doctorName,
     required this.date,
     required this.time,
     this.specialty = 'طب الأسنان',
+    this.requestId = '',
   }) : super(key: key);
 
   @override
@@ -32,10 +31,8 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final OtpService _otpService = OtpService();
-  final ApiService _apiService = ApiService();
+  final AppointmentsService _appointmentsService = AppointmentsService(ApiService());
   bool _isLoading = false;
-  bool _isSendingOtp = false;
 
   @override
   void dispose() {
@@ -47,42 +44,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isSendingOtp = true;
-      });
-
-      final otpResult = await _otpService.sendOtp(_phoneController.text);
-
-      setState(() {
-        _isSendingOtp = false;
-      });
-
-      if (otpResult['success']) {
-        if (!mounted) return;
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => OtpVerificationDialog(
-            contactInfo: _phoneController.text,
-            onVerified: (code) {
-              _completeBooking();
-            },
-            onResend: (phoneNumber) {
-              // ignore
-            },
-          ),
-        );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(otpResult['error'] ?? 'فشل إرسال رمز التحقق',
-                style: const TextStyle(fontFamily: 'Cairo')),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
+      _completeBooking();
     }
   }
 
@@ -91,111 +53,154 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
       _isLoading = true;
     });
 
-    // إعداد بيانات الحجز حسب AppointmentDto
-    final appointmentBody = {
-      'doctorId': widget.doctorId,
-      'doctorFirstName': widget.doctorName.split(' ').first,
-      'doctorLastName': widget.doctorName.split(' ').length > 1
-          ? widget.doctorName.split(' ').sublist(1).join(' ')
-          : '',
-      'patientFirstName': _firstNameController.text,
-      'patientLastName': _lastNameController.text,
-      'patientPhoneNumber': _phoneController.text,
-    };
+    try {
+      // Validate appointment data
+      final validationErrors = _appointmentsService.validateAppointmentData(
+        firstName: _firstNameController.text,
+        lastName: _lastNameController.text,
+        phone: _phoneController.text,
+        // Patient ID is auto-generated, no need to validate
+      );
 
-    final result = await _apiService.createAppointment(appointmentBody);
+      if (validationErrors.isNotEmpty) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              validationErrors.values.first,
+              style: const TextStyle(fontFamily: 'Cairo')
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        return;
+      }
 
-    if (!mounted) return;
+      // Call the AppointmentsService to create the appointment
+      final result = await _appointmentsService.createAppointment(
+        requestId: widget.requestId.isEmpty 
+            ? '1' // Default RequestId if not provided
+            : widget.requestId,
+        patientFirstName: _firstNameController.text,
+        patientLastName: _lastNameController.text,
+        patientPhoneNumber: _phoneController.text,
+      );
 
-    setState(() {
-      _isLoading = false;
-    });
+      if (!mounted) return;
 
-    if (result['success'] == true) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          titlePadding: const EdgeInsets.only(top: 20, left: 20, right: 20),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          actionsPadding:
-              const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-            title: Text(
-              'تم الحجز بنجاح',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w700,
-                color: ColorsManager.mainBlue,
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (result['success']) {
+        // Show success dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            titlePadding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            actionsPadding:
+                const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+              title: Text(
+                'تم الحجز بنجاح',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                  color: ColorsManager.mainBlue,
+                ),
               ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 72.w,
-                  height: 72.w,
-                  decoration: BoxDecoration(
-                    color: ColorsManager.mainBlue.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 72.w,
+                    height: 72.w,
+                    decoration: BoxDecoration(
+                      color: ColorsManager.mainBlue.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.check_rounded,
+                        color: ColorsManager.mainBlue, size: 42.w),
                   ),
-                  child: Icon(Icons.check_rounded,
-                      color: ColorsManager.mainBlue, size: 42.w),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  'تم حجز موعدك بنجاح مع ${widget.doctorName}\nفي يوم ${widget.date} الساعة ${widget.time}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 14.sp,
-                    color: const Color(0xFF1F2937),
-                    height: 1.6,
-                  ),
-                ),
-              ],
-            ),
-          actions: [
-            SizedBox(
-              width: 140.w,
-              height: 40.h,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorsManager.mainBlue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                ),
-                child: Text(
-                  'حسناً',
-                  style: TextStyle(
+                  SizedBox(height: 16.h),
+                  Text(
+                    'تم حجز موعدك بنجاح مع ${widget.doctorName}\nفي يوم ${widget.date} الساعة ${widget.time}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 14.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700),
+                      color: const Color(0xFF1F2937),
+                      height: 1.6,
+                    ),
+                  ),
+                ],
+              ),
+            actions: [
+              SizedBox(
+                width: 140.w,
+                height: 40.h,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorsManager.mainBlue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                  child: Text(
+                    'حسناً',
+                    style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 14.sp,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700),
+                  ),
                 ),
               ),
+            ],
+          ),
+        );
+      } else {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['error'] ?? 'فشل في إنشاء الحجز',
+              style: const TextStyle(fontFamily: 'Cairo')
             ),
-          ],
-        ),
-      );
-    } else {
-      // عرض خطأ
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            result['error'] ?? 'فشل في إنشاء الحجز',
-            style: const TextStyle(fontFamily: 'Cairo'),
+            'حدث خطأ غير متوقع',
+            style: const TextStyle(fontFamily: 'Cairo')
           ),
-          backgroundColor: Colors.red,
+         backgroundColor: Colors.red,
           duration: const Duration(seconds: 3),
         ),
       );
@@ -437,12 +442,13 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                 return null;
                               },
                             ),
+                            const SizedBox(height: 16),
                             const SizedBox(height: 24),
                             SizedBox(
                               height: 48,
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: (_isLoading || _isSendingOtp)
+                                onPressed: _isLoading
                                     ? null
                                     : () => _submitForm(),
                                 style: ElevatedButton.styleFrom(
@@ -451,51 +457,25 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                     borderRadius: BorderRadius.circular(8.r),
                                   ),
                                 ),
-                                child: _isSendingOtp
-                                    ? Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Text(
-                                            'جاري إرسال رمز التحقق...',
-                                            style: theme.textTheme.titleMedium
-                                                ?.copyWith(
-                                              fontFamily: 'Cairo',
-                                              fontSize: 14.sp,
-                                              color: colorScheme.onPrimary,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
                                       )
-                                    : _isLoading
-                                        ? const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Colors.white,
-                                            ),
-                                          )
-                                        : Text(
-                                            'تأكيد الحجز',
-                                            style: theme.textTheme.titleMedium
-                                                ?.copyWith(
-                                              fontFamily: 'Cairo',
-                                              fontSize: 16.sp,
-                                              color: colorScheme.onPrimary,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
+                                    : Text(
+                                        'تأكيد الحجز',
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                          fontFamily: 'Cairo',
+                                          fontSize: 16.sp,
+                                          color: colorScheme.onPrimary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                               ),
                             ),
                           ],

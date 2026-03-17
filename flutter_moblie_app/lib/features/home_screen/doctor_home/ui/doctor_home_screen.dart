@@ -1,15 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/helpers/constants.dart';
-import '../../../core/helpers/shared_pref_helper.dart';
-import '../../../core/utils/notification_helper.dart';
-import '../../../core/di/dependency_injection.dart';
+import '../../../../core/helpers/constants.dart';
+import '../../../../core/helpers/shared_pref_helper.dart';
+import '../../../../core/utils/notification_helper.dart';
+import '../../../requests/data/repos/case_request_repo.dart';
 import '../drawer/doctor_drawer_screen.dart';
-import '../../notifications/ui/notifications_screen.dart';
-import '../../appointments/logic/appointments_cubit.dart';
-import '../../appointments/logic/appointments_state.dart';
-import '../../appointments/data/models/appointment_model.dart';
+import '../../../notifications/ui/notifications_screen.dart';
+import '../../../home_screen/data/models/case_request_model.dart';
+import '../../../../core/di/dependency_injection.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DoctorHomeScreen
@@ -23,61 +21,22 @@ class DoctorHomeScreen extends StatefulWidget {
 
 class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  late final AppointmentsCubit _cubit;
+  final CaseRequestRepo _caseRepo = getIt<CaseRequestRepo>();
 
   // ── State ──────────────────────────────────────────────────────
   String? _firstName;
   bool _isLoadingName = true;
 
+  List<CaseRequestModel> _caseRequests = [];
+  bool _isLoadingCases = true;
+  String? _casesError;
+
   // ── Lifecycle ──────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
-    _cubit = getIt<AppointmentsCubit>();
-    _fetchDoctorName();
-    _loadAppointments();
-  }
-
-  Future<void> _loadAppointments() async {
-    final doctorId = await _extractDoctorIdFromToken();
-    if (doctorId != 0 && mounted) {
-      _cubit.loadAppointmentsByDoctorId(doctorId);
-    }
-  }
-
-  Future<int> _extractDoctorIdFromToken() async {
-    try {
-      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-      if (token == null || token.isEmpty) return 0;
-
-      final parts = token.split('.');
-      if (parts.length != 3) return 0;
-
-      String payload = parts[1];
-      while (payload.length % 4 != 0) {
-        payload += '=';
-      }
-
-      final decoded = json.decode(utf8.decode(base64Url.decode(payload))) as Map?;
-      if (decoded == null) return 0;
-
-      final rawId = decoded['id'] ?? decoded['doctorId'] ?? decoded['doctor_id'];
-      final did = int.tryParse(rawId?.toString() ?? '') ?? 0;
-
-      if (did != 0) {
-        await SharedPrefHelper.setData('doctor_id', did);
-      }
-
-      return did;
-    } catch (_) {
-      return 0;
-    }
-  }
-
-  @override
-  void dispose() {
-    _cubit.close();
-    super.dispose();
+    // Run both fetches in parallel — faster startup
+    Future.wait([_fetchDoctorName(), _fetchCaseRequests()]);
   }
 
   // ── Data Fetching ──────────────────────────────────────────────
@@ -131,15 +90,178 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     }
   }
 
+  Future<void> _fetchCaseRequests() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoadingCases = true;
+      _casesError = null;
+    });
+
+    try {
+      // Try to get doctor_id from SharedPreferences
+      int doctorId = await SharedPrefHelper.getInt('doctor_id');
+      if (doctorId == 0) {
+        final s = await SharedPrefHelper.getString('doctor_id');
+        doctorId = int.tryParse(s) ?? 0;
+      }
+
+      // Fallback: Extract from JWT token if not in cache
+      if (doctorId == 0) {
+        doctorId = await _extractDoctorIdFromToken();
+      }
+
+      print('=== DEBUG: doctorId = $doctorId ===');
+
+      if (doctorId == 0) {
+        if (mounted)
+          setState(() {
+            _isLoadingCases = false;
+            _casesError = 'تعذر تحديد هوية الطبيب';
+          });
+        return;
+      }
+
+      print('=== DEBUG: Calling getRequestsByDoctorId($doctorId) ===');
+      final result = await _caseRepo.getRequestsByDoctorId(doctorId);
+
+      print('=== DEBUG: API Response: $result ===');
+
+      if (!mounted) return;
+
+      if (result['success'] == true) {
+        final data = result['data'];
+        print('=== DEBUG: Data received: $data ===');
+        setState(() {
+          _caseRequests = List<CaseRequestModel>.from(data as List);
+          _isLoadingCases = false;
+        });
+      } else {
+        final error = result['error']?.toString() ?? 'فشل في تحميل الحالات';
+        print('=== DEBUG: API Error: $error ===');
+        setState(() {
+          _casesError = error;
+          _isLoadingCases = false;
+        });
+      }
+    } catch (e, stack) {
+      print('=== DEBUG: Exception: $e ===');
+      print('=== DEBUG: Stack trace: $stack ===');
+      if (mounted)
+        setState(() {
+          _isLoadingCases = false;
+          _casesError = 'حدث خطأ غير متوقع: $e';
+        });
+    }
+  }
+
+  Future<int> _extractDoctorIdFromToken() async {
+    try {
+      final token =
+          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      if (token == null || token.isEmpty) return 0;
+
+      final parts = token.split('.');
+      if (parts.length != 3) return 0;
+
+      String payload = parts[1];
+      while (payload.length % 4 != 0) {
+        payload += '=';
+      }
+
+      final decoded =
+          json.decode(utf8.decode(base64Url.decode(payload))) as Map?;
+      if (decoded == null) return 0;
+
+      final rawId =
+          decoded['id'] ?? decoded['doctorId'] ?? decoded['doctor_id'];
+      final did = int.tryParse(rawId?.toString() ?? '') ?? 0;
+
+      // Cache it for future use
+      if (did != 0) {
+        await SharedPrefHelper.setData('doctor_id', did);
+      }
+
+      return did;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   // ── Actions ────────────────────────────────────────────────────
 
-  void _openAppointmentDetails(AppointmentModel appointment) {
+  void _openCaseDetails(CaseRequestModel req) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _AppointmentDetailsSheet(appointment: appointment),
+      builder: (_) => _CaseDetailsSheet(
+        req: req,
+        onAccept: () => _updateStatus(req, 'APPROVED'),
+        onReject: () => _updateStatus(req, 'REJECTED'),
+      ),
     );
+  }
+
+  Future<void> _updateStatus(CaseRequestModel req, String status) async {
+    Navigator.pop(context); // close the sheet
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    int doctorId = await SharedPrefHelper.getInt('doctor_id');
+    if (doctorId == 0) {
+      final s = await SharedPrefHelper.getString('doctor_id');
+      doctorId = int.tryParse(s ?? '') ?? 0;
+    }
+    if (doctorId == 0) {
+      doctorId = await _extractDoctorIdFromToken();
+    }
+
+    final result = await _caseRepo.updateAppointmentStatus(
+      req.id.toString(),
+      status,
+      doctorId.toString(),
+    );
+
+    if (!mounted) return;
+    Navigator.pop(context); // close loading dialog
+
+    if (result['success'] == true || result['statusCode'] == 200 || result['AppointmentId'] != null || result['Status'] != null || result['data'] != null || result['statusCode'] == 204) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            status == 'APPROVED' ? 'تم قبول الحالة بنجاح' : 'تم رفض الحالة',
+            style: const TextStyle(fontFamily: 'Cairo'),
+          ),
+          backgroundColor: status == 'APPROVED' ? Colors.green : Colors.orange,
+        ),
+      );
+      _fetchCaseRequests(); // refresh list
+    } else {
+      if (result['success'] == true || (result.containsKey('data') && result['error'] == null)) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(
+               content: Text(
+                 status == 'APPROVED' ? 'تم قبول الحالة بنجاح' : 'تم رفض الحالة',
+                 style: const TextStyle(fontFamily: 'Cairo'),
+               ),
+               backgroundColor: status == 'APPROVED' ? Colors.green : Colors.orange,
+             ),
+           );
+           _fetchCaseRequests();
+      } else {
+        final error = result['error']?.toString() ?? 'حدث خطأ';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error, style: const TextStyle(fontFamily: 'Cairo')),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
   }
 
   void _openNotifications() {
@@ -161,31 +283,24 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     final baseFontSize = width * 0.04;
     final unreadCount = NotificationHelper.getUnreadCount();
 
-    return BlocProvider.value(
-      value: _cubit,
-      child: Scaffold(
-        key: _scaffoldKey,
-        backgroundColor: Colors.white,
-        drawer: const DoctorDrawer(),
-        appBar: _buildAppBar(width, cs, tt, baseFontSize, unreadCount),
-        body: BlocBuilder<AppointmentsCubit, AppointmentsState>(
-          builder: (context, state) {
-            return RefreshIndicator(
-              onRefresh: () => _loadAppointments(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildGreeting(width, baseFontSize),
-                    _buildSectionTitle('حجوزاتي القادمة', width, baseFontSize),
-                    _buildAppointmentsSection(context, state, width, baseFontSize),
-                    const SizedBox(height: 40),
-                  ],
-                ),
-              ),
-            );
-          },
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: Colors.white,
+      drawer: const DoctorDrawer(),
+      appBar: _buildAppBar(width, cs, tt, baseFontSize, unreadCount),
+      body: RefreshIndicator(
+        onRefresh: _fetchCaseRequests,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildGreeting(width, baseFontSize),
+              _buildSectionTitle('حالاتي القادمة', width, baseFontSize),
+              _buildCasesSection(width, baseFontSize),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
@@ -310,27 +425,27 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     );
   }
 
-  // ── Appointments section ──────────────────────────────────────────────
-  Widget _buildAppointmentsSection(BuildContext context, AppointmentsState state, double width, double baseFontSize) {
-    if (state is AppointmentsLoading) {
+  // ── Cases section ──────────────────────────────────────────────
+  Widget _buildCasesSection(double width, double baseFontSize) {
+    if (_isLoadingCases) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 40),
         child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (state is AppointmentsError) {
+    if (_casesError != null) {
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 16),
         child: Column(
           children: [
-            Text(state.message,
+            Text(_casesError!,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     fontFamily: 'Cairo', color: Colors.redAccent)),
             const SizedBox(height: 8),
             TextButton.icon(
-              onPressed: () => _loadAppointments(),
+              onPressed: _fetchCaseRequests,
               icon: const Icon(Icons.refresh),
               label: const Text('إعادة المحاولة',
                   style: TextStyle(fontFamily: 'Cairo')),
@@ -340,62 +455,53 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       );
     }
 
-    if (state is AppointmentsLoaded) {
-      final appointments = state.appointments;
-      
-      if (appointments.isEmpty) {
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 40),
-          child: Center(
-            child: Column(
-              children: [
-                Icon(Icons.calendar_today_outlined,
-                    size: 48, color: Colors.grey[300]),
-                const SizedBox(height: 12),
-                const Text(
-                  'لا توجد حجوزات مسجلة حالياً',
-                  style: TextStyle(
-                      fontFamily: 'Cairo', color: Colors.grey, fontSize: 15),
-                ),
-              ],
-            ),
+    if (_caseRequests.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 40),
+        child: Center(
+          child: Column(
+            children: [
+              Icon(Icons.calendar_today_outlined,
+                  size: 48, color: Colors.grey[300]),
+              const SizedBox(height: 12),
+              const Text(
+                'لا توجد حالات مسجلة حالياً',
+                style: TextStyle(
+                    fontFamily: 'Cairo', color: Colors.grey, fontSize: 15),
+              ),
+            ],
           ),
-        );
-      }
-
-      return ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(top: 10, bottom: 8),
-        itemCount: appointments.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 16),
-        itemBuilder: (_, i) {
-          final appointment = appointments[i] as AppointmentModel;
-          return _AppointmentCard(
-            appointment: appointment,
-            width: width,
-            baseFontSize: baseFontSize,
-            onTap: () => _openAppointmentDetails(appointment),
-          );
-        },
+        ),
       );
     }
 
-    return const SizedBox.shrink();
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(top: 10, bottom: 8),
+      itemCount: _caseRequests.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      itemBuilder: (_, i) => _CaseCard(
+        req: _caseRequests[i],
+        width: width,
+        baseFontSize: baseFontSize,
+        onTap: () => _openCaseDetails(_caseRequests[i]),
+      ),
+    );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// _AppointmentCard — stateless, const-safe
+// _CaseCard — stateless, const-safe
 // ─────────────────────────────────────────────────────────────────────────────
-class _AppointmentCard extends StatelessWidget {
-  final AppointmentModel appointment;
+class _CaseCard extends StatelessWidget {
+  final CaseRequestModel req;
   final double width;
   final double baseFontSize;
   final VoidCallback onTap;
 
-  const _AppointmentCard({
-    required this.appointment,
+  const _CaseCard({
+    required this.req,
     required this.width,
     required this.baseFontSize,
     required this.onTap,
@@ -422,63 +528,66 @@ class _AppointmentCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // Header: id badge + status
+            // Header: id badge + category
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (appointment.id != null)
-                  _IdBadge(id: appointment.id, baseFontSize: baseFontSize),
-                _StatusBadge(
-                  status: appointment.displayStatus,
-                  baseFontSize: baseFontSize,
+                if (req.id != null)
+                  _IdBadge(id: req.id!, baseFontSize: baseFontSize),
+                Text(
+                  req.categoryName,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: baseFontSize,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1D61E7),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 6),
-            // Patient name
+            // Doctor name
             Row(children: [
               Icon(Icons.person_outline, size: 14, color: Colors.grey[500]),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  appointment.patientFullName.isNotEmpty
-                      ? appointment.patientFullName
-                      : 'مريض',
+                  req.doctorFullName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                       fontFamily: 'Cairo',
-                      fontSize: baseFontSize * 0.9,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[800]),
+                      fontSize: baseFontSize * 0.8,
+                      color: Colors.grey[600]),
                 ),
               ),
             ]),
-            // Phone number
-            if (appointment.patientPhoneNumber?.isNotEmpty == true) ...[
+            // Description (optional)
+            if (req.description.isNotEmpty &&
+                req.description != 'No details') ...[
               const SizedBox(height: 6),
-              Row(children: [
-                Icon(Icons.phone_outlined, size: 14, color: Colors.grey[500]),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    appointment.patientPhoneNumber!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: baseFontSize * 0.8,
-                        color: Colors.grey[600]),
-                  ),
-                ),
-              ]),
+              Text(
+                req.description,
+                textAlign: TextAlign.right,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: baseFontSize * 0.82,
+                    color: Colors.grey[700]),
+              ),
             ],
             const SizedBox(height: 10),
-            // Created date chip
+            // Time + Date chips
             Row(children: [
               _InfoChip(
+                  icon: Icons.access_time_outlined,
+                  text: req.formattedTime,
+                  baseFontSize: baseFontSize),
+              const SizedBox(width: 8),
+              _InfoChip(
                   icon: Icons.calendar_today_outlined,
-                  text: _formatDate(appointment.createdAt),
+                  text: req.formattedDate,
                   baseFontSize: baseFontSize),
             ]),
           ],
@@ -486,22 +595,10 @@ class _AppointmentCard extends StatelessWidget {
       ),
     );
   }
-
-  String _formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return '';
-    try {
-      final dt = DateTime.parse(dateStr);
-      return '${dt.day.toString().padLeft(2, '0')}/'
-          '${dt.month.toString().padLeft(2, '0')}/'
-          '${dt.year}';
-    } catch (_) {
-      return dateStr;
-    }
-  }
 }
 
 class _IdBadge extends StatelessWidget {
-  final String? id;
+  final int? id;
   final double baseFontSize;
   const _IdBadge({required this.id, required this.baseFontSize});
 
@@ -519,34 +616,6 @@ class _IdBadge extends StatelessWidget {
           fontFamily: 'Cairo',
           fontSize: baseFontSize * 0.68,
           color: const Color(0xFF1D61E7),
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  final String status;
-  final double baseFontSize;
-  const _StatusBadge({required this.status, required this.baseFontSize});
-
-  @override
-  Widget build(BuildContext context) {
-    final isConfirmed = status == 'مؤكد';
-    final color = isConfirmed ? Colors.green : Colors.orange;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        status,
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: baseFontSize * 0.72,
-          color: color,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -581,11 +650,17 @@ class _InfoChip extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// _AppointmentDetailsSheet — bottom sheet as separate widget
+// _CaseDetailsSheet — bottom sheet as separate widget (no setState bleed)
 // ─────────────────────────────────────────────────────────────────────────────
-class _AppointmentDetailsSheet extends StatelessWidget {
-  final AppointmentModel appointment;
-  const _AppointmentDetailsSheet({required this.appointment});
+class _CaseDetailsSheet extends StatelessWidget {
+  final CaseRequestModel req;
+  final VoidCallback onAccept;
+  final VoidCallback onReject;
+  const _CaseDetailsSheet({
+    required this.req,
+    required this.onAccept,
+    required this.onReject,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -613,7 +688,7 @@ class _AppointmentDetailsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'تفاصيل الحجز',
+            'تفاصيل الحالة',
             style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 18,
@@ -624,68 +699,65 @@ class _AppointmentDetailsSheet extends StatelessWidget {
           const Divider(),
           const SizedBox(height: 10),
           _DetailRow(
-              icon: Icons.confirmation_number_outlined,
-              label: 'رقم الحجز',
-              value: '#${appointment.id ?? ""}'),
+              icon: Icons.medical_services_outlined,
+              label: 'التخصص',
+              value: req.categoryName),
           _DetailRow(
               icon: Icons.person_outline,
-              label: 'المريض',
-              value: appointment.patientFullName.isNotEmpty
-                  ? appointment.patientFullName
-                  : 'غير محدد'),
-          if (appointment.patientPhoneNumber?.isNotEmpty == true)
-            _DetailRow(
-                icon: Icons.phone_outlined,
-                label: 'هاتف المريض',
-                value: appointment.patientPhoneNumber!),
+              label: 'الطبيب',
+              value: req.doctorFullName),
           _DetailRow(
-              icon: Icons.info_outline,
-              label: 'الحالة',
-              value: appointment.displayStatus),
-          if (appointment.createdAt?.isNotEmpty == true)
-            _DetailRow(
-                icon: Icons.calendar_today_outlined,
-                label: 'تاريخ الإنشاء',
-                value: _formatDate(appointment.createdAt)),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton.icon(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.check_circle_outline, color: Colors.white),
-              label: Text(
-                'تم',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+              icon: Icons.phone_outlined,
+              label: 'الهاتف',
+              value: req.doctorPhoneNumber),
+          _DetailRow(
+              icon: Icons.school_outlined,
+              label: 'الجامعة',
+              value: req.doctorUniversityName),
+          _DetailRow(
+              icon: Icons.calendar_today_outlined,
+              label: 'التاريخ',
+              value: req.formattedDate),
+          _DetailRow(
+              icon: Icons.access_time_outlined,
+              label: 'الوقت',
+              value: req.formattedTime),
+          if (req.description.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey[850] : const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(10),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1D61E7),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
-                elevation: 2,
+              child: Text(
+                req.description,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 14,
+                    color: isDark ? Colors.grey[200] : Colors.grey[800]),
               ),
             ),
-          ),
+          ],
+          const SizedBox(height: 20),
+          Row(children: [
+            Expanded(
+                child: _SheetButton(
+                    label: 'رفض الحالة',
+                    color: Colors.red.shade600,
+                    onTap: onReject)),
+            const SizedBox(width: 12),
+            Expanded(
+                child: _SheetButton(
+                    label: 'قبول الحالة',
+                    color: Colors.green.shade600,
+                    onTap: onAccept)),
+          ]),
         ],
       ),
     );
-  }
-
-  String _formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return '';
-    try {
-      final dt = DateTime.parse(dateStr);
-      return '${dt.day.toString().padLeft(2, '0')}/'
-          '${dt.month.toString().padLeft(2, '0')}/'
-          '${dt.year}';
-    } catch (_) {
-      return dateStr;
-    }
   }
 }
 

@@ -63,7 +63,7 @@ class SharedPrefHelper {
     return sharedPreferences.getInt(key) ?? 0;
   }
 
-  /// Gets an String value from SharedPreferences with given [key].
+  /// Gets a String value from SharedPreferences with given [key].
   static getString(String key) async {
     debugPrint('SharedPrefHelper : getString with key : $key');
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();

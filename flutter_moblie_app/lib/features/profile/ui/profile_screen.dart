@@ -126,28 +126,28 @@ class _ProfileBodyState extends State<ProfileBody> {
     final category = _categoryCtrl.text.trim();
 
     if (firstName.isEmpty || firstName.length < 2) {
-      return '┘è╪▒╪¼┘ë ╪Ñ╪»╪«╪º┘ä ╪º┘ä╪º╪│┘à ╪º┘ä╪ú┘ê┘ä ╪¿╪┤┘â┘ä ╪╡╪¡┘è╪¡';
+      return 'الاسم الاول';
     }
     if (lastName.isEmpty || lastName.length < 2) {
-      return '┘è╪▒╪¼┘ë ╪Ñ╪»╪«╪º┘ä ╪º╪│┘à ╪º┘ä╪╣╪º╪ª┘ä╪⌐ ╪¿╪┤┘â┘ä ╪╡╪¡┘è╪¡';
+      return 'الاسم الثاني';
     }
     if (email.isEmpty || !_isValidEmail(email)) {
-      return '┘è╪▒╪¼┘ë ╪Ñ╪»╪«╪º┘ä ╪¿╪▒┘è╪» ╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è ╪╡╪¡┘è╪¡';
+      return 'البريد الالكتروني';
     }
     if (phone.isEmpty || !_isValidPhone(phone)) {
-      return '┘è╪▒╪¼┘ë ╪Ñ╪»╪«╪º┘ä ╪▒┘é┘à ┘ç╪º╪¬┘ü ╪╡╪¡┘è╪¡';
+      return 'رقم الهاتف';
     }
     if (university.isEmpty) {
-      return '┘è╪▒╪¼┘ë ╪º╪«╪¬┘è╪º╪▒ ╪º┘ä╪¼╪º┘à╪╣╪⌐';
+      return 'الكلية';
     }
     if (year.isEmpty) {
-      return '┘è╪▒╪¼┘ë ╪º╪«╪¬┘è╪º╪▒ ╪º┘ä╪│┘å╪⌐ ╪º┘ä╪»╪▒╪º╪│┘è╪⌐';
+      return 'السنة الدراسية';
     }
     if (city.isEmpty) {
-      return '┘è╪▒╪¼┘ë ╪º╪«╪¬┘è╪º╪▒ ╪º┘ä┘à╪¡╪º┘ü╪╕╪⌐';
+      return 'المحافظه';
     }
     if (category.isEmpty) {
-      return '┘è╪▒╪¼┘ë ╪º╪«╪¬┘è╪º╪▒ ╪º┘ä╪¬╪«╪╡╪╡';
+      return 'التخصص';
     }
     return null;
   }
@@ -280,7 +280,7 @@ class _ProfileBodyState extends State<ProfileBody> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          '╪º┘ä┘à┘ä┘ü ╪º┘ä╪┤╪«╪╡┘è',
+          'الملف الشخصى',
           style: const TextStyle(
             fontFamily: 'Cairo',
             fontSize: 18,
@@ -429,7 +429,7 @@ class _ProfileBodyState extends State<ProfileBody> {
                           ),
                         )
                       : Text(
-                          '╪¡┘ü╪╕',
+                          'حفظ',
                           style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 18.sp,
@@ -463,7 +463,7 @@ class _ProfileBodyState extends State<ProfileBody> {
                 icon: const Icon(Icons.lock_reset_rounded,
                     color: Color(0xFF1D61E7), size: 20),
                 label: Text(
-                  '╪¬╪║┘è┘è╪▒ ┘â┘ä┘à╪⌐ ╪º┘ä┘à╪▒┘ê╪▒',
+                  'تغير كلمة المرور',
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 16.sp,
@@ -496,7 +496,7 @@ class _ProfileBodyState extends State<ProfileBody> {
                 icon: const Icon(Icons.delete_forever_rounded,
                     color: Colors.red, size: 20),
                 label: Text(
-                  '╪¡╪░┘ü ╪º┘ä╪¡╪│╪º╪¿',
+                  'حذف الحساب ',
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 16.sp,
@@ -523,7 +523,7 @@ class _ProfileBodyState extends State<ProfileBody> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            '┘à╪╣┘ä┘ê┘à╪º╪¬┘â ╪º┘ä╪┤╪«╪╡┘è╪⌐',
+            'البيانات الشخصية',
             style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 18.sp,
@@ -548,7 +548,7 @@ class _ProfileBodyState extends State<ProfileBody> {
             child: Column(
               children: [
                 _buildEditableInputField(
-                  label: '╪º┘ä╪Ñ┘è┘à┘è┘ä',
+                  label: 'البريد الالكترونى',
                   controller: _emailCtrl,
                   focusNode: _emailFocusNode,
                   keyboardType: TextInputType.emailAddress,
@@ -558,71 +558,71 @@ class _ProfileBodyState extends State<ProfileBody> {
                 ),
                 _divider(),
                 _buildEditableInputField(
-                  label: '╪º┘ä╪º╪│┘à ╪º┘ä╪ú┘ê┘ä',
+                  label: 'الاسم الاول',
                   controller: _firstNameCtrl,
                   focusNode: _firstNameFocusNode,
-                  hintText: '╪ú╪»╪«┘ä ╪º┘ä╪º╪│┘à ╪º┘ä╪ú┘ê┘ä',
+                  hintText: 'اسم الطبيب',
                 ),
                 _divider(),
                 _buildEditableInputField(
-                  label: '╪º╪│┘à ╪º┘ä╪╣╪º╪ª┘ä╪⌐',
+                  label: 'الاسم الثاني',
                   controller: _lastNameCtrl,
                   focusNode: _lastNameFocusNode,
-                  hintText: '╪ú╪»╪«┘ä ╪º╪│┘à ╪º┘ä╪╣╪º╪ª┘ä╪⌐',
+                  hintText: 'اسم العائلة',
                 ),
                 _divider(),
                 _buildEditablePhoneField(),
                 _divider(),
                 _buildEditableField(
-                  label: '╪º┘ä╪¼╪º┘à╪╣╪⌐',
+                  label: 'الكلية',
                   id: 'university',
                   displayValue: _universityCtrl.text.isNotEmpty
                       ? _universityCtrl.text
                       : profile.faculty,
                   onTap: () => _showSelectionDialog(
-                    title: '╪º╪«╪¬╪▒ ╪º┘ä╪¼╪º┘à╪╣╪⌐',
+                    title: 'جميع الكليات',
                     items: universities.map((u) => u.name).toList(),
                     controller: _universityCtrl,
                   ),
                 ),
                 _divider(),
                 _buildEditableField(
-                  label: '╪º┘ä╪│┘å╪⌐ ╪º┘ä╪»╪▒╪º╪│┘è╪⌐',
+                  label: 'السنة الدراسية',
                   id: 'year',
                   displayValue:
                       _yearCtrl.text.isNotEmpty ? _yearCtrl.text : profile.year,
                   onTap: () => _showSelectionDialog(
-                    title: '╪º╪«╪¬╪▒ ╪º┘ä╪│┘å╪⌐ ╪º┘ä╪»╪▒╪º╪│┘è╪⌐',
+                    title: 'السنه الدراسية',
                     items: const [
-                      '╪º┘ä╪▒╪º╪¿╪╣╪⌐',
-                      '╪º┘ä╪«╪º┘à╪│╪⌐',
-                      '╪º┘à╪¬┘è╪º╪▓',
+                      'الفرقة الرابعة',
+                      'الفرقةالخامسة',
+                      'امتياز',
                     ],
                     controller: _yearCtrl,
                   ),
                 ),
                 _divider(),
                 _buildEditableField(
-                  label: '╪º┘ä┘à╪¡╪º┘ü╪╕╪⌐',
+                  label: 'المحافظة',
                   id: 'city',
                   displayValue: _cityCtrl.text.isNotEmpty
                       ? _cityCtrl.text
                       : profile.governorate,
                   onTap: () => _showSelectionDialog(
-                    title: '╪º╪«╪¬╪▒ ╪º┘ä┘à╪¡╪º┘ü╪╕╪⌐',
+                    title: 'جميع المحافظات',
                     items: cities.map((c) => c.name).toList(),
                     controller: _cityCtrl,
                   ),
                 ),
                 _divider(),
                 _buildEditableField(
-                  label: '╪º┘ä╪¬╪«╪╡╪╡',
+                  label: 'التخصص ',
                   id: 'category',
                   displayValue: _categoryCtrl.text.isNotEmpty
                       ? _categoryCtrl.text
                       : profile.category,
                   onTap: () => _showSelectionDialog(
-                    title: '╪º╪«╪¬╪▒ ╪º┘ä╪¬╪«╪╡╪╡',
+                    title: 'جميع التخصصات',
                     items: categories.map((c) => c.name).toList(),
                     controller: _categoryCtrl,
                   ),
@@ -679,7 +679,7 @@ class _ProfileBodyState extends State<ProfileBody> {
             onTap: onTap,
             child: Text(
               (displayValue == null || displayValue.isEmpty)
-                  ? '╪║┘è╪▒ ┘à╪¡╪»╪»'
+                  ? 'يس'
                   : displayValue,
               style: TextStyle(
                 fontFamily: 'Cairo',
@@ -788,13 +788,13 @@ class _ProfileBodyState extends State<ProfileBody> {
 
   Widget _buildEditablePhoneField() {
     return _buildEditableInputField(
-      label: '╪▒┘é┘à ╪º┘ä┘ç╪º╪¬┘ü',
+      label: 'رقم الهاتف',
       controller: _phoneCtrl,
       focusNode: _phoneFocusNode,
       keyboardType: TextInputType.phone,
       textDirection: TextDirection.ltr,
       textAlign: TextAlign.left,
-      hintText: '╪ú╪»╪«┘ä ╪▒┘é┘à ╪º┘ä┘ç╪º╪¬┘ü',
+      hintText: 'رقم الهاتف',
     );
   }
 

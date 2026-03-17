@@ -1,43 +1,31 @@
-import 'package:flutter/material.dart';
+import 'package:equatable/equatable.dart';
+import 'package:thotha_mobile_app/features/appointments/data/models/appointment_model.dart';
 
-@immutable
-abstract class AppointmentsState {
+abstract class AppointmentsState extends Equatable {
   const AppointmentsState();
+
+  @override
+  List<Object> get props => [];
 }
 
-class AppointmentsInitial extends AppointmentsState {
-  const AppointmentsInitial();
-}
+class AppointmentsInitial extends AppointmentsState {}
 
-class AppointmentsLoading extends AppointmentsState {
-  const AppointmentsLoading();
-}
+class AppointmentsLoading extends AppointmentsState {}
 
 class AppointmentsLoaded extends AppointmentsState {
-  final List<dynamic> appointments;
-  final String? selectedFilter;
+  final List<AppointmentModel> appointments;
 
-  const AppointmentsLoaded(this.appointments, {this.selectedFilter});
+  const AppointmentsLoaded(this.appointments);
+
+  @override
+  List<Object> get props => [appointments];
 }
 
 class AppointmentsError extends AppointmentsState {
   final String message;
 
   const AppointmentsError(this.message);
-}
 
-class AppointmentCreating extends AppointmentsState {
-  const AppointmentCreating();
-}
-
-class AppointmentCreated extends AppointmentsState {
-  final dynamic appointment;
-
-  const AppointmentCreated(this.appointment);
-}
-
-class AppointmentCreateError extends AppointmentsState {
-  final String message;
-
-  const AppointmentCreateError(this.message);
+  @override
+  List<Object> get props => [message];
 }

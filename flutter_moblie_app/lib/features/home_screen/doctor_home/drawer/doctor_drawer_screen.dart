@@ -1,24 +1,28 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thotha_mobile_app/core/theming/theme_provider.dart';
-import 'package:thotha_mobile_app/features/doctor/ui/doctor_booking_records_screen.dart';
-import 'package:thotha_mobile_app/features/doctor/ui/doctor_home_screen.dart';
-import 'package:thotha_mobile_app/features/profile/ui/profile_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_booking_records_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
 import 'package:thotha_mobile_app/features/login/ui/login_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 
-import 'package:thotha_mobile_app/features/doctor/ui/doctor_next_booking_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/doctor_next_booking_screen.dart';
 
-import 'package:thotha_mobile_app/features/doctor/ui/secondary_home_screen.dart';
 import 'package:thotha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
 import 'package:thotha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
 import 'package:thotha_mobile_app/features/about_app/ui/about_app_screen.dart';
 import 'package:thotha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart';
 
+import '../../../doctor/ui/secondary_home_screen.dart';
+import '../../../profile/ui/profile_screen.dart';
+
 class DoctorDrawer extends StatefulWidget {
   const DoctorDrawer({super.key});
+
+  static final ValueNotifier<String?> profileImageNotifier = ValueNotifier(null);
 
   @override
   State<DoctorDrawer> createState() => _DoctorDrawerState();
@@ -28,6 +32,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
   String? _firstName;
   String? _lastName;
   String? _email;
+  String? _profileImage;
   bool _isLoadingName = false;
 
   static const _cCyan = Color(0xFF84E5F3);
@@ -37,6 +42,21 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
   void initState() {
     super.initState();
     _fetchDoctorName();
+    DoctorDrawer.profileImageNotifier.addListener(_updateProfileImage);
+  }
+
+  @override
+  void dispose() {
+    DoctorDrawer.profileImageNotifier.removeListener(_updateProfileImage);
+    super.dispose();
+  }
+
+  void _updateProfileImage() {
+    if (DoctorDrawer.profileImageNotifier.value != null) {
+      setState(() {
+        _profileImage = DoctorDrawer.profileImageNotifier.value;
+      });
+    }
   }
 
   void _showLogoutConfirmation(BuildContext context) {
@@ -223,12 +243,14 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
       final cachedFirstName = await SharedPrefHelper.getString('first_name');
       final cachedLastName = await SharedPrefHelper.getString('last_name');
       final cachedEmail = await SharedPrefHelper.getString('email');
+      final cachedImage = await SharedPrefHelper.getString('profile_image');
 
       if (cachedFirstName != null && cachedFirstName.isNotEmpty) {
         setState(() {
           _firstName = cachedFirstName;
           _lastName = cachedLastName;
           _email = cachedEmail;
+          _profileImage = (cachedImage?.isNotEmpty ?? false) ? cachedImage : _profileImage;
         });
         return;
       }
@@ -243,17 +265,19 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        String? f, l, e;
+        String? f, l, e, img;
 
         if (data is Map) {
           f = (data['first_name'] ?? data['firstName']) as String?;
           l = (data['last_name'] ?? data['lastName']) as String?;
           e = (data['email'] ?? (data['user']?['email'])) as String?;
+          img = (data['profile_image']) as String?;
 
           if ((f == null || f.isEmpty) && data['user'] != null) {
             final user = data['user'];
             f = user['first_name'] ?? user['firstName'];
             l = user['last_name'] ?? user['lastName'];
+            img = img ?? user['profile_image'];
           }
         }
 
@@ -261,12 +285,14 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
           _firstName = f;
           _lastName = l;
           _email = e;
+          _profileImage = img;
         });
 
         if (f != null && f.isNotEmpty) {
           await SharedPrefHelper.setData('first_name', f);
           await SharedPrefHelper.setData('last_name', l ?? '');
           if (e != null) await SharedPrefHelper.setData('email', e);
+          if (img != null) await SharedPrefHelper.setData('profile_image', img);
         }
       }
     } catch (e) {
@@ -365,11 +391,19 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                               decoration: BoxDecoration(
                                 color: Theme.of(context).colorScheme.surface,
                                 shape: BoxShape.circle,
+                                image: _profileImage != null
+                                    ? DecorationImage(
+                                        image: MemoryImage(base64Decode(_profileImage!)),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : null,
                               ),
-                              child: const Icon(
-                                Icons.person_outline,
-                                color: _cCyan,
-                              ),
+                              child: _profileImage == null
+                                  ? const Icon(
+                                      Icons.person_outline,
+                                      color: _cCyan,
+                                    )
+                                  : null,
                             ),
                             Expanded(
                               child: Padding(

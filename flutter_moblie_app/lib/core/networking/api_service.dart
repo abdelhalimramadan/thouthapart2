@@ -5,21 +5,21 @@ import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
-import 'package:thotha_mobile_app/core/networking/models/api_error.dart';
-import 'package:thotha_mobile_app/core/networking/models/api_result.dart';
-import 'package:thotha_mobile_app/features/doctor/data/models/doctor_model.dart';
-import 'package:thotha_mobile_app/features/requests/data/models/case_request_model.dart';
-import 'package:thotha_mobile_app/features/profile/data/models/profile_model.dart';
+import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
+
+import '../../features/doctor/data/models/doctor_model.dart';
+import '../../features/profile/data/models/profile_model.dart';
+import '../../features/appointments/data/models/appointment_model.dart';
 
 /// Centralised API service.
 ///
-/// All paths are *relative* ΓÇö DioFactory already sets `baseUrl` to
+/// All paths are *relative* — DioFactory already sets `baseUrl` to
 /// `https://thoutha.page`, so we never concatenate `baseUrl` here.
 class ApiService {
-  // Authenticated Dio ΓÇö shared singleton with Bearer token interceptor
+  // Authenticated Dio — shared singleton with Bearer token interceptor
   late final Dio _dio = DioFactory.getDio();
 
-  // Public Dio ΓÇö no auth, used for open reference-data endpoints
+  // Public Dio — no auth, used for open reference-data endpoints
   Dio get _public => Dio(BaseOptions(
         baseUrl: ApiConstants.baseUrl,
         connectTimeout: const Duration(seconds: 10),
@@ -30,35 +30,26 @@ class ApiService {
         },
       ));
 
-  // ΓöÇΓöÇ Helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Helpers ──────────────────────────────────────────────────────────────
 
   /// Wraps a successful list response.
-  Map<String, dynamic> _okList(List items) =>
-      ApiResult<List>.success(items).toJson();
+  Map<String, dynamic> _okList(List items) => {'success': true, 'data': items};
 
   /// Wraps a successful map/object response.
-  Map<String, dynamic> _okData(dynamic data) =>
-      ApiResult<dynamic>.success(data).toJson();
+  Map<String, dynamic> _okData(dynamic data) => {'success': true, 'data': data};
 
-  /// Wraps a failure in a unified API error shape.
-  Map<String, dynamic> _fail(String msg, {int? code, dynamic details}) {
-    return ApiResult<dynamic>.failure(
-      ApiError(
-        messageAr: msg,
-        statusCode: code,
-        details: details,
-      ),
-    ).toJson();
-  }
+  /// Wraps a failure.
+  Map<String, dynamic> _fail(String msg, {int? code}) =>
+      {'success': false, 'error': msg, if (code != null) 'statusCode': code};
 
   /// Converts Dio errors to user-friendly Arabic strings.
   String _dioError(DioException e) {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.receiveTimeout:
-        return '╪º┘å╪¬┘ç╪¬ ┘à┘ç┘ä╪⌐ ╪º┘ä╪º╪¬╪╡╪º┘ä. ╪¬╪¡┘é┘é ┘à┘å ╪º┘ä╪Ñ┘å╪¬╪▒┘å╪¬';
+        return 'انتهت مهلة الاتصال. تحقق من الإنترنت';
       case DioExceptionType.connectionError:
-        return '╪¬╪╣╪░╪▒ ╪º┘ä╪º╪¬╪╡╪º┘ä ╪¿╪º┘ä╪«╪º╪»┘à. ╪¬╪¡┘é┘é ┘à┘å ╪º┘ä╪Ñ┘å╪¬╪▒┘å╪¬';
+        return 'تعذر الاتصال بالخادم. تحقق من الإنترنت';
       case DioExceptionType.badResponse:
         final code = e.response?.statusCode;
         final serverMsg = e.response?.data is Map
@@ -69,19 +60,19 @@ class ApiService {
                 '')
             : e.response?.data?.toString() ?? '';
         if (serverMsg.toString().contains('No static resource found')) {
-          return '╪º┘ä┘à╪│╪º╪▒ ╪║┘è╪▒ ╪╡╪¡┘è╪¡ ╪╣┘ä┘ë ╪º┘ä╪«╪º╪»┘à. ┘è╪▒╪¼┘ë ╪º┘ä┘à╪¡╪º┘ê┘ä╪⌐ ┘à╪▒╪⌐ ╪ú╪«╪▒┘ë';
+          return 'المسار غير صحيح على الخادم. يرجى المحاولة مرة أخرى';
         }
-        if (code == 401) return '╪║┘è╪▒ ┘à╪╡╪▒╪¡: ┘è╪▒╪¼┘ë ╪¬╪│╪¼┘è┘ä ╪º┘ä╪»╪«┘ê┘ä ┘à╪¼╪»╪»╪º┘ï (401)';
-        if (code == 403) return '┘à┘à┘å┘ê╪╣ ╪º┘ä┘ê╪╡┘ê┘ä (403)';
-        if (code == 404) return '╪º┘ä╪▒╪º╪¿╪╖ ╪║┘è╪▒ ┘à┘ê╪¼┘ê╪» (404)';
-        if (code != null && code >= 500) return '╪«╪╖╪ú ┘ü┘è ╪º┘ä╪«╪º╪»┘à ($code)';
-        return '╪«╪╖╪ú HTTP $code${serverMsg.isNotEmpty ? ": $serverMsg" : ""}';
+        if (code == 401) return 'غير مصرح: يرجى تسجيل الدخول مجدداً (401)';
+        if (code == 403) return 'ممنوع الوصول (403)';
+        if (code == 404) return 'الرابط غير موجود (404)';
+        if (code != null && code >= 500) return 'خطأ في الخادم ($code)';
+        return 'خطأ HTTP $code${serverMsg.isNotEmpty ? ": $serverMsg" : ""}';
       default:
-        return '╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣: ${e.message ?? e.type.name}';
+        return 'خطأ غير متوقع: ${e.message ?? e.type.name}';
     }
   }
 
-  // ΓöÇΓöÇ Doctors (public) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Doctors (public) ─────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>> getDoctorsByCity(int cityId) async {
     try {
@@ -93,11 +84,11 @@ class ApiService {
         return _okList(
             (res.data as List).map((j) => DoctorModel.fromJson(j)).toList());
       }
-      return _fail('┘ü╪┤┘ä ┘ü┘è ╪¬╪¡┘à┘è┘ä ╪º┘ä╪ú╪╖╪¿╪º╪í', code: res.statusCode);
+      return _fail('فشل في تحميل الأطباء', code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
+      return _fail('حدث خطأ غير متوقع');
     }
   }
 
@@ -111,15 +102,15 @@ class ApiService {
         return _okList(
             (res.data as List).map((j) => DoctorModel.fromJson(j)).toList());
       }
-      return _fail('┘ü╪┤┘ä ┘ü┘è ╪¬╪¡┘à┘è┘ä ╪º┘ä╪ú╪╖╪¿╪º╪í', code: res.statusCode);
+      return _fail('فشل في تحميل الأطباء', code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
+      return _fail('حدث خطأ غير متوقع');
     }
   }
 
-  // ΓöÇΓöÇ Reference data (public) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Reference data (public) ──────────────────────────────────────────────
 
   Future<Map<String, dynamic>> getCategories() async {
     try {
@@ -128,11 +119,11 @@ class ApiService {
         return _okList(
             (res.data as List).map((j) => CategoryModel.fromJson(j)).toList());
       }
-      return _fail('┘ü╪┤┘ä ┘ü┘è ╪¬╪¡┘à┘è┘ä ╪º┘ä╪¬╪«╪╡╪╡╪º╪¬', code: res.statusCode);
+      return _fail('فشل في تحميل التخصصات', code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e));
     } catch (_) {
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
+      return _fail('حدث خطأ غير متوقع');
     }
   }
 
@@ -143,11 +134,11 @@ class ApiService {
         return _okList(
             (res.data as List).map((j) => CityModel.fromJson(j)).toList());
       }
-      return _fail('┘ü╪┤┘ä ┘ü┘è ╪¬╪¡┘à┘è┘ä ╪º┘ä┘à╪»┘å', code: res.statusCode);
+      return _fail('فشل في تحميل المدن', code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e));
     } catch (_) {
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
+      return _fail('حدث خطأ غير متوقع');
     }
   }
 
@@ -159,15 +150,15 @@ class ApiService {
             .map((j) => UniversityModel.fromJson(j))
             .toList());
       }
-      return _fail('┘ü╪┤┘ä ┘ü┘è ╪¬╪¡┘à┘è┘ä ╪º┘ä╪¼╪º┘à╪╣╪º╪¬', code: res.statusCode);
+      return _fail('فشل في تحميل الجامعات', code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e));
     } catch (_) {
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
+      return _fail('حدث خطأ غير متوقع');
     }
   }
 
-  // ΓöÇΓöÇ Case Requests ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Case Requests ────────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>> getCaseRequestsByCategory(int categoryId) async {
     try {
@@ -207,9 +198,9 @@ class ApiService {
           return _okList(parsed);
         }
         print('ERROR: unexpected response format: $data');
-        return _fail('╪╡┘è╪║╪⌐ ╪º┘ä╪¿┘è╪º┘å╪º╪¬ ╪║┘è╪▒ ╪╡╪¡┘è╪¡╪⌐', code: res.statusCode);
+        return _fail('صيغة البيانات غير صحيحة', code: res.statusCode);
       }
-      return _fail('┘ü╪┤┘ä ┘ü┘è ╪¬╪¡┘à┘è┘ä ╪º┘ä╪╖┘ä╪¿╪º╪¬', code: res.statusCode);
+      return _fail('فشل في تحميل الطلبات', code: res.statusCode);
     } on DioException catch (e) {
       print('=== DioException in getCaseRequestsByCategory ===');
       print('type: ${e.type}');
@@ -221,7 +212,7 @@ class ApiService {
       print('=== UNEXPECTED ERROR in getCaseRequestsByCategory ===');
       print('error: $e');
       print('stackTrace: $st');
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣: ${e.toString()}');
+      return _fail('حدث خطأ غير متوقع: ${e.toString()}');
     }
   }
 
@@ -230,13 +221,13 @@ class ApiService {
     try {
       final res = await _dio.post(ApiConstants.createCaseRequest, data: body);
       if (res.statusCode == 200 || res.statusCode == 201) {
-        return _okData(res.data)..['message'] = '╪¬┘à ╪Ñ┘å╪┤╪º╪í ╪º┘ä╪╖┘ä╪¿ ╪¿┘å╪¼╪º╪¡';
+        return _okData(res.data)..['message'] = 'تم إنشاء الطلب بنجاح';
       }
-      return _fail('┘ü╪┤┘ä ┘ü┘è ╪Ñ┘å╪┤╪º╪í ╪º┘ä╪╖┘ä╪¿', code: res.statusCode);
+      return _fail('فشل في إنشاء الطلب', code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
+      return _fail('حدث خطأ غير متوقع');
     }
   }
 
@@ -249,13 +240,13 @@ class ApiService {
         data: body,
       );
       if (res.statusCode == 200 || res.statusCode == 201) {
-        return _okData(res.data)..['message'] = '╪¬┘à ╪¬╪¡╪»┘è╪½ ╪º┘ä╪╖┘ä╪¿ ╪¿┘å╪¼╪º╪¡';
+        return _okData(res.data)..['message'] = 'تم تحديث الطلب بنجاح';
       }
-      return _fail('┘ü╪┤┘ä ┘ü┘è ╪¬╪¡╪»┘è╪½ ╪º┘ä╪╖┘ä╪¿', code: res.statusCode);
+      return _fail('فشل في تحديث الطلب', code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
+      return _fail('حدث خطأ غير متوقع');
     }
   }
 
@@ -266,11 +257,11 @@ class ApiService {
         return _okData(
             CaseRequestModel.fromJson(res.data as Map<String, dynamic>));
       }
-      return _fail('┘ü╪┤┘ä ┘ü┘è ╪¬╪¡┘à┘è┘ä ╪º┘ä╪╖┘ä╪¿', code: res.statusCode);
+      return _fail('فشل في تحميل الطلب', code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
+      return _fail('حدث خطأ غير متوقع');
     }
   }
 
@@ -285,11 +276,11 @@ class ApiService {
               .toList(),
         );
       }
-      return _fail('┘ü╪┤┘ä ┘ü┘è ╪¬╪¡┘à┘è┘ä ╪º┘ä╪╖┘ä╪¿╪º╪¬', code: res.statusCode);
+      return _fail('فشل في تحميل الطلبات', code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
+      return _fail('حدث خطأ غير متوقع');
     }
   }
 
@@ -320,16 +311,40 @@ class ApiService {
                 .toList(),
           );
         }
-        return _fail('╪╡┘è╪║╪⌐ ╪º┘ä╪¿┘è╪º┘å╪º╪¬ ╪║┘è╪▒ ╪╡╪¡┘è╪¡╪⌐', code: res.statusCode);
+        return _fail('صيغة البيانات غير صحيحة', code: res.statusCode);
       }
-      return _fail('┘ü╪┤┘ä ┘ü┘è ╪¬╪¡┘à┘è┘ä ╪º┘ä╪╖┘ä╪¿╪º╪¬', code: res.statusCode);
+      return _fail('فشل في تحميل الطلبات', code: res.statusCode);
     } on DioException catch (e) {
       print('=== deleteDoctor error body ===');
       print('status code: ${e.response?.statusCode}');
       print('response data: ${e.response?.data}');
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
+  Future<Map<String, dynamic>> editRequest(
+      int requestId, Map<String, dynamic> body) async {
+    try {
+      await DioFactory.addDioHeaders();
+      final res = await _dio.put(
+        '${ApiConstants.editRequest}/$requestId',
+        data: body,
+      );
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        return _okData(res.data);
+      }
+      return _fail('فشل في تحديث الطلب', code: res.statusCode);
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      if (code == 403)
+        return _fail('ممنوع الوصول: يمكنك تعديل الطلبات المعلقة فقط', code: code);
+      if (code == 404) return _fail('الطلب غير موجود', code: code);
+      if (code == 500) return _fail('خطأ في الخادم، حاول مرة أخرى', code: code);
+      return _fail(_dioError(e), code: code);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
     }
   }
 
@@ -345,17 +360,67 @@ class ApiService {
       if (res.statusCode == 200 || res.statusCode == 204)
         return {'success': true};
       if (res.statusCode == 403)
-        return _fail('┘à┘à┘å┘ê╪╣ ╪º┘ä┘ê╪╡┘ê┘ä: ╪¬╪ú┘â╪» ┘à┘å ╪ú┘å ┘ç╪░╪º ╪º┘ä╪╖┘ä╪¿ ╪«╪º╪╡ ╪¿┘â', code: 403);
-      return _fail('┘ü╪┤┘ä ┘ü┘è ╪¡╪░┘ü ╪º┘ä╪╖┘ä╪¿', code: res.statusCode);
+        return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: 403);
+      return _fail('فشل في حذف الطلب', code: res.statusCode);
     } on DioException catch (e) {
       final code = e.response?.statusCode;
       if (code == 403)
-        return _fail('┘à┘à┘å┘ê╪╣ ╪º┘ä┘ê╪╡┘ê┘ä: ╪¬╪ú┘â╪» ┘à┘å ╪ú┘å ┘ç╪░╪º ╪º┘ä╪╖┘ä╪¿ ╪«╪º╪╡ ╪¿┘â', code: code);
-      if (code == 404) return _fail('╪º┘ä╪╖┘ä╪¿ ╪║┘è╪▒ ┘à┘ê╪¼┘ê╪»', code: code);
-      if (code == 500) return _fail('╪«╪╖╪ú ┘ü┘è ╪º┘ä╪«╪º╪»┘à╪î ╪¡╪º┘ê┘ä ┘à╪▒╪⌐ ╪ú╪«╪▒┘ë', code: code);
+        return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: code);
+      if (code == 404) return _fail('الطلب غير موجود', code: code);
+      if (code == 500) return _fail('خطأ في الخادم، حاول مرة أخرى', code: code);
       return _fail(_dioError(e), code: code);
     } catch (_) {
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
+  // ── Appointments ───────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> createAppointment(
+      String requestId, Map<String, dynamic> body) async {
+    try {
+      // Use public Dio since no authorization is required
+      // Using query parameters for requestId to fix "No static resource found" error
+      final res = await _public.post(
+        ApiConstants.createAppointment,
+        queryParameters: {'requestId': requestId},
+        data: body,
+      );
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        return _okData(res.data)..['message'] = 'تم إنشاء الحجز بنجاح';
+      }
+      return _fail('فشل في إنشاء الحجز', code: res.statusCode);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
+  Future<Map<String, dynamic>> getAppointmentsByDoctorId(int doctorId) async {
+    try {
+      await DioFactory.addDioHeaders();
+      final res = await _dio.get(
+        '${ApiConstants.viewAppointmentsByDoctor}/$doctorId',
+      );
+      if (res.statusCode == 200) {
+        final data = res.data;
+        // Support both plain List and Map with data/content/items key
+        final List? raw = data is List
+            ? data
+            : (data is Map
+                ? (data['data'] ?? data['content'] ?? data['items'] ?? data['appointments']) as List?
+                : null);
+        if (raw != null) {
+          return _okList(raw);
+        }
+        return _fail('صيغة البيانات غير صحيحة', code: res.statusCode);
+      }
+      return _fail('فشل في تحميل المواعيد', code: res.statusCode);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
     }
   }
 
@@ -436,7 +501,7 @@ class ApiService {
             }
 
             if (jsonData == null) {
-              return _fail('╪╡┘è╪║╪⌐ ╪¿┘è╪º┘å╪º╪¬ ╪º┘ä╪╖╪¿┘è╪¿ ╪║┘è╪▒ ╪╡╪¡┘è╪¡╪⌐', code: res.statusCode);
+              return _fail('صيغة بيانات الطبيب غير صحيحة', code: res.statusCode);
             }
 
             print('=== getDoctorById: Raw JSON (with params) = $jsonData ===');
@@ -454,9 +519,9 @@ class ApiService {
         }
       }
 
-      return _fail('╪¬╪╣╪░╪▒ ╪¬╪¡┘à┘è┘ä ╪¿┘è╪º┘å╪º╪¬ ╪º┘ä╪╖╪¿┘è╪¿');
+      return _fail('تعذر تحميل بيانات الطبيب');
     } catch (_) {
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
+      return _fail('حدث خطأ غير متوقع');
     }
   }
 
@@ -470,31 +535,31 @@ class ApiService {
       if (res.statusCode == 200 || res.statusCode == 201)
         return _okData(res.data);
       if (res.statusCode == 403)
-        return _fail('┘à┘à┘å┘ê╪╣ ╪º┘ä┘ê╪╡┘ê┘ä: ╪¬╪ú┘â╪» ┘à┘å ╪╡┘ä╪º╪¡┘è╪º╪¬┘â', code: 403);
-      return _fail('┘ü╪┤┘ä ┘ü┘è ╪¬╪¡╪»┘è╪½ ╪¿┘è╪º┘å╪º╪¬ ╪º┘ä╪╖╪¿┘è╪¿', code: res.statusCode);
+        return _fail('ممنوع الوصول: تأكد من صلاحياتك', code: 403);
+      return _fail('فشل في تحديث بيانات الطبيب', code: res.statusCode);
     } on DioException catch (e) {
       final code = e.response?.statusCode;
       if (code == 403)
-        return _fail('┘à┘à┘å┘ê╪╣ ╪º┘ä┘ê╪╡┘ê┘ä: ╪¬╪ú┘â╪» ┘à┘å ╪╡┘ä╪º╪¡┘è╪º╪¬┘â', code: code);
+        return _fail('ممنوع الوصول: تأكد من صلاحياتك', code: code);
       return _fail(_dioError(e), code: code);
     } catch (e) {
       debugPrint('updateDoctor unexpected error: $e');
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
+      return _fail('حدث خطأ غير متوقع');
     }
   }
 
   Future<Map<String, dynamic>> deleteDoctor() async {
     try {
       await DioFactory.addDioHeaders();
-      // ╪¡╪º┘ê┘ä POST ╪ú┘ê┘ä╪º┘ï (╪¿╪╣╪╢ ╪º┘ä┘Ç APIs ╪¬╪│╪¬╪«╪»┘à POST ┘ä┘ä╪¡╪░┘ü)
+      // حاول POST أولاً (بعض الـ APIs تستخدم POST للحذف)
       try {
         final res = await _dio.delete(ApiConstants.deleteDoctor);
         if (res.statusCode == 200 || res.statusCode == 204) {
           return {'success': true};
         }
-        return _fail('┘ü╪┤┘ä ┘ü┘è ╪¡╪░┘ü ╪º┘ä╪¡╪│╪º╪¿', code: res.statusCode);
+        return _fail('فشل في حذف الحساب', code: res.statusCode);
       } on DioException catch (postError) {
-        // ╪Ñ╪░╪º ┘ü╪┤┘ä POST╪î ╪¡╪º┘ê┘ä DELETE
+        // إذا فشل POST، حاول DELETE
         if (postError.response?.statusCode == 404 ||
             postError.response?.statusCode == 405) {
           try {
@@ -502,130 +567,129 @@ class ApiService {
             if (res.statusCode == 200 || res.statusCode == 204) {
               return {'success': true};
             }
-            return _fail('┘ü╪┤┘ä ┘ü┘è ╪¡╪░┘ü ╪º┘ä╪¡╪│╪º╪¿', code: res.statusCode);
+            return _fail('فشل في حذف الحساب', code: res.statusCode);
           } on DioException catch (deleteError) {
             final code = deleteError.response?.statusCode;
-            if (code == 404) return _fail('╪º┘ä╪╖╪¿┘è╪¿ ╪║┘è╪▒ ┘à┘ê╪¼┘ê╪»', code: code);
+            if (code == 404) return _fail('الطبيب غير موجود', code: code);
             if (code == 401)
-              return _fail('╪║┘è╪▒ ┘à╪╡╪▒╪¡: ┘è╪▒╪¼┘ë ╪¬╪│╪¼┘è┘ä ╪º┘ä╪»╪«┘ê┘ä ┘à╪¼╪»╪»╪º┘ï', code: code);
+              return _fail('غير مصرح: يرجى تسجيل الدخول مجدداً', code: code);
             if (code == 403)
-              return _fail('┘à┘à┘å┘ê╪╣ ╪º┘ä┘ê╪╡┘ê┘ä╪î ╪¬╪ú┘â╪» ┘à┘å ╪╡┘ä╪º╪¡┘è╪º╪¬┘â', code: code);
+              return _fail('ممنوع الوصول، تأكد من صلاحياتك', code: code);
             return _fail(_dioError(deleteError), code: code);
           }
         }
-        // ╪Ñ╪░╪º ┘â╪º┘å ╪º┘ä╪«╪╖╪ú ┘ä┘è╪│ 404 ╪ú┘ê 405╪î ╪ú╪▒╪¼╪╣ ╪º┘ä╪«╪╖╪ú ┘à┘å POST
+        // إذا كان الخطأ ليس 404 أو 405، أرجع الخطأ من POST
         final code = postError.response?.statusCode;
-        if (code == 404) return _fail('╪º┘ä╪╖╪¿┘è╪¿ ╪║┘è╪▒ ┘à┘ê╪¼┘ê╪»', code: code);
+        if (code == 404) return _fail('الطبيب غير موجود', code: code);
         if (code == 401)
-          return _fail('╪║┘è╪▒ ┘à╪╡╪▒╪¡: ┘è╪▒╪¼┘ë ╪¬╪│╪¼┘è┘ä ╪º┘ä╪»╪«┘ê┘ä ┘à╪¼╪»╪»╪º┘ï', code: code);
+          return _fail('غير مصرح: يرجى تسجيل الدخول مجدداً', code: code);
         if (code == 403)
-          return _fail('┘à┘à┘å┘ê╪╣ ╪º┘ä┘ê╪╡┘ê┘ä╪î ╪¬╪ú┘â╪» ┘à┘å ╪╡┘ä╪º╪¡┘è╪º╪¬┘â', code: code);
+          return _fail('ممنوع الوصول، تأكد من صلاحياتك', code: code);
         return _fail(_dioError(postError), code: code);
       }
     } catch (_) {
-      return _fail('╪¡╪»╪½ ╪«╪╖╪ú ╪║┘è╪▒ ┘à╪¬┘ê┘é╪╣');
-    }
-  }
-
-  // Appointments
-
-  Future<Map<String, dynamic>> getAllAppointments() async {
-    try {
-      await DioFactory.addDioHeaders();
-      final res = await _dio.get(ApiConstants.getAllAppointments);
-
-      if (res.statusCode == 200) {
-        final data = res.data;
-        final List<dynamic>? raw = data is List
-            ? data
-            : (data is Map
-                ? (data['data'] ?? data['content'] ?? data['items']) as List?
-                : null);
-
-        if (raw != null) {
-          // Keep payload as JSON maps to preserve current cubit contract.
-          return _okList(raw.map((e) => Map<String, dynamic>.from(e as Map)).toList());
-        }
-      }
-
-      return _fail('فشل في تحميل الحجوزات', code: res.statusCode);
-    } on DioException catch (e) {
-      return _fail(_dioError(e), code: e.response?.statusCode);
-    } catch (_) {
       return _fail('حدث خطأ غير متوقع');
     }
   }
 
-  Future<Map<String, dynamic>> getAppointmentsByDoctorId(int doctorId) async {
+  Future<Map<String, dynamic>> updateAppointmentStatus(
+      String appointmentId, String status, String doctorId) async {
     try {
       await DioFactory.addDioHeaders();
-      final res = await _dio.get(
-        ApiConstants.getAppointmentsByDoctorId,
-        queryParameters: {'doctorId': doctorId},
+      final body = {
+        "AppointmentId": appointmentId,
+        "Status": status,
+        "DoctorId": doctorId,
+      };
+
+      final res = await _dio.put(
+        '${ApiConstants.updateAppointmentStatus}/$appointmentId',
+        data: body,
       );
 
-      if (res.statusCode == 200) {
-        final data = res.data;
-        final List<dynamic>? raw = data is List
-            ? data
-            : (data is Map
-                ? (data['data'] ?? data['content'] ?? data['items']) as List?
-                : null);
-
-        if (raw != null) {
-          return _okList(raw.map((e) => Map<String, dynamic>.from(e as Map)).toList());
-        }
-      }
-
-      return _fail('فشل في تحميل حجوزات الطبيب', code: res.statusCode);
-    } on DioException catch (e) {
-      return _fail(_dioError(e), code: e.response?.statusCode);
-    } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
-    }
-  }
-
-  Future<Map<String, dynamic>> createAppointment(Map<String, dynamic> body) async {
-    try {
-      await DioFactory.addDioHeaders();
-      final res = await _dio.post(ApiConstants.createAppointment, data: body);
-
-      if (res.statusCode == 200 || res.statusCode == 201) {
+      if (res.statusCode == 200 || res.statusCode == 204) {
         return _okData(res.data);
       }
-
-      return _fail('فشل في إنشاء الحجز', code: res.statusCode);
+      return _fail('فشل في تحديث حالة الحجز', code: res.statusCode);
     } on DioException catch (e) {
-      return _fail(_dioError(e), code: e.response?.statusCode);
+      final code = e.response?.statusCode;
+      if (code == 404) return _fail('الحجز غير موجود', code: code);
+      if (code == 401) return _fail('غير مصرح: يرجى تسجيل الدخول مجدداً', code: code);
+      return _fail(_dioError(e), code: code);
     } catch (_) {
       return _fail('حدث خطأ غير متوقع');
     }
   }
 
-  Future<Map<String, dynamic>> getAppointmentById(int id) async {
+  Future<Map<String, dynamic>> viewAppointmentsByDoctor(String doctorId) async {
     try {
       await DioFactory.addDioHeaders();
-      final res = await _dio.get(
-        ApiConstants.getAppointmentById,
-        queryParameters: {'id': id},
-      );
+      final res = await _dio.get('${ApiConstants.viewAppointmentsByDoctor}/$doctorId');
+      if (res.statusCode == 200 || res.statusCode == 204) {
+        return _okData(res.data);
+      }
+      return _fail('فشل في تحميل الحجوزات', code: res.statusCode);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode ?? 500);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
 
+  Future<Map<String, dynamic>> cancelAppointment(String appointmentId) async {
+    try {
+      await DioFactory.addDioHeaders();
+      final res = await _dio.delete('${ApiConstants.cancelAppointment}/$appointmentId');
+      if (res.statusCode == 200 || res.statusCode == 204) {
+        return _okData(res.data);
+      }
+      return _fail('فشل في إلغاء الحجز', code: res.statusCode);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return _fail('الحجز غير موجود', code: 404);
+      return _fail(_dioError(e), code: e.response?.statusCode ?? 500);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
+  Future<Map<String, dynamic>> getPendingAppointments() async {
+    try {
+      await DioFactory.addDioHeaders();
+      final res = await _dio.get(ApiConstants.pendingAppointments);
       if (res.statusCode == 200) {
         final data = res.data;
-        final dynamic raw = data is Map
-            ? (data['data'] ?? data['item'] ?? data)
-            : data;
-
-        if (raw is Map) {
-          return _okData(Map<String, dynamic>.from(raw));
+        final List? raw = data is List
+            ? data
+            : (data is Map
+                ? (data['data'] ?? data['content'] ?? data['items'] ?? data['appointments']) as List?
+                : null);
+        if (raw != null) {
+          return _okList(raw.map((j) => AppointmentModel.fromJson(j)).toList());
         }
+        return _fail('صيغة البيانات غير صحيحة', code: res.statusCode);
       }
-
-      return _fail('فشل في تحميل تفاصيل الحجز', code: res.statusCode);
+      return _fail('فشل في تحميل الحجوزات القادمة', code: res.statusCode);
     } on DioException catch (e) {
-      return _fail(_dioError(e), code: e.response?.statusCode);
+      return _fail(_dioError(e), code: e.response?.statusCode ?? 500);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteAppointment(String appointmentId) async {
+    try {
+      await DioFactory.addDioHeaders();
+      final res = await _dio.delete('${ApiConstants.deleteAppointment}/$appointmentId');
+      if (res.statusCode == 200 || res.statusCode == 204) {
+        return {'success': true};
+      }
+      return _fail('فشل في حذف الحجز', code: res.statusCode);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return _fail('الحجز غير موجود', code: 404);
+      return _fail(_dioError(e), code: e.response?.statusCode ?? 500);
     } catch (_) {
       return _fail('حدث خطأ غير متوقع');
     }
   }
 }
+

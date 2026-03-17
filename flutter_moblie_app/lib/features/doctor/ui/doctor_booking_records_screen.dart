@@ -5,7 +5,7 @@ import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/utils/notification_helper.dart';
-import 'package:thotha_mobile_app/features/appointments/data/models/appointment_model.dart';
+
 import 'package:thotha_mobile_app/features/appointments/logic/appointments_cubit.dart';
 import 'package:thotha_mobile_app/features/appointments/logic/appointments_state.dart';
 import 'package:thotha_mobile_app/features/doctor/drawer/doctor_drawer_screen.dart';
@@ -352,6 +352,7 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
     required Color statusColor,
     required double width,
     required double baseFontSize,
+    VoidCallback? onDelete,
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -449,23 +450,49 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
               ),
             ),
             const SizedBox(width: 8),
-            // Status badge
-            Container(
-              padding: EdgeInsets.symmetric(
-                  horizontal: 10 * (width / 390), vertical: 4 * (width / 390)),
-              decoration: BoxDecoration(
-                color: statusColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                status,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.bold,
-                  fontSize: baseFontSize * 0.7,
+            const SizedBox(width: 8),
+            // Status badge and delete button
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 10 * (width / 390), vertical: 4 * (width / 390)),
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    status,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Cairo',
+                      fontWeight: FontWeight.bold,
+                      fontSize: baseFontSize * 0.7,
+                    ),
+                  ),
                 ),
-              ),
+                if (onDelete != null) ...[
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: onDelete,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.delete_outline,
+                        color: Colors.red,
+                        size: 20 * (width / 390),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ],
         ),
@@ -549,7 +576,7 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
                   )
                 else
                   ...appointments.map((appt) {
-                    final appointment = appt as AppointmentModel;
+                    final appointment = appt;
                     final status = appointment.displayStatus;
                     final statusColor = status == 'مؤكد' ? Colors.green : Colors.orange;
                     return Column(
@@ -559,12 +586,40 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
                           patientName: appointment.patientFullName.isNotEmpty
                               ? appointment.patientFullName
                               : 'مريض',
-                          phone: appointment.patientPhoneNumber ?? '',
+                          phone: appointment.patientPhoneNumber,
                           date: _formatDate(appointment.createdAt),
                           status: status,
                           statusColor: statusColor,
                           width: width,
                           baseFontSize: baseFontSize,
+                          onDelete: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => Directionality(
+                                textDirection: TextDirection.rtl,
+                                child: AlertDialog(
+                                  title: const Text('إلغاء الحجز', textAlign: TextAlign.right, style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
+                                  content: const Text('هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟', textAlign: TextAlign.right, style: TextStyle(fontFamily: 'Cairo')),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx, false),
+                                      child: const Text('تراجع', style: TextStyle(fontFamily: 'Cairo')),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx, true),
+                                      child: const Text('نعم، الغاء', style: TextStyle(fontFamily: 'Cairo', color: Colors.red)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                            if (confirm == true && appointment.id != null) {
+                              final doctorId = await _extractDoctorIdFromToken();
+                              if (context.mounted) {
+                                context.read<AppointmentsCubit>().cancelAppointment(appointment.id!, doctorId);
+                              }
+                            }
+                          },
                         ),
                         const SizedBox(height: 12),
                       ],

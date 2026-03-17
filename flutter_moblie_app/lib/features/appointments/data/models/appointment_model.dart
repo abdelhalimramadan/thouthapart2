@@ -1,109 +1,109 @@
-class AppointmentModel {
-  final int? id;
-  final int? doctorId;
-  final String? doctorFirstName;
-  final String? doctorLastName;
-  final int? patientId;
-  final String? patientFirstName;
-  final String? patientLastName;
-  final String? patientPhoneNumber;
-  final String? status;
+import 'package:equatable/equatable.dart';
+
+class AppointmentModel extends Equatable {
+  final String? patientId;
+  final String? firstName;
+  final String? lastName;
+  final String? phone;
+  final String? requestId;
+  final String? id;
   final String? createdAt;
   final String? updatedAt;
+  final String? status;
 
-  AppointmentModel({
-    this.id,
-    this.doctorId,
-    this.doctorFirstName,
-    this.doctorLastName,
+  const AppointmentModel({
     this.patientId,
-    this.patientFirstName,
-    this.patientLastName,
-    this.patientPhoneNumber,
-    this.status,
+    this.firstName,
+    this.lastName,
+    this.phone,
+    this.requestId,
+    this.id,
     this.createdAt,
     this.updatedAt,
+    this.status,
   });
-
-  /// Full doctor name helper
-  String get doctorFullName {
-    final first = doctorFirstName ?? '';
-    final last = doctorLastName ?? '';
-    return '$first $last'.trim();
-  }
-
-  /// Full patient name helper
-  String get patientFullName {
-    final first = patientFirstName ?? '';
-    final last = patientLastName ?? '';
-    return '$first $last'.trim();
-  }
-
-  /// Status color helper
-  String get displayStatus {
-    final s = status?.toLowerCase() ?? 'confirmed';
-    if (s == 'confirmed' || s == 'مؤكد') return 'مؤكد';
-    if (s == 'pending' || s == 'قيد الانتظار') return 'قيد الانتظار';
-    return status ?? 'مؤكد';
-  }
 
   factory AppointmentModel.fromJson(Map<String, dynamic> json) {
     return AppointmentModel(
-      id: json['id'] as int?,
-      doctorId: json['doctorId'] as int?,
-      doctorFirstName: json['doctorFirstName'] as String?,
-      doctorLastName: json['doctorLastName'] as String?,
-      patientId: json['patientId'] as int?,
-      patientFirstName: json['patientFirstName'] as String?,
-      patientLastName: json['patientLastName'] as String?,
-      patientPhoneNumber: json['patientPhoneNumber'] as String?,
-      status: json['status'] as String?,
-      createdAt: json['createdAt'] as String?,
-      updatedAt: json['updatedAt'] as String?,
+      patientId: json['PatientId']?.toString() ?? json['patientId']?.toString(),
+      firstName: json['FirstName']?.toString() ?? json['firstName']?.toString(),
+      lastName: json['LastName']?.toString() ?? json['lastName']?.toString(),
+      phone: json['Phone']?.toString() ?? json['phone']?.toString(),
+      requestId: json['RequestId']?.toString() ?? json['requestId']?.toString(),
+      id: json['id']?.toString() ?? json['AppointmentId']?.toString() ?? json['appointmentId']?.toString() ?? json['Id']?.toString(),
+      createdAt: json['CreatedAt']?.toString() ?? json['createdAt']?.toString() ?? json['created_at']?.toString(),
+      updatedAt: json['UpdatedAt']?.toString() ?? json['updatedAt']?.toString() ?? json['updated_at']?.toString(),
+      status: json['Status']?.toString() ?? json['status']?.toString(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'PatientId': patientId,
+      'FirstName': firstName,
+      'LastName': lastName,
+      'Phone': phone,
+      'RequestId': requestId,
       'id': id,
-      'doctorId': doctorId,
-      'doctorFirstName': doctorFirstName,
-      'doctorLastName': doctorLastName,
-      'patientId': patientId,
-      'patientFirstName': patientFirstName,
-      'patientLastName': patientLastName,
-      'patientPhoneNumber': patientPhoneNumber,
-      'status': status,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
+      'status': status,
     };
   }
 
+  String get patientFullName => '${firstName ?? ''} ${lastName ?? ''}'.trim();
+  String get patientPhoneNumber => phone ?? '';
+
+  String get displayStatus {
+    switch (status?.toLowerCase()) {
+      case 'confirmed':
+      case 'مؤكد':
+        return 'مؤكد';
+      case 'pending':
+      case 'قيد الانتظار':
+        return 'قيد الانتظار';
+      case 'cancelled':
+      case 'ملغي':
+        return 'ملغي';
+      default:
+        return status ?? 'قيد الانتظار';
+    }
+  }
+
   AppointmentModel copyWith({
-    int? id,
-    int? doctorId,
-    String? doctorFirstName,
-    String? doctorLastName,
-    int? patientId,
-    String? patientFirstName,
-    String? patientLastName,
-    String? patientPhoneNumber,
-    String? status,
+    String? patientId,
+    String? firstName,
+    String? lastName,
+    String? phone,
+    String? requestId,
+    String? id,
     String? createdAt,
     String? updatedAt,
+    String? status,
   }) {
     return AppointmentModel(
-      id: id ?? this.id,
-      doctorId: doctorId ?? this.doctorId,
-      doctorFirstName: doctorFirstName ?? this.doctorFirstName,
-      doctorLastName: doctorLastName ?? this.doctorLastName,
       patientId: patientId ?? this.patientId,
-      patientFirstName: patientFirstName ?? this.patientFirstName,
-      patientLastName: patientLastName ?? this.patientLastName,
-      patientPhoneNumber: patientPhoneNumber ?? this.patientPhoneNumber,
-      status: status ?? this.status,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      phone: phone ?? this.phone,
+      requestId: requestId ?? this.requestId,
+      id: id ?? this.id,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      status: status ?? this.status,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        patientId,
+        firstName,
+        lastName,
+        phone,
+        requestId,
+        id,
+        createdAt,
+        updatedAt,
+        status,
+      ];
 }

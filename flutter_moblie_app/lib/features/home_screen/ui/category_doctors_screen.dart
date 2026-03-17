@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
+import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
 import 'package:thotha_mobile_app/features/booking/ui/booking_confirmation_screen.dart';
-import 'package:thotha_mobile_app/features/requests/data/models/case_request_model.dart';
-import 'package:thotha_mobile_app/features/requests/data/repos/case_request_repo.dart';
-import 'package:thotha_mobile_app/features/requests/ui/add_case_request_screen.dart';
-import 'package:thotha_mobile_app/core/helpers/constants.dart';
+import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
+import '../../requests/data/repos/case_request_repo.dart';
+import '../../requests/ui/add_case_request_screen.dart';
+import '../../requests/ui/edit_case_request_screen.dart';
+import '../../requests/data/models/case_request_model.dart' as rcm;
 
 class CategoryDoctorsScreen extends StatefulWidget {
   final String categoryName;
@@ -36,9 +38,10 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
   final ApiService _apiService = ApiService();
 
   List<CaseRequestModel> _requests = [];
-  bool _isLoading = false;
+  bool _isLoading = true;
   String? _error;
   bool _isDoctorLoggedIn = false;
+  int _currentDoctorId = 0;
 
   @override
   void initState() {
@@ -49,16 +52,23 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
 
   Future<void> _checkLoginStatus() async {
     try {
-      final token =
-          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-
-      // If we have a token, we are logged in.
-      // If we were also told to show the add button, we treat the user as a doctor.
-      final isLoggedIn = token.isNotEmpty && token != 'null';
+      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      final isLoggedIn = token != null && token.isNotEmpty;
+      
+      int doctorId = 0;
+      if (isLoggedIn) {
+        // Try to get doctor_id from multiple common keys
+        doctorId = await SharedPrefHelper.getInt('doctor_id');
+        if (doctorId == 0) {
+          final sId = await SharedPrefHelper.getString('doctor_id');
+          doctorId = int.tryParse(sId ?? '') ?? 0;
+        }
+      }
 
       if (mounted) {
         setState(() {
-          _isDoctorLoggedIn = isLoggedIn && widget.showAddCaseButton;
+          _isDoctorLoggedIn = isLoggedIn;
+          _currentDoctorId = doctorId;
         });
       }
     } catch (e) {
@@ -167,6 +177,28 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
   }
 
   /// Asks for confirmation then deletes [req] via the authenticated API.
+  void _openEditScreen(CaseRequestModel req) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditCaseRequestScreen(
+          request: rcm.CaseRequestModel(
+            id: req.id,
+            doctorId: req.doctorId,
+            doctorFirstName: req.doctorFirstName,
+            doctorLastName: req.doctorLastName,
+            doctorPhoneNumber: req.doctorPhoneNumber,
+            doctorCityName: req.doctorCityName,
+            doctorUniversityName: req.doctorUniversityName,
+            categoryName: req.categoryName,
+            description: req.description,
+            dateTime: req.dateTime,
+          ),
+        ),
+      ),
+    ).then((_) => _loadRequests());
+  }
+
   Future<void> _deleteRequest(CaseRequestModel req) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -256,16 +288,24 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) => _CaseDetailsSheet(
         req: req,
-        // doctor (logged-in) sees delete icon → no Book Now
-        // patient/guest sees Book Now → no delete icon
+        // Show Book Now only if the user is NOT logged in (Guest)
         showBookNow: !_isDoctorLoggedIn,
+        // Show Edit/Delete ONLY if Logged in AND Owner
+        showEditDelete: _isDoctorLoggedIn && req.doctorId == _currentDoctorId,
+        onEdit: () {
+          Navigator.pop(context);
+          _openEditScreen(req);
+        },
+        onDelete: () {
+          Navigator.pop(context);
+          _deleteRequest(req);
+        },
         onBookNow: () {
           Navigator.pop(context); // close sheet
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => BookingConfirmationScreen(
-                doctorId: req.doctorId ?? 0,
                 doctorName: req.doctorFullName,
                 date: req.formattedDate,
                 time: req.formattedTime,
@@ -355,6 +395,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                                 isDark,
                                 theme,
                                 _isDoctorLoggedIn,
+                                _isDoctorLoggedIn && _requests[index].doctorId == _currentDoctorId,
                               ),
                             );
                           },
@@ -372,6 +413,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     bool isDark,
     ThemeData theme,
     bool isLoggedIn,
+    bool isOwner,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -411,40 +453,23 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (req.id != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: ColorsManager.mainBlue.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '#${req.id}',
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: baseFontSize * 0.72,
-                            fontWeight: FontWeight.bold,
-                            color: ColorsManager.mainBlue,
-                          ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: ColorsManager.mainBlue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '#${req.id}',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: baseFontSize * 0.72,
+                          fontWeight: FontWeight.bold,
+                          color: ColorsManager.mainBlue,
                         ),
                       ),
-                    if (isLoggedIn) ...[
-                      const SizedBox(width: 8),
-                      Material(
-                        color: Colors.red.withOpacity(0.08),
-                        shape: const CircleBorder(),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.delete_outline_rounded,
-                            color: Colors.red,
-                            size: 20,
-                          ),
-                          tooltip: 'حذف الطلب',
-                          onPressed: () => _deleteRequest(req),
-                        ),
-                      ),
-                    ],
+                    ),
                   ],
                 ),
               ],
@@ -543,7 +568,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
             const Divider(height: 1),
             const SizedBox(height: 12),
 
-            // Date and time chips + Book Now (for Guest)
+            // Date and time chips + Action Button
             Row(
               children: [
                 Expanded(
@@ -566,7 +591,30 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                     ],
                   ),
                 ),
-                if (!isLoggedIn)
+                
+                // Show Edit/Delete only if Logged in AND Owner
+                if (isOwner)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildActionButton(
+                        onTap: () => _deleteRequest(req),
+                        icon: Icons.delete_outline_rounded,
+                        label: 'حذف',
+                        color: Colors.red,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(width: 8),
+                      _buildActionButton(
+                        onTap: () => _openEditScreen(req),
+                        icon: Icons.edit_outlined,
+                        label: 'تعديل',
+                        color: ColorsManager.mainBlue,
+                        isDark: isDark,
+                      ),
+                    ],
+                  )
+                else if (!isLoggedIn) // Show Book Now only if NOT logged in
                   SizedBox(
                     height: 36.h,
                     child: ElevatedButton(
@@ -575,7 +623,6 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (_) => BookingConfirmationScreen(
-                              doctorId: req.doctorId ?? 0,
                               doctorName: req.doctorFullName,
                               date: req.formattedDate,
                               time: req.formattedTime,
@@ -604,6 +651,43 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                     ),
                   ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required VoidCallback onTap,
+    required IconData icon,
+    required String label,
+    required Color color,
+    required bool isDark,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withOpacity(0.2)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 12.sp,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
           ],
         ),
@@ -722,11 +806,17 @@ class _CaseDetailsSheet extends StatelessWidget {
   final CaseRequestModel req;
   final VoidCallback onBookNow;
   final bool showBookNow;
+  final bool showEditDelete;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const _CaseDetailsSheet({
     required this.req,
     required this.onBookNow,
     this.showBookNow = true,
+    this.showEditDelete = false,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -877,6 +967,48 @@ class _CaseDetailsSheet extends StatelessWidget {
                     ),
                   ),
                 ),
+
+              // ── Edit/Delete buttons (for Owner) ──
+              if (showEditDelete) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: onEdit,
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: const Text('تعديل الحالة',
+                            style: TextStyle(fontFamily: 'Cairo')),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: ColorsManager.mainBlue,
+                          side: BorderSide(color: ColorsManager.mainBlue),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: onDelete,
+                        icon: const Icon(Icons.delete_outline,
+                            size: 18, color: Colors.red),
+                        label: const Text('حذف',
+                            style: TextStyle(
+                                fontFamily: 'Cairo', color: Colors.red)),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

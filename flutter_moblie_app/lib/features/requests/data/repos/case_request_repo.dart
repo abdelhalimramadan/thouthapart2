@@ -65,6 +65,19 @@ class CaseRequestRepo {
     }
   }
 
+  Future<Map<String, dynamic>> editRequest(
+      int requestId, CaseRequestBody body) async {
+    try {
+      final response = await _apiService.editRequest(requestId, body.toJson());
+      return response;
+    } catch (e) {
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
   Future<Map<String, dynamic>> getRequestsByDoctorId(int doctorId) async {
     try {
       return await _apiService.getRequestsByDoctorId(doctorId);
@@ -86,4 +99,17 @@ class CaseRequestRepo {
       };
     }
   }
+  Future<Map<String, dynamic>> updateAppointmentStatus(
+      String appointmentId, String status, String doctorId) async {
+    try {
+      return await _apiService.updateAppointmentStatus(
+          appointmentId, status, doctorId);
+    } catch (e) {
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
 }
+

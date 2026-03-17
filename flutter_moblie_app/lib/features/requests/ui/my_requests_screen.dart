@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
+import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/features/requests/data/models/case_request_model.dart';
 import 'package:thotha_mobile_app/features/requests/logic/my_requests_cubit.dart';
 import 'package:thotha_mobile_app/features/requests/logic/my_requests_state.dart';
+import 'package:thotha_mobile_app/features/requests/ui/edit_case_request_screen.dart';
 import 'package:thotha_mobile_app/features/doctor/ui/doctor_home_screen.dart';
 
 // ── Entry point ──────────────────────────────────────────────────────────────
 
 /// Injects [MyRequestsCubit] and kicks off the initial fetch immediately.
 class MyRequestsScreen extends StatelessWidget {
-  const MyRequestsScreen({Key? key}) : super(key: key);
+  const MyRequestsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -168,12 +170,15 @@ class _MyRequestsView extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: requests.length,
-        itemBuilder: (_, index) => _buildRequestCard(
-          context,
-          requests[index],
-          width,
-          baseFontSize,
-          isDark,
+        itemBuilder: (_, index) => Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: _buildRequestCard(
+            context,
+            requests[index],
+            width,
+            baseFontSize,
+            isDark,
+          ),
         ),
       ),
     );
@@ -353,145 +358,218 @@ class _MyRequestsView extends StatelessWidget {
     double baseFontSize,
     bool isDark,
   ) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return FutureBuilder<int>(
+      future: _getCurrentDoctorId(),
+      builder: (context, snapshot) {
+        final currentDoctorId = snapshot.data ?? 0;
+        final isUserRequest = req.doctorId == currentDoctorId;
+
+        return Column(
           children: [
-            // ── Header row: category + id badge + delete ──────────────────
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    req.categoryName,
-                    style: TextStyle(
-                      fontSize: baseFontSize * 1.125,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Cairo',
-                    ),
-                  ),
-                ),
-                Row(
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              margin: EdgeInsets.zero,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (req.id != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
+                    // ── Header row: category + id badge + delete ──────────────────
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            req.categoryName,
+                            style: TextStyle(
+                              fontSize: baseFontSize * 1.125,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Cairo',
+                            ),
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                          color:
-                              ColorsManager.mainBlue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
+                        Row(
+                          children: [
+                            if (req.id != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      ColorsManager.mainBlue.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '#${req.id}',
+                                  style: TextStyle(
+                                    color: ColorsManager.mainBlue,
+                                    fontSize: baseFontSize * 0.75,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Cairo',
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(width: 8),
+                            // Show delete icon only for user's own requests
+                            if (isUserRequest)
+                              Material(
+                                color: Colors.red.withValues(alpha: 0.08),
+                                shape: const CircleBorder(),
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline_rounded,
+                                    color: Colors.red,
+                                    size: 20,
+                                  ),
+                                  tooltip: 'حذف الطلب',
+                                  onPressed: () =>
+                                      _confirmAndDelete(context, req),
+                                ),
+                              ),
+                          ],
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+
+                    // ── Doctor name ───────────────────────────────────────────────
+                    Row(children: [
+                      Icon(Icons.person_outline, size: 14, color: Colors.grey[500]),
+                      const SizedBox(width: 4),
+                      Expanded(
                         child: Text(
-                          '#${req.id}',
+                          req.doctorFullName,
                           style: TextStyle(
-                            color: ColorsManager.mainBlue,
-                            fontSize: baseFontSize * 0.75,
-                            fontWeight: FontWeight.bold,
+                            fontSize: baseFontSize * 0.875,
+                            color: isDark ? Colors.grey[400] : Colors.grey[600],
                             fontFamily: 'Cairo',
                           ),
                         ),
                       ),
-                    const SizedBox(width: 8),
-                    Material(
-                      color: Colors.red.withValues(alpha: 0.08),
-                      shape: const CircleBorder(),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.delete_outline_rounded,
-                          color: Colors.red,
-                          size: 20,
+                    ]),
+
+                    // ── City ──────────────────────────────────────────────────────
+                    if (req.doctorCityName.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Row(children: [
+                        Icon(Icons.location_on_outlined,
+                            size: 14, color: Colors.grey[500]),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            req.doctorCityName,
+                            style: TextStyle(
+                              fontSize: baseFontSize * 0.875,
+                              color: isDark ? Colors.grey[400] : Colors.grey[600],
+                              fontFamily: 'Cairo',
+                            ),
+                          ),
                         ),
-                        tooltip: 'حذف الطلب',
-                        onPressed: () =>
-                            _confirmAndDelete(context, req),
+                      ]),
+                    ],
+
+                    const SizedBox(height: 16),
+
+                    // ── Date / time chips ─────────────────────────────────────────
+                    Row(children: [
+                      _buildInfoChip(
+                        icon: Icons.calendar_today,
+                        text: req.formattedDate,
+                        baseFontSize: baseFontSize,
+                        isDark: isDark,
                       ),
-                    ),
+                      const SizedBox(width: 12),
+                      _buildInfoChip(
+                        icon: Icons.access_time,
+                        text: req.formattedTime,
+                        baseFontSize: baseFontSize,
+                        isDark: isDark,
+                      ),
+                    ]),
+
+                    // ── Description ───────────────────────────────────────────────
+                    if (req.description.isNotEmpty &&
+                        req.description != 'No details') ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        req.description,
+                        style: TextStyle(
+                          fontSize: baseFontSize * 0.875,
+                          color: isDark ? Colors.grey[200] : Colors.grey[800],
+                          fontFamily: 'Cairo',
+                        ),
+                      ),
+                    ],
                   ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            // ── Doctor name ───────────────────────────────────────────────
-            Row(children: [
-              Icon(Icons.person_outline, size: 14, color: Colors.grey[500]),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  req.doctorFullName,
-                  style: TextStyle(
-                    fontSize: baseFontSize * 0.875,
-                    color: isDark ? Colors.grey[400] : Colors.grey[600],
-                    fontFamily: 'Cairo',
-                  ),
-                ),
               ),
-            ]),
-
-            // ── City ──────────────────────────────────────────────────────
-            if (req.doctorCityName.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Row(children: [
-                Icon(Icons.location_on_outlined,
-                    size: 14, color: Colors.grey[500]),
-                const SizedBox(width: 4),
-                Expanded(
+            ),
+            // ── Edit button (only for user's requests) ────────────────────────
+            if (isUserRequest) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorsManager.mainBlue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () async {
+                    final result = await Navigator.push<bool>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditCaseRequestScreen(
+                          request: req,
+                        ),
+                      ),
+                    );
+                    
+                    // Refresh the list if edit was successful
+                    if (result == true && context.mounted) {
+                      context.read<MyRequestsCubit>().loadRequests();
+                    }
+                  },
                   child: Text(
-                    req.doctorCityName,
+                    'تعديل الطلب',
                     style: TextStyle(
-                      fontSize: baseFontSize * 0.875,
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
                       fontFamily: 'Cairo',
+                      fontSize: baseFontSize * 1.125,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-              ]),
-            ],
-
-            const SizedBox(height: 16),
-
-            // ── Date / time chips ─────────────────────────────────────────
-            Row(children: [
-              _buildInfoChip(
-                icon: Icons.calendar_today,
-                text: req.formattedDate,
-                baseFontSize: baseFontSize,
-                isDark: isDark,
               ),
-              const SizedBox(width: 12),
-              _buildInfoChip(
-                icon: Icons.access_time,
-                text: req.formattedTime,
-                baseFontSize: baseFontSize,
-                isDark: isDark,
-              ),
-            ]),
-
-            // ── Description ───────────────────────────────────────────────
-            if (req.description.isNotEmpty &&
-                req.description != 'No details') ...[
-              const SizedBox(height: 12),
-              Text(
-                req.description,
-                style: TextStyle(
-                  fontSize: baseFontSize * 0.875,
-                  color: isDark ? Colors.grey[200] : Colors.grey[800],
-                  fontFamily: 'Cairo',
-                ),
-              ),
-            ],
+              const SizedBox(height: 16),
+            ] else
+              const SizedBox(height: 16),
           ],
-        ),
-      ),
+        );
+      },
     );
+  }
+
+  /// Get the current user's doctor ID from SharedPreferences
+  Future<int> _getCurrentDoctorId() async {
+    try {
+      int doctorId = await SharedPrefHelper.getInt('doctor_id');
+      if (doctorId > 0) return doctorId;
+
+      // Fallback to string
+      final idStr = await SharedPrefHelper.getString('doctor_id');
+      if (idStr != null && idStr.isNotEmpty) {
+        return int.tryParse(idStr) ?? 0;
+      }
+      return 0;
+    } catch (e) {
+      return 0;
+    }
   }
 
   // ── Info chip ─────────────────────────────────────────────────────────────
