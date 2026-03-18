@@ -85,36 +85,9 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
               Center(
                 child: Column(
                   children: [
-                    Container(
-                      width: 150 * (width / 390),
-                      height: 150 * (width / 390),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: theme.colorScheme.surfaceContainerHighest,
-                      ),
-                      child: doctor.photo != null &&
-                              doctor.photo!.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                doctor.photo!,
-                                fit: BoxFit.cover,
-                                errorBuilder:
-                                    (context, error, stackTrace) {
-                                  return Icon(Icons.person,
-                                      size: 64 * (width / 390),
-                                      color: theme
-                                          .colorScheme.onSurfaceVariant);
-                                },
-                              ),
-                            )
-                          : Icon(Icons.person,
-                              size: 64 * (width / 390),
-                              color: theme.colorScheme.onSurfaceVariant),
-                    ),
+                    // Profile picture container removed
                     Container(
                       width: double.infinity,
-                      margin: const EdgeInsets.only(top: 8),
                       decoration: BoxDecoration(
                         color:
                             theme.cardTheme.color ?? colorScheme.surface,

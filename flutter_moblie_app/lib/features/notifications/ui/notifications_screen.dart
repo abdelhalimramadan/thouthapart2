@@ -90,11 +90,8 @@ class NotificationsScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
-                  child: Icon(Icons.person, color: colorScheme.primary),
-                ),
-                const SizedBox(width: 12),
+                // Profile picture removed
+                const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,6 +108,7 @@ class NotificationsScreen extends StatelessWidget {
                         booking.phone,
                         style: TextStyle(
                           fontFamily: 'Cairo',
+                          fontWeight: FontWeight.w400,
                           color: Colors.grey[600],
                           fontSize: baseFontSize * 0.8125, // 13sp
                         ),

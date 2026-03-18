@@ -12,6 +12,7 @@ import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/d
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/account_deletion_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
 import 'package:thotha_mobile_app/features/forgot_password/ui/change_password_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/my_requests_screen.dart';
 
 class DoctorProfileScreen extends StatelessWidget {
   const DoctorProfileScreen({super.key});
@@ -474,37 +475,75 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
               ),
             ),
             SizedBox(height: 10.h),
-            // ── Delete Account Button ─────────────────────────────────────
-            SizedBox(
-              width: double.infinity,
-              height: 50.h,
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.red, width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AccountDeletionScreen(),
+            // ── Request and Delete Buttons ─────────────────────────────────────
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 50.h,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1D61E7),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MyRequestsScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.assignment_outlined, size: 20),
+                      label: Text(
+                        'طلباتي',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  );
-                },
-                icon: const Icon(Icons.delete_forever_rounded,
-                    color: Colors.red, size: 20),
-                label: Text(
-                  'حذف الحساب',
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
                   ),
                 ),
-              ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: SizedBox(
+                    height: 50.h,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.red, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AccountDeletionScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.delete_forever_rounded,
+                          color: Colors.red, size: 20),
+                      label: Text(
+                        'حذف الحساب',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 14.sp, // Reduced slightly to fit side-by-side
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

@@ -386,31 +386,10 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                         textDirection: TextDirection.rtl,
                         child: Row(
                           children: [
-                            Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 12),
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surface,
-                                shape: BoxShape.circle,
-                                image: _profileImage != null
-                                    ? DecorationImage(
-                                        image: MemoryImage(base64Decode(_profileImage!)),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : null,
-                              ),
-                              child: _profileImage == null
-                                  ? const Icon(
-                                      Icons.person_outline,
-                                      color: _cCyan,
-                                    )
-                                  : null,
-                            ),
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
+                                  horizontal: 16,
                                 ),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
