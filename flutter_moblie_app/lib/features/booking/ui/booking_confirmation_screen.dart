@@ -69,12 +69,15 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
   Future<void> _fetchRequests() async {
     try {
       final result = await _apiService.getAllRequests();
+      debugPrint(
+          '=== getAllRequests result ===\nsuccess: ${result['success']}\ndata type: ${result['data']?.runtimeType}\ndata: ${result['data']}\nerror: ${result['error']}');
 
       if (result['success'] == true && result['data'] != null) {
         final requests = (result['data'] as List)
             .map((e) => CaseRequestModel.fromJson(e as Map<String, dynamic>))
             .toList();
 
+        debugPrint('Loaded ${requests.length} requests');
         setState(() {
           _requests = requests;
           _isLoadingRequests = false;
@@ -83,12 +86,14 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
           }
         });
       } else {
+        debugPrint(
+            'getAllRequests failed: ${result['error'] ?? "Unknown error"}');
         setState(() {
           _isLoadingRequests = false;
         });
       }
     } catch (e) {
-      print('Error fetching requests: $e');
+      debugPrint('Exception in _fetchRequests: $e');
       setState(() {
         _isLoadingRequests = false;
       });

@@ -297,13 +297,26 @@ class ApiService {
   Future<Map<String, dynamic>> getAllRequests() async {
     try {
       final res = await _dio.get(ApiConstants.getAllRequests);
-      if (res.statusCode == 200 && res.data is List) {
-        return _okList(
-          (res.data as List)
-              .map((e) => CaseRequestModel.fromJson(
-                  Map<String, dynamic>.from(e as Map)))
-              .toList(),
-        );
+      if (res.statusCode == 200) {
+        final data = res.data;
+        // Support: plain List OR Map with data/content/items/requests key
+        final List? raw = data is List
+            ? data
+            : (data is Map
+                ? (data['data'] ??
+                    data['content'] ??
+                    data['items'] ??
+                    data['requests']) as List?
+                : null);
+        if (raw != null) {
+          return _okList(
+            raw
+                .map((e) => CaseRequestModel.fromJson(
+                    Map<String, dynamic>.from(e as Map)))
+                .toList(),
+          );
+        }
+        return _fail('صيغة البيانات غير صحيحة', code: res.statusCode);
       }
       return _fail('فشل في تحميل الطلبات', code: res.statusCode);
     } on DioException catch (e) {

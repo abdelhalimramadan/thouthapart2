@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thotha_mobile_app/core/theming/theme_provider.dart';
@@ -14,6 +13,7 @@ import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/doctor_next_booking_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/appointment_history_screen.dart';
 
 import 'package:thotha_mobile_app/features/home_screen/ui/secondary_home_screen.dart';
 import 'package:thotha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
@@ -24,7 +24,8 @@ import 'package:thotha_mobile_app/features/privacy_policy/ui/privacy_policy_scre
 class DoctorDrawer extends StatefulWidget {
   const DoctorDrawer({super.key});
 
-  static final ValueNotifier<String?> profileImageNotifier = ValueNotifier(null);
+  static final ValueNotifier<String?> profileImageNotifier =
+      ValueNotifier(null);
 
   @override
   State<DoctorDrawer> createState() => _DoctorDrawerState();
@@ -35,6 +36,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
   String? _lastName;
   String? _email;
   String? _profileImage;
+  int? _doctorId;
   bool _isLoadingName = false;
 
   static const _cCyan = Color(0xFF84E5F3);
@@ -43,7 +45,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
   @override
   void initState() {
     super.initState();
-    _fetchDoctorName();
+    _fetchDoctorInfo();
     DoctorDrawer.profileImageNotifier.addListener(_updateProfileImage);
   }
 
@@ -74,7 +76,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
             title: Text(
               'تأكيد تسجيل الخروج',
               textAlign: TextAlign.right,
-              style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              style:
+                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             content: Text(
               'هل أنت متأكد من رغبتك في تسجيل الخروج؟',
@@ -117,23 +120,21 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
   }
 
   Widget _menuItem(
-      BuildContext context, {
-        required String title,
-        required IconData icon,
-        Color? iconColor,
-        Color? textColor,
-        bool isSelected = false,
-        VoidCallback? onTap,
-        required double width,
-        required double baseFontSize,
-      }) {
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    Color? iconColor,
+    Color? textColor,
+    bool isSelected = false,
+    VoidCallback? onTap,
+    required double width,
+    required double baseFontSize,
+  }) {
     final textTheme = Theme.of(context).textTheme;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isSelected 
-            ? _cCyan.withAlpha(26)
-            : null,
+        color: isSelected ? _cCyan.withAlpha(26) : null,
         borderRadius: BorderRadius.circular(8),
       ),
       child: InkWell(
@@ -147,7 +148,9 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
               children: [
                 Icon(
                   icon,
-                  color: isSelected ? _cCyan : (iconColor ?? Theme.of(context).iconTheme.color),
+                  color: isSelected
+                      ? _cCyan
+                      : (iconColor ?? Theme.of(context).iconTheme.color),
                   size: 24,
                 ),
                 const SizedBox(width: 12),
@@ -158,10 +161,12 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     style: textTheme.bodyLarge?.copyWith(
                       fontFamily: 'Cairo',
                       fontSize: baseFontSize * 0.9,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: isSelected 
-                          ? _cCyan 
-                          : textColor ?? Theme.of(context).colorScheme.onSurface,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color: isSelected
+                          ? _cCyan
+                          : textColor ??
+                              Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -185,15 +190,15 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
   }
 
   Widget _toggleMenuItem(
-      BuildContext context, {
-        required String title,
-        required bool value,
-        required ValueChanged<bool> onChanged,
-        IconData? icon,
-        Color? iconColor,
-        required double width,
-        required double baseFontSize,
-      }) {
+    BuildContext context, {
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+    IconData? icon,
+    Color? iconColor,
+    required double width,
+    required double baseFontSize,
+  }) {
     final textTheme = Theme.of(context).textTheme;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -252,7 +257,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
           _firstName = cachedFirstName;
           _lastName = cachedLastName;
           _email = cachedEmail;
-          _profileImage = (cachedImage?.isNotEmpty ?? false) ? cachedImage : _profileImage;
+          _profileImage =
+              (cachedImage?.isNotEmpty ?? false) ? cachedImage : _profileImage;
         });
         return;
       }
@@ -304,13 +310,63 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     }
   }
 
+  Future<void> _fetchDoctorInfo() async {
+    await _fetchDoctorName();
+    await _fetchDoctorId();
+  }
+
+  Future<void> _fetchDoctorId() async {
+    try {
+      final cachedId = await SharedPrefHelper.getString('doctor_id');
+      if (cachedId != null && cachedId.isNotEmpty) {
+        setState(() {
+          _doctorId = int.tryParse(cachedId);
+        });
+        return;
+      }
+
+      final dio = DioFactory.getDio();
+      Response response;
+      try {
+        response = await dio.get('/me');
+      } catch (_) {
+        response = await dio.get('/profile');
+      }
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        int? id;
+
+        if (data is Map) {
+          id = data['id'] as int?;
+          if (id == null && data['user'] != null) {
+            id = data['user']['id'] as int?;
+          }
+        }
+
+        if (id != null) {
+          setState(() {
+            _doctorId = id;
+          });
+          await SharedPrefHelper.setData('doctor_id', id.toString());
+        }
+      }
+    } catch (e) {
+      debugPrint('Exception fetching doctor ID: $e');
+    }
+  }
+
   int _getCurrentIndex() {
-    final currentRoute = ModalRoute.of(context)?.settings.name?.toLowerCase() ?? '';
+    final currentRoute =
+        ModalRoute.of(context)?.settings.name?.toLowerCase() ?? '';
     if (currentRoute.contains('doctor-home')) return 0;
     if (currentRoute.contains('add-case')) return 1;
-    if (currentRoute.contains('doctor-profile') || currentRoute.contains('profile')) return 2;
+    if (currentRoute.contains('doctor-profile') ||
+        currentRoute.contains('profile')) return 2;
     if (currentRoute.contains('upcoming-bookings')) return 3;
-    if (currentRoute.contains('booking-records') || currentRoute.contains('records')) return 4;
+    if (currentRoute.contains('booking-records') ||
+        currentRoute.contains('records') ||
+        currentRoute.contains('appointment-history')) return 4;
     if (currentRoute.contains('doctor-requests')) return 5;
     return 0;
   }
@@ -344,7 +400,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                   SizedBox(
+                  SizedBox(
                     height: 56,
                     child: Stack(
                       children: [
@@ -376,10 +432,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     child: Container(
                       height: 64,
                       decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surface
-                            .withAlpha(64),
+                        color:
+                            Theme.of(context).colorScheme.surface.withAlpha(64),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Directionality(
@@ -405,11 +459,12 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                                             ),
                                           )
                                         : Text(
-                                            (_firstName != null && _firstName!.isNotEmpty)
+                                            (_firstName != null &&
+                                                    _firstName!.isNotEmpty)
                                                 ? 'د/ ${_firstName!} ${_lastName ?? ''}'
                                                 : 'دكتور',
-                                            style: textTheme.titleMedium
-                                                ?.copyWith(
+                                            style:
+                                                textTheme.titleMedium?.copyWith(
                                               fontFamily: 'Cairo',
                                               color: Theme.of(context)
                                                   .colorScheme
@@ -499,7 +554,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                         ),
                       );
                     },
-
                   ),
                   _menuItem(
                     context,
@@ -512,7 +566,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          settings: const RouteSettings(name: 'upcoming-bookings'),
+                          settings:
+                              const RouteSettings(name: 'upcoming-bookings'),
                           builder: (context) => DoctorNextBookingScreen(),
                         ),
                       );
@@ -526,11 +581,22 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     width: width,
                     baseFontSize: baseFontSize,
                     onTap: () {
+                      if (_doctorId == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('خطأ: معرف الطبيب غير متاح'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                        return;
+                      }
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          settings: const RouteSettings(name: 'booking-records'),
-                          builder: (context) => DoctorBookingRecordsScreen(),
+                          settings:
+                              const RouteSettings(name: 'appointment-history'),
+                          builder: (context) =>
+                              AppointmentHistoryScreen(doctorId: _doctorId!),
                         ),
                       );
                     },
@@ -546,7 +612,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          settings: const RouteSettings(name: 'doctor-requests'),
+                          settings:
+                              const RouteSettings(name: 'doctor-requests'),
                           builder: (context) => const MyRequestsScreen(),
                         ),
                       );
@@ -592,7 +659,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const TermsAndConditionsScreen(),
+                          builder: (context) =>
+                              const TermsAndConditionsScreen(),
                         ),
                       );
                     },

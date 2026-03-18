@@ -584,7 +584,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
     );
   }
 
-  /// Update appointment status and refresh the list
+  /// Update appointment status and navigate to history
   Future<void> _updateAppointmentStatus(
       int appointmentId, String status) async {
     try {
@@ -607,8 +607,18 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
             duration: const Duration(seconds: 2),
           ),
         );
-        // Refresh the list
-        await _fetchPendingAppointments();
+
+        // Navigate to appointment history after a short delay
+        await Future.delayed(const Duration(milliseconds: 800));
+        if (mounted && _doctorId != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  AppointmentHistoryScreen(doctorId: _doctorId!),
+            ),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
