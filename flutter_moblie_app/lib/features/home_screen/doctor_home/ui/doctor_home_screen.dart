@@ -98,31 +98,13 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     });
 
     try {
-      // Try to get doctor_id from SharedPreferences
-      int doctorId = await SharedPrefHelper.getInt('doctor_id');
-      if (doctorId == 0) {
-        final s = await SharedPrefHelper.getString('doctor_id');
-        doctorId = int.tryParse(s) ?? 0;
-      }
-
-      // Fallback: Extract from JWT token if not in cache
-      if (doctorId == 0) {
-        doctorId = await _extractDoctorIdFromToken();
-      }
-
-      print('=== DEBUG: doctorId = $doctorId ===');
-
-      if (doctorId == 0) {
-        if (mounted)
-          setState(() {
-            _isLoadingCases = false;
-            _casesError = 'تعذر تحديد هوية الطبيب';
-          });
-        return;
-      }
-
-      print('=== DEBUG: Calling getRequestsByDoctorId($doctorId) ===');
-      final result = await _caseRepo.getRequestsByDoctorId(doctorId);
+      if (!mounted) return;
+      setState(() {
+        _isLoadingCases = true;
+        _casesError = null;
+      });
+      print('=== DEBUG: Calling getRequestsByDoctorId() ===');
+      final result = await _caseRepo.getRequestsByDoctorId();
 
       print('=== DEBUG: API Response: $result ===');
 
@@ -151,39 +133,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
           _isLoadingCases = false;
           _casesError = 'حدث خطأ غير متوقع: $e';
         });
-    }
-  }
-
-  Future<int> _extractDoctorIdFromToken() async {
-    try {
-      final token =
-          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-      if (token == null || token.isEmpty) return 0;
-
-      final parts = token.split('.');
-      if (parts.length != 3) return 0;
-
-      String payload = parts[1];
-      while (payload.length % 4 != 0) {
-        payload += '=';
-      }
-
-      final decoded =
-          json.decode(utf8.decode(base64Url.decode(payload))) as Map?;
-      if (decoded == null) return 0;
-
-      final rawId =
-          decoded['id'] ?? decoded['doctorId'] ?? decoded['doctor_id'];
-      final did = int.tryParse(rawId?.toString() ?? '') ?? 0;
-
-      // Cache it for future use
-      if (did != 0) {
-        await SharedPrefHelper.setData('doctor_id', did);
-      }
-
-      return did;
-    } catch (_) {
-      return 0;
     }
   }
 

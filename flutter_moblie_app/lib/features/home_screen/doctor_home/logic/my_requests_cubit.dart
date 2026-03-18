@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
@@ -40,18 +38,8 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
       return;
     }
 
-    // ── 2. Resolve doctorId ───────────────────────────────────────────────
-    final doctorId = await _resolveDoctorId(token);
-    if (doctorId == 0) {
-      emit(MyRequestsError(
-        'تعذر تحديد هوية الطبيب، يرجى تسجيل الدخول مرة أخرى',
-        isAuthError: true,
-      ));
-      return;
-    }
-
-    // ── 3. GET /api/request/getRequestsByDoctorId?doctorId=<id> ──────────
-    final result = await _repo.getRequestsByDoctorId(doctorId);
+    // ── 3. GET /api/request/getRequestsByDoctorId ──────────
+    final result = await _repo.getRequestsByDoctorId();
 
     if (result['success'] == true) {
       final requests = List<CaseRequestModel>.from(result['data'] as List);
@@ -72,6 +60,17 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
         ));
       }
     }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  /// Returns the request list from whichever state currently holds one.
+  List<CaseRequestModel> get _visibleRequests {
+    final s = state;
+    if (s is MyRequestsSuccess) return s.requests;
+    if (s is MyRequestsDeleteSuccess) return s.requests;
+    if (s is MyRequestsDeleteError) return s.requests;
+    return [];
   }
 
   /// Deletes [request] and emits the updated list.
@@ -104,57 +103,5 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
         currentList,
       ));
     }
-  }
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-
-  /// Returns the request list from whichever state currently holds one.
-  List<CaseRequestModel> get _visibleRequests {
-    final s = state;
-    if (s is MyRequestsSuccess) return s.requests;
-    if (s is MyRequestsDeleteSuccess) return s.requests;
-    if (s is MyRequestsDeleteError) return s.requests;
-    return [];
-  }
-
-  /// Resolves the doctor's numeric ID using three strategies:
-  ///  1. SharedPreferences integer (fastest — cached from previous login)
-  ///  2. SharedPreferences string
-  ///  3. Base64-decoded JWT payload (authoritative — no extra HTTP call)
-  Future<int> _resolveDoctorId(String token) async {
-    // Strategy 1 – stored as int
-    int id = await SharedPrefHelper.getInt('doctor_id');
-    if (id != 0) return id;
-
-    // Strategy 2 – stored as string
-    final idStr = await SharedPrefHelper.getString('doctor_id');
-    id = int.tryParse(idStr) ?? 0;
-    if (id != 0) return id;
-
-    // Strategy 3 – decode JWT payload directly (no HTTP call)
-    try {
-      final parts = token.split('.');
-      if (parts.length == 3) {
-        String payload = parts[1];
-        while (payload.length % 4 != 0) {
-          payload += '=';
-        }
-        final decoded =
-            json.decode(utf8.decode(base64Url.decode(payload))) as Map?;
-        if (decoded != null) {
-          final raw = decoded['id'] ??
-              decoded['doctorId'] ??
-              decoded['doctor_id'] ??
-              decoded['sub'];
-          final fromToken = int.tryParse(raw?.toString() ?? '');
-          if (fromToken != null && fromToken != 0) {
-            await SharedPrefHelper.setData('doctor_id', fromToken);
-            return fromToken;
-          }
-        }
-      }
-    } catch (_) {}
-
-    return 0;
   }
 }

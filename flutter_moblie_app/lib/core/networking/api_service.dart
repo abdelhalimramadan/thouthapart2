@@ -326,12 +326,11 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> getRequestsByDoctorId(int doctorId) async {
+  Future<Map<String, dynamic>> getRequestsByDoctorId() async {
     try {
       await DioFactory.addDioHeaders();
       final res = await _dio.get(
         ApiConstants.getRequestsByDoctorId,
-        queryParameters: {'doctorId': doctorId},
       );
 
       if (res.statusCode == 200) {
@@ -424,13 +423,11 @@ class ApiService {
               jsonData = Map<String, dynamic>.from(payload);
             }
 
-            if (jsonData != null) {
-              print('=== getDoctorById: Raw JSON (no params) = $jsonData ===');
-              final parsed = DoctorProfileModel.fromJson(jsonData);
-              print(
-                  '=== getDoctorById: Parsed = id:${parsed.id}, phone:${parsed.phone}, faculty:${parsed.faculty}, year:${parsed.year}, category:${parsed.category} ===');
-              return _okData(parsed);
-            }
+            print('=== getDoctorById: Raw JSON (no params) = $jsonData ===');
+            final parsed = DoctorProfileModel.fromJson(jsonData);
+            print(
+                '=== getDoctorById: Parsed = id:${parsed.id}, phone:${parsed.phone}, faculty:${parsed.faculty}, year:${parsed.year}, category:${parsed.category} ===');
+            return _okData(parsed);
           }
         } on DioException catch (e) {
           print('=== getDoctorById: Request without params failed: $e ===');
@@ -693,15 +690,15 @@ class ApiService {
     }
   }
 
-  /// GET /api/appointment/history/{doctorId}
+  /// GET /api/appointment/history
   /// Requires: Bearer JWT_TOKEN (Doctor)
   /// Returns: List of completed/cancelled appointments (isHistory=true)
-  Future<Map<String, dynamic>> getAppointmentHistory(int doctorId) async {
+  Future<Map<String, dynamic>> getAppointmentHistory() async {
     try {
       await DioFactory.addDioHeaders();
 
       final res = await _dio.get(
-        '${ApiConstants.appointmentHistory}/$doctorId',
+        ApiConstants.appointmentHistory,
       );
 
       if (res.statusCode == 200 && res.data is List) {

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
-import 'package:thotha_mobile_app/core/helpers/constants.dart';
-import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/my_requests_cubit.dart';
@@ -10,538 +9,161 @@ import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/my_requ
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/add_case_request_screen.dart';
 
-// ── Entry point ──────────────────────────────────────────────────────────────
-
-/// Injects [MyRequestsCubit] and kicks off the initial fetch immediately.
 class MyRequestsScreen extends StatelessWidget {
-  const MyRequestsScreen({Key? key}) : super(key: key);
+  const MyRequestsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<MyRequestsCubit>()..loadRequests(),
-      child: const _MyRequestsView(),
+      child: const MyRequestsView(),
     );
   }
 }
 
-// ── View ─────────────────────────────────────────────────────────────────────
-
-class _MyRequestsView extends StatelessWidget {
-  const _MyRequestsView();
+class MyRequestsView extends StatelessWidget {
+  const MyRequestsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final baseFontSize = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return BlocConsumer<MyRequestsCubit, MyRequestsState>(
-      // ── Listener: side-effects only (snackbars) ──────────────────────────
-      listenWhen: (_, current) =>
-          current is MyRequestsDeleteSuccess ||
-          current is MyRequestsDeleteError,
-      listener: (context, state) {
-        if (state is MyRequestsDeleteSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'تم حذف الطلب بنجاح',
-                style: TextStyle(fontFamily: 'Cairo'),
-              ),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } else if (state is MyRequestsDeleteError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                state.message,
-                style: const TextStyle(fontFamily: 'Cairo'),
-              ),
-              backgroundColor: Colors.red[700],
-            ),
-          );
-        }
-      },
-      // ── Builder: rebuild the Scaffold on every state change ──────────────
-      builder: (context, state) {
-        return Scaffold(
-          appBar: _buildAppBar(context, baseFontSize),
-          body: Directionality(
-            textDirection: TextDirection.rtl,
-            child: _buildBody(
-              context,
-              state,
-              baseFontSize,
-              width,
-              isDark,
-            ),
+    return Scaffold(
+      backgroundColor:
+          isDark ? const Color(0xFF121212) : const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        title: Text(
+          'طلباتي',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 18.sp,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-        );
-      },
-    );
-  }
-
-  // ── AppBar ─────────────────────────────────────────────────────────────────
-
-  AppBar _buildAppBar(BuildContext context, double baseFontSize) {
-    return AppBar(
-      title: Text(
-        'طلباتي',
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: baseFontSize * 1.125,
-          fontWeight: FontWeight.bold,
         ),
-      ),
-      centerTitle: true,
-      backgroundColor: ColorsManager.mainBlue,
-      foregroundColor: Colors.white,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        tooltip: 'رجوع',
-        onPressed: () {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-          } else {
+        centerTitle: true,
+        backgroundColor: ColorsManager.mainBlue,
+        elevation: 0,
+        leading: IconButton(
+          icon:
+              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                settings: const RouteSettings(name: 'doctor-home'),
-                builder: (_) => const DoctorHomeScreen(),
+              MaterialPageRoute(builder: (_) => const DoctorHomeScreen()),
+            );
+          },
+        ),
+      ),
+      body: BlocConsumer<MyRequestsCubit, MyRequestsState>(
+        listenWhen: (previous, current) =>
+            current is MyRequestsDeleteSuccess ||
+            current is MyRequestsDeleteError,
+        listener: (context, state) {
+          if (state is MyRequestsDeleteSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('تم حذف الطلب بنجاح',
+                    style: TextStyle(fontFamily: 'Cairo')),
+                backgroundColor: Colors.green.shade600,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          } else if (state is MyRequestsDeleteError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message,
+                    style: const TextStyle(fontFamily: 'Cairo')),
+                backgroundColor: Colors.red.shade600,
+                behavior: SnackBarBehavior.floating,
               ),
             );
           }
         },
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.home_rounded),
-          tooltip: 'الرئيسية',
-          onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                settings: const RouteSettings(name: 'doctor-home'),
-                builder: (_) => const DoctorHomeScreen(),
-              ),
-              (route) => false,
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  // ── Body dispatcher ────────────────────────────────────────────────────────
-
-  Widget _buildBody(
-    BuildContext context,
-    MyRequestsState state,
-    double baseFontSize,
-    double width,
-    bool isDark,
-  ) {
-    // Loading / initial
-    if (state is MyRequestsInitial || state is MyRequestsLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    // Error
-    if (state is MyRequestsError) {
-      return _buildError(context, state, baseFontSize);
-    }
-
-    // Empty list (404 or all items deleted)
-    if (state is MyRequestsEmpty) {
-      return _buildEmpty(context, baseFontSize, width);
-    }
-
-    // Success / delete result — extract whichever list is present
-    final requests = _requestsFromState(state);
-    if (requests == null || requests.isEmpty) {
-      return _buildEmpty(context, baseFontSize, width);
-    }
-
-    return RefreshIndicator(
-      onRefresh: () => context.read<MyRequestsCubit>().loadRequests(),
-      child: FutureBuilder<bool>(
-        future: _isUserLoggedIn(),
-        builder: (context, snapshot) {
-          final isLoggedIn = snapshot.data ?? false;
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            physics: const AlwaysScrollableScrollPhysics(),
-            itemCount: requests.length,
-            itemBuilder: (_, index) => _buildRequestCard(
-              context,
-              requests[index],
-              width,
-              baseFontSize,
-              isDark,
-              isLoggedIn: isLoggedIn,
-            ),
+        builder: (context, state) {
+          return Directionality(
+            textDirection: TextDirection.rtl,
+            child: _buildBody(context, state),
           );
         },
       ),
     );
   }
 
-  /// Extracts the request list from any list-bearing state, or returns null.
-  List<CaseRequestModel>? _requestsFromState(MyRequestsState state) {
-    if (state is MyRequestsSuccess) return state.requests;
-    if (state is MyRequestsDeleteSuccess) return state.requests;
-    if (state is MyRequestsDeleteError) return state.requests;
-    return null;
+  Widget _buildBody(BuildContext context, MyRequestsState state) {
+    if (state is MyRequestsLoading) {
+      return const Center(
+          child: CircularProgressIndicator(color: ColorsManager.mainBlue));
+    }
+
+    if (state is MyRequestsError) {
+      return _buildErrorState(context, state.message);
+    }
+
+    if (state is MyRequestsEmpty) {
+      return _buildEmptyState(context);
+    }
+
+    List<CaseRequestModel>? requests;
+    if (state is MyRequestsSuccess) requests = state.requests;
+    if (state is MyRequestsDeleteSuccess) requests = state.requests;
+    if (state is MyRequestsDeleteError) requests = state.requests;
+
+    if (requests == null || requests.isEmpty) {
+      return _buildEmptyState(context);
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => context.read<MyRequestsCubit>().loadRequests(),
+      color: ColorsManager.mainBlue,
+      child: ListView.builder(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
+        itemCount: requests.length,
+        itemBuilder: (context, index) =>
+            _RequestCard(request: requests![index]),
+      ),
+    );
   }
 
-  // ── Empty state ────────────────────────────────────────────────────────────
-
-  Widget _buildEmpty(
-    BuildContext context,
-    double baseFontSize,
-    double width,
-  ) {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.inbox_outlined,
-                size: 72 * (width / 390),
-                color: Colors.grey[300],
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'لا توجد طلبات حالياً',
-                style: TextStyle(
-                  fontSize: baseFontSize * 1.2,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[600],
-                  fontFamily: 'Cairo',
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'لم يتم العثور على أي طلبات مسجلة لحسابك',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: baseFontSize * 0.9,
-                  color: Colors.grey[400],
-                  fontFamily: 'Cairo',
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorsManager.mainBlue,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                ),
-                onPressed: () => context.read<MyRequestsCubit>().loadRequests(),
-                icon: const Icon(Icons.refresh, size: 18),
-                label: const Text(
-                  'تحديث',
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ── Error state ────────────────────────────────────────────────────────────
-
-  Widget _buildError(
-    BuildContext context,
-    MyRequestsError state,
-    double baseFontSize,
-  ) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                state.isServerError
-                    ? Icons.cloud_off_rounded
-                    : state.isAuthError
-                        ? Icons.lock_outline_rounded
-                        : Icons.error_outline_rounded,
-                size: 40,
-                color: Colors.redAccent,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              state.isServerError
-                  ? 'خطأ في الخادم'
-                  : state.isAuthError
-                      ? 'تسجيل الدخول مطلوب'
-                      : 'حدث خطأ',
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: baseFontSize * 1.2,
-                fontWeight: FontWeight.bold,
-                color: Colors.redAccent,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              state.message,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: baseFontSize * 0.9,
-                color: Colors.grey[600],
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 24),
-            if (!state.isAuthError)
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorsManager.mainBlue,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                ),
-                onPressed: () => context.read<MyRequestsCubit>().loadRequests(),
-                icon: const Icon(Icons.refresh, size: 18),
-                label: const Text(
-                  'إعادة المحاولة',
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── Request card ──────────────────────────────────────────────────────────
-
-  Widget _buildRequestCard(
-    BuildContext context,
-    CaseRequestModel req,
-    double width,
-    double baseFontSize,
-    bool isDark, {
-    bool isLoggedIn = false,
-  }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Header row: category + id badge + delete ──────────────────
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    req.categoryName,
-                    style: TextStyle(
-                      fontSize: baseFontSize * 1.125,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Cairo',
-                    ),
-                  ),
-                ),
-                Row(
-                  children: [
-                    if (req.id != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: ColorsManager.mainBlue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '#${req.id}',
-                          style: TextStyle(
-                            color: ColorsManager.mainBlue,
-                            fontSize: baseFontSize * 0.75,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Cairo',
-                          ),
-                        ),
-                      ),
-                    const SizedBox(width: 8),
-                    if (isLoggedIn) ...[
-                      Material(
-                        color: Colors.blue.withValues(alpha: 0.08),
-                        shape: const CircleBorder(),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.mode_edit_outline_rounded,
-                            color: Colors.blue,
-                            size: 20,
-                          ),
-                          tooltip: 'تعديل الطلب',
-                          onPressed: () => _navigateToEditRequest(context, req),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Material(
-                        color: Colors.red.withValues(alpha: 0.08),
-                        shape: const CircleBorder(),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.delete_outline_rounded,
-                            color: Colors.red,
-                            size: 20,
-                          ),
-                          tooltip: 'حذف الطلب',
-                          onPressed: () => _confirmAndDelete(context, req),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            // ── Doctor name ───────────────────────────────────────────────
-            Row(children: [
-              Icon(Icons.person_outline, size: 14, color: Colors.grey[500]),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  req.doctorFullName,
-                  style: TextStyle(
-                    fontSize: baseFontSize * 0.875,
-                    color: isDark ? Colors.grey[400] : Colors.grey[600],
-                    fontFamily: 'Cairo',
-                  ),
-                ),
-              ),
-            ]),
-
-            // ── City ──────────────────────────────────────────────────────
-            if (req.doctorCityName.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Row(children: [
-                Icon(Icons.location_on_outlined,
-                    size: 14, color: Colors.grey[500]),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    req.doctorCityName,
-                    style: TextStyle(
-                      fontSize: baseFontSize * 0.875,
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
-                      fontFamily: 'Cairo',
-                    ),
-                  ),
-                ),
-              ]),
-            ],
-
-            const SizedBox(height: 16),
-
-            // ── Date / time chips ─────────────────────────────────────────
-            Row(children: [
-              _buildInfoChip(
-                icon: Icons.calendar_today,
-                text: req.formattedDate,
-                baseFontSize: baseFontSize,
-                isDark: isDark,
-              ),
-              const SizedBox(width: 12),
-              _buildInfoChip(
-                icon: Icons.access_time,
-                text: req.formattedTime,
-                baseFontSize: baseFontSize,
-                isDark: isDark,
-              ),
-            ]),
-
-            // ── Description ───────────────────────────────────────────────
-            if (req.description.isNotEmpty &&
-                req.description != 'No details') ...[
-              const SizedBox(height: 12),
-              Text(
-                req.description,
-                style: TextStyle(
-                  fontSize: baseFontSize * 0.875,
-                  color: isDark ? Colors.grey[200] : Colors.grey[800],
-                  fontFamily: 'Cairo',
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── Info chip ─────────────────────────────────────────────────────────────
-
-  Widget _buildInfoChip({
-    required IconData icon,
-    required String text,
-    required double baseFontSize,
-    required bool isDark,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey[800] : Colors.grey[100],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 16, color: ColorsManager.mainBlue),
-          const SizedBox(width: 4),
+          Icon(Icons.assignment_late_outlined,
+              size: 80.sp, color: Colors.grey.withOpacity(0.5)),
+          SizedBox(height: 16.h),
           Text(
-            text,
+            'لا توجد طلبات حالياً',
             style: TextStyle(
-              fontSize: baseFontSize * 0.75,
-              color: isDark ? Colors.grey[200] : Colors.grey[800],
               fontFamily: 'Cairo',
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'ابدأ بإضافة طلباتك لتظهر هنا',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 14.sp,
+              color: Colors.grey.shade500,
+            ),
+          ),
+          SizedBox(height: 24.h),
+          ElevatedButton(
+            onPressed: () => context.read<MyRequestsCubit>().loadRequests(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorsManager.mainBlue,
+              padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r)),
+            ),
+            child: Text(
+              'تحديث الصفحة',
+              style: TextStyle(
+                  fontFamily: 'Cairo', fontSize: 14.sp, color: Colors.white),
             ),
           ),
         ],
@@ -549,90 +171,339 @@ class _MyRequestsView extends StatelessWidget {
     );
   }
 
-  // ── Delete flow ───────────────────────────────────────────────────────────
-
-  /// Shows a confirmation dialog then delegates deletion to [MyRequestsCubit].
-  /// A loading overlay is shown while the request is in-flight.
-  Future<void> _confirmAndDelete(
-    BuildContext context,
-    CaseRequestModel req,
-  ) async {
-    final cubit = context.read<MyRequestsCubit>();
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text(
-            'حذف الطلب',
-            style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
-          ),
-          content: const Text(
-            'هل أنت متأكد من حذف هذا الطلب؟',
-            style: TextStyle(fontFamily: 'Cairo'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text(
-                'إلغاء',
-                style: TextStyle(fontFamily: 'Cairo', color: Colors.grey),
+  Widget _buildErrorState(BuildContext context, String message) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(24.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline_rounded,
+                size: 60.sp, color: Colors.red.shade400),
+            SizedBox(height: 16.h),
+            Text(
+              'حدث خطأ ما',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.red.shade700,
               ),
             ),
+            SizedBox(height: 8.h),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 14.sp,
+                  color: Colors.grey.shade600),
+            ),
+            SizedBox(height: 24.h),
             ElevatedButton(
+              onPressed: () => context.read<MyRequestsCubit>().loadRequests(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: ColorsManager.mainBlue,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(10.r)),
+              ),
+              child: const Text('إعادة المحاولة',
+                  style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RequestCard extends StatelessWidget {
+  final CaseRequestModel request;
+  const _RequestCard({required this.request});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.r),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Colored Header
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    ColorsManager.mainBlue,
+                    ColorsManager.mainBlue.withOpacity(0.8),
+                  ],
                 ),
               ),
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text(
-                'حذف',
-                style: TextStyle(fontFamily: 'Cairo', color: Colors.white),
+              child: Row(
+                children: [
+                  Icon(Icons.medical_services_outlined,
+                      color: Colors.white, size: 20.sp),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      request.categoryName,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Text(
+                      '#${request.id}',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // City and Doctor
+                  Row(
+                    children: [
+                      _buildInfoIcon(Icons.location_on_rounded,
+                          request.doctorCityName, isDark),
+                      const Spacer(),
+                      _buildInfoIcon(
+                          Icons.person, request.doctorFullName, isDark),
+                    ],
+                  ),
+
+                  SizedBox(height: 16.h),
+                  const Divider(height: 1, color: Colors.grey, thickness: 0.1),
+                  SizedBox(height: 16.h),
+
+                  // Date and Time
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildDateTimeItem(Icons.calendar_month_rounded,
+                          'التاريخ', request.formattedDate, isDark),
+                      _buildDateTimeItem(Icons.access_time_filled_rounded,
+                          'الوقت', request.formattedTime, isDark),
+                    ],
+                  ),
+
+                  if (request.description.isNotEmpty &&
+                      request.description != 'No details') ...[
+                    SizedBox(height: 16.h),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withOpacity(0.05)
+                            : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Text(
+                        request.description,
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 13.sp,
+                          color: isDark
+                              ? Colors.grey.shade300
+                              : Colors.grey.shade800,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  SizedBox(height: 20.h),
+
+                  // Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _navigateToEdit(context, request),
+                          icon: const Icon(Icons.edit_note_rounded, size: 20),
+                          label: const Text('تعديل الطلب',
+                              style: TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontWeight: FontWeight.bold)),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.blue.shade700,
+                            side: BorderSide(color: Colors.blue.shade200),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.r)),
+                            padding: EdgeInsets.symmetric(vertical: 10.h),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _showDeleteDialog(context, request),
+                          icon: const Icon(Icons.delete_sweep_rounded,
+                              size: 20, color: Colors.white),
+                          label: const Text('حذف الطلب',
+                              style: TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red.shade400,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.r)),
+                            padding: EdgeInsets.symmetric(vertical: 10.h),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
     );
+  }
 
-    if (confirmed != true || !context.mounted) return;
-
-    // Show blocking loading overlay during the DELETE request
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+  Widget _buildInfoIcon(IconData icon, String text, bool isDark) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16.sp, color: ColorsManager.mainBlue),
+        SizedBox(width: 4.w),
+        Text(
+          text,
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 13.sp,
+            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+          ),
+        ),
+      ],
     );
-
-    await cubit.deleteRequest(req);
-
-    if (context.mounted) Navigator.pop(context); // dismiss the overlay
   }
 
-  // ── Helper methods ────────────────────────────────────────────────────────
-
-  /// Checks if the user is currently logged in by checking for a token
-  Future<bool> _isUserLoggedIn() async {
-    final token =
-        await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-    return token != null && token.isNotEmpty;
+  Widget _buildDateTimeItem(
+      IconData icon, String label, String value, bool isDark) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Icon(icon,
+                size: 14.sp, color: ColorsManager.mainBlue.withOpacity(0.7)),
+            SizedBox(width: 4.w),
+            Text(label,
+                style: TextStyle(
+                    fontFamily: 'Cairo', fontSize: 11.sp, color: Colors.grey)),
+          ],
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          value,
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 13.sp,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
+      ],
+    );
   }
 
-  /// Navigates to the edit screen with the request data
-  void _navigateToEditRequest(
-    BuildContext context,
-    CaseRequestModel request,
-  ) {
+  void _navigateToEdit(BuildContext context, CaseRequestModel request) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => AddCaseRequestScreen(
-          requestToEdit: request,
+        builder: (_) => AddCaseRequestScreen(requestToEdit: request),
+      ),
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, CaseRequestModel request) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          title: Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.red.shade600),
+              SizedBox(width: 10.w),
+              const Text('تأكيد الحذف',
+                  style: TextStyle(
+                      fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: const Text(
+            'هل أنت متأكد من رغبتك في حذف هذا الطلب نهائياً؟ لا يمكن التراجع عن هذا الإجراء.',
+            style: TextStyle(fontFamily: 'Cairo'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('إلغاء',
+                  style: TextStyle(
+                      fontFamily: 'Cairo', color: Colors.grey.shade600)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) => const Center(
+                      child: CircularProgressIndicator(
+                          color: ColorsManager.mainBlue)),
+                );
+                await context.read<MyRequestsCubit>().deleteRequest(request);
+                if (context.mounted) Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.r)),
+              ),
+              child: const Text('حذف الآن',
+                  style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
+            ),
+          ],
         ),
       ),
     );

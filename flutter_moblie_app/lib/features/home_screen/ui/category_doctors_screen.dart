@@ -269,6 +269,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                 date: req.formattedDate,
                 time: req.formattedTime,
                 specialty: req.categoryName,
+                requestId: req.id,
               ),
             ),
           );
@@ -578,6 +579,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                               date: req.formattedDate,
                               time: req.formattedTime,
                               specialty: req.categoryName,
+                              requestId: req.id,
                             ),
                           ),
                         );
@@ -665,16 +667,6 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
             style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: baseFontSize * 0.85,
-              color: ColorsManager.mainBlue,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'كن أول من ينشر حالة!',
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 14,
               color: ColorsManager.mainBlue,
               fontWeight: FontWeight.w600,
             ),

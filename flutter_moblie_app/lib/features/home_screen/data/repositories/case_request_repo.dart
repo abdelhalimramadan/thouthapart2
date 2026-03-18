@@ -68,9 +68,9 @@ class CaseRequestRepo {
     }
   }
 
-  Future<Map<String, dynamic>> getRequestsByDoctorId(int doctorId) async {
+  Future<Map<String, dynamic>> getRequestsByDoctorId() async {
     try {
-      return await _apiService.getRequestsByDoctorId(doctorId);
+      return await _apiService.getRequestsByDoctorId();
     } catch (e) {
       return {
         'success': false,

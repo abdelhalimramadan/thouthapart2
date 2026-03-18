@@ -1,7 +1,4 @@
-import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
-import 'package:thotha_mobile_app/features/appointments/data/appointments_service.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,14 +10,18 @@ class BookingConfirmationScreen extends StatefulWidget {
   final String date;
   final String time;
   final String specialty;
+  final int? requestId;
+  final int? doctorId;
 
   const BookingConfirmationScreen({
-    Key? key,
+    super.key,
     required this.doctorName,
     required this.date,
     required this.time,
     this.specialty = 'طب الأسنان',
-  }) : super(key: key);
+    this.requestId,
+    this.doctorId,
+  });
 
   @override
   State<BookingConfirmationScreen> createState() =>
@@ -35,70 +36,14 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
 
   // Appointment-related variables
   late ApiService _apiService;
-  List<CaseRequestModel> _requests = [];
-  CaseRequestModel? _selectedRequest;
-  bool _isLoadingRequests = true;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _apiService = getIt<ApiService>();
-    _prefillUserData();
-    _fetchRequests();
   }
 
-  Future<void> _prefillUserData() async {
-    try {
-      final fName = await SharedPrefHelper.getString('first_name');
-      final lName = await SharedPrefHelper.getString('last_name');
-      final phone = await SharedPrefHelper.getString('phone');
-
-      if (mounted) {
-        setState(() {
-          if (fName != null) _firstNameController.text = fName;
-          if (lName != null) _lastNameController.text = lName;
-          if (phone != null) _phoneController.text = phone;
-        });
-      }
-    } catch (e) {
-      print('Error pre-filling user data: $e');
-    }
-  }
-
-  Future<void> _fetchRequests() async {
-    try {
-      final result = await _apiService.getAllRequests();
-      debugPrint(
-          '=== getAllRequests result ===\nsuccess: ${result['success']}\ndata type: ${result['data']?.runtimeType}\ndata: ${result['data']}\nerror: ${result['error']}');
-
-      if (result['success'] == true && result['data'] != null) {
-        final requests = (result['data'] as List)
-            .map((e) => CaseRequestModel.fromJson(e as Map<String, dynamic>))
-            .toList();
-
-        debugPrint('Loaded ${requests.length} requests');
-        setState(() {
-          _requests = requests;
-          _isLoadingRequests = false;
-          if (requests.isNotEmpty) {
-            _selectedRequest = requests.first;
-          }
-        });
-      } else {
-        debugPrint(
-            'getAllRequests failed: ${result['error'] ?? "Unknown error"}');
-        setState(() {
-          _isLoadingRequests = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Exception in _fetchRequests: $e');
-      setState(() {
-        _isLoadingRequests = false;
-      });
-    }
-  }
 
   @override
   void dispose() {
@@ -115,22 +60,10 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
   }
 
   void _completeBooking() async {
-    if (_selectedRequest == null) {
+    if (widget.requestId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('يرجى تحديد طلب حالة أولاً',
-              style: TextStyle(fontFamily: 'Cairo')),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
-
-    if (_selectedRequest!.id == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('معرّف الطلب غير صحيح',
+          content: Text('عذراً، لا يمكن إتمام الحجز بدون تحديد حالة. يرجى المحاولة من صفحة الحالات.',
               style: TextStyle(fontFamily: 'Cairo')),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 3),
@@ -146,7 +79,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
     try {
       // Call the API to create appointment
       final result = await _apiService.createAppointment(
-        _selectedRequest!.id!,
+        widget.requestId!,
         _firstNameController.text,
         _lastNameController.text,
         _phoneController.text,
@@ -164,76 +97,82 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            titlePadding: const EdgeInsets.only(top: 20, left: 20, right: 20),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            actionsPadding:
-                const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-            title: Text(
-              'تم الحجز بنجاح',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w700,
-                color: ColorsManager.mainBlue,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 72.w,
-                  height: 72.w,
-                  decoration: BoxDecoration(
-                    color: ColorsManager.mainBlue.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.check_rounded,
-                      color: ColorsManager.mainBlue, size: 42.w),
+          builder: (context) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.r)),
+              titlePadding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              actionsPadding:
+                  const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+              actionsAlignment: MainAxisAlignment.center,
+              title: Text(
+                'تم الحجز بنجاح',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                  color: ColorsManager.mainBlue,
                 ),
-                SizedBox(height: 16.h),
-                Text(
-                  'تم حجز موعدك بنجاح مع ${widget.doctorName}\nفي يوم ${widget.date} الساعة ${widget.time}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 14.sp,
-                    color: const Color(0xFF1F2937),
-                    height: 1.6,
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 72.w,
+                    height: 72.w,
+                    decoration: BoxDecoration(
+                      color: ColorsManager.mainBlue.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.check_rounded,
+                        color: ColorsManager.mainBlue, size: 42.w),
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'تم حجز موعدك بنجاح مع ${widget.doctorName}\nفي يوم ${widget.date} الساعة ${widget.time}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 14.sp,
+                      color: const Color(0xFF1F2937),
+                      height: 1.6,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                Center(
+                  child: SizedBox(
+                    width: 140.w,
+                    height: 40.h,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorsManager.mainBlue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                      child: Text(
+                        'حسناً',
+                        style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 14.sp,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-            actions: [
-              SizedBox(
-                width: 140.w,
-                height: 40.h,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorsManager.mainBlue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                  ),
-                  child: Text(
-                    'حسناً',
-                    style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 14.sp,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
-            ],
           ),
         );
       } else {
@@ -411,82 +350,6 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            // Request Selection Dropdown
-                            if (_isLoadingRequests)
-                              Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
-                                child: const Center(
-                                  child: SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            else if (_requests.isEmpty)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 16),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.red),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  'لا توجد طلبات حالات. يرجى إنشاء طلب حالة أولاً',
-                                  style: TextStyle(
-                                    fontFamily: 'Cairo',
-                                    fontSize: 14.sp,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              )
-                            else
-                              DropdownButtonFormField<CaseRequestModel>(
-                                value: _selectedRequest,
-                                hint: Text(
-                                  'اختر طلب حالة',
-                                  style: TextStyle(
-                                    fontFamily: 'Cairo',
-                                    fontSize: 14.sp,
-                                  ),
-                                ),
-                                style: const TextStyle(fontFamily: 'Cairo'),
-                                items: _requests.map((request) {
-                                  return DropdownMenuItem<CaseRequestModel>(
-                                    value: request,
-                                    child: Text(
-                                      '${request.categoryName} - ${request.formattedDate}',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontFamily: 'Cairo',
-                                        fontSize: 13.sp,
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                                onChanged: (request) {
-                                  setState(() {
-                                    _selectedRequest = request;
-                                  });
-                                },
-                                decoration: InputDecoration(
-                                  prefixIcon: Icon(Icons.description_outlined,
-                                      color: theme.iconTheme.color),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value == null) {
-                                    return 'يرجى تحديد طلب حالة';
-                                  }
-                                  return null;
-                                },
-                              ),
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _firstNameController,

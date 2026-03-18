@@ -1,12 +1,13 @@
+import 'dart:ui' as ui show TextDirection;
+
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
 
 class AppointmentHistoryScreen extends StatefulWidget {
-  final int doctorId;
-
   const AppointmentHistoryScreen({
-    required this.doctorId,
     super.key,
   });
 
@@ -30,7 +31,7 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen> {
 
   Future<void> _fetchAppointmentHistory() async {
     try {
-      final result = await _apiService.getAppointmentHistory(widget.doctorId);
+      final result = await _apiService.getAppointmentHistory();
 
       if (mounted) {
         if (result['success'] == true && result['data'] != null) {
@@ -147,7 +148,14 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const DoctorHomeScreen(),
+              ),
+            );
+          },
         ),
         title: Text(
           'سجل الحجوزات',
@@ -224,9 +232,35 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen> {
                         itemCount: _history.length,
                         itemBuilder: (context, index) {
                           final appointment = _history[index];
+
+                          // Parsing Date and Time securely
+                          String displayDate = 'غير محدد';
+                          String displayTime = 'غير محدد';
+                          final String rawDateTime =
+                              appointment['appointmentDate'] ?? '';
+
+                          if (rawDateTime.isNotEmpty) {
+                            try {
+                              final dt = DateTime.parse(rawDateTime);
+                              displayDate = DateFormat('dd/MM/yyyy').format(dt);
+                              displayTime = DateFormat('hh:mm a', 'ar')
+                                  .format(dt)
+                                  .replaceAll('AM', 'صباحاً')
+                                  .replaceAll('PM', 'مساءً');
+                            } catch (e) {
+                              if (rawDateTime.contains('T')) {
+                                final parts = rawDateTime.split('T');
+                                displayDate = parts[0];
+                                displayTime = parts[1].substring(0, 5);
+                              }
+                            }
+                          }
+
                           return _buildHistoryCard(
                             context: context,
                             appointment: appointment,
+                            displayDate: displayDate,
+                            displayTime: displayTime,
                             baseFontSize: baseFontSize,
                             isDark: isDark,
                             theme: theme,
@@ -242,6 +276,8 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen> {
   Widget _buildHistoryCard({
     required BuildContext context,
     required Map<String, dynamic> appointment,
+    required String displayDate,
+    required String displayTime,
     required double baseFontSize,
     required bool isDark,
     required ThemeData theme,
@@ -273,12 +309,13 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen> {
         children: [
           // Patient name + Status
           Row(
-            textDirection: TextDirection.rtl,
+            textDirection: ui.TextDirection.rtl,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: Text(
-                  appointment['patientFirstName'] ?? 'مريض',
+                  '${appointment['patientFirstName'] ?? 'مريض'} ${appointment['patientLastName'] ?? ''}'
+                      .trim(),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w600,
@@ -321,21 +358,21 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen> {
           _buildDetailItem(
             icon: Icons.medical_services_outlined,
             label: 'التخصص',
-            value: appointment['specialty'] ?? 'غير محدد',
+            value: appointment['categoryName'] ?? 'غير محدد',
             baseFontSize: baseFontSize,
           ),
           const SizedBox(height: 10),
           _buildDetailItem(
             icon: Icons.calendar_month_outlined,
             label: 'التاريخ',
-            value: appointment['date'] ?? 'غير محدد',
+            value: displayDate,
             baseFontSize: baseFontSize,
           ),
           const SizedBox(height: 10),
           _buildDetailItem(
             icon: Icons.access_time_outlined,
             label: 'الوقت',
-            value: appointment['time'] ?? 'غير محدد',
+            value: displayTime,
             baseFontSize: baseFontSize,
           ),
           const SizedBox(height: 14),
@@ -375,7 +412,7 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Row(
-      textDirection: TextDirection.rtl,
+      textDirection: ui.TextDirection.rtl,
       children: [
         Container(
           width: 32,

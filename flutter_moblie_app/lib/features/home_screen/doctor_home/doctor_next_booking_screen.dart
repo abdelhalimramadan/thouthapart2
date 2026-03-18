@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/appointment_history_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
 import 'package:thotha_mobile_app/features/notifications/ui/notifications_screen.dart';
+import 'package:intl/intl.dart';
+import 'dart:ui' as ui show TextDirection;
 
 class DoctorNextBookingScreen extends StatefulWidget {
-  DoctorNextBookingScreen({super.key});
+  const DoctorNextBookingScreen({super.key});
 
   @override
   State<DoctorNextBookingScreen> createState() =>
@@ -18,7 +19,6 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
   List<Map<String, dynamic>> _bookings = [];
   bool _isLoading = true;
   String? _errorMessage;
-  int? _doctorId;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -26,27 +26,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
   void initState() {
     super.initState();
     _apiService = getIt<ApiService>();
-    _fetchDoctorIdAndAppointments();
-  }
-
-  Future<void> _fetchDoctorIdAndAppointments() async {
-    try {
-      // Get doctor ID from API
-      final doctorResult = await _apiService.getDoctorById();
-      if (doctorResult['success'] == true && doctorResult['data'] != null) {
-        final doctorData = doctorResult['data'];
-        final id = doctorData.id ?? doctorData['id'];
-        if (id != null) {
-          setState(() {
-            _doctorId = id is String ? int.tryParse(id) : id;
-          });
-        }
-      }
-      // Then fetch appointments
-      await _fetchPendingAppointments();
-    } catch (e) {
-      _fetchPendingAppointments();
-    }
+    _fetchPendingAppointments();
   }
 
   Future<void> _fetchPendingAppointments() async {
@@ -318,7 +298,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     return Row(
-      textDirection: TextDirection.rtl,
+      textDirection: ui.TextDirection.rtl,
       children: [
         Container(
           width: 38,
@@ -405,7 +385,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           children: [
             // Row: name | status badge
             Row(
-              textDirection: TextDirection.rtl,
+              textDirection: ui.TextDirection.rtl,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Name
@@ -440,6 +420,53 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                       fontWeight: FontWeight.bold,
                       fontSize: baseFontSize * 0.7,
                     ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Patient details row
+            Row(
+              textDirection: ui.TextDirection.rtl,
+              children: [
+                Icon(Icons.phone_outlined, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 8),
+                Text(
+                  phone,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: baseFontSize * 0.8,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Date and Time row
+            Row(
+              textDirection: ui.TextDirection.rtl,
+              children: [
+                Icon(Icons.calendar_today_outlined,
+                    size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 8),
+                Text(
+                  date,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: baseFontSize * 0.8,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Icon(Icons.access_time_outlined,
+                    size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 8),
+                Text(
+                  time,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: baseFontSize * 0.8,
+                    color: Colors.grey[700],
                   ),
                 ),
               ],
@@ -558,16 +585,41 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
             const SizedBox(height: 12),
             ..._bookings.asMap().entries.map((entry) {
               final booking = entry.value;
+
+              // Parse dateTime correctly using the correct API key 'appointmentDate'
+              final String rawDateTime = booking['appointmentDate'] ?? '';
+              String displayDate = booking['date'] ?? 'غير محدد';
+              String displayTime = booking['time'] ?? 'غير محدد';
+
+              if (rawDateTime.isNotEmpty) {
+                try {
+                  final dt = DateTime.parse(rawDateTime);
+                  // Format: 18/03/2026
+                  displayDate = DateFormat('dd/MM/yyyy').format(dt);
+                  // Format: 04:00 مساءً
+                  displayTime = DateFormat('hh:mm a', 'ar').format(dt)
+                      .replaceAll('AM', 'صباحاً')
+                      .replaceAll('PM', 'مساءً');
+                } catch (e) {
+                  // Fallback to raw if parsing fails
+                  if (rawDateTime.contains('T')) {
+                    final parts = rawDateTime.split('T');
+                    displayDate = parts[0];
+                    displayTime = parts[1].substring(0, 5);
+                  }
+                }
+              }
+
               return Column(
                 children: [
                   _buildBookingCard(
                     context: context,
                     appointmentId: booking['id'] ?? 0,
-                    patientName: booking['patientFirstName'] ?? 'مريض',
-                    phone: booking['patientPhoneNumber'] ?? '',
-                    service: booking['specialty'] ?? 'تخصص',
-                    time: booking['time'] ?? '',
-                    date: booking['date'] ?? '',
+                    patientName: '${booking['patientFirstName'] ?? 'مريض'} ${booking['patientLastName'] ?? ''}'.trim(),
+                    phone: booking['patientPhoneNumber'] ?? 'غير متوفر',
+                    service: booking['categoryName'] ?? 'تخصص عام',
+                    time: displayTime,
+                    date: displayDate,
                     status: booking['status'] ?? 'قادم',
                     statusColor: const Color(0xFF84E5F3),
                     width: width,
@@ -595,7 +647,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
 
       if (result['success'] == true) {
         // Show success message
-        final statusAr = _statusToArabic(status);
+        _statusToArabic(status);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -608,16 +660,10 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           ),
         );
 
-        // Navigate to appointment history after a short delay
-        await Future.delayed(const Duration(milliseconds: 800));
-        if (mounted && _doctorId != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  AppointmentHistoryScreen(doctorId: _doctorId!),
-            ),
-          );
+        // Refresh the list after a short delay
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          _fetchPendingAppointments();
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

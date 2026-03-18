@@ -8,9 +8,10 @@ import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/my_request
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_profile.dart';
 import 'package:thotha_mobile_app/features/login/ui/login_screen.dart';
-import 'package:dio/dio.dart';
-import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
+import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thotha_mobile_app/core/networking/api_service.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
 
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/doctor_next_booking_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/appointment_history_screen.dart';
@@ -42,9 +43,12 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
   static const _cCyan = Color(0xFF84E5F3);
   static const _cGreen = Color(0xFF8DECB4);
 
+  late ApiService _apiService;
+
   @override
   void initState() {
     super.initState();
+    _apiService = getIt<ApiService>();
     _fetchDoctorInfo();
     DoctorDrawer.profileImageNotifier.addListener(_updateProfileImage);
   }
@@ -243,7 +247,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     );
   }
 
-  Future<void> _fetchDoctorName() async {
+  Future<void> _fetchDoctorInfo() async {
     setState(() => _isLoadingName = true);
 
     try {
@@ -251,108 +255,50 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
       final cachedLastName = await SharedPrefHelper.getString('last_name');
       final cachedEmail = await SharedPrefHelper.getString('email');
       final cachedImage = await SharedPrefHelper.getString('profile_image');
+      final cachedId = await SharedPrefHelper.getString('doctor_id');
 
       if (cachedFirstName != null && cachedFirstName.isNotEmpty) {
         setState(() {
           _firstName = cachedFirstName;
           _lastName = cachedLastName;
           _email = cachedEmail;
-          _profileImage =
-              (cachedImage?.isNotEmpty ?? false) ? cachedImage : _profileImage;
-        });
-        return;
-      }
-
-      final dio = DioFactory.getDio();
-      Response response;
-      try {
-        response = await dio.get('/me');
-      } catch (_) {
-        response = await dio.get('/profile');
-      }
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-        String? f, l, e, img;
-
-        if (data is Map) {
-          f = (data['first_name'] ?? data['firstName']) as String?;
-          l = (data['last_name'] ?? data['lastName']) as String?;
-          e = (data['email'] ?? (data['user']?['email'])) as String?;
-          img = (data['profile_image']) as String?;
-
-          if ((f == null || f.isEmpty) && data['user'] != null) {
-            final user = data['user'];
-            f = user['first_name'] ?? user['firstName'];
-            l = user['last_name'] ?? user['lastName'];
-            img = img ?? user['profile_image'];
+          _profileImage = (cachedImage?.isNotEmpty ?? false) ? cachedImage : _profileImage;
+          if (cachedId != null && cachedId.isNotEmpty) {
+            _doctorId = int.tryParse(cachedId);
           }
-        }
+        });
+      }
 
+      // Fetch from API to update info and get doctor ID if missing/changed
+      final result = await _apiService.getDoctorById();
+      if (result['success'] == true && result['data'] != null) {
+        final doctorData = result['data'] as DoctorProfileModel;
         setState(() {
-          _firstName = f;
-          _lastName = l;
-          _email = e;
-          _profileImage = img;
+          _firstName = doctorData.firstName ?? _firstName;
+          _lastName = doctorData.lastName ?? _lastName;
+          _email = doctorData.email ?? _email;
+          _doctorId = doctorData.id ?? _doctorId;
         });
 
-        if (f != null && f.isNotEmpty) {
-          await SharedPrefHelper.setData('first_name', f);
-          await SharedPrefHelper.setData('last_name', l ?? '');
-          if (e != null) await SharedPrefHelper.setData('email', e);
-          if (img != null) await SharedPrefHelper.setData('profile_image', img);
+        if (doctorData.firstName != null) {
+          await SharedPrefHelper.setData('first_name', doctorData.firstName!);
+        }
+        if (doctorData.lastName != null) {
+          await SharedPrefHelper.setData('last_name', doctorData.lastName!);
+        }
+        if (doctorData.email != null) {
+          await SharedPrefHelper.setData('email', doctorData.email!);
+        }
+        if (doctorData.id != null) {
+          await SharedPrefHelper.setData('doctor_id', doctorData.id.toString());
         }
       }
     } catch (e) {
-      debugPrint('Exception: $e');
+      debugPrint('Exception fetching doctor info: $e');
     } finally {
-      setState(() => _isLoadingName = false);
-    }
-  }
-
-  Future<void> _fetchDoctorInfo() async {
-    await _fetchDoctorName();
-    await _fetchDoctorId();
-  }
-
-  Future<void> _fetchDoctorId() async {
-    try {
-      final cachedId = await SharedPrefHelper.getString('doctor_id');
-      if (cachedId != null && cachedId.isNotEmpty) {
-        setState(() {
-          _doctorId = int.tryParse(cachedId);
-        });
-        return;
+      if (mounted) {
+        setState(() => _isLoadingName = false);
       }
-
-      final dio = DioFactory.getDio();
-      Response response;
-      try {
-        response = await dio.get('/me');
-      } catch (_) {
-        response = await dio.get('/profile');
-      }
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-        int? id;
-
-        if (data is Map) {
-          id = data['id'] as int?;
-          if (id == null && data['user'] != null) {
-            id = data['user']['id'] as int?;
-          }
-        }
-
-        if (id != null) {
-          setState(() {
-            _doctorId = id;
-          });
-          await SharedPrefHelper.setData('doctor_id', id.toString());
-        }
-      }
-    } catch (e) {
-      debugPrint('Exception fetching doctor ID: $e');
     }
   }
 
@@ -581,22 +527,13 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     width: width,
                     baseFontSize: baseFontSize,
                     onTap: () {
-                      if (_doctorId == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('خطأ: معرف الطبيب غير متاح'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                        return;
-                      }
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           settings:
                               const RouteSettings(name: 'appointment-history'),
                           builder: (context) =>
-                              AppointmentHistoryScreen(doctorId: _doctorId!),
+                              const AppointmentHistoryScreen(),
                         ),
                       );
                     },

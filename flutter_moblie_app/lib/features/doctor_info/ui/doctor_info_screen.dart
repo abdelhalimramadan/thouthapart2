@@ -486,6 +486,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                                 specialty: widget.doctor.categoryName,
                                                 date: date,
                                                 time: time,
+                                                requestId: null,
                                               ),
                                             ),
                                           );
