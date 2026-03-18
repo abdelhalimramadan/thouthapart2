@@ -565,24 +565,50 @@ class ApiService {
     try {
       await DioFactory.addDioHeaders();
 
+      // Normalize phone number to English digits
+      final normalizedPhone = patientPhoneNumber
+          .replaceAll('٠', '0')
+          .replaceAll('١', '1')
+          .replaceAll('٢', '2')
+          .replaceAll('٣', '3')
+          .replaceAll('٤', '4')
+          .replaceAll('٥', '5')
+          .replaceAll('٦', '6')
+          .replaceAll('٧', '7')
+          .replaceAll('٨', '8')
+          .replaceAll('٩', '9');
+
       final body = {
         'patientFirstName': patientFirstName,
         'patientLastName': patientLastName,
-        'patientPhoneNumber': patientPhoneNumber,
+        'patientPhoneNumber': normalizedPhone,
       };
+
+      print('=== API CALL: createAppointment ===');
+      print('URL: ${ApiConstants.createAppointment}/$requestId');
+      print('Body: $body');
 
       final res = await _dio.post(
         '${ApiConstants.createAppointment}/$requestId',
         data: body,
       );
 
+      print('Response Status: ${res.statusCode}');
+      print('Response Data: ${res.data}');
+
       if (res.statusCode == 200 || res.statusCode == 201) {
         return _okData(res.data)..['message'] = 'تم حجز الموعد بنجاح';
       }
       return _fail('فشل في حجز الموعد', code: res.statusCode);
     } on DioException catch (e) {
+      print('=== DioException in createAppointment ===');
+      print('Status: ${e.response?.statusCode}');
+      print('Data: ${e.response?.data}');
+      print('Message: ${e.message}');
       return _fail(_dioError(e), code: e.response?.statusCode);
-    } catch (_) {
+    } catch (e) {
+      print('=== Unexpected error in createAppointment ===');
+      print('Error: $e');
       return _fail('حدث خطأ غير متوقع');
     }
   }

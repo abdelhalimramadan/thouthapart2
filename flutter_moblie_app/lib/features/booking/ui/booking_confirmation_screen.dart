@@ -1,3 +1,4 @@
+import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/features/appointments/data/appointments_service.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
@@ -43,7 +44,26 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
   void initState() {
     super.initState();
     _apiService = getIt<ApiService>();
+    _prefillUserData();
     _fetchRequests();
+  }
+
+  Future<void> _prefillUserData() async {
+    try {
+      final fName = await SharedPrefHelper.getString('first_name');
+      final lName = await SharedPrefHelper.getString('last_name');
+      final phone = await SharedPrefHelper.getString('phone');
+
+      if (mounted) {
+        setState(() {
+          if (fName != null) _firstNameController.text = fName;
+          if (lName != null) _lastNameController.text = lName;
+          if (phone != null) _phoneController.text = phone;
+        });
+      }
+    } catch (e) {
+      print('Error pre-filling user data: $e');
+    }
   }
 
   Future<void> _fetchRequests() async {
