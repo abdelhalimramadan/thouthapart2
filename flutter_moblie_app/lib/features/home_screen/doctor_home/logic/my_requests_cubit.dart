@@ -80,6 +80,12 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
   Future<void> deleteRequest(CaseRequestModel request) async {
     final currentList = List<CaseRequestModel>.from(_visibleRequests);
 
+    print('=== deleteRequest Cubit Debug ===');
+    print('Total requests before delete: ${currentList.length}');
+    print('Deleting request ID: ${request.id}');
+    print('Request description: ${request.description}');
+    print('All request IDs: ${currentList.map((r) => r.id).toList()}');
+
     // Read cached doctorId so the backend can verify ownership
     int doctorId = await SharedPrefHelper.getInt('doctor_id');
     if (doctorId == 0) {
@@ -87,11 +93,22 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
       doctorId = int.tryParse(s) ?? 0;
     }
 
+    print('Doctor ID for deletion: $doctorId');
+
     final result = await _repo.deleteRequest(request.id ?? 0,
         doctorId: doctorId == 0 ? null : doctorId);
 
+    print('Delete API Result: ${result['success']}');
+    print('Delete Error (if any): ${result['error']}');
+
     if (result['success'] == true) {
+      final beforeCount = currentList.length;
       currentList.removeWhere((r) => r.id == request.id);
+      final afterCount = currentList.length;
+      
+      print('Requests removed: ${beforeCount - afterCount}');
+      print('Total requests after delete: ${afterCount}');
+      
       if (currentList.isEmpty) {
         emit(MyRequestsEmpty());
       } else {

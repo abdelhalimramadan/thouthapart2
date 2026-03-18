@@ -368,25 +368,55 @@ class ApiService {
   Future<Map<String, dynamic>> deleteRequest(int id, {int? doctorId}) async {
     try {
       await DioFactory.addDioHeaders();
-      final params = <String, dynamic>{'id': id};
-      if (doctorId != null && doctorId != 0) params['doctorId'] = doctorId;
+
+      // Debug logging
+      print('=== deleteRequest Debug ===');
+      print('Request ID to delete: $id');
+      print('Doctor ID: $doctorId');
+      print('API Endpoint: ${ApiConstants.deleteRequest}');
+
+      // Build query parameters ensuring ID is included
+      final params = <String, dynamic>{
+        'id': id,
+        'requestId': id, // Try both parameter names to be safe
+      };
+      if (doctorId != null && doctorId != 0) {
+        params['doctorId'] = doctorId;
+      }
+
+      print('Query Parameters: $params');
+
       final res = await _dio.delete(
         ApiConstants.deleteRequest,
-        queryParameters: params,
+        queryParameters: {'id': id}, // Primary parameter
+        // If the above doesn't work, the API should handle it with doctorId verification
       );
-      if (res.statusCode == 200 || res.statusCode == 204)
+
+      print('Delete Response Status: ${res.statusCode}');
+      print('Delete Response Data: ${res.data}');
+
+      if (res.statusCode == 200 || res.statusCode == 204) {
+        print('✓ Request ID $id deleted successfully');
         return {'success': true};
+      }
       if (res.statusCode == 403)
         return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: 403);
       return _fail('فشل في حذف الطلب', code: res.statusCode);
     } on DioException catch (e) {
+      print('=== deleteRequest DioException ===');
+      print('Status Code: ${e.response?.statusCode}');
+      print('Response Data: ${e.response?.data}');
+      print('Error: ${e.message}');
+
       final code = e.response?.statusCode;
       if (code == 403)
         return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: code);
       if (code == 404) return _fail('الطلب غير موجود', code: code);
       if (code == 500) return _fail('خطأ في الخادم، حاول مرة أخرى', code: code);
       return _fail(_dioError(e), code: code);
-    } catch (_) {
+    } catch (e) {
+      print('=== deleteRequest Unexpected Error ===');
+      print('Error: $e');
       return _fail('حدث خطأ غير متوقع');
     }
   }
@@ -697,21 +727,47 @@ class ApiService {
     try {
       await DioFactory.addDioHeaders();
 
+      print('=== DEBUG: Calling getAppointmentHistory ===');
+      print('URL: ${ApiConstants.appointmentHistory}');
+
       final res = await _dio.get(
         ApiConstants.appointmentHistory,
       );
 
-      if (res.statusCode == 200 && res.data is List) {
-        return _okList(
-          (res.data as List)
-              .map((e) => Map<String, dynamic>.from(e as Map))
-              .toList(),
-        );
+      print('Response Status: ${res.statusCode}');
+      print('Response Data: ${res.data}');
+
+      if (res.statusCode == 200) {
+        // Handle both list and wrapped object responses
+        if (res.data is List) {
+          return _okList(
+            (res.data as List)
+                .map((e) => Map<String, dynamic>.from(e as Map))
+                .toList(),
+          );
+        } else if (res.data is Map && (res.data as Map).containsKey('data')) {
+          // If data is wrapped in an object
+          final data = (res.data as Map)['data'];
+          if (data is List) {
+            return _okList(
+              (data as List)
+                  .map((e) => Map<String, dynamic>.from(e as Map))
+                  .toList(),
+            );
+          }
+        }
+        // If empty or no data
+        return _okList([]);
       }
+      print('=== API Error: ${res.statusCode} ===');
       return _fail('فشل في تحميل سجل الحجوزات', code: res.statusCode);
     } on DioException catch (e) {
+      print('=== DioException: ${e.message} ===');
+      print('=== Status Code: ${e.response?.statusCode} ===');
+      print('=== Response: ${e.response?.data} ===');
       return _fail(_dioError(e), code: e.response?.statusCode);
-    } catch (_) {
+    } catch (e) {
+      print('=== Exception: $e ===');
       return _fail('حدث خطأ غير متوقع');
     }
   }

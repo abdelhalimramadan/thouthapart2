@@ -31,7 +31,10 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen> {
 
   Future<void> _fetchAppointmentHistory() async {
     try {
+      print('=== DEBUG: Fetching appointment history ===');
       final result = await _apiService.getAppointmentHistory();
+
+      print('=== DEBUG: Result: $result ===');
 
       if (mounted) {
         if (result['success'] == true && result['data'] != null) {
@@ -40,15 +43,20 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen> {
             _isLoading = false;
             _errorMessage = null;
           });
+          print('=== DEBUG: Loaded ${_history.length} appointments ===');
         } else {
+          final errorMsg = result['error'] ?? 'فشل في تحميل السجل';
+          print('=== DEBUG: Error - $errorMsg ===');
           setState(() {
             _isLoading = false;
-            _errorMessage = result['error'] ?? 'فشل في تحميل السجل';
+            _errorMessage = errorMsg;
             _history = [];
           });
         }
       }
-    } catch (e) {
+    } catch (e, stack) {
+      print('=== DEBUG: Exception: $e ===');
+      print('=== DEBUG: Stack: $stack ===');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -180,19 +188,44 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen> {
                         color: Colors.red[300],
                       ),
                       const SizedBox(height: 16),
-                      Text(
-                        _errorMessage!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontFamily: 'Cairo',
-                          color: Colors.red,
-                          fontSize: 16,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          children: [
+                            Text(
+                              _errorMessage!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                color: Colors.red,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (_errorMessage!.contains('404') ||
+                                _errorMessage!.contains('لم يتم العثور'))
+                              Column(
+                                children: [
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'تأكد من أن لديك حجوزات سابقة أو حاول إعادة المحاولة',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'Cairo',
+                                      color: Colors.grey[600],
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 24),
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed: _fetchAppointmentHistory,
-                        child: const Text(
+                        icon: const Icon(Icons.refresh),
+                        label: const Text(
                           'إعادة محاولة',
                           style: TextStyle(fontFamily: 'Cairo'),
                         ),

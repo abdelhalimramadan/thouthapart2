@@ -1,13 +1,14 @@
 import 'dart:convert';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/helpers/constants.dart';
 import '../../../../core/helpers/shared_pref_helper.dart';
 import '../../../../core/utils/notification_helper.dart';
 import '../drawer/doctor_drawer_screen.dart';
 import '../../../notifications/ui/notifications_screen.dart';
-import '../../../home_screen/data/models/case_request_model.dart';
 import '../../../../core/di/dependency_injection.dart';
-import '../../../home_screen/data/repositories/case_request_repo.dart';
+import '../../../../core/networking/api_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DoctorHomeScreen
@@ -21,22 +22,22 @@ class DoctorHomeScreen extends StatefulWidget {
 
 class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final CaseRequestRepo _caseRepo = getIt<CaseRequestRepo>();
+  final ApiService _apiService = getIt<ApiService>();
 
   // ── State ──────────────────────────────────────────────────────
   String? _firstName;
   bool _isLoadingName = true;
 
-  List<CaseRequestModel> _caseRequests = [];
-  bool _isLoadingCases = true;
-  String? _casesError;
+  List<Map<String, dynamic>> _pendingAppointments = [];
+  bool _isLoadingAppointments = true;
+  String? _appointmentsError;
 
   // ── Lifecycle ──────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
     // Run both fetches in parallel — faster startup
-    Future.wait([_fetchDoctorName(), _fetchCaseRequests()]);
+    Future.wait([_fetchDoctorName(), _fetchPendingAppointments()]);
   }
 
   // ── Data Fetching ──────────────────────────────────────────────
@@ -90,21 +91,16 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     }
   }
 
-  Future<void> _fetchCaseRequests() async {
+  Future<void> _fetchPendingAppointments() async {
     if (!mounted) return;
     setState(() {
-      _isLoadingCases = true;
-      _casesError = null;
+      _isLoadingAppointments = true;
+      _appointmentsError = null;
     });
 
     try {
-      if (!mounted) return;
-      setState(() {
-        _isLoadingCases = true;
-        _casesError = null;
-      });
-      print('=== DEBUG: Calling getRequestsByDoctorId() ===');
-      final result = await _caseRepo.getRequestsByDoctorId();
+      print('=== DEBUG: Calling getPendingAppointments() ===');
+      final result = await _apiService.getPendingAppointments();
 
       print('=== DEBUG: API Response: $result ===');
 
@@ -114,15 +110,15 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         final data = result['data'];
         print('=== DEBUG: Data received: $data ===');
         setState(() {
-          _caseRequests = List<CaseRequestModel>.from(data as List);
-          _isLoadingCases = false;
+          _pendingAppointments = List<Map<String, dynamic>>.from(data as List);
+          _isLoadingAppointments = false;
         });
       } else {
-        final error = result['error']?.toString() ?? 'فشل في تحميل الحالات';
+        final error = result['error']?.toString() ?? 'فشل في تحميل الحجوزات';
         print('=== DEBUG: API Error: $error ===');
         setState(() {
-          _casesError = error;
-          _isLoadingCases = false;
+          _appointmentsError = error;
+          _isLoadingAppointments = false;
         });
       }
     } catch (e, stack) {
@@ -130,21 +126,297 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       print('=== DEBUG: Stack trace: $stack ===');
       if (mounted)
         setState(() {
-          _isLoadingCases = false;
-          _casesError = 'حدث خطأ غير متوقع: $e';
+          _isLoadingAppointments = false;
+          _appointmentsError = 'حدث خطأ غير متوقع: $e';
         });
     }
   }
 
   // ── Actions ────────────────────────────────────────────────────
 
-  void _openCaseDetails(CaseRequestModel req) {
+  void _showAppointmentDetails({
+    required BuildContext context,
+    required int appointmentId,
+    required String patientName,
+    required String phone,
+    required String date,
+    required String time,
+    required String service,
+    required double baseFontSize,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _CaseDetailsSheet(req: req),
+      builder: (ctx) {
+        return Container(
+          decoration: BoxDecoration(
+            color: theme.cardTheme.color ?? theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.only(
+            top: 20,
+            left: 20,
+            right: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 28,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[600] : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Patient name
+              Text(
+                patientName,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w700,
+                  fontSize: baseFontSize * 1.25,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Divider(
+                  color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
+              const SizedBox(height: 12),
+              // Phone
+              _buildDetailRow(
+                context: context,
+                icon: Icons.phone_outlined,
+                label: 'رقم الهاتف',
+                value: phone,
+                baseFontSize: baseFontSize,
+              ),
+              const SizedBox(height: 14),
+              // Date
+              _buildDetailRow(
+                context: context,
+                icon: Icons.calendar_month_outlined,
+                label: 'التاريخ',
+                value: date,
+                baseFontSize: baseFontSize,
+              ),
+              const SizedBox(height: 14),
+              // Time
+              _buildDetailRow(
+                context: context,
+                icon: Icons.access_time_outlined,
+                label: 'الوقت',
+                value: time,
+                baseFontSize: baseFontSize,
+              ),
+              const SizedBox(height: 14),
+              // Specialty
+              _buildDetailRow(
+                context: context,
+                icon: Icons.medical_services_outlined,
+                label: 'التخصص',
+                value: service,
+                baseFontSize: baseFontSize,
+              ),
+              const SizedBox(height: 24),
+              // Action buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => _updateAppointmentStatus(
+                        context,
+                        appointmentId,
+                        'APPROVED',
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF0FDF4),
+                        foregroundColor: const Color(0xFF16A34A),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: const BorderSide(color: Color(0xFF16A34A)),
+                        ),
+                      ),
+                      child: Text(
+                        'قبول',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontWeight: FontWeight.w600,
+                          fontSize: baseFontSize * 0.9,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => _updateAppointmentStatus(
+                        context,
+                        appointmentId,
+                        'CANCELLED',
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFEF2F2),
+                        foregroundColor: const Color(0xFFE7000B),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: const BorderSide(color: Color(0xFFE7000B)),
+                        ),
+                      ),
+                      child: Text(
+                        'رفض',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontWeight: FontWeight.w600,
+                          fontSize: baseFontSize * 0.9,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
+  }
+
+  Widget _buildDetailRow({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required String value,
+    required double baseFontSize,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Row(
+      textDirection: ui.TextDirection.rtl,
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 18, color: const Color(0xFF021433)),
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: baseFontSize * 0.75,
+                color: Colors.grey,
+              ),
+            ),
+            Text(
+              value,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.w600,
+                fontSize: baseFontSize * 0.9,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<void> _updateAppointmentStatus(
+    BuildContext context,
+    int appointmentId,
+    String status,
+  ) async {
+    try {
+      // Close the bottom sheet
+      Navigator.pop(context);
+
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      final result = await _apiService.updateAppointmentStatus(
+        appointmentId,
+        status,
+      );
+
+      if (!mounted) return;
+
+      // Close loading dialog
+      Navigator.pop(context);
+
+      if (result['success'] == true) {
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'تم ${status == 'APPROVED' ? 'قبول' : 'رفض'} الحجز بنجاح',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor:
+                status == 'APPROVED' ? Colors.green : Colors.orange,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+
+        // Refresh the list after a short delay
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          _fetchPendingAppointments();
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['error'] ?? 'فشل في تحديث حالة الحجز',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      // Close loading dialog if still open
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'حدث خطأ: ${e.toString()}',
+            style: const TextStyle(fontFamily: 'Cairo'),
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   void _openNotifications() {
@@ -172,15 +444,15 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       drawer: const DoctorDrawer(),
       appBar: _buildAppBar(width, cs, tt, baseFontSize, unreadCount),
       body: RefreshIndicator(
-        onRefresh: _fetchCaseRequests,
+        onRefresh: _fetchPendingAppointments,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildGreeting(width, baseFontSize),
-              _buildSectionTitle('حالاتي القادمة', width, baseFontSize),
-              _buildCasesSection(width, baseFontSize),
+              _buildSectionTitle('حجوزاتي القادمة', width, baseFontSize),
+              _buildAppointmentsSection(width, baseFontSize),
               const SizedBox(height: 40),
             ],
           ),
@@ -278,7 +550,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                   ? 'مرحباً، د/ $_firstName 👋'
                   : 'مرحباً، دكتور 👋',
               textAlign: TextAlign.right,
-              textDirection: TextDirection.rtl,
+              textDirection: ui.TextDirection.rtl,
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: baseFontSize * 1.4,
@@ -308,27 +580,27 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     );
   }
 
-  // ── Cases section ──────────────────────────────────────────────
-  Widget _buildCasesSection(double width, double baseFontSize) {
-    if (_isLoadingCases) {
+  // ── Appointments section ──────────────────────────────────────
+  Widget _buildAppointmentsSection(double width, double baseFontSize) {
+    if (_isLoadingAppointments) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 40),
         child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (_casesError != null) {
+    if (_appointmentsError != null) {
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 16),
         child: Column(
           children: [
-            Text(_casesError!,
+            Text(_appointmentsError!,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     fontFamily: 'Cairo', color: Colors.redAccent)),
             const SizedBox(height: 8),
             TextButton.icon(
-              onPressed: _fetchCaseRequests,
+              onPressed: _fetchPendingAppointments,
               icon: const Icon(Icons.refresh),
               label: const Text('إعادة المحاولة',
                   style: TextStyle(fontFamily: 'Cairo')),
@@ -338,7 +610,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       );
     }
 
-    if (_caseRequests.isEmpty) {
+    if (_pendingAppointments.isEmpty) {
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 40),
         child: Center(
@@ -348,7 +620,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                   size: 48, color: Colors.grey[300]),
               const SizedBox(height: 12),
               const Text(
-                'لا توجد حالات مسجلة حالياً',
+                'لا توجد حجوزات قادمة حالياً',
                 style: TextStyle(
                     fontFamily: 'Cairo', color: Colors.grey, fontSize: 15),
               ),
@@ -362,29 +634,75 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.only(top: 10, bottom: 8),
-      itemCount: _caseRequests.length,
+      itemCount: _pendingAppointments.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
-      itemBuilder: (_, i) => _CaseCard(
-        req: _caseRequests[i],
-        width: width,
-        baseFontSize: baseFontSize,
-        onTap: () => _openCaseDetails(_caseRequests[i]),
-      ),
+      itemBuilder: (_, i) {
+        final appointment = _pendingAppointments[i];
+
+        // Parse dateTime correctly using the correct API key 'appointmentDate'
+        final String rawDateTime = appointment['appointmentDate'] ?? '';
+        String displayDate = appointment['date'] ?? 'غير محدد';
+        String displayTime = appointment['time'] ?? 'غير محدد';
+
+        if (rawDateTime.isNotEmpty) {
+          try {
+            final dt = DateTime.parse(rawDateTime);
+            // Format: 18/03/2026
+            displayDate = DateFormat('dd/MM/yyyy').format(dt);
+            // Format: 04:00 مساءً
+            displayTime = DateFormat('hh:mm a', 'ar')
+                .format(dt)
+                .replaceAll('AM', 'صباحاً')
+                .replaceAll('PM', 'مساءً');
+          } catch (e) {
+            // Fallback to raw if parsing fails
+            if (rawDateTime.contains('T')) {
+              final parts = rawDateTime.split('T');
+              displayDate = parts[0];
+              displayTime = parts[1].substring(0, 5);
+            }
+          }
+        }
+
+        return _AppointmentCard(
+          appointment: appointment,
+          displayDate: displayDate,
+          displayTime: displayTime,
+          width: width,
+          baseFontSize: baseFontSize,
+          onTap: () => _showAppointmentDetails(
+            context: context,
+            appointmentId: appointment['id'] ?? 0,
+            patientName:
+                '${appointment['patientFirstName'] ?? 'مريض'} ${appointment['patientLastName'] ?? ''}'
+                    .trim(),
+            phone: appointment['patientPhoneNumber'] ?? 'غير متوفر',
+            date: displayDate,
+            time: displayTime,
+            service: appointment['categoryName'] ?? 'تخصص عام',
+            baseFontSize: baseFontSize,
+          ),
+        );
+      },
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// _CaseCard — stateless, const-safe
+// _AppointmentCard — stateless, const-safe
 // ─────────────────────────────────────────────────────────────────────────────
-class _CaseCard extends StatelessWidget {
-  final CaseRequestModel req;
+class _AppointmentCard extends StatelessWidget {
+  final Map<String, dynamic> appointment;
+  final String displayDate;
+  final String displayTime;
   final double width;
   final double baseFontSize;
   final VoidCallback onTap;
 
-  const _CaseCard({
-    required this.req,
+  const _AppointmentCard({
+    required this.appointment,
+    required this.displayDate,
+    required this.displayTime,
     required this.width,
     required this.baseFontSize,
     required this.onTap,
@@ -392,6 +710,14 @@ class _CaseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final patientName =
+        '${appointment['patientFirstName'] ?? 'مريض'} ${appointment['patientLastName'] ?? ''}'
+            .trim();
+    final phone = appointment['patientPhoneNumber'] ?? 'غير متوفر';
+    final service = appointment['categoryName'] ?? 'تخصص عام';
+    final status = appointment['status'] ?? 'قادم';
+    final statusColor = const Color(0xFF84E5F3);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -411,95 +737,94 @@ class _CaseCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // Header: id badge + category
+            // Header: Patient Name | Status Badge
             Row(
+              textDirection: ui.TextDirection.rtl,
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (req.id != null)
-                  _IdBadge(id: req.id!, baseFontSize: baseFontSize),
-                Text(
-                  req.categoryName,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: baseFontSize,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1D61E7),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 10 * (width / 390),
+                      vertical: 4 * (width / 390)),
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    status,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Cairo',
+                      fontWeight: FontWeight.bold,
+                      fontSize: baseFontSize * 0.7,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    patientName,
+                    textAlign: TextAlign.right,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: baseFontSize,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1D61E7),
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 6),
-            // Doctor name
-            Row(children: [
-              Icon(Icons.person_outline, size: 14, color: Colors.grey[500]),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  req.doctorFullName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: baseFontSize * 0.8,
-                      color: Colors.grey[600]),
+            // Service/Category
+            Row(
+              textDirection: ui.TextDirection.rtl,
+              children: [
+                Icon(Icons.medical_services_outlined,
+                    size: 14, color: Colors.grey[500]),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    service,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: baseFontSize * 0.8,
+                        color: Colors.grey[600]),
+                  ),
                 ),
-              ),
-            ]),
-            // Description (optional)
-            if (req.description.isNotEmpty &&
-                req.description != 'No details') ...[
-              const SizedBox(height: 6),
-              Text(
-                req.description,
-                textAlign: TextAlign.right,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: baseFontSize * 0.82,
-                    color: Colors.grey[700]),
-              ),
-            ],
+              ],
+            ),
             const SizedBox(height: 10),
-            // Time + Date chips
-            Row(children: [
-              _InfoChip(
-                  icon: Icons.access_time_outlined,
-                  text: req.formattedTime,
-                  baseFontSize: baseFontSize),
-              const SizedBox(width: 8),
-              _InfoChip(
-                  icon: Icons.calendar_today_outlined,
-                  text: req.formattedDate,
-                  baseFontSize: baseFontSize),
-            ]),
+            // Phone + Date/Time chips
+            Row(
+              textDirection: ui.TextDirection.rtl,
+              children: [
+                _InfoChip(
+                    icon: Icons.phone_outlined,
+                    text: phone,
+                    baseFontSize: baseFontSize),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              textDirection: ui.TextDirection.rtl,
+              children: [
+                _InfoChip(
+                    icon: Icons.calendar_today_outlined,
+                    text: displayDate,
+                    baseFontSize: baseFontSize),
+                const SizedBox(width: 8),
+                _InfoChip(
+                    icon: Icons.access_time_outlined,
+                    text: displayTime,
+                    baseFontSize: baseFontSize),
+              ],
+            ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _IdBadge extends StatelessWidget {
-  final int? id;
-  final double baseFontSize;
-  const _IdBadge({required this.id, required this.baseFontSize});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1D61E7).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        '#${id ?? ""}',
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: baseFontSize * 0.68,
-          color: const Color(0xFF1D61E7),
-          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -528,168 +853,6 @@ class _InfoChip extends StatelessWidget {
                 fontSize: baseFontSize * 0.72,
                 color: Colors.grey[800])),
       ]),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// _CaseDetailsSheet — bottom sheet as separate widget (no setState bleed)
-// ─────────────────────────────────────────────────────────────────────────────
-class _CaseDetailsSheet extends StatelessWidget {
-  final CaseRequestModel req;
-  const _CaseDetailsSheet({required this.req});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(4)),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'تفاصيل الحالة',
-            style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black87),
-          ),
-          const SizedBox(height: 12),
-          const Divider(),
-          const SizedBox(height: 10),
-          _DetailRow(
-              icon: Icons.medical_services_outlined,
-              label: 'التخصص',
-              value: req.categoryName),
-          _DetailRow(
-              icon: Icons.person_outline,
-              label: 'الطبيب',
-              value: req.doctorFullName),
-          _DetailRow(
-              icon: Icons.phone_outlined,
-              label: 'الهاتف',
-              value: req.doctorPhoneNumber),
-          _DetailRow(
-              icon: Icons.school_outlined,
-              label: 'الجامعة',
-              value: req.doctorUniversityName),
-          _DetailRow(
-              icon: Icons.calendar_today_outlined,
-              label: 'التاريخ',
-              value: req.formattedDate),
-          _DetailRow(
-              icon: Icons.access_time_outlined,
-              label: 'الوقت',
-              value: req.formattedTime),
-          if (req.description.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isDark ? Colors.grey[850] : const Color(0xFFF9FAFB),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                req.description,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 14,
-                    color: isDark ? Colors.grey[200] : Colors.grey[800]),
-              ),
-            ),
-          ],
-          const SizedBox(height: 20),
-          Row(children: [
-            Expanded(
-                child: _SheetButton(
-                    label: 'رفض الحالة',
-                    color: Colors.red.shade600,
-                    onTap: () => Navigator.pop(context))),
-            const SizedBox(width: 12),
-            Expanded(
-                child: _SheetButton(
-                    label: 'قبول الحالة',
-                    color: Colors.green.shade600,
-                    onTap: () => Navigator.pop(context))),
-          ]),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  const _DetailRow(
-      {required this.icon, required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Flexible(
-              child: Text(value,
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 14))),
-          const SizedBox(width: 8),
-          Text('$label:',
-              style: const TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold)),
-          const SizedBox(width: 8),
-          Icon(icon, size: 18, color: const Color(0xFF1D61E7)),
-        ],
-      ),
-    );
-  }
-}
-
-class _SheetButton extends StatelessWidget {
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-  const _SheetButton(
-      {required this.label, required this.color, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onTap,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      child: Text(label,
-          style: const TextStyle(
-              fontFamily: 'Cairo', fontSize: 15, fontWeight: FontWeight.bold)),
     );
   }
 }

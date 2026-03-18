@@ -59,8 +59,13 @@ class CaseRequestRepo {
 
   Future<Map<String, dynamic>> deleteRequest(int id, {int? doctorId}) async {
     try {
+      print('=== deleteRequest Repository ===');
+      print('Delete ID: $id');
+      print('Doctor ID: $doctorId');
       return await _apiService.deleteRequest(id, doctorId: doctorId);
     } catch (e) {
+      print('=== deleteRequest Repository Error ===');
+      print('Error: $e');
       return {
         'success': false,
         'error': e.toString(),
