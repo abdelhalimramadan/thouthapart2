@@ -8,6 +8,7 @@ import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/my_requ
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/my_requests_state.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/add_case_request_screen.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/edit_request_screen.dart';
 
 class MyRequestsScreen extends StatelessWidget {
   const MyRequestsScreen({super.key});
@@ -449,9 +450,14 @@ class _RequestCard extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => AddCaseRequestScreen(requestToEdit: request),
+        builder: (_) => EditRequestScreen(request: request),
       ),
-    );
+    ).then((result) {
+      // Refresh requests list if changes were saved
+      if (result == true && context.mounted) {
+        context.read<MyRequestsCubit>().loadRequests();
+      }
+    });
   }
 
   void _showDeleteDialog(BuildContext context, CaseRequestModel request) {

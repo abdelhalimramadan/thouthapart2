@@ -1,6 +1,7 @@
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/theming/colors.dart';
+import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,7 +45,6 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
     _apiService = getIt<ApiService>();
   }
 
-
   @override
   void dispose() {
     _firstNameController.dispose();
@@ -63,7 +63,8 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
     if (widget.requestId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('عذراً، لا يمكن إتمام الحجز بدون تحديد حالة. يرجى المحاولة من صفحة الحالات.',
+          content: Text(
+              'عذراً، لا يمكن إتمام الحجز بدون تحديد حالة. يرجى المحاولة من صفحة الحالات.',
               style: TextStyle(fontFamily: 'Cairo')),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 3),
@@ -92,6 +93,14 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
       });
 
       if (result['success'] == true) {
+        // حفظ البيانات للمرة القادمة
+        await SharedPrefHelper.setData(
+            'first_name', _firstNameController.text.trim());
+        await SharedPrefHelper.setData(
+            'last_name', _lastNameController.text.trim());
+        await SharedPrefHelper.setData(
+            'phone_number', _phoneController.text.trim());
+
         // Success - show confirmation dialog
         if (!mounted) return;
         showDialog(
