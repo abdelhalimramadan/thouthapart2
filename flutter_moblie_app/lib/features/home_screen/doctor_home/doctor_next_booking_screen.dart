@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/appointment_history_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
 import 'package:thotha_mobile_app/features/notifications/ui/notifications_screen.dart';
 
@@ -17,6 +18,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
   List<Map<String, dynamic>> _bookings = [];
   bool _isLoading = true;
   String? _errorMessage;
+  int? _doctorId;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -24,7 +26,27 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
   void initState() {
     super.initState();
     _apiService = getIt<ApiService>();
-    _fetchPendingAppointments();
+    _fetchDoctorIdAndAppointments();
+  }
+
+  Future<void> _fetchDoctorIdAndAppointments() async {
+    try {
+      // Get doctor ID from API
+      final doctorResult = await _apiService.getDoctorById();
+      if (doctorResult['success'] == true && doctorResult['data'] != null) {
+        final doctorData = doctorResult['data'];
+        final id = doctorData.id ?? doctorData['id'];
+        if (id != null) {
+          setState(() {
+            _doctorId = id is String ? int.tryParse(id) : id;
+          });
+        }
+      }
+      // Then fetch appointments
+      await _fetchPendingAppointments();
+    } catch (e) {
+      _fetchPendingAppointments();
+    }
   }
 
   Future<void> _fetchPendingAppointments() async {

@@ -50,4 +50,6 @@ class ApiConstants {
   static const String pendingAppointments =
       '/api/appointment/pendingAppointments';
   static const String updateAppointmentStatus = '/api/appointment/updateStatus';
+  static const String appointmentHistory = '/api/appointment/history';
+  static const String deleteAppointment = '/api/appointment/deleteAppointment';
 }
