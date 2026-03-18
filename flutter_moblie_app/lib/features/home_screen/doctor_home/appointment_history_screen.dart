@@ -1,0 +1,448 @@
+import 'package:flutter/material.dart';
+import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thotha_mobile_app/core/networking/api_service.dart';
+
+class AppointmentHistoryScreen extends StatefulWidget {
+  final int doctorId;
+
+  const AppointmentHistoryScreen({
+    required this.doctorId,
+    super.key,
+  });
+
+  @override
+  State<AppointmentHistoryScreen> createState() =>
+      _AppointmentHistoryScreenState();
+}
+
+class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen> {
+  late ApiService _apiService;
+  List<Map<String, dynamic>> _history = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiService = getIt<ApiService>();
+    _fetchAppointmentHistory();
+  }
+
+  Future<void> _fetchAppointmentHistory() async {
+    try {
+      final result = await _apiService.getAppointmentHistory(widget.doctorId);
+
+      if (mounted) {
+        if (result['success'] == true && result['data'] != null) {
+          setState(() {
+            _history = List<Map<String, dynamic>>.from(result['data'] as List);
+            _isLoading = false;
+            _errorMessage = null;
+          });
+        } else {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = result['error'] ?? 'فشل في تحميل السجل';
+            _history = [];
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'حدث خطأ: ${e.toString()}';
+          _history = [];
+        });
+      }
+    }
+  }
+
+  Future<void> _deleteAppointment(int appointmentId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          'تأكيد الحذف',
+          style: TextStyle(fontFamily: 'Cairo'),
+        ),
+        content: const Text(
+          'هل تريد حذف هذا السجل؟',
+          style: TextStyle(fontFamily: 'Cairo'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text(
+              'إلغاء',
+              style: TextStyle(fontFamily: 'Cairo'),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              'حذف',
+              style: TextStyle(fontFamily: 'Cairo', color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final result = await _apiService.deleteAppointment(appointmentId);
+
+      if (!mounted) return;
+
+      if (result['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'تم حذف السجل بنجاح',
+              style: TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        await _fetchAppointmentHistory();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['error'] ?? 'فشل في حذف السجل',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'حدث خطأ: ${e.toString()}',
+            style: const TextStyle(fontFamily: 'Cairo'),
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final baseFontSize = width * 0.04;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'سجل الحجوزات',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontFamily: 'Cairo',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        elevation: 0,
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Colors.red[300],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontFamily: 'Cairo',
+                          color: Colors.red,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _fetchAppointmentHistory,
+                        child: const Text(
+                          'إعادة محاولة',
+                          style: TextStyle(fontFamily: 'Cairo'),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : _history.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.history,
+                            size: 64,
+                            color: Colors.grey[300],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'لا توجد حجوزات سابقة',
+                            style: TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: baseFontSize * 1.125,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: _fetchAppointmentHistory,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 15,
+                        ),
+                        itemCount: _history.length,
+                        itemBuilder: (context, index) {
+                          final appointment = _history[index];
+                          return _buildHistoryCard(
+                            context: context,
+                            appointment: appointment,
+                            baseFontSize: baseFontSize,
+                            isDark: isDark,
+                            theme: theme,
+                            onDelete: () =>
+                                _deleteAppointment(appointment['id'] ?? 0),
+                          );
+                        },
+                      ),
+                    ),
+    );
+  }
+
+  Widget _buildHistoryCard({
+    required BuildContext context,
+    required Map<String, dynamic> appointment,
+    required double baseFontSize,
+    required bool isDark,
+    required ThemeData theme,
+    required VoidCallback onDelete,
+  }) {
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color ?? colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withAlpha((0.3 * 255).round())
+                : Colors.grey.withAlpha((0.08 * 255).round()),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // Patient name + Status
+          Row(
+            textDirection: TextDirection.rtl,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  appointment['patientFirstName'] ?? 'مريض',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontFamily: 'Cairo',
+                    fontWeight: FontWeight.w600,
+                    fontSize: baseFontSize * 1.0,
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: _getStatusColor(appointment['status']),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  _statusToArabic(appointment['status'] ?? 'PENDING'),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Cairo',
+                    fontWeight: FontWeight.bold,
+                    fontSize: baseFontSize * 0.7,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 20),
+          // Details
+          _buildDetailItem(
+            icon: Icons.phone_outlined,
+            label: 'رقم الهاتف',
+            value: appointment['patientPhoneNumber'] ?? 'غير محدد',
+            baseFontSize: baseFontSize,
+          ),
+          const SizedBox(height: 10),
+          _buildDetailItem(
+            icon: Icons.medical_services_outlined,
+            label: 'التخصص',
+            value: appointment['specialty'] ?? 'غير محدد',
+            baseFontSize: baseFontSize,
+          ),
+          const SizedBox(height: 10),
+          _buildDetailItem(
+            icon: Icons.calendar_month_outlined,
+            label: 'التاريخ',
+            value: appointment['date'] ?? 'غير محدد',
+            baseFontSize: baseFontSize,
+          ),
+          const SizedBox(height: 10),
+          _buildDetailItem(
+            icon: Icons.access_time_outlined,
+            label: 'الوقت',
+            value: appointment['time'] ?? 'غير محدد',
+            baseFontSize: baseFontSize,
+          ),
+          const SizedBox(height: 14),
+          // Delete button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline),
+              label: const Text(
+                'حذف السجل',
+                style: TextStyle(fontFamily: 'Cairo'),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFEF2F2),
+                foregroundColor: const Color(0xFFE7000B),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  side: const BorderSide(color: Color(0xFFE7000B)),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    required double baseFontSize,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Row(
+      textDirection: TextDirection.rtl,
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Icon(
+            icon,
+            size: 14,
+            color: const Color(0xFF021433),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: baseFontSize * 0.7,
+                  color: Colors.grey,
+                ),
+              ),
+              Text(
+                value,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w600,
+                  fontSize: baseFontSize * 0.85,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getStatusColor(String? status) {
+    switch (status?.toUpperCase()) {
+      case 'APPROVED':
+        return const Color(0xFF84E5F3);
+      case 'DONE':
+        return const Color(0xFF16A34A);
+      case 'CANCELLED':
+        return const Color(0xFFE7000B);
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _statusToArabic(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 'قيد الانتظار';
+      case 'APPROVED':
+        return 'موافق عليه';
+      case 'DONE':
+        return 'مكتمل';
+      case 'CANCELLED':
+        return 'ملغى';
+      default:
+        return status;
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
+import 'package:thotha_mobile_app/features/home_screen/doctor_home/appointment_history_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
 import 'package:thotha_mobile_app/features/notifications/ui/notifications_screen.dart';
 
@@ -8,7 +9,8 @@ class DoctorNextBookingScreen extends StatefulWidget {
   DoctorNextBookingScreen({super.key});
 
   @override
-  State<DoctorNextBookingScreen> createState() => _DoctorNextBookingScreenState();
+  State<DoctorNextBookingScreen> createState() =>
+      _DoctorNextBookingScreenState();
 }
 
 class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
@@ -16,6 +18,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
   List<Map<String, dynamic>> _bookings = [];
   bool _isLoading = true;
   String? _errorMessage;
+  int? _doctorId;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -23,7 +26,27 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
   void initState() {
     super.initState();
     _apiService = getIt<ApiService>();
-    _fetchPendingAppointments();
+    _fetchDoctorIdAndAppointments();
+  }
+
+  Future<void> _fetchDoctorIdAndAppointments() async {
+    try {
+      // Get doctor ID from API
+      final doctorResult = await _apiService.getDoctorById();
+      if (doctorResult['success'] == true && doctorResult['data'] != null) {
+        final doctorData = doctorResult['data'];
+        final id = doctorData.id ?? doctorData['id'];
+        if (id != null) {
+          setState(() {
+            _doctorId = id is String ? int.tryParse(id) : id;
+          });
+        }
+      }
+      // Then fetch appointments
+      await _fetchPendingAppointments();
+    } catch (e) {
+      _fetchPendingAppointments();
+    }
   }
 
   Future<void> _fetchPendingAppointments() async {
@@ -113,7 +136,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const NotificationsScreen()),
                   );
                 },
               ),
@@ -176,7 +200,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                       const SizedBox(height: 24),
                       ElevatedButton(
                         onPressed: _fetchPendingAppointments,
-                        child: const Text('إعادة محاولة', style: TextStyle(fontFamily: 'Cairo')),
+                        child: const Text('إعادة محاولة',
+                            style: TextStyle(fontFamily: 'Cairo')),
                       ),
                     ],
                   ),
@@ -193,7 +218,6 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
     required String date,
     required String time,
     required String service,
-    required String profileImage,
     required double baseFontSize,
   }) {
     final theme = Theme.of(context);
@@ -228,34 +252,18 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              // Profile image + name
-              Row(
-                textDirection: TextDirection.rtl,
-                children: [
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      image: DecorationImage(
-                        image: AssetImage(profileImage),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    patientName,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.w700,
-                      fontSize: baseFontSize * 1.25,
-                    ),
-                  ),
-                ],
+              // Patient name
+              Text(
+                patientName,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w700,
+                  fontSize: baseFontSize * 1.25,
+                ),
               ),
               const SizedBox(height: 20),
-              Divider(color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
+              Divider(
+                  color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
               const SizedBox(height: 12),
               // Phone
               _buildDetailRow(
@@ -350,6 +358,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
   // ── Simplified booking card ─────────────────────────────────────────────────
   Widget _buildBookingCard({
     required BuildContext context,
+    required int appointmentId,
     required String patientName,
     required String phone,
     required String service,
@@ -357,7 +366,6 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
     required String date,
     required String status,
     required Color statusColor,
-    required String profileImage,
     required double width,
     required double baseFontSize,
   }) {
@@ -373,7 +381,6 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         date: date,
         time: time,
         service: service,
-        profileImage: profileImage,
         baseFontSize: baseFontSize,
       ),
       child: Container(
@@ -382,7 +389,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         decoration: BoxDecoration(
           color: theme.cardTheme.color ?? colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
+          border: Border.all(
+              color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
           boxShadow: [
             BoxShadow(
               color: isDark
@@ -395,24 +403,11 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         ),
         child: Column(
           children: [
-            // Row: image | name | status badge
+            // Row: name | status badge
             Row(
               textDirection: TextDirection.rtl,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Patient Image
-                Container(
-                  width: 52 * (width / 390),
-                  height: 52 * (width / 390),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    image: DecorationImage(
-                      image: AssetImage(profileImage),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
                 // Name
                 Expanded(
                   child: Text(
@@ -431,7 +426,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                 // Status badge
                 Container(
                   padding: EdgeInsets.symmetric(
-                      horizontal: 10 * (width / 390), vertical: 4 * (width / 390)),
+                      horizontal: 10 * (width / 390),
+                      vertical: 4 * (width / 390)),
                   decoration: BoxDecoration(
                     color: statusColor,
                     borderRadius: BorderRadius.circular(12),
@@ -454,7 +450,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () =>
+                        _updateAppointmentStatus(appointmentId, 'APPROVED'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFF0FDF4),
                       foregroundColor: const Color(0xFF16A34A),
@@ -478,7 +475,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () =>
+                        _updateAppointmentStatus(appointmentId, 'CANCELLED'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFEF2F2),
                       foregroundColor: const Color(0xFFE7000B),
@@ -507,7 +505,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
     );
   }
 
-  Widget _buildMainContent(BuildContext context, double width, double height, double baseFontSize) {
+  Widget _buildMainContent(
+      BuildContext context, double width, double height, double baseFontSize) {
     final theme = Theme.of(context);
 
     if (_bookings.isEmpty) {
@@ -563,6 +562,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                 children: [
                   _buildBookingCard(
                     context: context,
+                    appointmentId: booking['id'] ?? 0,
                     patientName: booking['patientFirstName'] ?? 'مريض',
                     phone: booking['patientPhoneNumber'] ?? '',
                     service: booking['specialty'] ?? 'تخصص',
@@ -570,7 +570,6 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                     date: booking['date'] ?? '',
                     status: booking['status'] ?? 'قادم',
                     statusColor: const Color(0xFF84E5F3),
-                    profileImage: 'assets/images/zozjpg.jpg',
                     width: width,
                     baseFontSize: baseFontSize,
                   ),
@@ -583,5 +582,73 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         ),
       ),
     );
+  }
+
+  /// Update appointment status and refresh the list
+  Future<void> _updateAppointmentStatus(
+      int appointmentId, String status) async {
+    try {
+      final result =
+          await _apiService.updateAppointmentStatus(appointmentId, status);
+
+      if (!mounted) return;
+
+      if (result['success'] == true) {
+        // Show success message
+        final statusAr = _statusToArabic(status);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'تم ${status == 'APPROVED' ? 'قبول' : 'رفض'} الحجز بنجاح',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor:
+                status == 'APPROVED' ? Colors.green : Colors.orange,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        // Refresh the list
+        await _fetchPendingAppointments();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['error'] ?? 'فشل في تحديث حالة الحجز',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'حدث خطأ: ${e.toString()}',
+            style: const TextStyle(fontFamily: 'Cairo'),
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  /// Convert appointment status to Arabic
+  String _statusToArabic(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 'قيد الانتظار';
+      case 'APPROVED':
+        return 'موافق عليه';
+      case 'DONE':
+        return 'مكتمل';
+      case 'CANCELLED':
+        return 'ملغى';
+      default:
+        return status;
+    }
   }
 }

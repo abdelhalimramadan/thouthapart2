@@ -635,4 +635,96 @@ class ApiService {
       return _fail('حدث خطأ غير متوقع');
     }
   }
+
+  /// PUT /api/appointment/updateStatus/{appointmentId}?status=APPROVED|DONE|CANCELLED
+  /// Requires: Bearer JWT_TOKEN (Doctor)
+  /// Available Statuses: PENDING, APPROVED, DONE, CANCELLED
+  Future<Map<String, dynamic>> updateAppointmentStatus(
+    int appointmentId,
+    String status,
+  ) async {
+    try {
+      await DioFactory.addDioHeaders();
+
+      final res = await _dio.put(
+        '${ApiConstants.updateAppointmentStatus}/$appointmentId',
+        queryParameters: {'status': status},
+      );
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final statusAr = _statusToArabic(status);
+        return _okData(res.data)
+          ..['message'] = 'تم تحديث حالة الحجز إلى $statusAr بنجاح';
+      }
+      return _fail('فشل في تحديث حالة الحجز', code: res.statusCode);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
+  /// Convert appointment status to Arabic
+  String _statusToArabic(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 'قيد الانتظار';
+      case 'APPROVED':
+        return 'موافق عليه';
+      case 'DONE':
+        return 'مكتمل';
+      case 'CANCELLED':
+        return 'ملغى';
+      default:
+        return status;
+    }
+  }
+
+  /// GET /api/appointment/history/{doctorId}
+  /// Requires: Bearer JWT_TOKEN (Doctor)
+  /// Returns: List of completed/cancelled appointments (isHistory=true)
+  Future<Map<String, dynamic>> getAppointmentHistory(int doctorId) async {
+    try {
+      await DioFactory.addDioHeaders();
+
+      final res = await _dio.get(
+        '${ApiConstants.appointmentHistory}/$doctorId',
+      );
+
+      if (res.statusCode == 200 && res.data is List) {
+        return _okList(
+          (res.data as List)
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList(),
+        );
+      }
+      return _fail('فشل في تحميل سجل الحجوزات', code: res.statusCode);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
+  /// DELETE /api/appointment/deleteAppointment/{appointmentId}
+  /// Requires: Bearer JWT_TOKEN (Doctor)
+  /// Response: 204 No Content on success
+  Future<Map<String, dynamic>> deleteAppointment(int appointmentId) async {
+    try {
+      await DioFactory.addDioHeaders();
+
+      final res = await _dio.delete(
+        '${ApiConstants.deleteAppointment}/$appointmentId',
+      );
+
+      if (res.statusCode == 200 || res.statusCode == 204) {
+        return {'success': true, 'message': 'تم حذف السجل بنجاح'};
+      }
+      return _fail('فشل في حذف السجل', code: res.statusCode);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
 }
