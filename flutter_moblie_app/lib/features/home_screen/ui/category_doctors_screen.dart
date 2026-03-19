@@ -79,19 +79,21 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     print('CategoryId: ${widget.categoryId}');
     print('CategoryName: ${widget.categoryName}');
 
-    // إذا كان لدينا categoryId، استخدمه (الطريقة المفضلة)
-    if (widget.categoryId != null) {
-      print('Using CategoryId: ${widget.categoryId}');
-      result = await _repo.getRequestsByCategoryId(widget.categoryId!);
-    }
-    // وإلا، احصل على كل الطلبات وصفيها حسب اسم الكاتجوري (fallback)
-    else if (widget.categoryName.isNotEmpty) {
-      print('Using CategoryName (fallback): ${widget.categoryName}');
-      result = await _repo.getAllRequests();
-    }
-    // إذا لم يكن هناك categoryId أو categoryName
-    else {
-      result = {'success': false, 'error': 'لم يتم تحديد التخصص'};
+    // إذا كان المستخدم دكتور مسجّل دخولًا، اعرض فقط الطلبات الخاصة به
+    if (_isDoctorLoggedIn) {
+      print('Loading requests for current doctor only.');
+      result = await _repo.getRequestsByDoctorId();
+    } else {
+      // زائر/مريض: استخدم منطق الكاتيجوري القديم
+      if (widget.categoryId != null) {
+        print('Using CategoryId (public): ${widget.categoryId}');
+        result = await _repo.getRequestsByCategoryId(widget.categoryId!);
+      } else if (widget.categoryName.isNotEmpty) {
+        print('Using CategoryName (public fallback): ${widget.categoryName}');
+        result = await _repo.getAllRequests();
+      } else {
+        result = {'success': false, 'error': 'لم يتم تحديد التخصص'};
+      }
     }
 
     if (!mounted) return;
@@ -102,27 +104,28 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
 
     if (result['success'] == true) {
       var all = List<CaseRequestModel>.from(result['data'] as List);
-      print('Total requests loaded: ${all.length}');
+      print('Total requests loaded (raw): ${all.length}');
 
-      // إذا لم يكن categoryId محدد، صفي حسب categoryName
-      if (widget.categoryId == null && widget.categoryName.isNotEmpty) {
+      // إذا كان دكتور مسجّل دخولًا، ما زلنا نلتزم بالتخصص/المدينة المختارة في الشاشة
+      if (widget.categoryName.isNotEmpty) {
         print('Filtering by category name: ${widget.categoryName}');
         all = all
             .where((r) =>
                 r.categoryName.toLowerCase() ==
                 widget.categoryName.toLowerCase())
             .toList();
-        print('Requests after filtering: ${all.length}');
+        print('Requests after category filter: ${all.length}');
       }
 
-      final filtered = (widget.cityName != null && widget.cityName!.isNotEmpty)
-          ? all.where((r) => r.doctorCityName == widget.cityName).toList()
-          : all;
-
-      print('Final requests count: ${filtered.length}');
+      if (widget.cityName != null && widget.cityName!.isNotEmpty) {
+        all = all
+            .where((r) => r.doctorCityName == widget.cityName)
+            .toList();
+        print('Requests after city filter: ${all.length}');
+      }
 
       setState(() {
-        _requests = filtered;
+        _requests = all;
         _isLoading = false;
       });
     } else {

@@ -144,6 +144,54 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen> {
     }
   }
 
+  Future<void> _updateAppointmentStatus(int appointmentId, String status) async {
+    try {
+      final result =
+          await _apiService.updateAppointmentStatus(appointmentId, status);
+
+      if (!mounted) return;
+
+      if (result['success'] == true) {
+        final statusAr = _statusToArabic(status);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'تم تحديث حالة الحجز إلى $statusAr بنجاح',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor:
+                status.toUpperCase() == 'CANCELLED' ? Colors.orange : Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        await _fetchAppointmentHistory();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['error'] ?? 'فشل في تحديث حالة الحجز',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'حدث خطأ: ${e.toString()}',
+            style: const TextStyle(fontFamily: 'Cairo'),
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -409,27 +457,87 @@ class _AppointmentHistoryScreenState extends State<AppointmentHistoryScreen> {
             baseFontSize: baseFontSize,
           ),
           const SizedBox(height: 14),
-          // Delete button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline),
-              label: const Text(
-                'حذف السجل',
-                style: TextStyle(fontFamily: 'Cairo'),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFEF2F2),
-                foregroundColor: const Color(0xFFE7000B),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                  side: const BorderSide(color: Color(0xFFE7000B)),
+          // Actions: if still PENDING → show تأكيد / إلغاء, otherwise delete only
+          Builder(builder: (context) {
+            final status = (appointment['status'] ?? 'PENDING').toString();
+            final isPending = status.toUpperCase() == 'PENDING';
+            if (isPending) {
+              return Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () =>
+                          _updateAppointmentStatus(appointment['id'] ?? 0, 'DONE'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF0FDF4),
+                        foregroundColor: const Color(0xFF16A34A),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          side: const BorderSide(color: Color(0xFF16A34A)),
+                        ),
+                      ),
+                      child: Text(
+                        'تأكيد الحالة',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: baseFontSize * 0.85,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => _updateAppointmentStatus(
+                          appointment['id'] ?? 0, 'CANCELLED'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFEF2F2),
+                        foregroundColor: const Color(0xFFE7000B),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          side: const BorderSide(color: Color(0xFFE7000B)),
+                        ),
+                      ),
+                      child: Text(
+                        'إلغاء الحالة',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: baseFontSize * 0.85,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            return SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onDelete,
+                icon: const Icon(Icons.delete_outline),
+                label: const Text(
+                  'حذف السجل',
+                  style: TextStyle(fontFamily: 'Cairo'),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFEF2F2),
+                  foregroundColor: const Color(0xFFE7000B),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                    side: const BorderSide(color: Color(0xFFE7000B)),
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
