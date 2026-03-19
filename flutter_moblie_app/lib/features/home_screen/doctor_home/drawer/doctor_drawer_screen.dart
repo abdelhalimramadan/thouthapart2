@@ -1,9 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thotha_mobile_app/core/theming/theme_provider.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_booking_records_screen.dart';
+
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/my_requests_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_profile.dart';
@@ -262,7 +260,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
           _firstName = cachedFirstName;
           _lastName = cachedLastName;
           _email = cachedEmail;
-          _profileImage = (cachedImage?.isNotEmpty ?? false) ? cachedImage : _profileImage;
+          _profileImage =
+              (cachedImage?.isNotEmpty ?? false) ? cachedImage : _profileImage;
           if (cachedId != null && cachedId.isNotEmpty) {
             _doctorId = int.tryParse(cachedId);
           }

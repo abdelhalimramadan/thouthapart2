@@ -296,7 +296,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> getAllRequests() async {
     try {
-      final res = await _dio.get(ApiConstants.getAllRequests);
+      final res = await _dio.get(ApiConstants.getCaseRequestsByCategories);
       if (res.statusCode == 200) {
         final data = res.data;
         // Support: plain List OR Map with data/content/items/requests key
@@ -750,9 +750,7 @@ class ApiService {
           final data = (res.data as Map)['data'];
           if (data is List) {
             return _okList(
-              (data as List)
-                  .map((e) => Map<String, dynamic>.from(e as Map))
-                  .toList(),
+              data.map((e) => Map<String, dynamic>.from(e as Map)).toList(),
             );
           }
         }

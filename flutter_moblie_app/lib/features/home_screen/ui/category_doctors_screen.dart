@@ -74,26 +74,62 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     });
 
     Map<String, dynamic> result;
+
+    print('=== Loading Requests ===');
+    print('CategoryId: ${widget.categoryId}');
+    print('CategoryName: ${widget.categoryName}');
+
+    // إذا كان لدينا categoryId، استخدمه (الطريقة المفضلة)
     if (widget.categoryId != null) {
+      print('Using CategoryId: ${widget.categoryId}');
       result = await _repo.getRequestsByCategoryId(widget.categoryId!);
-    } else {
+    }
+    // وإلا، احصل على كل الطلبات وصفيها حسب اسم الكاتجوري (fallback)
+    else if (widget.categoryName.isNotEmpty) {
+      print('Using CategoryName (fallback): ${widget.categoryName}');
+      result = await _repo.getAllRequests();
+    }
+    // إذا لم يكن هناك categoryId أو categoryName
+    else {
       result = {'success': false, 'error': 'لم يتم تحديد التخصص'};
     }
 
     if (!mounted) return;
 
+    print('API Result Success: ${result['success']}');
+    print('API Result Error: ${result['error']}');
+    print('API Result Status Code: ${result['statusCode']}');
+
     if (result['success'] == true) {
-      final all = List<CaseRequestModel>.from(result['data'] as List);
+      var all = List<CaseRequestModel>.from(result['data'] as List);
+      print('Total requests loaded: ${all.length}');
+
+      // إذا لم يكن categoryId محدد، صفي حسب categoryName
+      if (widget.categoryId == null && widget.categoryName.isNotEmpty) {
+        print('Filtering by category name: ${widget.categoryName}');
+        all = all
+            .where((r) =>
+                r.categoryName.toLowerCase() ==
+                widget.categoryName.toLowerCase())
+            .toList();
+        print('Requests after filtering: ${all.length}');
+      }
+
       final filtered = (widget.cityName != null && widget.cityName!.isNotEmpty)
           ? all.where((r) => r.doctorCityName == widget.cityName).toList()
           : all;
+
+      print('Final requests count: ${filtered.length}');
+
       setState(() {
         _requests = filtered;
         _isLoading = false;
       });
     } else {
+      final errorMsg = result['error']?.toString() ?? 'فشل في تحميل الحالات';
+      print('Error occurred: $errorMsg');
       setState(() {
-        _error = result['error']?.toString() ?? 'فشل في تحميل الحالات';
+        _error = errorMsg;
         _isLoading = false;
       });
     }

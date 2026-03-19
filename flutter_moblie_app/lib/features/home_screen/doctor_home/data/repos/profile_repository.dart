@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
@@ -19,13 +17,15 @@ class ProfileRepository {
   Future<DoctorProfileModel> fetchProfile() async {
     // Primary: Try getDoctorById using token from headers (no request body)
     // الـ Token موجود في headers تلقائياً من DioFactory
-    print('=== fetchProfile: Attempting to fetch doctor profile using token ===');
+    print(
+        '=== fetchProfile: Attempting to fetch doctor profile using token ===');
     try {
       final profileResult = await getIt<ApiService>().getDoctorById();
       if (profileResult['success'] == true &&
           profileResult['data'] is DoctorProfileModel) {
         final profile = profileResult['data'] as DoctorProfileModel;
-        print('=== fetchProfile: Successfully fetched fresh doctor profile ===');
+        print(
+            '=== fetchProfile: Successfully fetched fresh doctor profile ===');
         // NO CACHING - Return fresh data directly from server
         return profile;
       }
@@ -82,68 +82,13 @@ class ProfileRepository {
     try {
       final cached = await getCachedProfile();
       if (cached.firstName != null && cached.firstName!.isNotEmpty) {
-        print('=== fetchProfile: All endpoints failed, returning cached profile ===');
+        print(
+            '=== fetchProfile: All endpoints failed, returning cached profile ===');
         return cached;
       }
     } catch (_) {}
 
     throw Exception('لا يمكن تحميل البيانات، يرجى التحقق من الاتصال');
-  }
-
-  Future<DoctorProfileModel?> _getProfileFromToken() async {
-    try {
-      final token =
-          await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-      if (token == null || token.isEmpty) return null;
-
-      final parts = token.split('.');
-      if (parts.length != 3) return null;
-
-      // Base64Url decode the payload part (index 1)
-      String payload = parts[1];
-      // Add padding if needed
-      while (payload.length % 4 != 0) {
-        payload += '=';
-      }
-
-      final Map<String, dynamic> decoded =
-          json.decode(utf8.decode(base64Url.decode(payload)));
-
-      return DoctorProfileModel(
-        id: int.tryParse(decoded['id']?.toString() ?? ''),
-        firstName: (decoded['firstName'] ?? decoded['first_name'])?.toString(),
-        lastName: (decoded['lastName'] ?? decoded['last_name'])?.toString(),
-        email: decoded['email']?.toString() ?? decoded['sub']?.toString(),
-        phone: (decoded['phoneNumber'] ?? decoded['phone'])?.toString(),
-        faculty: (decoded['universityName'] ?? decoded['faculty'])?.toString(),
-        year: (decoded['studyYear'] ?? decoded['year'])?.toString(),
-        governorate:
-            (decoded['cityName'] ?? decoded['governorate'])?.toString(),
-        category: (decoded['categoryName'] ?? decoded['category'])?.toString(),
-      );
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<void> _cacheProfileLocally(DoctorProfileModel profile) async {
-    // لا تحفظ الـ ID - التوكن هو المصدر الوحيد للهوية
-    if (profile.firstName != null)
-      await SharedPrefHelper.setData('first_name', profile.firstName!);
-    if (profile.lastName != null)
-      await SharedPrefHelper.setData('last_name', profile.lastName!);
-    if (profile.email != null)
-      await SharedPrefHelper.setData('email', profile.email!);
-    if (profile.phone != null)
-      await SharedPrefHelper.setData('phone', profile.phone!);
-    if (profile.faculty != null)
-      await SharedPrefHelper.setData('faculty', profile.faculty!);
-    if (profile.year != null)
-      await SharedPrefHelper.setData('year', profile.year!);
-    if (profile.governorate != null)
-      await SharedPrefHelper.setData('governorate', profile.governorate!);
-    if (profile.category != null)
-      await SharedPrefHelper.setData('category', profile.category!);
   }
 
   Future<DoctorProfileModel> getCachedProfile() async {
@@ -204,4 +149,3 @@ class ProfileRepository {
     throw Exception(result['error'] ?? 'فشل في تحميل قائمة التخصصات');
   }
 }
-

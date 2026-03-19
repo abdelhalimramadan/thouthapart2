@@ -18,8 +18,8 @@ class _ChatScreenState extends State<ChatScreen> {
     'Content-Type': 'application/json'
   };
 
-  static const Color _color2 = Color(0xFF53CAF9); 
-  static const Color _color3 = Color(0x2853CAF9); 
+  static const Color _color2 = Color(0xFF53CAF9);
+  static const Color _color3 = Color(0x2853CAF9);
   static const Color _outline = Color(0xFFCCCCE5);
   static const String _thinkingText = 'يفكر.....';
 
@@ -40,6 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _chatMode = false;
   String? _sessionId;
   String? _activeQuestionId;
+  List<Map<String, dynamic>> _categories = []; // قائمة الكاتيجوريات من API
 
   final List<_FlowItem> _flowItems = <_FlowItem>[];
   final List<_ChatItem> _chatHistory = <_ChatItem>[];
@@ -53,6 +54,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _inputFocusNode.addListener(() {
       if (mounted) setState(() {});
     });
+    _loadCategories(); // جلب الكاتيجوريات عند البداية
     _startSessionOnce();
   }
 
@@ -257,6 +259,46 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  /// جلب الكاتيجوريات من API
+  Future<void> _loadCategories() async {
+    try {
+      final res = await _dio.get('/category/getCategories');
+      final data = res.data;
+
+      if (data is Map && data['categories'] != null) {
+        if (mounted) {
+          setState(() {
+            _categories = List<Map<String, dynamic>>.from(
+              (data['categories'] as List)
+                  .map((c) => Map<String, dynamic>.from(c as Map)),
+            );
+          });
+        }
+        print('Categories loaded: ${_categories.length}');
+      }
+    } catch (e) {
+      print('Error loading categories: $e');
+    }
+  }
+
+  /// ابحث عن category_id باستخدام الاسم المترجم
+  int? _getCategoryIdByName(String categoryName) {
+    try {
+      for (var cat in _categories) {
+        final name = cat['name']?.toString() ?? '';
+        final nameAr = cat['name_ar']?.toString() ?? '';
+
+        if (name.toLowerCase() == categoryName.toLowerCase() ||
+            nameAr.toLowerCase() == categoryName.toLowerCase()) {
+          return cat['id'] as int?;
+        }
+      }
+    } catch (e) {
+      print('Error finding category id: $e');
+    }
+    return null;
+  }
+
   String _mapToAppCategory(String raw) {
     const map = <String, String>{
       'تبييض الأسنان': 'تبييض الأسنان',
@@ -279,12 +321,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _openCategory(String rawCategory) {
     final mapped = _mapToAppCategory(rawCategory);
+    final categoryId = _getCategoryIdByName(mapped);
+
+    print('Opening category: $mapped (ID: $categoryId)');
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => CategoryDoctorsScreen(
           categoryName: mapped,
-          categoryId: null,
+          categoryId: categoryId, // تمرير ID الصحيح
         ),
       ),
     );
@@ -491,8 +537,7 @@ class _ChatScreenState extends State<ChatScreen> {
       children: [
         Flexible(
           child: Container(
-            constraints: BoxConstraints(
-                maxWidth: width * 0.75),
+            constraints: BoxConstraints(maxWidth: width * 0.75),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: _color3,
@@ -517,7 +562,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
         const SizedBox(width: 8),
-        _botAvatar(size: 32, factor: width/390),
+        _botAvatar(size: 32, factor: width / 390),
       ],
     );
   }
@@ -526,8 +571,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
-        constraints:
-            BoxConstraints(maxWidth: width * 0.75),
+        constraints: BoxConstraints(maxWidth: width * 0.75),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: _color2,
@@ -559,7 +603,9 @@ class _ChatScreenState extends State<ChatScreen> {
       builder: (context, constraints) {
         final crossAxisCount = width > 600 ? 3 : (width < 420 ? 1 : 2);
         final spacing = 12.0;
-        final buttonWidth = (constraints.maxWidth - (spacing * (crossAxisCount - 1))) / crossAxisCount;
+        final buttonWidth =
+            (constraints.maxWidth - (spacing * (crossAxisCount - 1))) /
+                crossAxisCount;
 
         return Wrap(
           spacing: spacing,
@@ -577,7 +623,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   backgroundColor: _color3,
                   foregroundColor: const Color(0xFF083B52),
                   elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999)),
                 ),
@@ -641,7 +688,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 backgroundColor: _color2,
                 foregroundColor: Colors.white,
                 elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
               ),
@@ -665,7 +713,6 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
         ),
-
         const SizedBox(height: 10),
         Center(
           child: OutlinedButton.icon(
