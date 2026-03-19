@@ -18,10 +18,15 @@ class _ChatScreenState extends State<ChatScreen> {
     'Content-Type': 'application/json'
   };
 
+  // CSS equivalents:
+  // --color-1: #95F8C9 (unused in web UI)
+  // --color-2: #53CAF9
+  // --color-3: #53caf928
   static const Color _color2 = Color(0xFF53CAF9);
   static const Color _color3 = Color(0x2853CAF9);
   static const Color _outline = Color(0xFFCCCCE5);
   static const String _thinkingText = 'يفكر.....';
+  static const Color _textInk = Color(0xFF083B52);
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -265,19 +270,21 @@ class _ChatScreenState extends State<ChatScreen> {
       final res = await _dio.get('/category/getCategories');
       final data = res.data;
 
-      if (data is Map && data['categories'] != null) {
-        if (mounted) {
-          setState(() {
-            _categories = List<Map<String, dynamic>>.from(
-              (data['categories'] as List)
-                  .map((c) => Map<String, dynamic>.from(c as Map)),
-            );
-          });
+      // API may return:
+      // - List directly: [ {id, name, name_ar, ...}, ... ]
+      // - Map wrapper: { categories: [...] } OR { data: [...] }
+      final List? raw = data is List
+          ? data
+          : (data is Map ? (data['categories'] ?? data['data']) as List? : null);
+
+      if (raw != null) {
+        final parsed = <Map<String, dynamic>>[];
+        for (final c in raw) {
+          if (c is Map) parsed.add(Map<String, dynamic>.from(c));
         }
-        print('Categories loaded: ${_categories.length}');
+        if (mounted) setState(() => _categories = parsed);
       }
     } catch (e) {
-      print('Error loading categories: $e');
     }
   }
 
@@ -294,7 +301,6 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       }
     } catch (e) {
-      print('Error finding category id: $e');
     }
     return null;
   }
@@ -323,8 +329,6 @@ class _ChatScreenState extends State<ChatScreen> {
     final mapped = _mapToAppCategory(rawCategory);
     final categoryId = _getCategoryIdByName(mapped);
 
-    print('Opening category: $mapped (ID: $categoryId)');
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -338,17 +342,26 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final baseFontSize = width * 0.04;
+    final mq = MediaQuery.of(context);
+    final width = mq.size.width;
     final theme = Theme.of(context);
+
+    // Match CSS-ish responsive font sizing (clamp(0.85rem..0.95rem)).
+    final baseFontSize = (width * 0.036).clamp(13.0, 16.0);
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
           _header(width, baseFontSize, theme),
-          Expanded(child: _chatBody(width, baseFontSize, theme)),
+          Expanded(
+            child: _chatBody(
+              width,
+              baseFontSize,
+              theme,
+              bottomPadding: _chatMode ? 0 : 0,
+            ),
+          ),
           if (_chatMode)
             SafeArea(
               top: false,
@@ -420,10 +433,16 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _chatBody(double width, double baseFontSize, ThemeData theme) {
+  Widget _chatBody(
+    double width,
+    double baseFontSize,
+    ThemeData theme, {
+    required double bottomPadding,
+  }) {
     return SingleChildScrollView(
       controller: _scrollController,
-      padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 25),
+      padding: EdgeInsets.fromLTRB(width * 0.05, 25, width * 0.05,
+          25 + (bottomPadding > 0 ? bottomPadding : 0)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -488,10 +507,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 focusNode: _inputFocusNode,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _sendChatMessage(),
-                style: const TextStyle(fontFamily: 'Cairo'),
+                style: const TextStyle(fontFamily: 'Cairo', color: _textInk),
                 decoration: InputDecoration(
                   hintText: 'اكتب رسالتك..............................',
-                  hintStyle: const TextStyle(fontFamily: 'Cairo'),
+                  hintStyle: const TextStyle(
+                      fontFamily: 'Cairo', color: Color(0xFF6B8090)),
                   border: InputBorder.none,
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
@@ -553,9 +573,9 @@ class _ChatScreenState extends State<ChatScreen> {
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: baseFontSize * 0.875, // 14sp
+                fontSize: baseFontSize,
                 height: 1.5,
-                color: const Color(0xFF083B52),
+                color: _textInk,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -587,7 +607,7 @@ class _ChatScreenState extends State<ChatScreen> {
           textAlign: TextAlign.right,
           style: TextStyle(
             fontFamily: 'Cairo',
-            fontSize: baseFontSize * 0.875, // 14sp
+            fontSize: baseFontSize,
             height: 1.5,
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -599,48 +619,37 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _quickReplies(_FlowQuestion q, double width, double baseFontSize) {
     final answers = q.answers;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = width > 600 ? 3 : (width < 420 ? 1 : 2);
-        final spacing = 12.0;
-        final buttonWidth =
-            (constraints.maxWidth - (spacing * (crossAxisCount - 1))) /
-                crossAxisCount;
-
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
-          alignment: WrapAlignment.end,
-          children: answers.map((a) {
-            final isOther = RegExp(r'(اخر|أخر|other)', caseSensitive: false)
-                .hasMatch(a.text);
-            final full = isOther || crossAxisCount == 1;
-            return SizedBox(
-              width: full ? constraints.maxWidth : buttonWidth,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : () => _submitAnswer(q, a),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _color3,
-                  foregroundColor: const Color(0xFF083B52),
-                  elevation: 0,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999)),
-                ),
-                child: Text(
-                  a.text,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: baseFontSize * 0.875,
-                      fontWeight: FontWeight.w600),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final a in answers) ...[
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : () => _submitAnswer(q, a),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _color3,
+                foregroundColor: const Color(0xFF083B52),
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
                 ),
               ),
-            );
-          }).toList(growable: false),
-        );
-      },
+              child: Text(
+                a.text,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: baseFontSize,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+      ],
     );
   }
 
@@ -693,22 +702,29 @@ class _ChatScreenState extends State<ChatScreen> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'عرض حالات $category',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: baseFontSize * 0.9375, // 15sp
-                      fontWeight: FontWeight.w700,
-                      height: 1.2,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: width * 0.75),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'عرض حالات $category',
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: (baseFontSize + 1).clamp(14.0, 16.0),
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Icon(Icons.arrow_back_rounded, size: 20),
-                ],
+                    const SizedBox(width: 10),
+                    const Icon(Icons.arrow_back_rounded, size: 20),
+                  ],
+                ),
               ),
             ),
           ),
@@ -722,7 +738,7 @@ class _ChatScreenState extends State<ChatScreen> {
               'إعادة المحادثة من البداية',
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: baseFontSize * 0.8125, // 13sp
+                fontSize: (baseFontSize - 1).clamp(12.0, 14.0),
                 fontWeight: FontWeight.w600,
                 color: _color2,
               ),

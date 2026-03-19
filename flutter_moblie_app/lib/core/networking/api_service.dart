@@ -163,10 +163,26 @@ class ApiService {
       print('=== getCaseRequestsByCategory ===');
       print('categoryId: $categoryId');
 
-      final res = await _public.get(
-        ApiConstants.getCaseRequestsByCategories,
-        queryParameters: {'categoryId': categoryId},
-      );
+      Response res;
+      try {
+        // Try public first (no auth).
+        res = await _public.get(
+          ApiConstants.getCaseRequestsByCategories,
+          queryParameters: {'categoryId': categoryId},
+        );
+      } on DioException catch (e) {
+        // If server requires auth for this endpoint, retry with authenticated Dio.
+        final code = e.response?.statusCode;
+        if (code == 401 || code == 403) {
+          await DioFactory.addDioHeaders();
+          res = await _dio.get(
+            ApiConstants.getCaseRequestsByCategories,
+            queryParameters: {'categoryId': categoryId},
+          );
+        } else {
+          rethrow;
+        }
+      }
 
       print('statusCode: ${res.statusCode}');
       print('responseType: ${res.data?.runtimeType}');
@@ -296,7 +312,9 @@ class ApiService {
 
   Future<Map<String, dynamic>> getAllRequests() async {
     try {
-      final res = await _dio.get(ApiConstants.getCaseRequestsByCategories);
+      // Use the dedicated "getAllRequests" endpoint instead of the
+      // "getRequestByCategoryId" endpoint which requires a categoryId.
+      final res = await _dio.get(ApiConstants.getAllRequests);
       if (res.statusCode == 200) {
         final data = res.data;
         // Support: plain List OR Map with data/content/items/requests key
