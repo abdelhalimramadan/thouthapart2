@@ -1,25 +1,26 @@
-class CaseRequestModel {
-  final int? id;
-  final String doctorFirstName;
-  final String doctorLastName;
-  final String doctorPhoneNumber;
-  final String doctorCityName;
-  final String doctorUniversityName;
-  final String categoryName;
-  final String description;
-  final String dateTime; // raw ISO string e.g. "2026-03-10T21:12:00"
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  CaseRequestModel({
-    this.id,
-    required this.doctorFirstName,
-    required this.doctorLastName,
-    required this.doctorPhoneNumber,
-    required this.doctorCityName,
-    required this.doctorUniversityName,
-    required this.categoryName,
-    required this.description,
-    required this.dateTime,
-  });
+part 'case_request_model.freezed.dart';
+part 'case_request_model.g.dart';
+
+@freezed
+abstract class CaseRequestModel with _$CaseRequestModel {
+  const CaseRequestModel._(); // Needed for custom getters/methods
+
+  const factory CaseRequestModel({
+    int? id,
+    @Default('') String doctorFirstName,
+    @Default('') String doctorLastName,
+    @Default('') String doctorPhoneNumber,
+    @Default('') String doctorCityName,
+    @Default('') String doctorUniversityName,
+    @Default('') String categoryName,
+    @Default('') String description,
+    @Default('') String dateTime, // raw ISO string e.g. "2026-03-10T21:12:00"
+  }) = _CaseRequestModel;
+
+  factory CaseRequestModel.fromJson(Map<String, dynamic> json) =>
+      _$CaseRequestModelFromJson(json);
 
   /// Full doctor name helper
   String get doctorFullName => '$doctorFirstName $doctorLastName'.trim();
@@ -45,19 +46,5 @@ class CaseRequestModel {
     } catch (_) {
       return '';
     }
-  }
-
-  factory CaseRequestModel.fromJson(Map<String, dynamic> json) {
-    return CaseRequestModel(
-      id: json['id'] as int?,
-      doctorFirstName: json['doctorFirstName'] as String? ?? '',
-      doctorLastName: json['doctorLastName'] as String? ?? '',
-      doctorPhoneNumber: json['doctorPhoneNumber'] as String? ?? '',
-      doctorCityName: json['doctorCityName'] as String? ?? '',
-      doctorUniversityName: json['doctorUniversityName'] as String? ?? '',
-      categoryName: json['categoryName'] as String? ?? '',
-      description: json['description'] as String? ?? '',
-      dateTime: json['dateTime'] as String? ?? '',
-    );
   }
 }

@@ -90,7 +90,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
   bool _namesMatch(String a, String b) {
     final na = _stripPrefix(a.trim());
     final nb = _stripPrefix(b.trim());
-    if (na.isEmpty || nb.isEmpty) return false;// Exact match after stripping
+    if (na.isEmpty || nb.isEmpty) return false; // Exact match after stripping
     if (na == nb) return true;
     // One fully contains the other (require ≥4 chars to avoid "ال" false hits)
     if (na.length >= 4 && nb.contains(na)) return true;

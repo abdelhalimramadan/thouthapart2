@@ -105,10 +105,10 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
       final beforeCount = currentList.length;
       currentList.removeWhere((r) => r.id == request.id);
       final afterCount = currentList.length;
-      
+
       print('Requests removed: ${beforeCount - afterCount}');
       print('Total requests after delete: ${afterCount}');
-      
+
       if (currentList.isEmpty) {
         emit(MyRequestsEmpty());
       } else {

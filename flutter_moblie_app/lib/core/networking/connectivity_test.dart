@@ -18,7 +18,7 @@ class _ConnectivityTestScreenState extends State<ConnectivityTestScreen> {
   void initState() {
     super.initState();
     _checkConnectivity();
-    
+
     // Listen to connectivity changes
     _connectivityService.connectionStream.listen((isConnected) {
       setState(() {
@@ -37,7 +37,7 @@ class _ConnectivityTestScreenState extends State<ConnectivityTestScreen> {
       await _connectivityService.initialize();
       final isConnected = await _connectivityService.checkInitialConnection();
       final status = _connectivityService.getConnectionStatusText();
-      
+
       setState(() {
         _isConnected = isConnected;
         _connectionStatus = status;
@@ -82,17 +82,17 @@ class _ConnectivityTestScreenState extends State<ConnectivityTestScreen> {
                     Text(
                       _connectionStatus,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: _isConnected ? Colors.green : Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
+                            color: _isConnected ? Colors.green : Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       _isConnected ? 'Connected' : 'Disconnected',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: _isConnected ? Colors.green : Colors.red,
-                      ),
+                            color: _isConnected ? Colors.green : Colors.red,
+                          ),
                     ),
                   ],
                 ),

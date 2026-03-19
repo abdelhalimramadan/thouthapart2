@@ -23,13 +23,13 @@ class OtpVerificationScreen extends StatefulWidget {
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final _otpController = TextEditingController();
-  final _focusNode     = FocusNode();
+  final _focusNode = FocusNode();
 
-  bool    _isVerifying  = false;
-  bool    _isResending  = false;
+  bool _isVerifying = false;
+  bool _isResending = false;
   String? _errorMessage;
   late int _secondsLeft;
-  Timer?  _timer;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -53,8 +53,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   void _startTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) { t.cancel(); return; }
-      if (_secondsLeft <= 0) { t.cancel(); return; }
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
+      if (_secondsLeft <= 0) {
+        t.cancel();
+        return;
+      }
       setState(() => _secondsLeft--);
     });
   }
@@ -74,12 +80,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       return;
     }
 
-    setState(() { _isVerifying = true; _errorMessage = null; });
+    setState(() {
+      _isVerifying = true;
+      _errorMessage = null;
+    });
 
     try {
       final result = await PasswordResetService.instance.verifyOtp(
         phone: widget.phone,
-        otp:   pin,
+        otp: pin,
       );
 
       if (!mounted) return;
@@ -93,7 +102,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       } else {
         _otpController.clear();
         _focusNode.requestFocus();
-        setState(() => _errorMessage = result['message'] ?? 'رمز التحقق غير صحيح');
+        setState(
+            () => _errorMessage = result['message'] ?? 'رمز التحقق غير صحيح');
       }
     } catch (_) {
       if (mounted) setState(() => _errorMessage = 'حدث خطأ، أعد المحاولة');
@@ -106,10 +116,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   Future<void> _resend() async {
     if (!_canResend) return;
 
-    setState(() { _isResending = true; _errorMessage = null; });
+    setState(() {
+      _isResending = true;
+      _errorMessage = null;
+    });
 
     try {
-      final result = await PasswordResetService.instance.requestReset(widget.phone);
+      final result =
+          await PasswordResetService.instance.requestReset(widget.phone);
       if (!mounted) return;
 
       if (result['success'] == true) {
@@ -118,13 +132,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         _startTimer();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('✅ تم إعادة إرسال رمز التحقق', style: TextStyle(fontFamily: 'Cairo')),
+            content: Text('✅ تم إعادة إرسال رمز التحقق',
+                style: TextStyle(fontFamily: 'Cairo')),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
         );
       } else {
-        setState(() => _errorMessage = result['message'] ?? 'فشل إعادة إرسال الرمز');
+        setState(
+            () => _errorMessage = result['message'] ?? 'فشل إعادة إرسال الرمز');
       }
     } catch (_) {
       if (mounted) setState(() => _errorMessage = 'حدث خطأ في إعادة الإرسال');
@@ -136,13 +152,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   // ── Build ────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final width        = MediaQuery.of(context).size.width;
+    final width = MediaQuery.of(context).size.width;
     final baseFontSize = width * 0.04;
-    final isDark       = Theme.of(context).brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // ── Pin Themes (same as booking dialog) ─────────────────────────────
     final defaultPinTheme = PinTheme(
-      width:  width > 600 ? 56 : (width - 80) / 6,
+      width: width > 600 ? 56 : (width - 80) / 6,
       height: 60 * (width / 390),
       textStyle: TextStyle(
         fontSize: baseFontSize * 1.375,
@@ -182,14 +198,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         children: [
           // Background gradients
           _gradient(const Alignment(-0.7, -0.7), ColorsManager.layerBlur1),
-          _gradient(const Alignment(0.7,  0.7),  ColorsManager.layerBlur2),
+          _gradient(const Alignment(0.7, 0.7), ColorsManager.layerBlur2),
 
           Center(
             child: SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.all(width * 0.06),
                 child: Container(
-                  constraints: BoxConstraints(maxWidth: width >= 600 ? 500 : double.infinity),
+                  constraints: BoxConstraints(
+                      maxWidth: width >= 600 ? 500 : double.infinity),
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
@@ -205,13 +222,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-
                       // ── Icon ────────────────────────────────────────────
                       Container(
-                        width:  72 * (width / 390),
+                        width: 72 * (width / 390),
                         height: 72 * (width / 390),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE0F2FE).withValues(alpha: isDark ? 0.1 : 1.0),
+                          color: const Color(0xFFE0F2FE)
+                              .withValues(alpha: isDark ? 0.1 : 1.0),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -230,7 +247,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           fontFamily: 'Cairo',
                           fontSize: baseFontSize * 1.25,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? Colors.white : const Color(0xFF1E293B),
+                          color:
+                              isDark ? Colors.white : const Color(0xFF1E293B),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -243,7 +261,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: baseFontSize * 0.875,
-                          color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                          color: isDark
+                              ? Colors.grey[400]
+                              : const Color(0xFF64748B),
                           height: 1.5,
                         ),
                       ),
@@ -261,7 +281,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           errorPinTheme: errorPinTheme,
                           forceErrorState: _errorMessage != null,
                           onCompleted: _verify,
-                          pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
+                          pinputAutovalidateMode:
+                              PinputAutovalidateMode.onSubmit,
                           validator: (pin) {
                             if (pin == null || pin.isEmpty) return 'مطلوب';
                             if (pin.length != 6) return '6 أرقام';
@@ -290,9 +311,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       // ── Verify button / loading ──────────────────────────
                       _isVerifying
                           ? const SizedBox(
-                              height: 48, width: 48,
+                              height: 48,
+                              width: 48,
                               child: Center(
-                                child: CircularProgressIndicator(color: Color(0xFF0B8FAC)),
+                                child: CircularProgressIndicator(
+                                    color: Color(0xFF0B8FAC)),
                               ),
                             )
                           : Column(
@@ -308,16 +331,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                       style: TextStyle(
                                         fontFamily: 'Cairo',
                                         fontSize: baseFontSize * 0.875,
-                                        color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                                        color: isDark
+                                            ? Colors.grey[400]
+                                            : const Color(0xFF64748B),
                                       ),
                                     ),
                                     if (_canResend)
                                       _isResending
                                           ? const Padding(
-                                              padding: EdgeInsets.only(right: 8),
+                                              padding:
+                                                  EdgeInsets.only(right: 8),
                                               child: SizedBox(
-                                                width: 16, height: 16,
-                                                child: CircularProgressIndicator(
+                                                width: 16,
+                                                height: 16,
+                                                child:
+                                                    CircularProgressIndicator(
                                                   strokeWidth: 2,
                                                   color: Color(0xFF0B8FAC),
                                                 ),
@@ -347,7 +375,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                     style: TextStyle(
                                       fontFamily: 'Cairo',
                                       fontSize: baseFontSize * 0.875,
-                                      color: isDark ? Colors.grey[500] : Colors.grey[600],
+                                      color: isDark
+                                          ? Colors.grey[500]
+                                          : Colors.grey[600],
                                     ),
                                   ),
                                 ),
@@ -367,7 +397,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   Widget _gradient(Alignment center, Color color) => Container(
         decoration: BoxDecoration(
           gradient: RadialGradient(
-            center: center, radius: 1.5,
+            center: center,
+            radius: 1.5,
             colors: [
               color.withValues(alpha: 0.5),
               color.withValues(alpha: 0.1),

@@ -25,7 +25,8 @@ class DoctorRepository {
     throw Exception(result['error'] ?? 'فشل في تحميل الأطباء');
   }
 
-  Future<List<CaseRequestModel>> getCaseRequestsByCategory(int categoryId, {String? categoryName}) async {
+  Future<List<CaseRequestModel>> getCaseRequestsByCategory(int categoryId,
+      {String? categoryName}) async {
     // Try the specific endpoint first
     final result = await _apiService.getCaseRequestsByCategory(categoryId);
 
@@ -33,16 +34,6 @@ class DoctorRepository {
       return result['data'] as List<CaseRequestModel>;
     }
 
-    // If specific endpoint fails (e.g. 404 or other error) and categoryName is provided,
-    // try fallback: get all requests and filter by categoryName.
-    if (categoryName != null && categoryName.isNotEmpty) {
-      final allRequestsResult = await _apiService.getAllRequests();
-      if (allRequestsResult['success'] == true) {
-        final all = allRequestsResult['data'] as List<CaseRequestModel>;
-        // Filter by exact match or contains, robust string comparison
-        return all.where((r) => r.categoryName.trim() == categoryName.trim()).toList();
-      }
-    }
 
     throw Exception(result['error'] ?? 'فشل في تحميل الطلبات');
   }

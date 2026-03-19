@@ -2,8 +2,6 @@ import 'package:thotha_mobile_app/core/helpers/extentions.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-
-
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theming/styles.dart';
 

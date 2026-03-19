@@ -39,7 +39,6 @@ class ApiConstants {
   static const String createCaseRequest = '/api/request/createRequest';
   static const String updateCaseRequest = '/api/request/updateRequest';
   static const String getRequestById = '/api/request/getRequestById';
-  static const String getAllRequests = '/api/request/getAllRequests';
   static const String deleteRequest = '/api/request/deleteRequest';
   static const String getRequestsByDoctorId =
       '/api/request/getRequestsByDoctorId';
@@ -52,4 +51,9 @@ class ApiConstants {
   static const String updateAppointmentStatus = '/api/appointment/updateStatus';
   static const String appointmentHistory = '/api/appointment/history';
   static const String deleteAppointment = '/api/appointment/deleteAppointment';
+
+  // ── Chatbot ──────────────────────────────────────────────────
+  static const String startSession = '/api/session/start';
+  static const String submitAnswer = '/api/session/answer';
+  static const String chat = '/api/chat';
 }

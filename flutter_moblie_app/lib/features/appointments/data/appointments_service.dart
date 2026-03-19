@@ -20,4 +20,3 @@ class AppointmentsService {
     await prefs.setString(_key, jsonEncode(appointments));
   }
 }
-

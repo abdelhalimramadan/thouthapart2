@@ -103,7 +103,7 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
             const SizedBox(width: 10),
             Flexible(
               child: _buildNavItem(
-                icon : Icons.person,
+                icon: Icons.person,
                 activeIcon: Icons.person,
                 label: 'الملف',
                 isActive: _currentIndex == 2,
@@ -131,14 +131,12 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        splashColor: Theme.of(context)
-            .colorScheme
-            .onSurface
-            .withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.12),
-        highlightColor: Theme.of(context)
-            .colorScheme
-            .onSurface
-            .withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.15 : 0.1),
+        splashColor: Theme.of(context).colorScheme.onSurface.withValues(
+            alpha:
+                Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.12),
+        highlightColor: Theme.of(context).colorScheme.onSurface.withValues(
+            alpha:
+                Theme.of(context).brightness == Brightness.dark ? 0.15 : 0.1),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -162,7 +160,8 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: baseFontSize * 0.6875, // 11
-                      fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight:
+                          isActive ? FontWeight.w600 : FontWeight.normal,
                     ),
               ),
             ],

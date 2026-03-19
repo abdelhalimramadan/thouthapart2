@@ -27,8 +27,7 @@ class PasswordValidations extends StatelessWidget {
         verticalSpace(2),
         buildValidationRow('حرف كبير واحد على الأقل', hasUpperCase),
         verticalSpace(2),
-        buildValidationRow(
-            'رمز خاص واحد على الأقل', hasSpecialCharacters),
+        buildValidationRow('رمز خاص واحد على الأقل', hasSpecialCharacters),
         verticalSpace(2),
         buildValidationRow('رقم واحد على الأقل', hasNumber),
         verticalSpace(2),

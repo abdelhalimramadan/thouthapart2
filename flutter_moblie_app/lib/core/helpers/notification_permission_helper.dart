@@ -17,7 +17,7 @@ class NotificationPermissionHelper {
         title: Row(
           children: [
             Icon(Icons.notifications_active,
-                color: Theme.of(context).primaryColor, 
+                color: Theme.of(context).primaryColor,
                 size: 28 * (width / 390)),
             const SizedBox(width: 10),
             Expanded(
@@ -92,8 +92,7 @@ class NotificationPermissionHelper {
         title: Row(
           children: [
             Icon(Icons.warning_amber_rounded,
-                color: Colors.orange, 
-                size: 28 * (width / 390)),
+                color: Colors.orange, size: 28 * (width / 390)),
             const SizedBox(width: 10),
             Expanded(
               child: Text(

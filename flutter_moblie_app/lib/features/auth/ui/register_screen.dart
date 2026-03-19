@@ -116,7 +116,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       } else {
         setState(() {
-          _errorMessage = response['error'] ?? 'فشل إنشاء الحساب. الرجاء المحاولة مرة أخرى';
+          _errorMessage =
+              response['error'] ?? 'فشل إنشاء الحساب. الرجاء المحاولة مرة أخرى';
         });
       }
     } catch (e) {
@@ -212,7 +213,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    validator: (value) => _validateRequired(value, 'الاسم الأول'),
+                    validator: (value) =>
+                        _validateRequired(value, 'الاسم الأول'),
                   ),
                   verticalSpace(16),
                   TextFormField(
@@ -224,7 +226,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    validator: (value) => _validateRequired(value, 'الاسم الأخير'),
+                    validator: (value) =>
+                        _validateRequired(value, 'الاسم الأخير'),
                   ),
                   verticalSpace(16),
                   TextFormField(
@@ -237,7 +240,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     keyboardType: TextInputType.phone,
-                    validator: (value) => _validateRequired(value, 'رقم الهاتف'),
+                    validator: (value) =>
+                        _validateRequired(value, 'رقم الهاتف'),
                   ),
                   verticalSpace(16),
                   TextFormField(
@@ -261,7 +265,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    validator: (value) => _validateRequired(value, 'السنة الدراسية'),
+                    validator: (value) =>
+                        _validateRequired(value, 'السنة الدراسية'),
                   ),
                   verticalSpace(16),
                   TextFormField(
@@ -315,7 +320,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, Routes.loginScreen);
+                      Navigator.pushReplacementNamed(
+                          context, Routes.loginScreen);
                     },
                     child: Text(
                       'لديك حساب بالفعل؟ تسجيل الدخول',

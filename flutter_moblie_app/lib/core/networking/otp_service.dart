@@ -22,26 +22,28 @@ class OtpService {
   }
 
   /// Send OTP to the provided phone number with retry mechanism
-  /// 
+  ///
   /// [phoneNumber] should be in international format: +20XXXXXXXXXX
   /// [retryCount] current retry attempt (used internally)
-  /// 
+  ///
   /// Returns a Map with:
   /// - 'success': true/false
   /// - 'message': success/error message
   /// - 'retryable': true if request can be retried
-  Future<Map<String, dynamic>> sendOtp(String phoneNumber, {int retryCount = 0}) async {
+  Future<Map<String, dynamic>> sendOtp(String phoneNumber,
+      {int retryCount = 0}) async {
     try {
       // Ensure service is initialized
       await initialize();
-      
+
       // Check connectivity first
       if (!_connectivityService.isConnected) {
         final hasConnection = await _connectivityService.waitForConnectivity();
         if (!hasConnection) {
           return {
             'success': false,
-            'error': 'لا يوجد اتصال بالإنترنت. يرجى التحقق من الاتصال والمحاولة مرة أخرى.',
+            'error':
+                'لا يوجد اتصال بالإنترنت. يرجى التحقق من الاتصال والمحاولة مرة أخرى.',
             'retryable': true,
           };
         }
@@ -58,7 +60,8 @@ class OtpService {
       }
 
       // Ensure phone number doesn't start with + for the API
-      final String formattedPhone = PhoneHelper.normalizeEgyptPhone(phoneNumber);
+      final String formattedPhone =
+          PhoneHelper.normalizeEgyptPhone(phoneNumber);
 
       print('Sending OTP to: $formattedPhone');
 
@@ -124,14 +127,15 @@ class OtpService {
       }
     } on DioException catch (e) {
       print('DioException in sendOtp: ${e.message}');
-      
+
       // Retry logic for network errors
       if (retryCount < _maxRetries && _isRetryableError(e)) {
-        print('Retrying OTP send due to network error... Attempt ${retryCount + 1}/$_maxRetries');
+        print(
+            'Retrying OTP send due to network error... Attempt ${retryCount + 1}/$_maxRetries');
         await Future.delayed(_calculateBackoff(retryCount));
         return sendOtp(phoneNumber, retryCount: retryCount + 1);
       }
-      
+
       return {
         'success': false,
         'error': _handleDioError(e),
@@ -157,18 +161,20 @@ class OtpService {
   /// - 'success': true/false
   /// - 'message': success/error message
   /// - 'retryable': true if request can be retried
-  Future<Map<String, dynamic>> verifyOtp(String phoneNumber, String otp, {int retryCount = 0}) async {
+  Future<Map<String, dynamic>> verifyOtp(String phoneNumber, String otp,
+      {int retryCount = 0}) async {
     try {
       // Ensure service is initialized
       await initialize();
-      
+
       // Check connectivity first
       if (!_connectivityService.isConnected) {
         final hasConnection = await _connectivityService.waitForConnectivity();
         if (!hasConnection) {
           return {
             'success': false,
-            'error': 'لا يوجد اتصال بالإنترنت. يرجى التحقق من الاتصال والمحاولة مرة أخرى.',
+            'error':
+                'لا يوجد اتصال بالإنترنت. يرجى التحقق من الاتصال والمحاولة مرة أخرى.',
             'retryable': true,
           };
         }
@@ -185,7 +191,8 @@ class OtpService {
       }
 
       // Ensure phone number doesn't start with + for the API
-      final String formattedPhone = PhoneHelper.normalizeEgyptPhone(phoneNumber);
+      final String formattedPhone =
+          PhoneHelper.normalizeEgyptPhone(phoneNumber);
 
       print('Verifying OTP: $otp for phone: $formattedPhone');
 
@@ -244,7 +251,8 @@ class OtpService {
 
         // Retry logic for server errors
         if (retryable && retryCount < _maxRetries) {
-          print('Retrying OTP verify... Attempt ${retryCount + 1}/$_maxRetries');
+          print(
+              'Retrying OTP verify... Attempt ${retryCount + 1}/$_maxRetries');
           await Future.delayed(_calculateBackoff(retryCount));
           return verifyOtp(phoneNumber, otp, retryCount: retryCount + 1);
         }
@@ -257,14 +265,15 @@ class OtpService {
       }
     } on DioException catch (e) {
       print('DioException in verifyOtp: ${e.message}');
-      
+
       // Retry logic for network errors
       if (retryCount < _maxRetries && _isRetryableError(e)) {
-        print('Retrying OTP verify due to network error... Attempt ${retryCount + 1}/$_maxRetries');
+        print(
+            'Retrying OTP verify due to network error... Attempt ${retryCount + 1}/$_maxRetries');
         await Future.delayed(_calculateBackoff(retryCount));
         return verifyOtp(phoneNumber, otp, retryCount: retryCount + 1);
       }
-      
+
       return {
         'success': false,
         'error': _handleDioError(e),
@@ -353,7 +362,8 @@ class OtpService {
 
   /// Calculate exponential backoff delay
   Duration _calculateBackoff(int retryCount) {
-    return Duration(milliseconds: _baseDelay.inMilliseconds * (1 << retryCount));
+    return Duration(
+        milliseconds: _baseDelay.inMilliseconds * (1 << retryCount));
   }
 
   /// Check if error is retryable
@@ -361,8 +371,7 @@ class OtpService {
     return e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout ||
         e.type == DioExceptionType.connectionError ||
-        (e.response?.statusCode != null && 
-         e.response!.statusCode! >= 500);
+        (e.response?.statusCode != null && e.response!.statusCode! >= 500);
   }
 
   String _handleDioError(DioException e) {

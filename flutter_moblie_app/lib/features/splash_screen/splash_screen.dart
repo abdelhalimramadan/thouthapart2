@@ -58,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
           onPressed: () async {
             Navigator.of(context).pop();
             await Geolocator.openLocationSettings();
-            _checkLocationPermission(); 
+            _checkLocationPermission();
           },
         );
       }
@@ -76,7 +76,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 'يحتاج التطبيق إلى إذن الموقع ليعمل بشكل صحيح. يرجى منح الإذن.',
             onPressed: () {
               Navigator.of(context).pop();
-              _checkLocationPermission(); 
+              _checkLocationPermission();
             },
           );
         }
@@ -93,7 +93,7 @@ class _SplashScreenState extends State<SplashScreen> {
           onPressed: () async {
             Navigator.of(context).pop();
             await Geolocator.openAppSettings();
-            _checkLocationPermission(); 
+            _checkLocationPermission();
           },
         );
       }
@@ -213,7 +213,7 @@ class _SplashScreenState extends State<SplashScreen> {
             height: double.infinity,
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: const Alignment(-0.7, -0.7), 
+                center: const Alignment(-0.7, -0.7),
                 radius: 1.5,
                 colors: [
                   ColorsManager.layerBlur1.withValues(alpha: 0.4),
@@ -229,7 +229,7 @@ class _SplashScreenState extends State<SplashScreen> {
             height: double.infinity,
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: const Alignment(0.7, 0.7), 
+                center: const Alignment(0.7, 0.7),
                 radius: 1.5,
                 colors: [
                   ColorsManager.layerBlur2.withValues(alpha: 0.4),
@@ -240,7 +240,6 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
           ),
-
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

@@ -106,7 +106,7 @@ class HomeDrawer extends StatelessWidget {
     final double topPad = MediaQuery.of(context).padding.top;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Drawer(
       child: Container(
         color: theme.scaffoldBackgroundColor,
@@ -163,7 +163,7 @@ class HomeDrawer extends StatelessWidget {
                         ],
                       ),
                     ),
-                    
+
                     // Menu Items
                     _menuItem(
                       context,
@@ -220,7 +220,8 @@ class HomeDrawer extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const TermsAndConditionsScreen(),
+                            builder: (context) =>
+                                const TermsAndConditionsScreen(),
                           ),
                         );
                       },
@@ -272,7 +273,7 @@ class HomeDrawer extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Footer Section
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),

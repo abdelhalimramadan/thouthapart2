@@ -16,10 +16,10 @@ class ChangePasswordScreen extends StatefulWidget {
 }
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
-  final _formKey        = GlobalKey<FormState>();
-  final _phoneCtrl      = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _phoneCtrl = TextEditingController();
 
-  bool    _isLoading   = false;
+  bool _isLoading = false;
   String? _errorMessage;
 
   @override
@@ -40,7 +40,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Future<void> _sendOtp() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() { _isLoading = true; _errorMessage = null; });
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     try {
       final result = await PasswordResetService.instance
@@ -53,7 +56,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           context,
           Routes.otpVerificationScreen,
           arguments: {
-            'phone': result['phone'],          // normalised +2xxx
+            'phone': result['phone'], // normalised +2xxx
             'expires_in': result['expires_in'] ?? 300,
           },
         );
@@ -70,9 +73,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   // ── Build ────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final width  = MediaQuery.of(context).size.width;
+    final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
-    final fs     = width * 0.04;
+    final fs = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -82,12 +85,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded,
-            color: isDark ? Colors.white : Colors.black),
+              color: isDark ? Colors.white : Colors.black),
           onPressed: () {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => const DoctorProfileScreen(),
-
               ),
             );
           },
@@ -97,7 +99,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         children: [
           // Background gradients
           _gradient(const Alignment(-0.7, -0.7), ColorsManager.layerBlur1),
-          _gradient(const Alignment(0.7, 0.7),   ColorsManager.layerBlur2),
+          _gradient(const Alignment(0.7, 0.7), ColorsManager.layerBlur2),
 
           SafeArea(
             child: Center(
@@ -105,22 +107,24 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 child: Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: width * 0.06,
-                    vertical:  height * 0.03,
+                    vertical: height * 0.03,
                   ),
                   child: Container(
                     width: double.infinity,
-                    constraints: BoxConstraints(maxWidth: width >= 600 ? 500 : double.infinity),
+                    constraints: BoxConstraints(
+                        maxWidth: width >= 600 ? 500 : double.infinity),
                     padding: EdgeInsets.all(width * 0.06),
                     decoration: BoxDecoration(
                       color: isDark ? const Color(0xFF2D2D2D) : Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(
-                        color: isDark
-                          ? Colors.black.withAlpha(50)
-                          : Colors.black.withAlpha(25),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4)
-                      )],
+                      boxShadow: [
+                        BoxShadow(
+                            color: isDark
+                                ? Colors.black.withAlpha(50)
+                                : Colors.black.withAlpha(25),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4))
+                      ],
                     ),
                     child: Directionality(
                       textDirection: TextDirection.rtl,
@@ -133,7 +137,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           // Logo
                           Image.asset(
                             'assets/images/splash-logo.png',
-                            width: width * 0.2, height: width * 0.2,
+                            width: width * 0.2,
+                            height: width * 0.2,
                             fit: BoxFit.contain,
                           ),
                           const SizedBox(height: 8),
@@ -142,8 +147,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           Text(
                             'تغيير كلمة المرور',
                             style: TextStyle(
-                              fontSize: fs * 1.5, fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : ColorsManager.mainBlue,
+                              fontSize: fs * 1.5,
+                              fontWeight: FontWeight.bold,
+                              color: isDark
+                                  ? Colors.white
+                                  : ColorsManager.mainBlue,
                               fontFamily: 'Cairo',
                             ),
                           ),
@@ -153,10 +161,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           Text(
                             'سنرسل لك رمز تحقق على الواتساب',
                             style: TextStyle(
-                              fontSize: fs * 0.875,
-                              color: isDark ? Colors.grey[400] : Colors.grey,
-                              fontFamily: 'Cairo'
-                            ),
+                                fontSize: fs * 0.875,
+                                color: isDark ? Colors.grey[400] : Colors.grey,
+                                fontFamily: 'Cairo'),
                             textAlign: TextAlign.center,
                           ),
                           SizedBox(height: height * 0.03),
@@ -171,7 +178,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 TextFormField(
                                   controller: _phoneCtrl,
                                   keyboardType: TextInputType.phone,
-                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d+]'))],
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                        RegExp(r'[\d+]'))
+                                  ],
                                   textDirection: TextDirection.ltr,
                                   style: TextStyle(
                                     fontFamily: 'Cairo',
@@ -181,31 +191,38 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   decoration: InputDecoration(
                                     labelText: 'رقم الهاتف',
                                     hintText: '01xxxxxxxxx',
-                                    prefixIcon: Icon(Icons.phone_android_outlined,
-                                      color: isDark ? Colors.grey[400] : null),
+                                    prefixIcon: Icon(
+                                        Icons.phone_android_outlined,
+                                        color:
+                                            isDark ? Colors.grey[400] : null),
                                     labelStyle: TextStyle(
                                       fontFamily: 'Cairo',
                                       color: isDark ? Colors.grey[400] : null,
                                     ),
                                     hintStyle: TextStyle(
-                                      color: Colors.grey[400],
-                                      fontFamily: 'Cairo'
-                                    ),
+                                        color: Colors.grey[400],
+                                        fontFamily: 'Cairo'),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
-                                        color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+                                        color: isDark
+                                            ? Colors.grey[700]!
+                                            : Colors.grey[300]!,
                                       ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
-                                        color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+                                        color: isDark
+                                            ? Colors.grey[700]!
+                                            : Colors.grey[300]!,
                                       ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: ColorsManager.mainBlue, width: 2),
+                                      borderSide: BorderSide(
+                                          color: ColorsManager.mainBlue,
+                                          width: 2),
                                     ),
                                   ),
                                   validator: _validatePhone,
@@ -216,19 +233,25 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   SizedBox(height: height * 0.015),
                                   Container(
                                     width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 10),
                                     decoration: BoxDecoration(
                                       color: Colors.red.shade50,
                                       borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: Colors.red.shade200),
+                                      border: Border.all(
+                                          color: Colors.red.shade200),
                                     ),
                                     child: Row(children: [
-                                      Icon(Icons.error_outline, color: Colors.red.shade600, size: 18),
+                                      Icon(Icons.error_outline,
+                                          color: Colors.red.shade600, size: 18),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
                                           _errorMessage!,
-                                          style: TextStyle(color: Colors.red.shade700, fontFamily: 'Cairo', fontSize: fs * 0.8),
+                                          style: TextStyle(
+                                              color: Colors.red.shade700,
+                                              fontFamily: 'Cairo',
+                                              fontSize: fs * 0.8),
                                         ),
                                       ),
                                     ]),
@@ -242,12 +265,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   height: 52,
                                   width: double.infinity,
                                   child: _isLoading
-                                      ? const Center(child: CircularProgressIndicator())
+                                      ? const Center(
+                                          child: CircularProgressIndicator())
                                       : AppTextButton(
                                           buttonText: 'إرسال رمز التحقق',
                                           textStyle: const TextStyle(
-                                            fontSize: 16, color: Colors.white,
-                                            fontWeight: FontWeight.bold, fontFamily: 'Cairo',
+                                            fontSize: 16,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Cairo',
                                           ),
                                           onPressed: _sendOtp,
                                         ),
@@ -260,8 +286,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     onPressed: () {
                                       Navigator.of(context).pushReplacement(
                                         MaterialPageRoute(
-                                          builder: (context) => const DoctorProfileScreen(),
-
+                                          builder: (context) =>
+                                              const DoctorProfileScreen(),
                                         ),
                                       );
                                     },
@@ -293,14 +319,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   Widget _gradient(Alignment center, Color color) => Container(
-        width: double.infinity, height: double.infinity,
+        width: double.infinity,
+        height: double.infinity,
         decoration: BoxDecoration(
           gradient: RadialGradient(
-            center: center, radius: 1.5,
-            colors: [color.withAlpha(102), color.withAlpha(25), Colors.transparent],
+            center: center,
+            radius: 1.5,
+            colors: [
+              color.withAlpha(102),
+              color.withAlpha(25),
+              Colors.transparent
+            ],
             stops: const [0.0, 0.3, 0.8],
           ),
         ),
       );
 }
-

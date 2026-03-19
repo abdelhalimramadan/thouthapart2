@@ -30,7 +30,8 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
     _slideAnim = Tween<Offset>(
       begin: const Offset(0, 0.08),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
+    ).animate(
+        CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
     _animController.forward();
   }
 
@@ -198,7 +199,8 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
                               _buildBullet(isDark, 'رقم الهاتف'),
                               _buildBullet(isDark, 'المحافظة المختارة'),
                               _buildBullet(isDark, 'تفاصيل الحجز'),
-                              _buildBullet(isDark, 'بيانات تسجيل الدخول (للدكاترة)'),
+                              _buildBullet(
+                                  isDark, 'بيانات تسجيل الدخول (للدكاترة)'),
                               const SizedBox(height: 10),
                               _buildNote(
                                 isDark,
@@ -227,10 +229,10 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
                                   'إتمام عملية الحجز بين المريض وطالب طب الأسنان'),
                               _buildBullet(isDark,
                                   'إرسال إشعارات للدكتور بوجود حجز جديد'),
-                              _buildBullet(isDark,
-                                  'تحسين تجربة المستخدم داخل التطبيق'),
-                              _buildBullet(isDark,
-                                  'مساعدة المستخدم من خلال الشات بوت'),
+                              _buildBullet(
+                                  isDark, 'تحسين تجربة المستخدم داخل التطبيق'),
+                              _buildBullet(
+                                  isDark, 'مساعدة المستخدم من خلال الشات بوت'),
                               const SizedBox(height: 10),
                               _buildNote(
                                 isDark,

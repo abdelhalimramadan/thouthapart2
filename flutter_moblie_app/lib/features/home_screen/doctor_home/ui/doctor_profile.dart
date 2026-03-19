@@ -535,7 +535,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                         'حذف الحساب',
                         style: TextStyle(
                           fontFamily: 'Cairo',
-                          fontSize: 14.sp, // Reduced slightly to fit side-by-side
+                          fontSize:
+                              14.sp, // Reduced slightly to fit side-by-side
                           fontWeight: FontWeight.bold,
                           color: Colors.red,
                         ),

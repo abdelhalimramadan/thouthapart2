@@ -46,16 +46,6 @@ class CaseRequestRepo {
     }
   }
 
-  Future<Map<String, dynamic>> getAllRequests() async {
-    try {
-      return await _apiService.getAllRequests();
-    } catch (e) {
-      return {
-        'success': false,
-        'error': e.toString(),
-      };
-    }
-  }
 
   Future<Map<String, dynamic>> deleteRequest(int id, {int? doctorId}) async {
     try {

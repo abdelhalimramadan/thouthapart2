@@ -85,7 +85,8 @@ class AuthService {
             g = (userMap['governorate'] ?? userMap['city']) as String?;
             fa = (userMap['faculty'] ?? userMap['college']) as String?;
             c = (userMap['category'] ?? userMap['specialization'])?.toString();
-            final id = userMap['id'] ?? userMap['doctor_id'] ?? userMap['doctorId'];
+            final id =
+                userMap['id'] ?? userMap['doctor_id'] ?? userMap['doctorId'];
 
             // احفظ التوكن في الـ cache أيضاً (بالإضافة للـ secure storage)
             await SharedPrefHelper.setData('auth_token', token);
@@ -239,9 +240,11 @@ class AuthService {
         // Persist provided user info so UI can greet correctly after signup
         try {
           final data = response.data;
-          final userMap = (data is Map && data['user'] is Map) ? data['user'] : data;
-          final id = userMap['id'] ?? userMap['doctor_id'] ?? userMap['doctorId'];
-          
+          final userMap =
+              (data is Map && data['user'] is Map) ? data['user'] : data;
+          final id =
+              userMap['id'] ?? userMap['doctor_id'] ?? userMap['doctorId'];
+
           if (id != null) {
             await SharedPrefHelper.setData('doctor_id', id);
           }

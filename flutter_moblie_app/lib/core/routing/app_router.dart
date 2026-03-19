@@ -49,7 +49,7 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>? ?? {};
         return MaterialPageRoute(
           builder: (context) => OtpVerificationScreen(
-            phone:           args['phone'] ?? '',
+            phone: args['phone'] ?? '',
             expiresInSeconds: args['expires_in'] ?? 300,
           ),
         );

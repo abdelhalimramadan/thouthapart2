@@ -40,7 +40,8 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('تم إرسال رسالتك بنجاح. سنتواصل معك في أقرب وقت.', style: TextStyle(fontFamily: 'Cairo')),
+        content: Text('تم إرسال رسالتك بنجاح. سنتواصل معك في أقرب وقت.',
+            style: TextStyle(fontFamily: 'Cairo')),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
       ),
@@ -100,9 +101,16 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            _buildBullet(theme, 'الدعم الفني يقتصر فقط على المشاكل التقنية المتعلقة باستخدام التطبيق.', baseFontSize),
-            _buildBullet(theme, 'لا يتدخل فريق الدعم في أي نزاعات أو اتفاقات بين الطلاب والمرضى.', baseFontSize),
-            _buildBullet(theme, 'التطبيق دوره يقتصر على الربط فقط بين الطرفين.', baseFontSize),
+            _buildBullet(
+                theme,
+                'الدعم الفني يقتصر فقط على المشاكل التقنية المتعلقة باستخدام التطبيق.',
+                baseFontSize),
+            _buildBullet(
+                theme,
+                'لا يتدخل فريق الدعم في أي نزاعات أو اتفاقات بين الطلاب والمرضى.',
+                baseFontSize),
+            _buildBullet(theme, 'التطبيق دوره يقتصر على الربط فقط بين الطرفين.',
+                baseFontSize),
             const SizedBox(height: 24),
 
             // وسائل التواصل
@@ -146,7 +154,9 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Icon(Icons.email_outlined, size: 22 * (width / 390), color: theme.colorScheme.primary),
+                  Icon(Icons.email_outlined,
+                      size: 22 * (width / 390),
+                      color: theme.colorScheme.primary),
                 ],
               ),
             ),
@@ -181,22 +191,27 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                       hintStyle: const TextStyle(fontFamily: 'Cairo'),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.outline, width: 1.5),
+                        borderSide: BorderSide(
+                            color: theme.colorScheme.outline, width: 1.5),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.outline, width: 1.5),
+                        borderSide: BorderSide(
+                            color: theme.colorScheme.outline, width: 1.5),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+                        borderSide: BorderSide(
+                            color: theme.colorScheme.primary, width: 2),
                       ),
                       filled: true,
                       fillColor: theme.cardColor,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'يرجى إدخال الاسم';
+                      if (v == null || v.trim().isEmpty)
+                        return 'يرجى إدخال الاسم';
                       return null;
                     },
                   ),
@@ -213,22 +228,27 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                       hintStyle: const TextStyle(fontFamily: 'Cairo'),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.outline, width: 1.5),
+                        borderSide: BorderSide(
+                            color: theme.colorScheme.outline, width: 1.5),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.outline, width: 1.5),
+                        borderSide: BorderSide(
+                            color: theme.colorScheme.outline, width: 1.5),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+                        borderSide: BorderSide(
+                            color: theme.colorScheme.primary, width: 2),
                       ),
                       filled: true,
                       fillColor: theme.cardColor,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'يرجى إدخال البريد الإلكتروني';
+                      if (v == null || v.trim().isEmpty)
+                        return 'يرجى إدخال البريد الإلكتروني';
                       return null;
                     },
                   ),
@@ -246,22 +266,27 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                       alignLabelWithHint: true,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.outline, width: 1.5),
+                        borderSide: BorderSide(
+                            color: theme.colorScheme.outline, width: 1.5),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.outline, width: 1.5),
+                        borderSide: BorderSide(
+                            color: theme.colorScheme.outline, width: 1.5),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+                        borderSide: BorderSide(
+                            color: theme.colorScheme.primary, width: 2),
                       ),
                       filled: true,
                       fillColor: theme.cardColor,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'يرجى كتابة رسالتك';
+                      if (v == null || v.trim().isEmpty)
+                        return 'يرجى كتابة رسالتك';
                       return null;
                     },
                   ),
@@ -283,7 +308,8 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                               width: 24,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
                           : Text(

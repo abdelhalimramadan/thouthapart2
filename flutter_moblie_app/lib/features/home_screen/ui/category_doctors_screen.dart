@@ -88,11 +88,8 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
       if (widget.categoryId != null) {
         print('Using CategoryId (public): ${widget.categoryId}');
         result = await _repo.getRequestsByCategoryId(widget.categoryId!);
-      } else if (widget.categoryName.isNotEmpty) {
-        print('Using CategoryName (public fallback): ${widget.categoryName}');
-        result = await _repo.getAllRequests();
       } else {
-        result = {'success': false, 'error': 'لم يتم تحديد التخصص'};
+        result = {'success': false, 'error': 'لم يتم تحديد التخصّص بشكل صحيح'};
       }
     }
 

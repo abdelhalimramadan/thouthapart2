@@ -31,16 +31,19 @@ class NotificationsScreen extends StatelessWidget {
       body: notifications.isEmpty
           ? _buildEmptyState(width, baseFontSize, colorScheme)
           : ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: width * 0.04, vertical: 10),
+              padding:
+                  EdgeInsets.symmetric(horizontal: width * 0.04, vertical: 10),
               itemCount: notifications.length,
               itemBuilder: (context, index) {
-                return _buildBookingCard(notifications[index], width, baseFontSize, colorScheme);
+                return _buildBookingCard(
+                    notifications[index], width, baseFontSize, colorScheme);
               },
             ),
     );
   }
 
-  Widget _buildEmptyState(double width, double baseFontSize, ColorScheme colorScheme) {
+  Widget _buildEmptyState(
+      double width, double baseFontSize, ColorScheme colorScheme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -74,8 +77,8 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBookingCard(
-      PatientBookingModel booking, double width, double baseFontSize, ColorScheme colorScheme) {
+  Widget _buildBookingCard(PatientBookingModel booking, double width,
+      double baseFontSize, ColorScheme colorScheme) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 4,
@@ -117,7 +120,8 @@ class NotificationsScreen extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -144,10 +148,10 @@ class NotificationsScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildInfoItem(
-                      Icons.calendar_today_outlined, booking.date, baseFontSize, colorScheme),
-                  _buildInfoItem(
-                      Icons.access_time_outlined, booking.time, baseFontSize, colorScheme),
+                  _buildInfoItem(Icons.calendar_today_outlined, booking.date,
+                      baseFontSize, colorScheme),
+                  _buildInfoItem(Icons.access_time_outlined, booking.time,
+                      baseFontSize, colorScheme),
                 ],
               ),
             ),
@@ -157,7 +161,8 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoItem(IconData icon, String label, double baseFontSize, ColorScheme colorScheme) {
+  Widget _buildInfoItem(IconData icon, String label, double baseFontSize,
+      ColorScheme colorScheme) {
     return Row(
       children: [
         Icon(icon, size: 16 * (baseFontSize / 16), color: colorScheme.primary),

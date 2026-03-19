@@ -12,7 +12,8 @@ class TermsAndConditionsText extends StatelessWidget {
       text: TextSpan(
         children: [
           TextSpan(
-            text: 'من خلال تسجيل الدخول، فإنك توافق على شروط الاستخدام الخاصة بنا',
+            text:
+                'من خلال تسجيل الدخول، فإنك توافق على شروط الاستخدام الخاصة بنا',
             style: TextStyles.font13GrayRegular,
           ),
           TextSpan(

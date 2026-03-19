@@ -11,7 +11,8 @@ class ConnectivityService {
   final Dio _dio = Dio(); // For actual internet connectivity check
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
   List<ConnectivityResult> _connectionStatus = [ConnectivityResult.none];
-  final StreamController<bool> _connectionStatusController = StreamController<bool>.broadcast();
+  final StreamController<bool> _connectionStatusController =
+      StreamController<bool>.broadcast();
   bool _isInitialized = false;
 
   Stream<bool> get connectionStream => _connectionStatusController.stream;
@@ -24,7 +25,7 @@ class ConnectivityService {
     try {
       final results = await _connectivity.checkConnectivity();
       _connectionStatus = results;
-      
+
       // Check if device has connectivity but also test actual internet access
       if (isConnected) {
         final hasInternet = await _testInternetConnectivity();
@@ -75,10 +76,11 @@ class ConnectivityService {
       await checkInitialConnection(); // Check initial connection
       _isInitialized = true;
     }
-    
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen((results) async {
+
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen((results) async {
       _connectionStatus = results;
-      
+
       // Test actual internet when connectivity changes
       if (isConnected) {
         final hasInternet = await _testInternetConnectivity();
@@ -95,7 +97,8 @@ class ConnectivityService {
   }
 
   /// Wait for connectivity with timeout
-  Future<bool> waitForConnectivity({Duration timeout = const Duration(seconds: 30)}) async {
+  Future<bool> waitForConnectivity(
+      {Duration timeout = const Duration(seconds: 30)}) async {
     if (isConnected) return true;
 
     final completer = Completer<bool>();

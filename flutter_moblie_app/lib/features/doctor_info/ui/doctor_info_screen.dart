@@ -52,7 +52,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
             children: [
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
@@ -68,7 +69,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Icon(Icons.close,
-                          size: 24 * (width / 390), color: theme.iconTheme.color),
+                          size: 24 * (width / 390),
+                          color: theme.iconTheme.color),
                     ),
                     Text(
                       'تفاصيل الطبيب',
@@ -89,8 +91,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color:
-                            theme.cardTheme.color ?? colorScheme.surface,
+                        color: theme.cardTheme.color ?? colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
@@ -126,8 +127,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                             width: double.infinity,
                             child: Wrap(
                               alignment: WrapAlignment.center,
-                              crossAxisAlignment:
-                                  WrapCrossAlignment.center,
+                              crossAxisAlignment: WrapCrossAlignment.center,
                               spacing: 24,
                               runSpacing: 8,
                               children: [
@@ -168,7 +168,9 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                           fontWeight: FontWeight.w400,
                                           fontSize: baseFontSize, // 16
                                           height: 1.5,
-                                          color: isDark ? Colors.white : Colors.black,
+                                          color: isDark
+                                              ? Colors.white
+                                              : Colors.black,
                                         ),
                                         children: const [
                                           TextSpan(text: '4.8 '),
@@ -208,7 +210,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                           const SizedBox(height: 16),
                           Container(
                             width: double.infinity,
-                            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 20),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: isDark ? Colors.grey[800] : Colors.white,
@@ -222,8 +225,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                               ],
                             ),
                             child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
                                   'عن الطبيب',
@@ -232,7 +234,9 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                     fontWeight: FontWeight.bold,
                                     fontSize: baseFontSize * 1.125, // 18
                                     height: 1.5,
-                                    color: isDark ? Colors.white : const Color(0xFF0A0A0A),
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF0A0A0A),
                                   ),
                                   textAlign: TextAlign.right,
                                 ),
@@ -245,7 +249,9 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                     fontWeight: FontWeight.w400,
                                     fontSize: baseFontSize, // 16
                                     height: 1.625,
-                                    color: isDark ? Colors.grey[300] : const Color(0xFF858585),
+                                    color: isDark
+                                        ? Colors.grey[300]
+                                        : const Color(0xFF858585),
                                   ),
                                   textAlign: TextAlign.right,
                                 ),
@@ -259,8 +265,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 _InfoTile(
                                   icon: Icons.school_outlined,
@@ -308,7 +313,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                               ),
                               const SizedBox(width: 8),
                               Icon(Icons.calendar_today_outlined,
-                                  size: 18 * (width / 390), color: const Color(0xFF0B8FAC)),
+                                  size: 18 * (width / 390),
+                                  color: const Color(0xFF0B8FAC)),
                               const SizedBox(width: 6),
                             ],
                           ),
@@ -319,8 +325,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                               scrollDirection: Axis.horizontal,
                               reverse: true,
                               itemCount: 4,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
                               separatorBuilder: (_, __) =>
                                   const SizedBox(width: 8),
                               itemBuilder: (context, index) {
@@ -335,8 +341,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                   label: label,
                                   selected: _selectedDay == label,
                                   baseFontSize: baseFontSize,
-                                  onTap: () => setState(
-                                      () => _selectedDay = label),
+                                  onTap: () =>
+                                      setState(() => _selectedDay = label),
                                 );
                               },
                             ),
@@ -349,9 +355,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                 baseFontSize: baseFontSize,
                                 selected: _selectedTime?.hour == 9 &&
                                     _selectedTime?.minute == 0,
-                                onTap: () => setState(() =>
-                                    _selectedTime = const TimeOfDay(
-                                        hour: 9, minute: 0)),
+                                onTap: () => setState(() => _selectedTime =
+                                    const TimeOfDay(hour: 9, minute: 0)),
                               ),
                               const SizedBox(height: 8),
                               _TimeListTile(
@@ -359,9 +364,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                 baseFontSize: baseFontSize,
                                 selected: _selectedTime?.hour == 10 &&
                                     _selectedTime?.minute == 0,
-                                onTap: () => setState(() =>
-                                    _selectedTime = const TimeOfDay(
-                                        hour: 10, minute: 0)),
+                                onTap: () => setState(() => _selectedTime =
+                                    const TimeOfDay(hour: 10, minute: 0)),
                               ),
                               const SizedBox(height: 8),
                               _TimeListTile(
@@ -369,9 +373,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                 baseFontSize: baseFontSize,
                                 selected: _selectedTime?.hour == 12 &&
                                     _selectedTime?.minute == 0,
-                                onTap: () => setState(() =>
-                                    _selectedTime = const TimeOfDay(
-                                        hour: 12, minute: 0)),
+                                onTap: () => setState(() => _selectedTime =
+                                    const TimeOfDay(hour: 12, minute: 0)),
                               ),
                               const SizedBox(height: 8),
                               _TimeListTile(
@@ -379,9 +382,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                 baseFontSize: baseFontSize,
                                 selected: _selectedTime?.hour == 14 &&
                                     _selectedTime?.minute == 0,
-                                onTap: () => setState(() =>
-                                    _selectedTime = const TimeOfDay(
-                                        hour: 14, minute: 0)),
+                                onTap: () => setState(() => _selectedTime =
+                                    const TimeOfDay(hour: 14, minute: 0)),
                               ),
                               const SizedBox(height: 8),
                               _TimeListTile(
@@ -389,9 +391,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                 baseFontSize: baseFontSize,
                                 selected: _selectedTime?.hour == 16 &&
                                     _selectedTime?.minute == 0,
-                                onTap: () => setState(() =>
-                                    _selectedTime = const TimeOfDay(
-                                        hour: 16, minute: 0)),
+                                onTap: () => setState(() => _selectedTime =
+                                    const TimeOfDay(hour: 16, minute: 0)),
                               ),
                               const SizedBox(height: 8),
                               _TimeListTile(
@@ -399,9 +400,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                 baseFontSize: baseFontSize,
                                 selected: _selectedTime?.hour == 18 &&
                                     _selectedTime?.minute == 0,
-                                onTap: () => setState(() =>
-                                    _selectedTime = const TimeOfDay(
-                                        hour: 18, minute: 0)),
+                                onTap: () => setState(() => _selectedTime =
+                                    const TimeOfDay(hour: 18, minute: 0)),
                               ),
                             ],
                           ),
@@ -410,14 +410,15 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.blueGrey[900] : const Color(0xFFEFF7FF),
+                              color: isDark
+                                  ? Colors.blueGrey[900]
+                                  : const Color(0xFFEFF7FF),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                  color: const Color(0xFFB3DAFF)),
+                              border:
+                                  Border.all(color: const Color(0xFFB3DAFF)),
                             ),
                             child: Row(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Expanded(
                                   child: Text(
@@ -425,13 +426,16 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                     style: TextStyle(
                                       fontFamily: 'Cairo',
                                       fontSize: baseFontSize * 0.75, // 12
-                                      color: isDark ? Colors.grey[200] : const Color(0xFF1F2937),
+                                      color: isDark
+                                          ? Colors.grey[200]
+                                          : const Color(0xFF1F2937),
                                       height: 1.6,
                                     ),
                                   ),
                                 ),
                                 Icon(Icons.sticky_note_2_outlined,
-                                    color: const Color(0xFF3B82F6), size: baseFontSize * 1.25),
+                                    color: const Color(0xFF3B82F6),
+                                    size: baseFontSize * 1.25),
                               ],
                             ),
                           ),
@@ -440,15 +444,15 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                             children: [
                               Expanded(
                                 child: InkWell(
-                                  borderRadius:
-                                      BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(8),
                                   onTap: () => Navigator.pop(context),
                                   child: Container(
                                     height: 44,
                                     decoration: BoxDecoration(
-                                      color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
-                                      borderRadius:
-                                          BorderRadius.circular(8),
+                                      color: isDark
+                                          ? Colors.grey[800]
+                                          : const Color(0xFFF3F4F6),
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Center(
                                       child: Text(
@@ -457,7 +461,9 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                           fontFamily: 'Cairo',
                                           fontWeight: FontWeight.w700,
                                           fontSize: baseFontSize * 0.875, // 14
-                                          color: isDark ? Colors.white : const Color(0xFF111827),
+                                          color: isDark
+                                              ? Colors.white
+                                              : const Color(0xFF111827),
                                         ),
                                       ),
                                     ),
@@ -474,8 +480,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                           final String date =
                                               _selectedDay ?? '';
                                           final String time =
-                                              _selectedTime?.format(
-                                                      context) ??
+                                              _selectedTime?.format(context) ??
                                                   '';
                                           Navigator.push(
                                             context,
@@ -483,7 +488,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                               builder: (context) =>
                                                   BookingConfirmationScreen(
                                                 doctorName: doctorName,
-                                                specialty: widget.doctor.categoryName,
+                                                specialty:
+                                                    widget.doctor.categoryName,
                                                 date: date,
                                                 time: time,
                                                 requestId: null,
@@ -498,8 +504,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                       color: _isBookingEnabled
                                           ? const Color(0xFF10B981)
                                           : const Color(0xFF9CA3AF),
-                                      borderRadius:
-                                          BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Center(
                                       child: Text(
@@ -542,7 +547,10 @@ class _InfoTile extends StatelessWidget {
   final double baseFontSize;
 
   const _InfoTile(
-      {required this.icon, required this.title, required this.subtitle, required this.baseFontSize});
+      {required this.icon,
+      required this.title,
+      required this.subtitle,
+      required this.baseFontSize});
 
   @override
   Widget build(BuildContext context) {
@@ -605,7 +613,11 @@ class _DayChip extends StatelessWidget {
   final VoidCallback? onTap;
   final double baseFontSize;
 
-  const _DayChip({required this.label, this.selected = false, this.onTap, required this.baseFontSize});
+  const _DayChip(
+      {required this.label,
+      this.selected = false,
+      this.onTap,
+      required this.baseFontSize});
 
   @override
   Widget build(BuildContext context) {
@@ -617,7 +629,9 @@ class _DayChip extends StatelessWidget {
         fontFamily: 'Cairo',
         fontWeight: FontWeight.w700,
         fontSize: baseFontSize * 0.875, // 14
-        color: selected ? Colors.white : (isDark ? Colors.grey[200] : const Color(0xFF111827)),
+        color: selected
+            ? Colors.white
+            : (isDark ? Colors.grey[200] : const Color(0xFF111827)),
       ),
     );
 
@@ -660,21 +674,28 @@ class _TimeListTile extends StatelessWidget {
   final VoidCallback? onTap;
   final double baseFontSize;
 
-  const _TimeListTile({required this.label, this.selected = false, this.onTap, required this.baseFontSize});
+  const _TimeListTile(
+      {required this.label,
+      this.selected = false,
+      this.onTap,
+      required this.baseFontSize});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final BorderRadius radius = BorderRadius.circular(10);
-    final Color borderColor =
-        selected ? const Color(0xFF8DECB4) : (isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB));
+    final Color borderColor = selected
+        ? const Color(0xFF8DECB4)
+        : (isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB));
     final Widget text = Text(
       label,
       style: TextStyle(
         fontFamily: 'Cairo',
         fontWeight: FontWeight.w700,
         fontSize: baseFontSize * 0.875, // 14
-        color: selected ? Colors.white : (isDark ? Colors.grey[200] : const Color(0xFF111827)),
+        color: selected
+            ? Colors.white
+            : (isDark ? Colors.grey[200] : const Color(0xFF111827)),
       ),
     );
 
@@ -708,7 +729,9 @@ class _TimeListTile extends StatelessWidget {
           children: [
             Icon(Icons.access_time,
                 size: 18,
-                color: selected ? Colors.white : (isDark ? Colors.grey[200] : const Color(0xFF111827))),
+                color: selected
+                    ? Colors.white
+                    : (isDark ? Colors.grey[200] : const Color(0xFF111827))),
             text,
           ],
         ),

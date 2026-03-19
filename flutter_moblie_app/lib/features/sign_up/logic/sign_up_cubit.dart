@@ -65,8 +65,7 @@ class SignUpCubit extends Cubit<SignUpState> {
           'firstName': firstName.trim(),
         if (lastName != null && lastName.trim().isNotEmpty)
           'lastName': lastName.trim(),
-        if (formattedPhone != null)
-          'phoneNumber': formattedPhone,
+        if (formattedPhone != null) 'phoneNumber': formattedPhone,
         if (college != null && college.trim().isNotEmpty)
           'universityName': college.trim(),
         if (studyYear != null && studyYear.trim().isNotEmpty)
@@ -79,7 +78,8 @@ class SignUpCubit extends Cubit<SignUpState> {
 
       print('✅ SignUp Request URL: ${ApiConstants.baseUrl}/api/auth/signup');
       print('✅ SignUp Request Data: $requestData');
-      print('✅ SignUp Headers: Content-Type=application/json (NO Authorization)');
+      print(
+          '✅ SignUp Headers: Content-Type=application/json (NO Authorization)');
 
       // Send POST request WITHOUT Authorization header
       final response = await authDio.post(

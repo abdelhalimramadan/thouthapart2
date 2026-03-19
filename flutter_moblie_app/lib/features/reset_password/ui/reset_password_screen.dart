@@ -17,15 +17,14 @@ class ResetPasswordScreen extends StatefulWidget {
 }
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
-  final _formKey               = GlobalKey<FormState>();
-  final _newPassCtrl           = TextEditingController();
-  final _confirmPassCtrl       = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _newPassCtrl = TextEditingController();
+  final _confirmPassCtrl = TextEditingController();
 
-  bool    _obscureNew          = true;
-  bool    _obscureConfirm      = true;
-  bool    _isLoading           = false;
+  bool _obscureNew = true;
+  bool _obscureConfirm = true;
+  bool _isLoading = false;
   String? _errorMessage;
-
 
   @override
   void dispose() {
@@ -53,12 +52,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() { _isLoading = true; _errorMessage = null; });
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     try {
       final result = await PasswordResetService.instance.changePassword(
-        phone:           widget.phone,
-        newPassword:     _newPassCtrl.text,
+        phone: widget.phone,
+        newPassword: _newPassCtrl.text,
         confirmPassword: _confirmPassCtrl.text,
       );
 
@@ -67,7 +69,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       if (result['success'] == true) {
         _showSuccessDialog();
       } else {
-        setState(() => _errorMessage = result['message'] ?? 'فشل تغيير كلمة المرور');
+        setState(
+            () => _errorMessage = result['message'] ?? 'فشل تغيير كلمة المرور');
       }
     } catch (_) {
       if (mounted) setState(() => _errorMessage = 'حدث خطأ غير متوقع');
@@ -78,7 +81,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   void _showSuccessDialog() {
     final width = MediaQuery.of(context).size.width;
-    final fs    = width * 0.04;
+    final fs = width * 0.04;
 
     showDialog(
       context: context,
@@ -86,25 +89,35 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       builder: (_) => Directionality(
         textDirection: TextDirection.rtl,
         child: Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Container(
-            constraints: BoxConstraints(maxWidth: width >= 600 ? 500 : double.infinity),
+            constraints:
+                BoxConstraints(maxWidth: width >= 600 ? 500 : double.infinity),
             padding: EdgeInsets.all(width * 0.06),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+            decoration: BoxDecoration(
+                color: Colors.white, borderRadius: BorderRadius.circular(16)),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.check_circle_rounded, color: Colors.green, size: 80),
+                const Icon(Icons.check_circle_rounded,
+                    color: Colors.green, size: 80),
                 const SizedBox(height: 16),
                 Text(
                   'تم تغيير كلمة المرور!',
-                  style: TextStyle(fontFamily: 'Cairo', fontSize: fs * 1.4, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: fs * 1.4,
+                      fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.',
-                  style: TextStyle(fontFamily: 'Cairo', color: Colors.grey[600], fontSize: fs * 0.875),
+                  style: TextStyle(
+                      fontFamily: 'Cairo',
+                      color: Colors.grey[600],
+                      fontSize: fs * 0.875),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -112,7 +125,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   width: double.infinity,
                   child: AppTextButton(
                     buttonText: 'تسجيل الدخول',
-                    textStyle: TextStyles.font16WhiteSemiBold.copyWith(fontFamily: 'Cairo'),
+                    textStyle: TextStyles.font16WhiteSemiBold
+                        .copyWith(fontFamily: 'Cairo'),
                     onPressed: () {
                       Navigator.of(context).pushNamedAndRemoveUntil(
                         Routes.loginScreen,
@@ -133,7 +147,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final fs    = width * 0.04;
+    final fs = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -142,7 +156,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         children: [
           // Background gradients
           _gradient(const Alignment(-0.7, -0.7), ColorsManager.layerBlur1),
-          _gradient(const Alignment(0.7, 0.7),   ColorsManager.layerBlur2),
+          _gradient(const Alignment(0.7, 0.7), ColorsManager.layerBlur2),
 
           Center(
             child: SingleChildScrollView(
@@ -150,18 +164,20 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 padding: EdgeInsets.all(width * 0.06),
                 child: Container(
                   width: double.infinity,
-                  constraints: BoxConstraints(maxWidth: width >= 600 ? 500 : double.infinity),
+                  constraints: BoxConstraints(
+                      maxWidth: width >= 600 ? 500 : double.infinity),
                   padding: EdgeInsets.all(width * 0.06),
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF2D2D2D) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [BoxShadow(
-                      color: isDark
-                        ? Colors.black.withValues(alpha: 0.3)
-                        : Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4)
-                    )],
+                    boxShadow: [
+                      BoxShadow(
+                          color: isDark
+                              ? Colors.black.withValues(alpha: 0.3)
+                              : Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4))
+                    ],
                   ),
                   child: Directionality(
                     textDirection: TextDirection.rtl,
@@ -211,7 +227,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             controller: _newPassCtrl,
                             hint: 'أدخل كلمة المرور الجديدة',
                             obscure: _obscureNew,
-                            onToggle: () => setState(() => _obscureNew = !_obscureNew),
+                            onToggle: () =>
+                                setState(() => _obscureNew = !_obscureNew),
                             validator: _validateNew,
                           ),
                           const SizedBox(height: 16),
@@ -223,7 +240,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             controller: _confirmPassCtrl,
                             hint: 'أعد إدخال كلمة المرور',
                             obscure: _obscureConfirm,
-                            onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                            onToggle: () => setState(
+                                () => _obscureConfirm = !_obscureConfirm),
                             validator: _validateConfirm,
                           ),
 
@@ -232,18 +250,23 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             const SizedBox(height: 14),
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 10),
                               decoration: BoxDecoration(
                                 color: Colors.red.shade50,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(color: Colors.red.shade200),
                               ),
                               child: Row(children: [
-                                Icon(Icons.error_outline, color: Colors.red.shade600, size: 18),
+                                Icon(Icons.error_outline,
+                                    color: Colors.red.shade600, size: 18),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(_errorMessage!,
-                                      style: TextStyle(color: Colors.red.shade700, fontFamily: 'Cairo', fontSize: fs * 0.8)),
+                                      style: TextStyle(
+                                          color: Colors.red.shade700,
+                                          fontFamily: 'Cairo',
+                                          fontSize: fs * 0.8)),
                                 ),
                               ]),
                             ),
@@ -256,10 +279,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             width: double.infinity,
                             height: 52,
                             child: _isLoading
-                                ? const Center(child: CircularProgressIndicator())
+                                ? const Center(
+                                    child: CircularProgressIndicator())
                                 : AppTextButton(
                                     buttonText: 'تغيير كلمة المرور',
-                                    textStyle: TextStyles.font16WhiteSemiBold.copyWith(fontFamily: 'Cairo'),
+                                    textStyle: TextStyles.font16WhiteSemiBold
+                                        .copyWith(fontFamily: 'Cairo'),
                                     onPressed: _submit,
                                   ),
                           ),
@@ -277,11 +302,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Widget _gradient(Alignment center, Color color) => Container(
-        width: double.infinity, height: double.infinity,
+        width: double.infinity,
+        height: double.infinity,
         decoration: BoxDecoration(
           gradient: RadialGradient(
-            center: center, radius: 1.5,
-            colors: [color.withValues(alpha: 0.4), color.withValues(alpha: 0.1), Colors.transparent],
+            center: center,
+            radius: 1.5,
+            colors: [
+              color.withValues(alpha: 0.4),
+              color.withValues(alpha: 0.1),
+              Colors.transparent
+            ],
             stops: const [0.0, 0.3, 0.8],
           ),
         ),
@@ -298,13 +329,13 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
-        text,
-        style: TextStyles.font14DarkBlueMedium.copyWith(
-          fontFamily: 'Cairo',
-          fontSize: fs * 0.875,
-          color: isDark ? Colors.white : null,
-        ),
-      );
+      text,
+      style: TextStyles.font14DarkBlueMedium.copyWith(
+        fontFamily: 'Cairo',
+        fontSize: fs * 0.875,
+        color: isDark ? Colors.white : null,
+      ),
+    );
   }
 }
 

@@ -597,7 +597,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                   // Format: 18/03/2026
                   displayDate = DateFormat('dd/MM/yyyy').format(dt);
                   // Format: 04:00 مساءً
-                  displayTime = DateFormat('hh:mm a', 'ar').format(dt)
+                  displayTime = DateFormat('hh:mm a', 'ar')
+                      .format(dt)
                       .replaceAll('AM', 'صباحاً')
                       .replaceAll('PM', 'مساءً');
                 } catch (e) {
@@ -615,7 +616,9 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                   _buildBookingCard(
                     context: context,
                     appointmentId: booking['id'] ?? 0,
-                    patientName: '${booking['patientFirstName'] ?? 'مريض'} ${booking['patientLastName'] ?? ''}'.trim(),
+                    patientName:
+                        '${booking['patientFirstName'] ?? 'مريض'} ${booking['patientLastName'] ?? ''}'
+                            .trim(),
                     phone: booking['patientPhoneNumber'] ?? 'غير متوفر',
                     service: booking['categoryName'] ?? 'تخصص عام',
                     time: displayTime,

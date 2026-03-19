@@ -291,43 +291,57 @@ class _ChatScreenState extends State<ChatScreen> {
   /// ابحث عن category_id باستخدام الاسم المترجم
   int? _getCategoryIdByName(String categoryName) {
     try {
+      final normalizedInput = _normalize(categoryName);
       for (var cat in _categories) {
         final name = cat['name']?.toString() ?? '';
         final nameAr = cat['name_ar']?.toString() ?? '';
 
-        if (name.toLowerCase() == categoryName.toLowerCase() ||
-            nameAr.toLowerCase() == categoryName.toLowerCase()) {
+        if (_normalize(name) == normalizedInput ||
+            _normalize(nameAr) == normalizedInput) {
           return cat['id'] as int?;
         }
       }
-    } catch (e) {
-    }
+    } catch (_) {}
     return null;
+  }
+
+  String _normalize(String s) {
+    return s
+        .replaceAll('أ', 'ا')
+        .replaceAll('إ', 'ا')
+        .replaceAll('آ', 'ا')
+        .replaceAll('ة', 'ه')
+        .replaceAll('ى', 'ي')
+        .replaceAll(RegExp(r'[^\u0621-\u064A0-9a-zA-Z]'), '')
+        .toLowerCase();
   }
 
   String _mapToAppCategory(String raw) {
     const map = <String, String>{
-      'تبييض الأسنان': 'تبييض الأسنان',
-      'Teeth Whitening': 'تبييض الأسنان',
-      'زراعة الأسنان': 'زراعة الاسنان',
-      'Dental Implants': 'زراعة الاسنان',
-      'حشوات الأسنان': 'حشو أسنان',
-      'Dental Fillings': 'حشو أسنان',
+      'تبييض الأسنان': 'تنظيف وتبييض الأسنان',
+      'Teeth Whitening': 'تنظيف وتبييض الأسنان',
+      'زراعة الأسنان': 'زراعة الأسنان',
+      'Dental Implants': 'زراعة الأسنان',
+      'حشوات الأسنان': 'حشو تجميلي',
+      'Dental Fillings': 'حشو تجميلي',
       'خلع الأسنان': 'الجراحة والخلع',
       'Tooth Extraction': 'الجراحة والخلع',
       'تيجان الأسنان / التركيبات': 'تيجان وجسور',
       'Dental Crowns / Prosthodontics': 'تيجان وجسور',
-      'تقويم الأسنان': 'تقويم الاسنان',
-      'Braces': 'تقويم الاسنان',
+      'تقويم الأسنان': 'تقويم الأسنان',
+      'Braces': 'تقويم الأسنان',
       'فحص شامل للأسنان': 'فحص شامل',
       'Comprehensive Dental Examination': 'فحص شامل',
       'حشو املجم': 'حشو املجم',
       'حشو عصب': 'حشو عصب',
       'تيجان وجسور': 'تيجان وجسور',
       'تركيبات متحركة': 'تركيبات متحركة',
-      'تنظيف وتبييض': 'تنظيف وتبييض',
-      'الاطفال': 'الاطفال',
+      'تنظيف وتبييض': 'تنظيف وتبييض الأسنان',
+      'الاطفال': 'طب أسنان الأطفال',
       'الجراحة والخلع': 'الجراحة والخلع',
+      'Pediatric': 'طب أسنان الأطفال',
+      'تركيبات ثابتة (تيجان وجسور)': 'تيجان وجسور',
+      'Crowns and Bridges': 'تيجان وجسور',
     };
     return map[raw] ?? map[raw.trim()] ?? raw;
   }

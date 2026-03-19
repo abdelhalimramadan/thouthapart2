@@ -14,9 +14,6 @@ import 'package:flutter/foundation.dart'
 ///   options: DefaultFirebaseOptions.currentPlatform,
 /// );
 
-
-
-
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -82,5 +79,3 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.example.flutterMoblieApp',
   );
 }
-
-

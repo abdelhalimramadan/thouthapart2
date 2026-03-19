@@ -80,7 +80,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
 
     try {
       final result = await _otpService.verifyOtp(widget.contactInfo, pin);
-      
+
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -93,7 +93,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
           setState(() {
             _error = result['error'] ?? 'فشل التحقق من الرمز';
           });
-          
+
           _otpController.clear();
           _focusNode.requestFocus();
         }
@@ -116,7 +116,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
 
     try {
       final result = await _otpService.sendOtp(widget.contactInfo);
-      
+
       if (mounted) {
         setState(() {
           _isResending = false;
@@ -125,10 +125,11 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
         if (result['success']) {
           _startTimer();
           widget.onResend?.call(widget.contactInfo);
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('تم إعادة إرسال رمز التحقق', style: TextStyle(fontFamily: 'Cairo')),
+              content: Text('تم إعادة إرسال رمز التحقق',
+                  style: TextStyle(fontFamily: 'Cairo')),
               backgroundColor: Colors.green,
               duration: Duration(seconds: 2),
             ),
@@ -201,14 +202,12 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
                 width: 72 * (width / 390),
                 height: 72 * (width / 390),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE0F2FE).withValues(alpha: isDark ? 0.1 : 1.0),
+                  color: const Color(0xFFE0F2FE)
+                      .withValues(alpha: isDark ? 0.1 : 1.0),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.mark_email_read_outlined,
-                  size: 32 * (width / 390),
-                  color: const Color(0xFF0B8FAC)
-                ),
+                child: Icon(Icons.mark_email_read_outlined,
+                    size: 32 * (width / 390), color: const Color(0xFF0B8FAC)),
               ),
               const SizedBox(height: 24),
               Text(
@@ -272,68 +271,72 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
 
               const SizedBox(height: 32),
               _isLoading
-                ? SizedBox(
-                    height: 48,
-                    width: 48,
-                    child: Center(
-                      child: CircularProgressIndicator(color: const Color(0xFF0B8FAC)),
-                    ),
-                  )
-                : Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            _resendCountdown > 0
-                                ? "إعادة الإرسال بعد ${_resendCountdown} ثانية"
-                                : "لم يصلك الرمز؟",
+                  ? SizedBox(
+                      height: 48,
+                      width: 48,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                            color: const Color(0xFF0B8FAC)),
+                      ),
+                    )
+                  : Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _resendCountdown > 0
+                                  ? "إعادة الإرسال بعد ${_resendCountdown} ثانية"
+                                  : "لم يصلك الرمز؟",
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: baseFontSize * 0.875, // 14
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : const Color(0xFF64748B),
+                              ),
+                            ),
+                            if (_resendCountdown == 0)
+                              _isResending
+                                  ? const Padding(
+                                      padding: EdgeInsets.only(right: 8),
+                                      child: SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Color(0xFF0B8FAC),
+                                        ),
+                                      ),
+                                    )
+                                  : TextButton(
+                                      onPressed: _resendOtp,
+                                      child: const Text(
+                                        "إعادة الإرسال",
+                                        style: TextStyle(
+                                          fontFamily: 'Cairo',
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF0B8FAC),
+                                        ),
+                                      ),
+                                    ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            "إلغاء",
                             style: TextStyle(
                               fontFamily: 'Cairo',
-                              fontSize: baseFontSize * 0.875, // 14
-                              color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                              fontSize: baseFontSize * 0.875,
+                              color:
+                                  isDark ? Colors.grey[500] : Colors.grey[600],
                             ),
                           ),
-                          if (_resendCountdown == 0)
-                            _isResending
-                                ? const Padding(
-                                    padding: EdgeInsets.only(right: 8),
-                                    child: SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Color(0xFF0B8FAC),
-                                      ),
-                                    ),
-                                  )
-                                : TextButton(
-                                    onPressed: _resendOtp,
-                                    child: const Text(
-                                      "إعادة الإرسال",
-                                      style: TextStyle(
-                                        fontFamily: 'Cairo',
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF0B8FAC),
-                                      ),
-                                    ),
-                                  ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          "إلغاء",
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: baseFontSize * 0.875,
-                            color: isDark ? Colors.grey[500] : Colors.grey[600],
-                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
             ],
           ),
         ),

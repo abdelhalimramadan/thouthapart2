@@ -7,10 +7,12 @@ class DoctorBookingRecordsScreen extends StatefulWidget {
   const DoctorBookingRecordsScreen({super.key});
 
   @override
-  State<DoctorBookingRecordsScreen> createState() => _DoctorBookingRecordsScreenState();
+  State<DoctorBookingRecordsScreen> createState() =>
+      _DoctorBookingRecordsScreenState();
 }
 
-class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen> {
+class _DoctorBookingRecordsScreenState
+    extends State<DoctorBookingRecordsScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -71,35 +73,38 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
                   NotificationHelper.hasUnreadNotifications = false;
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const NotificationsScreen()),
                   ).then((_) {
                     if (mounted) setState(() {});
                   });
                 },
               ),
               if (NotificationHelper.getUnreadCount() > 0)
-              Positioned(
-                right: 8,
-                top: 10,
-                child: Container(
-                  width: 16 * (width / 390),
-                  height: 16 * (width / 390),
-                  decoration: BoxDecoration(
-                    color: colorScheme.error,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      NotificationHelper.getUnreadCount() > 9 ? '9+' : '${NotificationHelper.getUnreadCount()}',
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onError,
-                        fontSize: baseFontSize * 0.625, // 10
-                        fontWeight: FontWeight.bold,
+                Positioned(
+                  right: 8,
+                  top: 10,
+                  child: Container(
+                    width: 16 * (width / 390),
+                    height: 16 * (width / 390),
+                    decoration: BoxDecoration(
+                      color: colorScheme.error,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        NotificationHelper.getUnreadCount() > 9
+                            ? '9+'
+                            : '${NotificationHelper.getUnreadCount()}',
+                        style: textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onError,
+                          fontSize: baseFontSize * 0.625, // 10
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
           const SizedBox(width: 8),
@@ -183,7 +188,8 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
                 ],
               ),
               const SizedBox(height: 20),
-              Divider(color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
+              Divider(
+                  color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
               const SizedBox(height: 12),
               _buildDetailRow(
                 context: context,
@@ -305,7 +311,8 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
         decoration: BoxDecoration(
           color: theme.cardTheme.color ?? colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
+          border: Border.all(
+              color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
           boxShadow: [
             BoxShadow(
               color: isDark
@@ -372,7 +379,8 @@ class _DoctorBookingRecordsScreenState extends State<DoctorBookingRecordsScreen>
     );
   }
 
-  Widget _buildMainContent(BuildContext context, double width, double height, double baseFontSize) {
+  Widget _buildMainContent(
+      BuildContext context, double width, double height, double baseFontSize) {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
