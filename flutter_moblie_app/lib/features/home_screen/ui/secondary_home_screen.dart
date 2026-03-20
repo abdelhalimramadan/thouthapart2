@@ -239,8 +239,8 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
   final Map<String, String> _categoryAssets = {
     'فحص شامل': 'assets/svg/فحص شامل.svg',
     'حشو أسنان': 'assets/svg/حشو اسنان.svg',
-    'حشو تجميلي': 'assets/svg/حشو اسنان.svg',
-    'حشو املجم': 'assets/svg/حشو اسنان.svg',
+    'حشو تجميلي': 'assets/svg/تجميلي.svg',
+    'حشو املجم': 'assets/svg/املغم.svg',
     'حشو عصب': 'assets/svg/حشو اسنان.svg',
     'زراعة أسنان': 'assets/svg/زراعه اسنان.svg',
     'زراعة الأسنان': 'assets/svg/زراعه اسنان.svg',
@@ -252,7 +252,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
     'تيجان وجسور': 'assets/images/تيجان وجسور.webp',
     'تركيبات الأسنان': 'assets/svg/تركيبات اسنان.svg',
     'تركيبات متحركة': 'assets/svg/تركيبات اسنان.svg',
-    'الاطفال': 'assets/svg/اطفال2.svg',
+    'طب أسنان الأطفال': 'assets/svg/اطفال2.svg',
   };
 
   Future<void> _handleCategoryTap({
@@ -302,24 +302,33 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final svgFiles = [
-      'فحص شامل.svg',
-      'حشو اسنان.svg',
-      'زراعه اسنان.svg',
-      'خلع اسنان.svg',
-      'تبيض اسنان.svg',
-      'تقويم اسنان.svg',
-      'تركيبات اسنان.svg',
+      'حشو املغم.svg',
+      'حشو عصب .svg',
+      'حشو تجميلي.svg',
+      'زراعه الأسنان.svg',
+      'الجراحة وخلع .svg',
+      'تنظيف وتبييض الأسنان .svg',
+      'تقويم الأسنان.svg',
+      'تركيبات متحركة.svg',
+      'تيجان وجسور.svg',
+      'طب أسنان الأطفال.svg',
+
     ];
 
     final categoryNames = [
-      'فحص شامل',
-      'حشو أسنان',
-      'زراعة أسنان',
-      'خلع الأسنان',
-      'تبييض الأسنان',
+      'حشو املغم',
+      'حشو عصب',
+      'حشو تجميلي',
+      'زراعة الأسنان',
+      'الجراحة والخلع ',
+      'تنظيف وتبييض الأسنان',
       'تقويم الأسنان',
-      'تركيبات الأسنان',
+      'تركيبات  متحركة',
+      'تيجان وجسور',
+      'طب أسنان الأطفال',
+
     ];
+
 
     final fileName =
         index < svgFiles.length ? svgFiles[index] : 'placeholder.svg';
