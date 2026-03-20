@@ -86,24 +86,31 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final svgFiles = [
-      'فحص شامل.svg',
-      'حشو اسنان.svg',
-      'زراعه اسنان.svg',
-      'خلع اسنان.svg',
-      'تبيض اسنان.svg',
-      'تقويم اسنان.svg',
-      'تركيبات اسنان.svg',
+      'حشو املغم.svg',
+      'حشو عصب .svg',
+      'حشو تجميلي.svg',
+      'زراعه الأسنان.svg',
+      'الجراحة وخلع .svg',
+      'تنظيف وتبييض الأسنان .svg',
+      'تقويم الأسنان.svg',
+      'تركيبات متحركة.svg',
+      'تيجان وجسور.svg',
+      'طب أسنان الأطفال.svg',
 
     ];
 
     final categoryNames = [
-      'فحص شامل',
-      'حشو أسنان',
-      'زراعة أسنان',
-      'خلع الأسنان',
-      'تبييض الأسنان',
+      'حشو املغم',
+      'حشو عصب',
+      'حشو تجميلي',
+      'زراعة الأسنان',
+      'الجراحة والخلع ',
+      'تنظيف وتبييض الأسنان',
       'تقويم الأسنان',
-      'تركيبات الأسنان',
+      'تركيبات  متحركة',
+      'تيجان وجسور',
+ 'طب أسنان الأطفال',
+
     ];
 
     final fileName =
@@ -148,12 +155,12 @@ class _HomeScreenState extends State<HomeScreen> {
             if (resolvedAssetPath.endsWith('.svg'))
               SvgPicture.asset(
                 resolvedAssetPath,
-                width: 64 * (width / 390),
-                height: 64 * (width / 390),
+                width: 70 * (width / 390),
+                height: 70 * (width / 390),
                 fit: BoxFit.contain,
                 placeholderBuilder: (BuildContext context) => Container(
-                  width: 64,
-                  height: 64,
+                  width: 70,
+                  height: 70,
                   color: isDark ? Colors.grey[800] : Colors.grey[200],
                   child: const Icon(Icons.image, size: 32, color: Colors.grey),
                 ),
