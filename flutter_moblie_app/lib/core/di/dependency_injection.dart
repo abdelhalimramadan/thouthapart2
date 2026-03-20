@@ -7,8 +7,6 @@ import 'package:thotha_mobile_app/features/notifications/data/repos/notification
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/repos/profile_repository.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/profile_cubit.dart';
 import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/my_requests_cubit.dart';
-import 'package:thotha_mobile_app/features/chat/data/chat_repo.dart';
-import 'package:thotha_mobile_app/features/chat/logic/chat_cubit.dart';
 
 final getIt = GetIt.instance;
 
@@ -29,9 +27,6 @@ Future<void> setupGetIt() async {
   getIt.registerLazySingleton<ProfileRepository>(
     () => ProfileRepository(),
   );
-  getIt.registerLazySingleton<ChatRepo>(
-    () => ChatRepo(getIt()),
-  );
 
   // Cubits
   getIt.registerFactory<DoctorCubit>(
@@ -42,8 +37,5 @@ Future<void> setupGetIt() async {
   );
   getIt.registerFactory<MyRequestsCubit>(
     () => MyRequestsCubit(getIt()),
-  );
-  getIt.registerFactory<ChatCubit>(
-    () => ChatCubit(getIt()),
   );
 }
