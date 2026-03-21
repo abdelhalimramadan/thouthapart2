@@ -8,8 +8,18 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+import java.util.Properties
+import java.io.FileInputStream
+
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+}
+
+// Load signing configuration from key.properties
+val keystorePropertiesFile = rootProject.file("key.properties")
+val keystoreProperties = Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -38,11 +48,36 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = if (keystoreProperties.isEmpty) {
+                file("release-key.jks")
+            } else {
+                file(keystoreProperties.getProperty("storeFile"))
+            }
+            storePassword = if (keystoreProperties.isEmpty) {
+                "android"
+            } else {
+                keystoreProperties.getProperty("storePassword")
+            }
+            keyAlias = if (keystoreProperties.isEmpty) {
+                "release"
+            } else {
+                keystoreProperties.getProperty("keyAlias")
+            }
+            keyPassword = if (keystoreProperties.isEmpty) {
+                "android"
+            } else {
+                keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so \lutter run --release\ works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }
