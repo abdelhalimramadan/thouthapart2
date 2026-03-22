@@ -526,26 +526,6 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
               ),
             ],
 
-            // Phone
-            if (req.doctorPhoneNumber.isNotEmpty) ...[
-              SizedBox(height: 5.h),
-              Row(
-                children: [
-                  Icon(Icons.phone_outlined,
-                      size: 15.r, color: Colors.grey[500]),
-                  SizedBox(width: 4.w),
-                  Text(
-                    req.doctorPhoneNumber,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 13.sp,
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-
             // Description
             if (req.description.isNotEmpty &&
                 req.description != 'No details') ...[
