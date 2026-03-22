@@ -23,7 +23,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.flutter_moblie_app"
+    namespace = "com.thoutha.mobile"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -39,7 +39,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.flutter_moblie_app"
+        applicationId = "com.thoutha.mobile"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -50,26 +50,10 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = if (keystoreProperties.isEmpty) {
-                file("release-key.jks")
-            } else {
-                file(keystoreProperties.getProperty("storeFile"))
-            }
-            storePassword = if (keystoreProperties.isEmpty) {
-                "android"
-            } else {
-                keystoreProperties.getProperty("storePassword")
-            }
-            keyAlias = if (keystoreProperties.isEmpty) {
-                "release"
-            } else {
-                keystoreProperties.getProperty("keyAlias")
-            }
-            keyPassword = if (keystoreProperties.isEmpty) {
-                "android"
-            } else {
-                keystoreProperties.getProperty("keyPassword")
-            }
+            keyAlias = keystoreProperties.getProperty("keyAlias", "thoutha")
+            keyPassword = keystoreProperties.getProperty("keyPassword", "thoutha_release_2024")
+            storeFile = file(keystoreProperties.getProperty("storeFile", "release-key.jks"))
+            storePassword = keystoreProperties.getProperty("storePassword", "thoutha_release_2024")
         }
     }
 
@@ -78,6 +62,9 @@ android {
             signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             isShrinkResources = false
+            ndk {
+                debugSymbolLevel = "none"
+            }
         }
     }
 }

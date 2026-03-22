@@ -7,7 +7,7 @@ void main() {
   testWidgets('App should load successfully', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(DocApp(
-      appRouter: A+ppRouter(),
+      appRouter: AppRouter(),
     ));
 
     // Verify that the app starts up and displays the initial route
