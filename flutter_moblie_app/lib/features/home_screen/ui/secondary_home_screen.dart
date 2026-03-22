@@ -239,11 +239,20 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
   final Map<String, String> _categoryAssets = {
     'فحص شامل': 'assets/svg/فحص شامل.svg',
     'حشو أسنان': 'assets/svg/حشو اسنان.svg',
+    'حشو تجميلي': 'assets/svg/تجميلي.svg',
+    'حشو املجم': 'assets/svg/املغم.svg',
+    'حشو عصب': 'assets/svg/حشو اسنان.svg',
     'زراعة أسنان': 'assets/svg/زراعه اسنان.svg',
+    'زراعة الأسنان': 'assets/svg/زراعه اسنان.svg',
     'خلع الأسنان': 'assets/svg/خلع اسنان.svg',
+    'الجراحة والخلع': 'assets/svg/خلع اسنان.svg',
     'تبييض الأسنان': 'assets/svg/تبيض اسنان.svg',
+    'تنظيف وتبييض الأسنان': 'assets/svg/تبيض اسنان.svg',
     'تقويم الأسنان': 'assets/svg/تقويم اسنان.svg',
+    'تيجان وجسور': 'assets/images/تيجان وجسور.webp',
     'تركيبات الأسنان': 'assets/svg/تركيبات اسنان.svg',
+    'تركيبات متحركة': 'assets/svg/تركيبات اسنان.svg',
+    'طب أسنان الأطفال': 'assets/svg/اطفال2.svg',
   };
 
   Future<void> _handleCategoryTap({
@@ -293,24 +302,33 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final svgFiles = [
-      'فحص شامل.svg',
-      'حشو اسنان.svg',
-      'زراعه اسنان.svg',
-      'خلع اسنان.svg',
-      'تبيض اسنان.svg',
-      'تقويم اسنان.svg',
-      'تركيبات اسنان.svg',
+      'حشو املغم.svg',
+      'حشو عصب .svg',
+      'حشو تجميلي.svg',
+      'زراعه الأسنان.svg',
+      'الجراحة وخلع .svg',
+      'تنظيف وتبييض الأسنان .svg',
+      'تقويم الأسنان.svg',
+      'تركيبات متحركة.svg',
+      'تيجان وجسور.svg',
+      'طب أسنان الأطفال.svg',
+
     ];
 
     final categoryNames = [
-      'فحص شامل',
-      'حشو أسنان',
-      'زراعة أسنان',
-      'خلع الأسنان',
-      'تبييض الأسنان',
+      'حشو املغم',
+      'حشو عصب',
+      'حشو تجميلي',
+      'زراعة الأسنان',
+      'الجراحة والخلع ',
+      'تنظيف وتبييض الأسنان',
       'تقويم الأسنان',
-      'تركيبات الأسنان',
+      'تركيبات  متحركة',
+      'تيجان وجسور',
+      'طب أسنان الأطفال',
+
     ];
+
 
     final fileName =
         index < svgFiles.length ? svgFiles[index] : 'placeholder.svg';
@@ -350,18 +368,33 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SvgPicture.asset(
-              resolvedAssetPath,
-              width: 48 * (width / 390),
-              height: 48 * (width / 390),
-              fit: BoxFit.contain,
-              placeholderBuilder: (BuildContext context) => Container(
-                width: 48,
-                height: 48,
-                color: isDark ? Colors.grey[800] : Colors.grey[200],
-                child: const Icon(Icons.image, size: 24, color: Colors.grey),
+            // Display image based on file type
+            if (resolvedAssetPath.endsWith('.svg'))
+              SvgPicture.asset(
+                resolvedAssetPath,
+                width: 64 * (width / 390),
+                height: 64 * (width / 390),
+                fit: BoxFit.contain,
+                placeholderBuilder: (BuildContext context) => Container(
+                  width: 64,
+                  height: 64,
+                  color: isDark ? Colors.grey[800] : Colors.grey[200],
+                  child: const Icon(Icons.image, size: 32, color: Colors.grey),
+                ),
+              )
+            else
+              Image.asset(
+                resolvedAssetPath,
+                width: 64 * (width / 390),
+                height: 64 * (width / 390),
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  width: 64,
+                  height: 64,
+                  color: isDark ? Colors.grey[800] : Colors.grey[200],
+                  child: const Icon(Icons.image, size: 32, color: Colors.grey),
+                ),
               ),
-            ),
             const SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
