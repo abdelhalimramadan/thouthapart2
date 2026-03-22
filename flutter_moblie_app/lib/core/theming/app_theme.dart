@@ -243,6 +243,20 @@ class AppTheme {
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: primaryColor,
       ),
+
+      // SnackBar Theme
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: const Color(0xFF323232),
+        contentTextStyle: const TextStyle(
+          fontFamily: 'Cairo',
+          color: Colors.white,
+          fontSize: 14,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
     );
   }
 
@@ -479,6 +493,20 @@ class AppTheme {
       // Progress Indicator Theme
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: primaryColor,
+      ),
+
+      // SnackBar Theme
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: Colors.white,
+        contentTextStyle: const TextStyle(
+          fontFamily: 'Cairo',
+          color: Color(0xFF0A0A0A),
+          fontSize: 14,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
     );
   }

@@ -334,11 +334,13 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
             Container(
               height: topPad + 160,
               padding: EdgeInsets.only(top: topPad),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
-                  colors: [_cCyan, _cGreen],
+                  colors: isDark 
+                      ? [_cCyan.withAlpha(200), _cGreen.withAlpha(200)] 
+                      : [_cCyan, _cGreen],
                 ),
               ),
               child: Column(

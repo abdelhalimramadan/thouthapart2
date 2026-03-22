@@ -47,7 +47,7 @@ class MyRequestsView extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon:
-              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+              Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 24.r),
           onPressed: () {
             Navigator.pushReplacement(
               context,
@@ -132,7 +132,7 @@ class MyRequestsView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.assignment_late_outlined,
-              size: 80.sp, color: Colors.grey.withOpacity(0.5)),
+              size: 80.r, color: Colors.grey.withOpacity(0.5)),
           SizedBox(height: 16.h),
           Text(
             'لا توجد طلبات حالياً',
@@ -180,7 +180,7 @@ class MyRequestsView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.error_outline_rounded,
-                size: 60.sp, color: Colors.red.shade400),
+                size: 60.r, color: Colors.red.shade400),
             SizedBox(height: 16.h),
             Text(
               'حدث خطأ ما',
@@ -234,8 +234,8 @@ class _RequestCard extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 10.r,
+            offset: Offset(0, 4.h),
           ),
         ],
       ),
@@ -258,7 +258,7 @@ class _RequestCard extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(Icons.medical_services_outlined,
-                      color: Colors.white, size: 20.sp),
+                      color: Colors.white, size: 20.r),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
@@ -356,7 +356,7 @@ class _RequestCard extends StatelessWidget {
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () => _navigateToEdit(context, request),
-                          icon: const Icon(Icons.edit_note_rounded, size: 20),
+                          icon: Icon(Icons.edit_note_rounded, size: 20.r),
                           label: const Text('تعديل الطلب',
                               style: TextStyle(
                                   fontFamily: 'Cairo',
@@ -374,8 +374,8 @@ class _RequestCard extends StatelessWidget {
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () => _showDeleteDialog(context, request),
-                          icon: const Icon(Icons.delete_sweep_rounded,
-                              size: 20, color: Colors.white),
+                          icon: Icon(Icons.delete_sweep_rounded,
+                              size: 20.r, color: Colors.white),
                           label: const Text('حذف الطلب',
                               style: TextStyle(
                                   fontFamily: 'Cairo',
@@ -404,7 +404,7 @@ class _RequestCard extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16.sp, color: ColorsManager.mainBlue),
+        Icon(icon, size: 16.r, color: ColorsManager.mainBlue),
         SizedBox(width: 4.w),
         Text(
           text,
@@ -425,7 +425,7 @@ class _RequestCard extends StatelessWidget {
         Row(
           children: [
             Icon(icon,
-                size: 14.sp, color: ColorsManager.mainBlue.withOpacity(0.7)),
+                size: 14.r, color: ColorsManager.mainBlue.withOpacity(0.7)),
             SizedBox(width: 4.w),
             Text(label,
                 style: TextStyle(

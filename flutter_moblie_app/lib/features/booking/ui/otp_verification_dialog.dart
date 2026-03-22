@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pinput/pinput.dart';
 import 'package:thotha_mobile_app/core/networking/otp_service.dart';
 
@@ -152,85 +153,82 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final baseFontSize = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Pin Theme
     final defaultPinTheme = PinTheme(
-      width: width > 600 ? 56 : (width - 80) / 6,
-      height: 60 * (width / 390),
+      width: 1.sw > 600 ? 56.w : (1.sw - 80.w) / 6,
+      height: 60.h,
       textStyle: TextStyle(
-        fontSize: baseFontSize * 1.375, // 22
+        fontSize: 22.sp,
         color: isDark ? Colors.white : const Color(0xFF1E293B),
         fontWeight: FontWeight.w600,
       ),
       decoration: BoxDecoration(
         color: isDark ? Colors.grey[800] : const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: Colors.transparent),
       ),
     );
 
     final focusedPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
-        border: Border.all(color: const Color(0xFF0B8FAC), width: 2),
+        border: Border.all(color: const Color(0xFF0B8FAC), width: 2.w),
         color: isDark ? Colors.black : const Color(0xFFFFFFFF),
       ),
     );
 
     final errorPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
-        border: Border.all(color: Colors.redAccent, width: 2),
+        border: Border.all(color: Colors.redAccent, width: 2.w),
         color: isDark ? const Color(0xFF451A1A) : const Color(0xFFFEF2F2),
       ),
     );
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
       backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-      insetPadding: const EdgeInsets.all(20),
+      insetPadding: EdgeInsets.all(20.r),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(24.r),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               // Header Icon
               Container(
-                width: 72 * (width / 390),
-                height: 72 * (width / 390),
+                width: 72.w,
+                height: 72.h,
                 decoration: BoxDecoration(
                   color: const Color(0xFFE0F2FE)
                       .withValues(alpha: isDark ? 0.1 : 1.0),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.mark_email_read_outlined,
-                    size: 32 * (width / 390), color: const Color(0xFF0B8FAC)),
+                    size: 32.r, color: const Color(0xFF0B8FAC)),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
               Text(
                 widget.isEmail ? "تأكيد البريد الإلكتروني" : "تأكيد رقم الهاتف",
                 style: TextStyle(
                   fontFamily: 'Cairo',
-                  fontSize: baseFontSize * 1.25, // 20
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.w700,
                   color: isDark ? Colors.white : const Color(0xFF1E293B),
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text(
                 "أدخل رمز التحقق المرسل إلى\n${widget.contactInfo}",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Cairo',
-                  fontSize: baseFontSize * 0.875, // 14
+                  fontSize: 14.sp,
                   color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
 
               Directionality(
                 textDirection: TextDirection.ltr,
@@ -258,25 +256,25 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
 
               if (_error != null)
                 Padding(
-                  padding: const EdgeInsets.only(top: 16),
+                  padding: EdgeInsets.only(top: 16.h),
                   child: Text(
                     _error!,
                     style: TextStyle(
                       fontFamily: 'Cairo',
                       color: Colors.redAccent,
-                      fontSize: baseFontSize * 0.875, // 14
+                      fontSize: 14.sp,
                     ),
                   ),
                 ),
 
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
               _isLoading
                   ? SizedBox(
-                      height: 48,
-                      width: 48,
-                      child: Center(
+                      height: 48.h,
+                      width: 48.w,
+                      child: const Center(
                         child: CircularProgressIndicator(
-                            color: const Color(0xFF0B8FAC)),
+                            color: Color(0xFF0B8FAC)),
                       ),
                     )
                   : Column(
@@ -290,7 +288,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
                                   : "لم يصلك الرمز؟",
                               style: TextStyle(
                                 fontFamily: 'Cairo',
-                                fontSize: baseFontSize * 0.875, // 14
+                                fontSize: 14.sp,
                                 color: isDark
                                     ? Colors.grey[400]
                                     : const Color(0xFF64748B),
@@ -298,12 +296,12 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
                             ),
                             if (_resendCountdown == 0)
                               _isResending
-                                  ? const Padding(
-                                      padding: EdgeInsets.only(right: 8),
+                                  ? Padding(
+                                      padding: EdgeInsets.only(right: 8.w),
                                       child: SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
+                                        width: 16.w,
+                                        height: 16.h,
+                                        child: const CircularProgressIndicator(
                                           strokeWidth: 2,
                                           color: Color(0xFF0B8FAC),
                                         ),
@@ -322,14 +320,14 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
                                     ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16.h),
                         TextButton(
                           onPressed: () => Navigator.pop(context),
                           child: Text(
                             "إلغاء",
                             style: TextStyle(
                               fontFamily: 'Cairo',
-                              fontSize: baseFontSize * 0.875,
+                              fontSize: 14.sp,
                               color:
                                   isDark ? Colors.grey[500] : Colors.grey[600],
                             ),

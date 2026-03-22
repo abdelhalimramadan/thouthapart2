@@ -26,13 +26,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           'في ثوثة جمعنا أفضل طلاب وأطباء الأسنان عشان نقدم لك رعاية حقيقية بأسعار طلابية. ابتسامتك في أيد أمينة، مع نخبة من أمهر الأطباء الشباب.',
     },
     {
-      'image': 'assets/images/2-inboarding.jpg',
+      'image': 'assets/images/on boarding 2.jpg',
       'title': 'احجز موعدك بسهولة',
       'description':
           'اختار الموعد المناسب لك واحجز مع طبيبك المفضل في ثواني. خدمة حجز المواعديد لدينا سهلة وسريعة وآمنة.',
     },
     {
-      'image': 'assets/images/3-onboarding.jpg',
+      'image': 'assets/images/onbourding3.jpg',
       'title': 'متابعة دقيقة لصحة أسنانك',
       'description':
           'احصل على سجل كامل لعلاجاتك ومواعيدك القادمة. نحن نهتم بابتسامتك من أول زيارة.',
@@ -66,14 +66,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               height: double.infinity,
               decoration: BoxDecoration(
                 gradient: RadialGradient(
-                  center: Alignment(-0.7, -0.7),
-                  radius: 1.5,
+                  center: const Alignment(-0.8, -0.5),
+                  radius: 1.2,
                   colors: [
-                    ColorsManager.layerBlur1.withAlpha(102),
-                    ColorsManager.layerBlur1.withAlpha(25),
+                    ColorsManager.layerBlur1.withAlpha(80),
+                    ColorsManager.layerBlur1.withAlpha(30),
                     Colors.transparent,
                   ],
-                  stops: const [0.1, 0.5, 0.8],
+                  stops: const [0.0, 0.4, 1.0],
                 ),
               ),
             ),
@@ -83,14 +83,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               height: double.infinity,
               decoration: BoxDecoration(
                 gradient: RadialGradient(
-                  center: Alignment(0.7, 0.7),
-                  radius: 1.5,
+                  center: const Alignment(0.8, 0.5),
+                  radius: 1.2,
                   colors: [
-                    ColorsManager.layerBlur2.withAlpha(102),
-                    ColorsManager.layerBlur2.withAlpha(25),
+                    ColorsManager.layerBlur2.withAlpha(80),
+                    ColorsManager.layerBlur2.withAlpha(30),
                     Colors.transparent,
                   ],
-                  stops: const [0.1, 0.5, 0.8],
+                  stops: const [0.0, 0.4, 1.0],
                 ),
               ),
             ),
@@ -109,16 +109,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               },
             ),
 
-            // Page Indicator
-            Positioned(
-              bottom: 120.h,
-              left: 0,
-              right: 0,
-              child: PageIndicator(
-                currentPage: _currentPage,
-                pageCount: _numPages,
-              ),
-            ),
 
             // Action Buttons Container
             Positioned(
@@ -135,8 +125,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       onPressed: () async {
                         if (_currentPage < _numPages - 1) {
                           await _pageController.nextPage(
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.ease,
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut,
                           );
                         } else {
                           if (mounted) {

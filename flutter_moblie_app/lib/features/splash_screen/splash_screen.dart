@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theming/colors.dart';
 import '../../core/helpers/notification_permission_helper.dart';
@@ -179,9 +180,6 @@ class _SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver
     required String content,
     required VoidCallback onPressed,
   }) {
-    final width = MediaQuery.of(context).size.width;
-    final baseFontSize = width * 0.04;
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -191,7 +189,7 @@ class _SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver
           style: TextStyle(
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
-            fontSize: baseFontSize * 1.125, // 18sp
+            fontSize: 18.sp,
           ),
           textAlign: TextAlign.right,
           textDirection: TextDirection.rtl,
@@ -200,7 +198,7 @@ class _SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver
           content,
           style: TextStyle(
             fontFamily: 'Cairo',
-            fontSize: baseFontSize * 0.875, // 14sp
+            fontSize: 14.sp,
           ),
           textAlign: TextAlign.right,
           textDirection: TextDirection.rtl,
@@ -214,7 +212,7 @@ class _SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.bold,
                 color: ColorsManager.mainBlue,
-                fontSize: baseFontSize,
+                fontSize: 16.sp,
               ),
             ),
           ),
@@ -225,10 +223,6 @@ class _SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final baseFontSize = width * 0.04;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -271,16 +265,16 @@ class _SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver
               children: [
                 Image.asset(
                   'assets/images/splash-logo.png',
-                  width: 200 * (width / 390),
-                  height: 200 * (width / 390),
+                  width: 200.w,
+                  height: 200.h,
                   fit: BoxFit.contain,
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
                 Text(
                   'رعاية ذكية، لمسة طبية',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: baseFontSize * 1.75, // 28sp
+                    fontSize: 28.sp,
                     fontWeight: FontWeight.bold,
                     color: ColorsManager.fontColor,
                     fontFamily: 'Cairo',

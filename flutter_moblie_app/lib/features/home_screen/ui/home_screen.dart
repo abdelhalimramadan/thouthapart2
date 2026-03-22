@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
@@ -11,13 +12,17 @@ import 'package:thotha_mobile_app/features/home_screen/logic/doctor_state.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
+
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, this.drawer = const HomeDrawer(), this.showAddCaseCategory = false});
+  const HomeScreen(
+      {super.key, this.drawer = const HomeDrawer(), this.showAddCaseCategory = false});
   final Widget drawer;
   final bool showAddCaseCategory;
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
+
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
@@ -26,8 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int? _selectedCityId;
   // All candidate strings returned by Nominatim (state, county, city, etc.)
   List<String> _gpsNameCandidates = [];
-  bool _gpsFinished =
-      false; // true once GPS attempt completes (success or fail)
+  bool _gpsFinished = false; // true once GPS attempt completes (success or fail)
   bool _autoSelectApplied = false;
   bool _isLoggedIn = false;
   bool _isDetecting = false;
@@ -55,21 +59,27 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_categoryAssets.containsKey(categoryName)) {
       return _categoryAssets[categoryName]!;
     }
-    
+
     // Check for partial matches
     if (categoryName.contains('فحص')) return 'assets/svg/فحص شامل.svg';
-    if (categoryName.contains('املجم') || categoryName.contains('amalgam')) return 'assets/svg/املغم.svg';
+    if (categoryName.contains('املجم') || categoryName.contains('amalgam'))
+      return 'assets/svg/املغم.svg';
     if (categoryName.contains('عصب')) return 'assets/svg/حشو اسنان.svg';
     if (categoryName.contains('تجميلي')) return 'assets/svg/تجميلي.svg';
     if (categoryName.contains('زراعة')) return 'assets/svg/زراعه اسنان.svg';
-    if (categoryName.contains('خلع') || categoryName.contains('جراحة')) return 'assets/svg/خلع اسنان.svg';
-    if (categoryName.contains('تنظيف') || categoryName.contains('تبييض')) return 'assets/svg/تبيض اسنان.svg';
+    if (categoryName.contains('خلع') || categoryName.contains('جراحة'))
+      return 'assets/svg/خلع اسنان.svg';
+    if (categoryName.contains('تنظيف') || categoryName.contains('تبييض'))
+      return 'assets/svg/تبيض اسنان.svg';
     if (categoryName.contains('تقويم')) return 'assets/svg/تقويم اسنان.svg';
-    if (categoryName.contains('تركيبات') && categoryName.contains('متحركة')) return 'assets/svg/تركيبات اسنان.svg';
+    if (categoryName.contains('تركيبات') && categoryName.contains('متحركة'))
+      return 'assets/svg/تركيبات اسنان.svg';
     if (categoryName.contains('تركيبات')) return 'assets/svg/تركيبات اسنان.svg';
-    if (categoryName.contains('تيجان') || categoryName.contains('جسور')) return 'assets/images/تيجان وجسور.webp';
-    if (categoryName.contains('اطفال') || categoryName.contains('pediatric')) return 'assets/svg/اطفال2.svg';
-    
+    if (categoryName.contains('تيجان') || categoryName.contains('جسور'))
+      return 'assets/images/تيجان وجسور.webp';
+    if (categoryName.contains('اطفال') || categoryName.contains('pediatric'))
+      return 'assets/svg/اطفال2.svg';
+
     // Default fallback
     return 'assets/svg/فحص شامل.svg';
   }
@@ -94,13 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSquareCategory(
-      String assetPath, 
-      int index, 
-      String categoryName,
-      double width,
-      double height,
-      double baseFontSize,
+  Widget _buildSquareCategory(String assetPath, int index, String categoryName,
       {int? categoryId, String? cityName}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -148,19 +152,21 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
       child: Container(
-        margin: const EdgeInsets.all(5),
+        margin: EdgeInsets.all(5.r),
         decoration: BoxDecoration(
           color: Theme.of(context).cardTheme.color,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
             color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
-            width: 1,
+            width: 1.w,
           ),
           boxShadow: [
             BoxShadow(
-              color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.grey.withValues(alpha: 0.1),
+              blurRadius: 4.r,
+              offset: Offset(0, 2.h),
             ),
           ],
         ),
@@ -171,34 +177,34 @@ class _HomeScreenState extends State<HomeScreen> {
             if (resolvedAssetPath.endsWith('.svg')) ...[
               SvgPicture.asset(
                 resolvedAssetPath,
-                width: 68 * (width / 390),
-                height: 68 * (width / 390),
+                width: 68.w,
+                height: 68.h,
                 fit: BoxFit.contain,
                 placeholderBuilder: (BuildContext context) => Container(
-                  width: 68,
-                  height: 68,
+                  width: 68.w,
+                  height: 68.h,
                   color: isDark ? Colors.grey[800] : Colors.grey[200],
-                  child: const Icon(Icons.image, size: 24, color: Colors.grey),
+                  child: Icon(Icons.image, size: 24.r, color: Colors.grey),
                 ),
               ),
             ] else ...[
               Image.asset(
                 resolvedAssetPath,
-                width: 68 * (width / 390),
-                height: 68 * (width / 390),
+                width: 68.w,
+                height: 68.h,
                 fit: BoxFit.contain,
               ),
             ],
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: EdgeInsets.symmetric(horizontal: 8.w),
               child: Text(
                 resolvedCategoryName,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontFamily: 'Cairo',
                       fontWeight: FontWeight.w600,
-                      fontSize: baseFontSize * 0.875, // 14sp
+                      fontSize: 14.sp,
                       height: 1.2,
                     ),
                 maxLines: 2,
@@ -213,6 +219,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -363,7 +371,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final candidates = <String>[];
       const addressKeys = [
-        'state', 'county', 'city', 'town', 'village', 'state_district', 'region', 'municipality'
+        'state',
+        'county',
+        'city',
+        'town',
+        'village',
+        'state_district',
+        'region',
+        'municipality'
       ];
 
       if (resAr.statusCode == 200 && resAr.data is Map) {
@@ -391,12 +406,9 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final height = size.height;
-    final baseFontSize = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return BlocProvider(
@@ -411,7 +423,7 @@ class _HomeScreenState extends State<HomeScreen> {
           leading: IconButton(
             icon: Icon(
               Icons.menu,
-              size: 24,
+              size: 24.r,
               color: Theme.of(context).iconTheme.color,
             ),
             onPressed: () {
@@ -441,349 +453,359 @@ class _HomeScreenState extends State<HomeScreen> {
                 final categories = state.categories;
                 final cities = state.cities;
 
-                final filteredCategories = (_searchController.text.isEmpty || categories.isEmpty)
-                    ? categories
-                    : categories
-                        .where((c) => c.name.contains(_searchController.text))
-                        .toList();
+                final filteredCategories =
+                    (_searchController.text.isEmpty || categories.isEmpty)
+                        ? categories
+                        : categories
+                            .where((c) => c.name.contains(_searchController.text))
+                            .toList();
 
-                final visibleCategories = filteredCategories
-                    
-                    .toList();
+                final visibleCategories = filteredCategories.toList();
 
                 return SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.zero,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Search Bar
-                        Container(
-                          height: 48,
-                          margin: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.grey[800]?.withValues(alpha: 0.5)
-                                : const Color(0xFFD9D9D9).withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 12),
-                                child: Icon(Icons.search, color: Colors.grey, size: 22),
-                              ),
-                              Expanded(
-                                child: TextField(
-                                  controller: _searchController,
-                                  focusNode: _searchFocusNode,
-                                  onChanged: (val) {
-                                    setState(() {});
-                                  },
-                                  textAlign: TextAlign.right,
-                                  textDirection: TextDirection.rtl,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontFamily: 'Cairo'),
-                                  decoration: InputDecoration(
-                                    hintText: 'ابحث عن قسم...',
-                                    hintStyle: TextStyle(
-                                      fontFamily: 'Cairo',
-                                      color: Colors.grey[600],
-                                      fontSize: baseFontSize * 0.9,
-                                    ),
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Search Bar
+                      Container(
+                        height: 48.h,
+                        margin: EdgeInsets.symmetric(
+                            horizontal: 1.sw * 0.05, vertical: 10.h),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.grey[800]?.withOpacity(0.5)
+                              : const Color(0xFFD9D9D9).withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12.w),
+                              child: Icon(Icons.search, color: Colors.grey, size: 22.r),
+                            ),
+                            Expanded(
+                              child: TextField(
+                                controller: _searchController,
+                                focusNode: _searchFocusNode,
+                                onChanged: (val) {
+                                  setState(() {});
+                                },
+                                textAlign: TextAlign.right,
+                                textDirection: TextDirection.rtl,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(fontFamily: 'Cairo'),
+                                decoration: InputDecoration(
+                                  hintText: 'ابحث عن قسم...',
+                                  hintStyle: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    color: Colors.grey[600],
+                                    fontSize: 14.sp,
                                   ),
+                                  border: InputBorder.none,
+                                  contentPadding:
+                                      EdgeInsets.symmetric(vertical: 14.h),
                                 ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.mic, color: Colors.grey, size: 22),
-                                onPressed: () {},
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                              ),
-                              const SizedBox(width: 8),
-                            ],
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.mic, color: Colors.grey, size: 22.r),
+                              onPressed: () {},
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                            SizedBox(width: 8.w),
+                          ],
+                        ),
+                      ),
+
+                      // Gradient Card
+                      Container(
+                        width: double.infinity,
+                        height: 140.h,
+                        margin: EdgeInsets.symmetric(
+                            horizontal: 1.sw * 0.05, vertical: 12.h),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10.r),
+                          gradient: const LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [Color(0xFF95F8C9), Color(0xFF54CAF7)],
                           ),
                         ),
-
-                        // Gradient Card
-                        Container(
-                          width: double.infinity,
-                          height: 140,
-                          margin: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 12),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            gradient: const LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [Color(0xFF95F8C9), Color(0xFF54CAF7)],
-                            ),
-                          ),
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                left: 0,
-                                top: 10,
-                                bottom: 10,
-                                child: Image.asset(
-                                  'assets/images/دكتور.png',
-                                  width: width * 0.4,
-                                  fit: BoxFit.contain,
-                                ),
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              left: 0,
+                              top: 10.h,
+                              bottom: 10.h,
+                              child: Image.asset(
+                                'assets/images/دكتور.png',
+                                width: 1.sw * 0.4,
+                                fit: BoxFit.contain,
                               ),
-                              Positioned(
-                                right: 20,
-                                top: 20,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      'احجز و سجل',
+                            ),
+                            Positioned(
+                              right: 20.w,
+                              top: 20.h,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'احجز و سجل',
+                                    style: TextStyle(
+                                      fontFamily: 'Cairo',
+                                      color: Colors.white,
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                  ),
+                                  SizedBox(height: 8.h),
+                                  SizedBox(
+                                    width: 1.sw * 0.4,
+                                    child: Text(
+                                      'مع افضل الاطباء في نطاقك',
                                       style: TextStyle(
                                         fontFamily: 'Cairo',
                                         color: Colors.white,
-                                        fontSize: baseFontSize * 0.9375, // 15sp
+                                        fontSize: 13.sp,
                                         fontWeight: FontWeight.bold,
                                       ),
                                       textAlign: TextAlign.right,
                                     ),
-                                    const SizedBox(height: 8),
-                                    SizedBox(
-                                      width: width * 0.4,
-                                      child: Text(
-                                        'مع افضل الاطباء في نطاقك',
-                                        style: TextStyle(
-                                          fontFamily: 'Cairo',
-                                          color: Colors.white,
-                                          fontSize: baseFontSize * 0.8125, // 13sp
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.right,
+                                  ),
+                                  SizedBox(height: 12.h),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 16.w, vertical: 4.h),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(4.r),
+                                    ),
+                                    child: Text(
+                                      'احجز الان',
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
+                                        color: Colors.black,
+                                        fontSize: 11.sp,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(height: 12),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        'احجز الان',
-                                        style: TextStyle(
-                                          fontFamily: 'Cairo',
-                                          color: Colors.black,
-                                          fontSize: baseFontSize * 0.7, // 11sp
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // City Dropdown
+                      Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.symmetric(
+                            horizontal: 1.sw * 0.06, vertical: 16.h),
+                        child: Container(
+                          height: 52.h,
+                          padding: EdgeInsets.symmetric(horizontal: 12.w),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.grey[700]!
+                                  : const Color(0xFFD1D5DC),
+                              width: 1.1.w,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.3),
+                                blurRadius: 4.r,
+                                offset: Offset(0, 1.h),
+                              ),
+                            ],
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<int>(
+                              value: _selectedCityId,
+                              hint: Row(
+                                children: [
+                                  Icon(
+                                    _isDetecting
+                                        ? Icons.location_searching
+                                        : Icons.my_location,
+                                    size: 16.r,
+                                    color: _isDetecting
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.grey[500],
+                                  ),
+                                  SizedBox(width: 6.w),
+                                  Expanded(
+                                    child: Text(
+                                      _isDetecting
+                                          ? 'جارٍ تحديد موقعك...'
+                                          : 'اختر المدينة',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontFamily: 'Cairo',
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ],
+                                  ),
+                                ],
+                              ),
+                              isExpanded: true,
+                              icon: _isDetecting
+                                  ? SizedBox(
+                                      width: 18.w,
+                                      height: 18.h,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color:
+                                            Theme.of(context).colorScheme.primary,
+                                      ),
+                                    )
+                                  : Icon(Icons.arrow_drop_down,
+                                      color: Theme.of(context).iconTheme.color),
+                              items: cities.map((city) {
+                                return DropdownMenuItem<int>(
+                                  value: city.id,
+                                  child: Text(
+                                    city.name,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontFamily: 'Cairo',
+                                          fontSize: 14.sp,
+                                        ),
+                                    textAlign: TextAlign.right,
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (val) {
+                                setState(() {
+                                  _selectedCityId = val;
+                                  _gpsFailureMessage = null;
+                                });
+                                if (val != null) {
+                                  context.read<DoctorCubit>().filterByCity(val);
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // GPS failure banner
+                      if (!_isLoggedIn && _gpsFailureMessage != null)
+                        Container(
+                          margin: EdgeInsets.symmetric(horizontal: 1.sw * 0.06),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12.w, vertical: 10.h),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.orange.withOpacity(0.15)
+                                : Colors.orange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(
+                                color: isDark
+                                    ? Colors.orange.shade700
+                                    : Colors.orange.shade300,
+                                width: 1.w),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.location_off,
+                                  color: isDark ? Colors.orange[300] : Colors.orange,
+                                  size: 18.r),
+                              SizedBox(width: 8.w),
+                              Expanded(
+                                child: Text(
+                                  _gpsFailureMessage!,
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 13.sp,
+                                    color: isDark
+                                        ? Colors.orange[100]
+                                        : Colors.orange.shade800,
+                                  ),
+                                  textDirection: TextDirection.rtl,
                                 ),
                               ),
                             ],
                           ),
                         ),
 
-                        // City Dropdown
-                        Container(
-                          width: double.infinity,
-                          margin: EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 16),
-                          child: Container(
-                            height: 52,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: isDark ? Colors.grey[700]! : const Color(0xFFD1D5DC),
-                                width: 1.1,
+                      // Services Header
+                      Container(
+                        width: double.infinity,
+                        margin:
+                            EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                        child: Text(
+                          'الخدمات المتوفرة',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17.sp,
+                                height: 1.2,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 1),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+
+                      // Categories Grid
+                      if (visibleCategories.isNotEmpty)
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 1.sw * 0.05),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final crossAxisCount = 1.sw > 600 ? 4 : 2;
+                              return GridView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  mainAxisSpacing: 12.h,
+                                  crossAxisSpacing: 12.w,
+                                  childAspectRatio: 1.0,
                                 ),
-                              ],
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<int>(
-                                  value: _selectedCityId,
-                                  hint: Row(
-                                    children: [
-                                      Icon(
-                                        _isDetecting
-                                            ? Icons.location_searching
-                                            : Icons.my_location,
-                                        size: 16,
-                                        color: _isDetecting
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                            : Colors.grey[500],
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Expanded(
-                                        child: Text(
-                                          _isDetecting
-                                              ? 'جارٍ تحديد موقعك...'
-                                              : 'اختر المدينة',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium
-                                              ?.copyWith(
-                                                fontFamily: 'Cairo',
-                                                fontSize: baseFontSize * 0.875,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  isExpanded: true,
-                                  icon: _isDetecting
-                                      ? SizedBox(
-                                          width: 18,
-                                          height: 18,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                          ),
-                                        )
-                                      : Icon(Icons.arrow_drop_down,
-                                          color: Theme.of(context)
-                                              .iconTheme
-                                              .color),
-                                items: cities.map((city) {
-                                  return DropdownMenuItem<int>(
-                                    value: city.id,
-                                    child: Text(
-                                      city.name,
-                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        fontFamily: 'Cairo',
-                                        fontSize: baseFontSize * 0.875,
-                                      ),
-                                      textAlign: TextAlign.right,
-                                    ),
-                                  );
-                                }).toList(),
-                                onChanged: (val) {
-                                  setState(() {
-                                    _selectedCityId = val;
-                                    _gpsFailureMessage = null;
-                                  });
-                                  if (val != null) {
-                                    context
-                                        .read<DoctorCubit>()
-                                        .filterByCity(val);
+                                itemCount: visibleCategories.length,
+                                itemBuilder: (context, index) {
+                                  final category = visibleCategories[index];
+                                  final asset =
+                                      _getAssetForCategory(category.name);
+
+                                  String? selectedCityName;
+                                  if (_selectedCityId != null) {
+                                    try {
+                                      selectedCityName = cities
+                                          .firstWhere((c) => c.id == _selectedCityId)
+                                          .name;
+                                    } catch (_) {}
                                   }
+
+                                  return _buildSquareCategory(
+                                      asset, index, category.name,
+                                      categoryId: category.id,
+                                      cityName: selectedCityName);
                                 },
-                              ),
-                            ),
+                              );
+                            },
                           ),
                         ),
 
-                        // GPS failure banner
-                        if (!_isLoggedIn && _gpsFailureMessage != null)
-                          Container(
-                            margin: EdgeInsets.symmetric(
-                                horizontal: width * 0.06),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withAlpha(30),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                  color: Colors.orange.shade300, width: 1),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.location_off,
-                                    color: Colors.orange, size: 18),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    _gpsFailureMessage!,
-                                    style: TextStyle(
-                                      fontFamily: 'Cairo',
-                                      fontSize: baseFontSize * 0.8,
-                                      color: Colors.orange.shade800,
-                                    ),
-                                    textDirection: TextDirection.rtl,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                        // Services Header
-                        Container(
-                          width: double.infinity,
-                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          child: Text(
-                            'الخدمات المتوفرة',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontFamily: 'Cairo',
-                              fontWeight: FontWeight.bold,
-                              fontSize: baseFontSize * 1.06, // 17sp
-                              height: 1.2,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-
-                        // Categories Grid
-                        if (visibleCategories.isNotEmpty)
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: width * 0.05),
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                final crossAxisCount = width > 600 ? 4 : 2;
-                                return GridView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: crossAxisCount,
-                                    mainAxisSpacing: 12,
-                                    crossAxisSpacing: 12,
-                                    childAspectRatio: 1.0,
-                                  ),
-                                  itemCount: visibleCategories.length,
-                                  itemBuilder: (context, index) {
-                                    final category = visibleCategories[index];
-                                    final asset = _getAssetForCategory(category.name);
-
-                                    String? selectedCityName;
-                                    if (_selectedCityId != null) {
-                                      try {
-                                        selectedCityName = cities
-                                            .firstWhere((c) => c.id == _selectedCityId)
-                                            .name;
-                                      } catch (_) {}
-                                    }
-
-                                    return _buildSquareCategory(
-                                        asset, 
-                                        index, 
-                                        category.name,
-                                        width,
-                                        height,
-                                        baseFontSize,
-                                        categoryId: category.id,
-                                        cityName: selectedCityName);
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-
-                        const SizedBox(height: 20),
-                      ],
-                    ),
+                      SizedBox(height: 20.h),
+                    ],
                   ),
                 );
               }

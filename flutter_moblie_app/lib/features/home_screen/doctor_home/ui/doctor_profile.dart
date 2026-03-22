@@ -271,27 +271,29 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
       },
     );
   }
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         title: Text(
           'الملف الشخصي',
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Cairo',
-            fontSize: 18,
+            fontSize: 18.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: isDark ? Colors.white : Colors.black,
           ),
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: Colors.black, size: 20.sp),
+              color: isDark ? Colors.white : Colors.black, size: 24.r),
           onPressed: () {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (_) => const DoctorHomeScreen()),
@@ -380,12 +382,12 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
       bottomNavigationBar: Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? Colors.grey[900] : Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+              blurRadius: 10.r,
+              offset: Offset(0, -5.h),
             ),
           ],
         ),
@@ -461,8 +463,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                     ),
                   );
                 },
-                icon: const Icon(Icons.lock_reset_rounded,
-                    color: Color(0xFF1D61E7), size: 20),
+                icon: Icon(Icons.lock_reset_rounded,
+                    color: const Color(0xFF1D61E7), size: 24.r),
                 label: Text(
                   'تغيير كلمة المرور',
                   style: TextStyle(
@@ -498,7 +500,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.assignment_outlined, size: 20),
+                      icon: Icon(Icons.assignment_outlined, size: 24.r),
                       label: Text(
                         'طلباتي',
                         style: TextStyle(
@@ -529,8 +531,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.delete_forever_rounded,
-                          color: Colors.red, size: 20),
+                      icon: Icon(Icons.delete_forever_rounded,
+                          color: Colors.red, size: 24.r),
                       label: Text(
                         'حذف الحساب',
                         style: TextStyle(
@@ -557,6 +559,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
       List<UniversityModel> universities,
       List<CityModel> cities,
       List<CategoryModel> categories) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.w),
       child: Column(
@@ -568,20 +572,20 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
               fontFamily: 'Cairo',
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF4B5563),
+              color: isDark ? Colors.white : const Color(0xFF4B5563),
             ),
           ),
           SizedBox(height: 20.h),
           Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: theme.cardTheme.color ?? (isDark ? Colors.grey[900] : Colors.white),
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                  blurRadius: 10.r,
+                  offset: Offset(0, 4.h),
                 ),
               ],
             ),
@@ -686,6 +690,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     String? displayValue,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -703,7 +708,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                   ).createShader(bounds),
                   child: Icon(
                     Icons.edit_outlined,
-                    size: 20.sp,
+                    size: 20.r,
                     color: Colors.white,
                   ),
                 ),
@@ -729,7 +734,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 fontFamily: 'Cairo',
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF1F2937),
+                color: isDark ? Colors.white : const Color(0xFF1F2937),
               ),
               textDirection: TextDirection.rtl,
             ),
@@ -765,7 +770,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                   ).createShader(bounds),
                   child: Icon(
                     Icons.edit_outlined,
-                    size: 20.sp,
+                    size: 20.r,
                     color: Colors.white,
                   ),
                 ),

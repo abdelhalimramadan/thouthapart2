@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thotha_mobile_app/core/networking/api_service.dart';
 
@@ -99,23 +100,33 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
         final isDark = Theme.of(dialogContext).brightness == Brightness.dark;
         return AlertDialog(
           backgroundColor: isDark ? const Color(0xFF161B22) : Colors.white,
-          title: const Text(
+          title: Text(
             'تأكيد حذف الحساب',
-            style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+            style: TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.w700,
+                fontSize: 18.sp),
           ),
-          content: const Text(
+          content: Text(
             'هل أنت متأكد أنك تريد حذف الحساب نهائياً؟ هذا الإجراء لا يمكن التراجع عنه.',
-            style: TextStyle(fontFamily: 'Cairo', height: 1.5),
+            style: TextStyle(fontFamily: 'Cairo', height: 1.5, fontSize: 14.sp),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo')),
+              child: Text('إلغاء',
+                  style: TextStyle(fontFamily: 'Cairo', fontSize: 14.sp)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red[700]),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red[700],
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.r)),
+              ),
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('حذف', style: TextStyle(fontFamily: 'Cairo')),
+              child: Text('حذف',
+                  style: TextStyle(
+                      fontFamily: 'Cairo', fontSize: 14.sp, color: Colors.white)),
             ),
           ],
         );
@@ -131,11 +142,12 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg, style: const TextStyle(fontFamily: 'Cairo')),
+        content: Text(msg,
+            style: TextStyle(fontFamily: 'Cairo', fontSize: 14.sp)),
         backgroundColor: isError ? Colors.red[700] : Colors.green[700],
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+        margin: EdgeInsets.all(16.r),
       ),
     );
   }
@@ -153,7 +165,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
           slivers: [
             // ─── Custom App Bar ───────────────────────────────────────────────
             SliverAppBar(
-              expandedHeight: 180,
+              expandedHeight: 180.h,
               pinned: true,
               automaticallyImplyLeading: false,
               backgroundColor: _darkBlue,
@@ -170,11 +182,11 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                     children: [
                       // Decorative circles
                       Positioned(
-                        top: -30,
-                        left: -30,
+                        top: -30.h,
+                        left: -30.w,
                         child: Container(
-                          width: 140,
-                          height: 140,
+                          width: 140.w,
+                          height: 140.w,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white.withValues(alpha: 0.04),
@@ -182,11 +194,11 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                         ),
                       ),
                       Positioned(
-                        top: 20,
-                        left: 60,
+                        top: 20.h,
+                        left: 60.w,
                         child: Container(
-                          width: 80,
-                          height: 80,
+                          width: 80.w,
+                          height: 80.w,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white.withValues(alpha: 0.03),
@@ -200,41 +212,41 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                           children: [
                             // Warning icon
                             Container(
-                              width: 60,
-                              height: 60,
+                              width: 60.r,
+                              height: 60.r,
                               decoration: BoxDecoration(
                                 color: Colors.red.withValues(alpha: 0.2),
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                     color: Colors.red.withValues(alpha: 0.4),
-                                    width: 2),
+                                    width: 2.w),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.delete_forever_rounded,
                                 color: Colors.redAccent,
-                                size: 30,
+                                size: 30.r,
                               ),
                             ),
-                            const SizedBox(height: 10),
-                            const Text(
+                            SizedBox(height: 10.h),
+                            Text(
                               'حذف الحساب',
                               style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontWeight: FontWeight.w700,
-                                fontSize: 20,
+                                fontSize: 20.sp,
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4.h),
                             Text(
                               'هذا الإجراء لا يمكن التراجع عنه',
                               style: TextStyle(
                                 fontFamily: 'Cairo',
-                                fontSize: 13,
+                                fontSize: 13.sp,
                                 color: Colors.white.withValues(alpha: 0.65),
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            SizedBox(height: 20.h),
                           ],
                         ),
                       ),
@@ -243,17 +255,17 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                 ),
               ),
               leading: Padding(
-                padding: const EdgeInsets.only(right: 8),
+                padding: EdgeInsets.only(right: 8.w),
                 child: IconButton(
                   icon: Container(
-                    width: 36,
-                    height: 36,
+                    width: 36.r,
+                    height: 36.r,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
-                    child: const Icon(Icons.arrow_back_ios_new_rounded,
-                        color: Colors.white, size: 16),
+                    child: Icon(Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white, size: 16.r),
                   ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
@@ -267,18 +279,18 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                 child: SlideTransition(
                   position: _slideAnim,
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16.r),
                     child: Column(
                       children: [
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4.h),
 
                         // ── Warning Card ────────────────────────────────────
                         _buildWarningCard(isDark),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16.h),
 
                         // ── What Will Be Deleted ─────────────────────────
                         _buildWillBeDeletedCard(isDark),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24.h),
 
                         // ── Delete Button ────────────────────────────────
                         Column(
@@ -287,12 +299,12 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                               Container(
                                 alignment: Alignment.centerRight,
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 8),
+                                    EdgeInsets.symmetric(vertical: 8.h),
                                 child: Text(
                                   _errorMessage!,
                                   style: TextStyle(
                                     fontFamily: 'Cairo',
-                                    fontSize: 14,
+                                    fontSize: 14.sp,
                                     color: Colors.redAccent,
                                   ),
                                 ),
@@ -300,13 +312,13 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                             _buildDeleteButton(),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12.h),
 
                         // ── Cancel Button ────────────────────────────────
                         _buildCancelButton(isDark),
 
                         SizedBox(
-                            height: MediaQuery.of(context).padding.bottom + 24),
+                            height: MediaQuery.of(context).padding.bottom + 24.h),
                       ],
                     ),
                   ),
@@ -331,43 +343,43 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
             Colors.orange.withValues(alpha: isDark ? 0.10 : 0.04),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: Colors.red.withValues(alpha: 0.25)),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.r),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 40.r,
+            height: 40.r,
             decoration: BoxDecoration(
               color: Colors.red.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(10.r),
             ),
-            child: const Icon(Icons.warning_amber_rounded,
-                color: Colors.redAccent, size: 22),
+            child: Icon(Icons.warning_amber_rounded,
+                color: Colors.redAccent, size: 22.r),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'تحذير مهم',
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w700,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     color: Colors.redAccent,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Text(
                   'حذف الحساب إجراء دائم ولا يمكن التراجع عنه. ستفقد جميع بياناتك وسجلاتك بشكل نهائي.',
                   style: TextStyle(
                     fontFamily: 'Cairo',
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     height: 1.6,
                     color: isDark ? Colors.white70 : const Color(0xFF374151),
                   ),
@@ -397,24 +409,24 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
       child: Column(
         children: items.map((item) {
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: EdgeInsets.symmetric(vertical: 8.h),
             child: Row(
               children: [
                 Container(
-                  width: 32,
-                  height: 32,
+                  width: 32.r,
+                  height: 32.r,
                   decoration: BoxDecoration(
                     color: Colors.red.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
-                  child: Icon(item.$1, size: 16, color: Colors.red[400]),
+                  child: Icon(item.$1, size: 16.r, color: Colors.red[400]),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Text(
                   item.$2,
                   style: TextStyle(
                     fontFamily: 'Cairo',
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w500,
                     color: isDark ? Colors.white70 : const Color(0xFF374151),
                   ),
@@ -430,18 +442,18 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
   Widget _buildDeleteButton() {
     return SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 52.h,
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.red[700]!, Colors.red[500]!],
           ),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(14.r),
           boxShadow: [
             BoxShadow(
               color: Colors.red.withValues(alpha: 0.35),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              blurRadius: 12.r,
+              offset: Offset(0, 4.h),
             ),
           ],
         ),
@@ -450,27 +462,27 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
             shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
           ),
           onPressed: _isLoading ? null : _confirmDeleteAccount,
           child: _isLoading
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
+              ? SizedBox(
+                  width: 22.r,
+                  height: 22.r,
+                  child: const CircularProgressIndicator(
                       strokeWidth: 2.5, color: Colors.white))
-              : const Row(
+              : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.delete_forever_rounded,
-                        color: Colors.white, size: 20),
-                    SizedBox(width: 8),
+                        color: Colors.white, size: 20.r),
+                    SizedBox(width: 8.w),
                     Text(
                       'حذف الحساب نهائياً',
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                        fontSize: 15.sp,
                         color: Colors.white,
                       ),
                     ),
@@ -485,14 +497,14 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
   Widget _buildCancelButton(bool isDark) {
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: 50.h,
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(
           side: BorderSide(
             color: isDark ? Colors.grey[700]! : const Color(0xFFD1D5DB),
           ),
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
         ),
         onPressed: () => Navigator.of(context).pop(),
         child: Text(
@@ -500,7 +512,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
           style: TextStyle(
             fontFamily: 'Cairo',
             fontWeight: FontWeight.w600,
-            fontSize: 14,
+            fontSize: 14.sp,
             color: isDark ? Colors.white70 : const Color(0xFF374151),
           ),
         ),
@@ -518,7 +530,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
     return Container(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF161B22) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
             color: isDark ? Colors.grey[800]! : const Color(0xFFE5E7EB)),
         boxShadow: [
@@ -526,8 +538,8 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
             color: isDark
                 ? Colors.black.withValues(alpha: 0.2)
                 : Colors.grey.withValues(alpha: 0.07),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            blurRadius: 8.r,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
@@ -536,29 +548,29 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
         children: [
           // Section header
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+            padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
             child: Row(
               children: [
-                Icon(icon, size: 16, color: const Color(0xFF021433)),
-                const SizedBox(width: 6),
+                Icon(icon, size: 16.r, color: const Color(0xFF021433)),
+                SizedBox(width: 6.w),
                 Text(
                   title,
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w700,
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     color: isDark ? Colors.white70 : const Color(0xFF021433),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           Divider(
               height: 1,
               color: isDark ? Colors.grey[800] : const Color(0xFFE5E7EB)),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+            padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 14.h),
             child: child,
           ),
         ],

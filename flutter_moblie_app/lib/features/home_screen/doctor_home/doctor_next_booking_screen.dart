@@ -77,8 +77,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
       appBar: AppBar(
         toolbarHeight: 75.6,
         elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
+        backgroundColor: isDark ? Colors.transparent : theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
         automaticallyImplyLeading: false,
         leading: Builder(
           builder: (context) => IconButton(
@@ -149,9 +149,9 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.1),
-          child: Container(
+          child: Divider(
             height: 1.1,
-            color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
+            color: theme.dividerColor.withAlpha(isDark ? 50 : 255),
           ),
         ),
       ),
@@ -307,7 +307,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
             color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, size: 18, color: const Color(0xFF021433)),
+          child: Icon(icon, size: 18, color: isDark ? Colors.white : const Color(0xFF021433)),
         ),
         const SizedBox(width: 12),
         Column(
@@ -367,10 +367,10 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: theme.cardTheme.color ?? colorScheme.surface,
+          color: isDark ? Colors.grey[900]?.withAlpha(200) : (theme.cardTheme.color ?? colorScheme.surface),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-              color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
+              color: isDark ? Colors.grey[800]! : const Color(0xFFE5E7EB)),
           boxShadow: [
             BoxShadow(
               color: isDark
@@ -436,7 +436,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: baseFontSize * 0.8,
-                    color: Colors.grey[700],
+                    color: isDark ? Colors.white70 : Colors.grey[700],
                   ),
                 ),
               ],
@@ -466,7 +466,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: baseFontSize * 0.8,
-                    color: Colors.grey[700],
+                    color: isDark ? Colors.white70 : Colors.grey[700],
                   ),
                 ),
               ],
@@ -535,6 +535,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
   Widget _buildMainContent(
       BuildContext context, double width, double height, double baseFontSize) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     if (_bookings.isEmpty) {
       return Center(
@@ -552,7 +553,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: baseFontSize * 1.125,
-                color: Colors.grey[600],
+                color: isDark ? Colors.white38 : Colors.grey[600],
               ),
             ),
           ],

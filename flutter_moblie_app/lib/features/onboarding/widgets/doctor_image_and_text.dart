@@ -32,43 +32,38 @@ class DoctorImageAndText extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Image container
-                  AspectRatio(
-                    aspectRatio: 1,
-                    child: Container(
-                      constraints: BoxConstraints(
-                        maxWidth: isTablet ? 300.w : 0.5.sw,
-                        maxHeight: isTablet ? 300.h : 0.5.sw,
-                      ),
-                      margin: EdgeInsets.only(bottom: 40.h),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withAlpha(76),
-                            spreadRadius: 2.r,
-                            blurRadius: 10.r,
-                            offset: Offset(0, 5.h),
-                          ),
-                        ],
-                      ),
-                      child: ClipOval(
-                        child: Image.asset(
-                          imagePath,
-                          fit: BoxFit.cover,
-                          cacheWidth: 1500,
-                          isAntiAlias: true,
-                          filterQuality: FilterQuality.medium,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey[200],
-                              child: const Icon(
-                                Icons.image_not_supported,
-                                size: 3,
-                                color: Colors.grey,
-                              ),
-                            );
-                          },
+                  Container(
+                    width: isTablet ? 380.w : 280.w,
+                    height: isTablet ? 380.w : 280.w,
+                    margin: EdgeInsets.only(bottom: 32.h),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: ColorsManager.mainBlue.withAlpha(40),
+                          spreadRadius: 8.r,
+                          blurRadius: 20.r,
+                          offset: const Offset(0, 0),
                         ),
+                      ],
+                    ),
+                    child: ClipOval(
+                      child: Image.asset(
+                        imagePath,
+                        fit: BoxFit.cover,
+                        cacheWidth: 1500,
+                        isAntiAlias: true,
+                        filterQuality: FilterQuality.high,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[200],
+                            child: Icon(
+                              Icons.image_not_supported,
+                              size: 40.r,
+                              color: Colors.grey,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -83,7 +78,8 @@ class DoctorImageAndText extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       softWrap: true,
                       style: TextStyle(
-                        fontSize: 26.sp,
+                        fontFamily: 'Cairo',
+                        fontSize: 24.sp,
                         fontWeight: FontWeight.bold,
                         color: ColorsManager.mainBlue,
                       ),
@@ -101,9 +97,10 @@ class DoctorImageAndText extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       softWrap: true,
                       style: TextStyle(
+                        fontFamily: 'Cairo',
                         fontSize: 16.sp,
                         color: Colors.grey[600],
-                        height: 1.5,
+                        height: 1.6,
                       ),
                     ),
                   ),

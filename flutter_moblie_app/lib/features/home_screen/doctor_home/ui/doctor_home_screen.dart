@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/helpers/constants.dart';
 import '../../../../core/helpers/shared_pref_helper.dart';
@@ -142,7 +143,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     required String date,
     required String time,
     required String service,
-    required double baseFontSize,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -155,76 +155,72 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         return Container(
           decoration: BoxDecoration(
             color: theme.cardTheme.color ?? theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
           ),
           padding: EdgeInsets.only(
-            top: 20,
-            left: 20,
-            right: 20,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 28,
+            top: 20.h,
+            left: 20.w,
+            right: 20.w,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 28.h,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               // Handle bar
               Container(
-                width: 40,
-                height: 4,
+                width: 40.w,
+                height: 4.h,
                 decoration: BoxDecoration(
                   color: isDark ? Colors.grey[600] : Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               // Patient name
               Text(
                 patientName,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w700,
-                  fontSize: baseFontSize * 1.25,
+                  fontSize: 20.sp,
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               Divider(
                   color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               // Phone
               _buildDetailRow(
                 context: context,
                 icon: Icons.phone_outlined,
                 label: 'رقم الهاتف',
                 value: phone,
-                baseFontSize: baseFontSize,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14.h),
               // Date
               _buildDetailRow(
                 context: context,
                 icon: Icons.calendar_month_outlined,
                 label: 'التاريخ',
                 value: date,
-                baseFontSize: baseFontSize,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14.h),
               // Time
               _buildDetailRow(
                 context: context,
                 icon: Icons.access_time_outlined,
                 label: 'الوقت',
                 value: time,
-                baseFontSize: baseFontSize,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14.h),
               // Specialty
               _buildDetailRow(
                 context: context,
                 icon: Icons.medical_services_outlined,
                 label: 'التخصص',
                 value: service,
-                baseFontSize: baseFontSize,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
               // Action buttons
               Row(
                 children: [
@@ -239,9 +235,9 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                         backgroundColor: const Color(0xFFF0FDF4),
                         foregroundColor: const Color(0xFF16A34A),
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(8.r),
                           side: const BorderSide(color: Color(0xFF16A34A)),
                         ),
                       ),
@@ -250,12 +246,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontWeight: FontWeight.w600,
-                          fontSize: baseFontSize * 0.9,
+                          fontSize: 14.sp,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => _updateAppointmentStatus(
@@ -267,9 +263,9 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                         backgroundColor: const Color(0xFFFEF2F2),
                         foregroundColor: const Color(0xFFE7000B),
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(8.r),
                           side: const BorderSide(color: Color(0xFFE7000B)),
                         ),
                       ),
@@ -278,7 +274,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontWeight: FontWeight.w600,
-                          fontSize: baseFontSize * 0.9,
+                          fontSize: 14.sp,
                         ),
                       ),
                     ),
@@ -297,7 +293,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     required IconData icon,
     required String label,
     required String value,
-    required double baseFontSize,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -305,15 +300,15 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       textDirection: ui.TextDirection.rtl,
       children: [
         Container(
-          width: 38,
-          height: 38,
+          width: 38.w,
+          height: 38.w,
           decoration: BoxDecoration(
             color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
           ),
-          child: Icon(icon, size: 18, color: const Color(0xFF021433)),
+          child: Icon(icon, size: 18.r, color: const Color(0xFF021433)),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12.w),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -321,7 +316,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               label,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: baseFontSize * 0.75,
+                fontSize: 12.sp,
                 color: Colors.grey,
               ),
             ),
@@ -330,7 +325,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w600,
-                fontSize: baseFontSize * 0.9,
+                fontSize: 14.sp,
               ),
             ),
           ],
@@ -431,18 +426,16 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   // ── Build ──────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final tt = theme.textTheme;
-    final baseFontSize = width * 0.04;
     final unreadCount = NotificationHelper.getUnreadCount();
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       drawer: const DoctorDrawer(),
-      appBar: _buildAppBar(width, cs, tt, baseFontSize, unreadCount),
+      appBar: _buildAppBar(cs, tt, unreadCount, theme),
       body: RefreshIndicator(
         onRefresh: _fetchPendingAppointments,
         child: SingleChildScrollView(
@@ -450,10 +443,10 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildGreeting(width, baseFontSize),
-              _buildSectionTitle('حجوزاتي القادمة', width, baseFontSize),
-              _buildAppointmentsSection(width, baseFontSize),
-              const SizedBox(height: 40),
+              _buildGreeting(),
+              _buildSectionTitle('حجوزاتي القادمة'),
+              _buildAppointmentsSection(),
+              SizedBox(height: 40.h),
             ],
           ),
         ),
@@ -463,20 +456,21 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
 
   // ── AppBar ─────────────────────────────────────────────────────
   PreferredSizeWidget _buildAppBar(
-    double width,
     ColorScheme cs,
     TextTheme tt,
-    double baseFontSize,
     int unreadCount,
+    ThemeData theme,
   ) {
+    final cs = theme.colorScheme;
+    final isDark = cs.brightness == Brightness.dark;
     return AppBar(
-      toolbarHeight: 70,
+      toolbarHeight: 70.h,
       elevation: 0,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? Colors.transparent : Colors.white,
       foregroundColor: cs.onSurface,
       automaticallyImplyLeading: false,
       leading: IconButton(
-        icon: const Icon(Icons.menu, size: 24),
+        icon: Icon(Icons.menu, size: 24.r),
         onPressed: () => _scaffoldKey.currentState?.openDrawer(),
       ),
       titleSpacing: 0,
@@ -485,16 +479,16 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         children: [
           Image.asset(
             'assets/images/splash-logo.png',
-            width: 36 * (width / 390),
-            height: 36 * (width / 390),
+            width: 36.w,
+            height: 36.w,
             fit: BoxFit.contain,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Text(
             'لوحة التحكم',
             style: tt.titleLarge?.copyWith(
               fontFamily: 'Cairo',
-              fontSize: baseFontSize * 1.125,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -503,16 +497,16 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       actions: [
         Stack(children: [
           IconButton(
-            icon: const Icon(Icons.notifications_none, size: 24),
+            icon: Icon(Icons.notifications_none, size: 24.r),
             onPressed: _openNotifications,
           ),
           if (unreadCount > 0)
             Positioned(
-              right: 8,
-              top: 10,
+              right: 8.w,
+              top: 10.h,
               child: Container(
-                width: 16,
-                height: 16,
+                width: 16.w,
+                height: 16.w,
                 decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.error,
                     shape: BoxShape.circle),
@@ -521,7 +515,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                     unreadCount > 9 ? '9+' : '$unreadCount',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: Theme.of(context).colorScheme.onError,
-                          fontSize: 10,
+                          fontSize: 10.sp,
                           fontWeight: FontWeight.bold,
                         ),
                   ),
@@ -529,22 +523,26 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               ),
             ),
         ]),
-        const SizedBox(width: 8),
+        SizedBox(width: 8.w),
       ],
-      bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(1),
-        child: Divider(height: 1, color: Color(0xFFE5E7EB)),
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(1.h),
+        child: Divider(
+          height: 1,
+          color: theme.dividerColor.withAlpha(isDark ? 50 : 255),
+        ),
       ),
     );
   }
 
   // ── Greeting ───────────────────────────────────────────────────
-  Widget _buildGreeting(double width, double baseFontSize) {
+  Widget _buildGreeting() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: EdgeInsets.fromLTRB(width * 0.05, 20, width * 0.05, 10),
+      padding: EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 10.h),
       child: _isLoadingName
-          ? const SizedBox(
-              height: 30, child: CircularProgressIndicator(strokeWidth: 2))
+          ? SizedBox(
+              height: 30.h, child: const CircularProgressIndicator(strokeWidth: 2))
           : Text(
               _firstName != null
                   ? 'مرحباً، د/ $_firstName 👋'
@@ -553,18 +551,19 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               textDirection: ui.TextDirection.rtl,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: baseFontSize * 1.4,
+                fontSize: 22.sp,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF111827),
+                color: isDarkMode ? Colors.white : const Color(0xFF111827),
               ),
             ),
     );
   }
 
   // ── Section title ──────────────────────────────────────────────
-  Widget _buildSectionTitle(String title, double width, double baseFontSize) {
+  Widget _buildSectionTitle(String title) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: EdgeInsets.fromLTRB(width * 0.05, 18, width * 0.05, 6),
+      padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 6.h),
       child: Align(
         alignment: Alignment.centerRight,
         child: Text(
@@ -572,8 +571,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
           style: TextStyle(
             fontFamily: 'Cairo',
             fontWeight: FontWeight.w700,
-            fontSize: baseFontSize * 1.1,
-            color: const Color(0xFF111827),
+            fontSize: 16.sp,
+            color: isDarkMode ? Colors.white70 : const Color(0xFF111827),
           ),
         ),
       ),
@@ -581,24 +580,24 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   }
 
   // ── Appointments section ──────────────────────────────────────
-  Widget _buildAppointmentsSection(double width, double baseFontSize) {
+  Widget _buildAppointmentsSection() {
     if (_isLoadingAppointments) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 40),
-        child: Center(child: CircularProgressIndicator()),
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 40.h),
+        child: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_appointmentsError != null) {
       return Padding(
-        padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 16),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         child: Column(
           children: [
             Text(_appointmentsError!,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     fontFamily: 'Cairo', color: Colors.redAccent)),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             TextButton.icon(
               onPressed: _fetchPendingAppointments,
               icon: const Icon(Icons.refresh),
@@ -611,18 +610,22 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     }
 
     if (_pendingAppointments.isEmpty) {
+      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
       return Padding(
-        padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 40),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 40.h),
         child: Center(
           child: Column(
             children: [
               Icon(Icons.calendar_today_outlined,
-                  size: 48, color: Colors.grey[300]),
-              const SizedBox(height: 12),
-              const Text(
+                  size: 48.r,
+                  color: isDarkMode ? Colors.white24 : Colors.grey[300]),
+              SizedBox(height: 12.h),
+              Text(
                 'لا توجد حجوزات قادمة حالياً',
                 style: TextStyle(
-                    fontFamily: 'Cairo', color: Colors.grey, fontSize: 15),
+                    fontFamily: 'Cairo',
+                    color: isDarkMode ? Colors.white38 : Colors.grey,
+                    fontSize: 15.sp),
               ),
             ],
           ),
@@ -633,9 +636,9 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(top: 10, bottom: 8),
+      padding: EdgeInsets.only(top: 10.h, bottom: 8.h),
       itemCount: _pendingAppointments.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      separatorBuilder: (_, __) => SizedBox(height: 16.h),
       itemBuilder: (_, i) {
         final appointment = _pendingAppointments[i];
 
@@ -668,8 +671,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
           appointment: appointment,
           displayDate: displayDate,
           displayTime: displayTime,
-          width: width,
-          baseFontSize: baseFontSize,
           onTap: () => _showAppointmentDetails(
             context: context,
             appointmentId: appointment['id'] ?? 0,
@@ -680,7 +681,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
             date: displayDate,
             time: displayTime,
             service: appointment['categoryName'] ?? 'تخصص عام',
-            baseFontSize: baseFontSize,
           ),
         );
       },
@@ -695,16 +695,12 @@ class _AppointmentCard extends StatelessWidget {
   final Map<String, dynamic> appointment;
   final String displayDate;
   final String displayTime;
-  final double width;
-  final double baseFontSize;
   final VoidCallback onTap;
 
   const _AppointmentCard({
     required this.appointment,
     required this.displayDate,
     required this.displayTime,
-    required this.width,
-    required this.baseFontSize,
     required this.onTap,
   });
 
@@ -716,22 +712,26 @@ class _AppointmentCard extends StatelessWidget {
     final phone = appointment['patientPhoneNumber'] ?? 'غير متوفر';
     final service = appointment['categoryName'] ?? 'تخصص عام';
     final status = appointment['status'] ?? 'قادم';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final statusColor = const Color(0xFF84E5F3);
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: width * 0.04),
-        padding: const EdgeInsets.all(14),
+        margin: EdgeInsets.symmetric(horizontal: 16.w),
+        padding: EdgeInsets.all(14.r),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
+          color: isDark ? Colors.grey[900]?.withAlpha(200) : Colors.white,
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(
+              color: isDark ? Colors.grey[800]! : const Color(0xFFE5E7EB)),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 3)),
+                color: isDark
+                    ? Colors.black.withOpacity(0.3)
+                    : Colors.black.withOpacity(0.05),
+                blurRadius: 8.r,
+                offset: Offset(0, 3.h)),
           ],
         ),
         child: Column(
@@ -745,11 +745,11 @@ class _AppointmentCard extends StatelessWidget {
               children: [
                 Container(
                   padding: EdgeInsets.symmetric(
-                      horizontal: 10 * (width / 390),
-                      vertical: 4 * (width / 390)),
+                      horizontal: 10.w,
+                      vertical: 4.h),
                   decoration: BoxDecoration(
                     color: statusColor,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
                     status,
@@ -757,7 +757,7 @@ class _AppointmentCard extends StatelessWidget {
                       color: Colors.white,
                       fontFamily: 'Cairo',
                       fontWeight: FontWeight.bold,
-                      fontSize: baseFontSize * 0.7,
+                      fontSize: 12.sp,
                     ),
                   ),
                 ),
@@ -769,22 +769,22 @@ class _AppointmentCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: 'Cairo',
-                      fontSize: baseFontSize,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1D61E7),
+                      color: isDark ? Colors.blue[300] : const Color(0xFF1D61E7),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6.h),
             // Service/Category
             Row(
               textDirection: ui.TextDirection.rtl,
               children: [
                 Icon(Icons.medical_services_outlined,
-                    size: 14, color: Colors.grey[500]),
-                const SizedBox(width: 4),
+                    size: 14.r, color: Colors.grey[500]),
+                SizedBox(width: 4.w),
                 Expanded(
                   child: Text(
                     service,
@@ -792,36 +792,33 @@ class _AppointmentCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: baseFontSize * 0.8,
+                        fontSize: 13.sp,
                         color: Colors.grey[600]),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10.h),
             // Phone + Date/Time chips
             Row(
               textDirection: ui.TextDirection.rtl,
               children: [
                 _InfoChip(
                     icon: Icons.phone_outlined,
-                    text: phone,
-                    baseFontSize: baseFontSize),
+                    text: phone),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Row(
               textDirection: ui.TextDirection.rtl,
               children: [
                 _InfoChip(
                     icon: Icons.calendar_today_outlined,
-                    text: displayDate,
-                    baseFontSize: baseFontSize),
-                const SizedBox(width: 8),
+                    text: displayDate),
+                SizedBox(width: 8.w),
                 _InfoChip(
                     icon: Icons.access_time_outlined,
-                    text: displayTime,
-                    baseFontSize: baseFontSize),
+                    text: displayTime),
               ],
             ),
           ],
@@ -834,24 +831,24 @@ class _AppointmentCard extends StatelessWidget {
 class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String text;
-  final double baseFontSize;
-  const _InfoChip(
-      {required this.icon, required this.text, required this.baseFontSize});
+  const _InfoChip({required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
       decoration: BoxDecoration(
-          color: Colors.grey[100], borderRadius: BorderRadius.circular(8)),
+          color: isDark ? Colors.grey[800]?.withAlpha(150) : Colors.grey[100],
+          borderRadius: BorderRadius.circular(8.r)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 13, color: const Color(0xFF1D61E7)),
-        const SizedBox(width: 4),
+        Icon(icon, size: 13.r, color: isDark ? Colors.blue[300] : const Color(0xFF1D61E7)),
+        SizedBox(width: 4.w),
         Text(text,
             style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: baseFontSize * 0.72,
-                color: Colors.grey[800])),
+                fontSize: 11.sp,
+                color: isDark ? Colors.white70 : Colors.grey[800])),
       ]),
     );
   }

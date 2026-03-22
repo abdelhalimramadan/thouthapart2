@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thotha_mobile_app/features/booking/ui/booking_confirmation_screen.dart';
 import 'package:thotha_mobile_app/features/home_screen/data/models/doctor_model.dart';
 import 'dart:ui';
@@ -25,9 +26,6 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final baseFontSize = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -36,24 +34,24 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
     return Align(
       alignment: Alignment.topCenter,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(horizontal: 16.w),
+        padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: theme.cardTheme.color ?? colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
         ),
         child: SafeArea(
           top: false,
           child: ListView(
             controller: widget.controller,
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 16.h,
             ),
             children: [
               Container(
                 width: double.infinity,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                    EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
@@ -69,83 +67,82 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Icon(Icons.close,
-                          size: 24 * (width / 390),
+                          size: 24.r,
                           color: theme.iconTheme.color),
                     ),
                     Text(
                       'تفاصيل الطبيب',
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontFamily: 'Cairo',
-                        fontSize: baseFontSize * 1.125, // 18
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               Center(
                 child: Column(
                   children: [
-                    // Profile picture container removed
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: theme.cardTheme.color ?? colorScheme.surface,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 20),
+                          SizedBox(height: 20.h),
                           Text(
                             doctor.fullName,
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontFamily: 'Cairo',
                               fontWeight: FontWeight.w700,
-                              fontSize: baseFontSize * 1.75, // 28
+                              fontSize: 28.sp,
                               height: 1.5,
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                           Text(
                             doctor.categoryName,
                             textAlign: TextAlign.center,
                             style: theme.textTheme.bodyLarge?.copyWith(
                               fontFamily: 'Cairo',
                               fontWeight: FontWeight.w400,
-                              fontSize: baseFontSize * 1.125, // 18
+                              fontSize: 18.sp,
                               height: 1.5,
                               color: theme.textTheme.bodyLarge?.color
                                   ?.withValues(alpha: 0.7),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                           SizedBox(
                             width: double.infinity,
                             child: Wrap(
                               alignment: WrapAlignment.center,
                               crossAxisAlignment: WrapCrossAlignment.center,
-                              spacing: 24,
-                              runSpacing: 8,
+                              spacing: 24.w,
+                              runSpacing: 8.h,
                               children: [
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
                                       Icons.location_on_outlined,
-                                      size: 16 * (width / 390),
+                                      size: 16.r,
                                       color: const Color(0xFF858585),
                                     ),
-                                    const SizedBox(width: 4),
+                                    SizedBox(width: 4.w),
                                     Text(
                                       doctor.cityName,
                                       style: TextStyle(
                                         fontFamily: 'Cairo',
                                         fontWeight: FontWeight.w400,
-                                        fontSize: baseFontSize, // 16
+                                        fontSize: 16.sp,
                                         height: 1.5,
                                         color: const Color(0xFF858585),
                                       ),
@@ -158,15 +155,15 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                     Icon(
                                       Icons.star,
                                       color: Colors.amber,
-                                      size: 20 * (width / 390),
+                                      size: 20.r,
                                     ),
-                                    const SizedBox(width: 4),
+                                    SizedBox(width: 4.w),
                                     RichText(
                                       text: TextSpan(
                                         style: TextStyle(
                                           fontFamily: 'Cairo',
                                           fontWeight: FontWeight.w400,
-                                          fontSize: baseFontSize, // 16
+                                          fontSize: 16.sp,
                                           height: 1.5,
                                           color: isDark
                                               ? Colors.white
@@ -188,39 +185,39 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12.h),
                           if (doctor.price != null)
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 6),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10.w, vertical: 6.h),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFE8F5E9),
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(20.r),
                               ),
                               child: Text(
                                 'سعر الكشف: ${doctor.price} جنيه',
                                 style: TextStyle(
                                   fontFamily: 'Cairo',
-                                  fontSize: baseFontSize * 0.875, // 14
+                                  fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF2E7D32),
                                 ),
                               ),
                             ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                           Container(
                             width: double.infinity,
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 20),
-                            padding: const EdgeInsets.all(12),
+                            margin: EdgeInsets.symmetric(
+                                horizontal: 8.w, vertical: 20.h),
+                            padding: EdgeInsets.all(12.r),
                             decoration: BoxDecoration(
                               color: isDark ? Colors.grey[800] : Colors.white,
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(8.r),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(alpha: 0.05),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
+                                  blurRadius: 4.r,
+                                  offset: Offset(0, 2.h),
                                 ),
                               ],
                             ),
@@ -232,7 +229,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                   style: TextStyle(
                                     fontFamily: 'Cairo',
                                     fontWeight: FontWeight.bold,
-                                    fontSize: baseFontSize * 1.125, // 18
+                                    fontSize: 18.sp,
                                     height: 1.5,
                                     color: isDark
                                         ? Colors.white
@@ -240,14 +237,14 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                   ),
                                   textAlign: TextAlign.right,
                                 ),
-                                const SizedBox(height: 4),
+                                SizedBox(height: 4.h),
                                 Text(
                                   doctor.description ??
                                       'طبيب أسنان متخصص ذو خبرة عالية في مجال طب الأسنان.',
                                   style: TextStyle(
                                     fontFamily: 'Cairo',
                                     fontWeight: FontWeight.w400,
-                                    fontSize: baseFontSize, // 16
+                                    fontSize: 16.sp,
                                     height: 1.625,
                                     color: isDark
                                         ? Colors.grey[300]
@@ -260,9 +257,9 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                           ),
                           Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.all(12),
+                            padding: EdgeInsets.all(12.r),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
+                               borderRadius: BorderRadius.circular(8.r),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
@@ -271,34 +268,30 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                   icon: Icons.school_outlined,
                                   title: 'الجامعة',
                                   subtitle: doctor.universityName,
-                                  baseFontSize: baseFontSize,
                                 ),
-                                const SizedBox(height: 10),
+                                SizedBox(height: 10.h),
                                 _InfoTile(
                                   icon: Icons.location_on_outlined,
                                   title: 'العنوان',
                                   subtitle: doctor.cityName,
-                                  baseFontSize: baseFontSize,
                                 ),
-                                const SizedBox(height: 10),
+                                SizedBox(height: 10.h),
                                 _InfoTile(
                                   icon: Icons.phone_outlined,
                                   title: 'رقم الهاتف',
                                   subtitle: doctor.phoneNumber,
-                                  baseFontSize: baseFontSize,
                                 ),
-                                const SizedBox(height: 10),
+                                SizedBox(height: 10.h),
                                 if (doctor.email != null)
                                   _InfoTile(
                                     icon: Icons.mail_outline,
                                     title: 'البريد الإلكتروني',
                                     subtitle: doctor.email!,
-                                    baseFontSize: baseFontSize,
                                   ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
@@ -307,28 +300,28 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                 style: TextStyle(
                                   fontFamily: 'Cairo',
                                   fontWeight: FontWeight.w700,
-                                  fontSize: baseFontSize,
+                                  fontSize: 16.sp,
                                   color: isDark ? Colors.white : Colors.black,
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8.w),
                               Icon(Icons.calendar_today_outlined,
-                                  size: 18 * (width / 390),
+                                  size: 18.r,
                                   color: const Color(0xFF0B8FAC)),
-                              const SizedBox(width: 6),
+                              SizedBox(width: 6.w),
                             ],
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12.h),
                           SizedBox(
-                            height: 44,
+                            height: 44.h,
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               reverse: true,
                               itemCount: 4,
                               padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
+                                  EdgeInsets.symmetric(horizontal: 8.w),
                               separatorBuilder: (_, __) =>
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: 8.w),
                               itemBuilder: (context, index) {
                                 final days = [
                                   'الأحد',
@@ -340,64 +333,57 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                 return _DayChip(
                                   label: label,
                                   selected: _selectedDay == label,
-                                  baseFontSize: baseFontSize,
                                   onTap: () =>
                                       setState(() => _selectedDay = label),
                                 );
                               },
                             ),
                           ),
-                          const SizedBox(height: 15),
+                          SizedBox(height: 15.h),
                           Column(
                             children: [
                               _TimeListTile(
                                 label: '9:00 صباحاً',
-                                baseFontSize: baseFontSize,
                                 selected: _selectedTime?.hour == 9 &&
                                     _selectedTime?.minute == 0,
                                 onTap: () => setState(() => _selectedTime =
                                     const TimeOfDay(hour: 9, minute: 0)),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8.h),
                               _TimeListTile(
                                 label: '10:00 صباحاً',
-                                baseFontSize: baseFontSize,
                                 selected: _selectedTime?.hour == 10 &&
                                     _selectedTime?.minute == 0,
                                 onTap: () => setState(() => _selectedTime =
                                     const TimeOfDay(hour: 10, minute: 0)),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8.h),
                               _TimeListTile(
                                 label: '12:00 ظهراً',
-                                baseFontSize: baseFontSize,
                                 selected: _selectedTime?.hour == 12 &&
                                     _selectedTime?.minute == 0,
                                 onTap: () => setState(() => _selectedTime =
                                     const TimeOfDay(hour: 12, minute: 0)),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8.h),
                               _TimeListTile(
                                 label: '02:00 مساءً',
-                                baseFontSize: baseFontSize,
                                 selected: _selectedTime?.hour == 14 &&
                                     _selectedTime?.minute == 0,
                                 onTap: () => setState(() => _selectedTime =
                                     const TimeOfDay(hour: 14, minute: 0)),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8.h),
                               _TimeListTile(
                                 label: '04:00 مساءً',
-                                baseFontSize: baseFontSize,
                                 selected: _selectedTime?.hour == 16 &&
                                     _selectedTime?.minute == 0,
                                 onTap: () => setState(() => _selectedTime =
                                     const TimeOfDay(hour: 16, minute: 0)),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8.h),
                               _TimeListTile(
                                 label: '06:00 مساءً',
-                                baseFontSize: baseFontSize,
                                 selected: _selectedTime?.hour == 18 &&
                                     _selectedTime?.minute == 0,
                                 onTap: () => setState(() => _selectedTime =
@@ -405,15 +391,15 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                           Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.all(12),
+                            padding: EdgeInsets.all(12.r),
                             decoration: BoxDecoration(
                               color: isDark
                                   ? Colors.blueGrey[900]
                                   : const Color(0xFFEFF7FF),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(8.r),
                               border:
                                   Border.all(color: const Color(0xFFB3DAFF)),
                             ),
@@ -425,7 +411,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                     'جميع الخدمات تتم تحت إشراف مباشر من أعضاء هيئة التدريس بالكلية',
                                     style: TextStyle(
                                       fontFamily: 'Cairo',
-                                      fontSize: baseFontSize * 0.75, // 12
+                                      fontSize: 12.sp,
                                       color: isDark
                                           ? Colors.grey[200]
                                           : const Color(0xFF1F2937),
@@ -435,24 +421,24 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                 ),
                                 Icon(Icons.sticky_note_2_outlined,
                                     color: const Color(0xFF3B82F6),
-                                    size: baseFontSize * 1.25),
+                                    size: 20.r),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                           Row(
                             children: [
                               Expanded(
                                 child: InkWell(
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(8.r),
                                   onTap: () => Navigator.pop(context),
                                   child: Container(
-                                    height: 44,
+                                    height: 44.h,
                                     decoration: BoxDecoration(
                                       color: isDark
                                           ? Colors.grey[800]
                                           : const Color(0xFFF3F4F6),
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(8.r),
                                     ),
                                     child: Center(
                                       child: Text(
@@ -460,7 +446,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                         style: TextStyle(
                                           fontFamily: 'Cairo',
                                           fontWeight: FontWeight.w700,
-                                          fontSize: baseFontSize * 0.875, // 14
+                                          fontSize: 14.sp,
                                           color: isDark
                                               ? Colors.white
                                               : const Color(0xFF111827),
@@ -470,7 +456,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12.w),
                               Expanded(
                                 child: GestureDetector(
                                   onTap: _isBookingEnabled
@@ -499,12 +485,12 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                         }
                                       : null,
                                   child: Container(
-                                    height: 44,
+                                    height: 44.h,
                                     decoration: BoxDecoration(
                                       color: _isBookingEnabled
                                           ? const Color(0xFF10B981)
                                           : const Color(0xFF9CA3AF),
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(8.r),
                                     ),
                                     child: Center(
                                       child: Text(
@@ -512,7 +498,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                         style: TextStyle(
                                           fontFamily: 'Cairo',
                                           fontWeight: FontWeight.w700,
-                                          fontSize: baseFontSize * 0.875, // 14
+                                          fontSize: 14.sp,
                                           color: _isBookingEnabled
                                               ? Colors.white
                                               : Colors.white
@@ -525,7 +511,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                         ],
                       ),
                     ),
@@ -544,29 +530,27 @@ class _InfoTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final double baseFontSize;
 
   const _InfoTile(
       {required this.icon,
       required this.title,
-      required this.subtitle,
-      required this.baseFontSize});
+      required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
         color: isDark ? Colors.grey[800] : Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            blurRadius: 6.r,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
@@ -581,18 +565,18 @@ class _InfoTile extends StatelessWidget {
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: 'Cairo',
-                    fontSize: baseFontSize * 0.9375, // 15
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.bold,
                     color: isDark ? Colors.white : const Color(0xFF111827),
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Text(
                   subtitle,
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: 'Cairo',
-                    fontSize: baseFontSize * 0.875, // 14
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
                     color: isDark ? Colors.grey[300] : const Color(0xFF111827),
                   ),
@@ -600,7 +584,7 @@ class _InfoTile extends StatelessWidget {
               ],
             ),
           ),
-          Icon(icon, color: const Color(0xFF0B8FAC)),
+          Icon(icon, color: const Color(0xFF0B8FAC), size: 24.r),
         ],
       ),
     );
@@ -611,24 +595,22 @@ class _DayChip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback? onTap;
-  final double baseFontSize;
 
   const _DayChip(
       {required this.label,
       this.selected = false,
-      this.onTap,
-      required this.baseFontSize});
+      this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final BorderRadius radius = BorderRadius.circular(8);
+    final BorderRadius radius = BorderRadius.circular(8.r);
     final Widget child = Text(
       label,
       style: TextStyle(
         fontFamily: 'Cairo',
         fontWeight: FontWeight.w700,
-        fontSize: baseFontSize * 0.875, // 14
+        fontSize: 14.sp,
         color: selected
             ? Colors.white
             : (isDark ? Colors.grey[200] : const Color(0xFF111827)),
@@ -640,7 +622,7 @@ class _DayChip extends StatelessWidget {
         borderRadius: radius,
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               begin: Alignment.centerLeft,
@@ -657,7 +639,7 @@ class _DayChip extends StatelessWidget {
       borderRadius: radius,
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
           borderRadius: radius,
@@ -672,18 +654,16 @@ class _TimeListTile extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback? onTap;
-  final double baseFontSize;
 
   const _TimeListTile(
       {required this.label,
       this.selected = false,
-      this.onTap,
-      required this.baseFontSize});
+      this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final BorderRadius radius = BorderRadius.circular(10);
+    final BorderRadius radius = BorderRadius.circular(10.r);
     final Color borderColor = selected
         ? const Color(0xFF8DECB4)
         : (isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB));
@@ -692,7 +672,7 @@ class _TimeListTile extends StatelessWidget {
       style: TextStyle(
         fontFamily: 'Cairo',
         fontWeight: FontWeight.w700,
-        fontSize: baseFontSize * 0.875, // 14
+        fontSize: 14.sp,
         color: selected
             ? Colors.white
             : (isDark ? Colors.grey[200] : const Color(0xFF111827)),
@@ -703,8 +683,8 @@ class _TimeListTile extends StatelessWidget {
       borderRadius: radius,
       onTap: onTap,
       child: Container(
-        height: 48,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        height: 48.h,
+        padding: EdgeInsets.symmetric(horizontal: 14.w),
         decoration: BoxDecoration(
           gradient: selected
               ? const LinearGradient(
@@ -719,8 +699,8 @@ class _TimeListTile extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+              blurRadius: 4.r,
+              offset: Offset(0, 2.h),
             ),
           ],
         ),
@@ -728,7 +708,7 @@ class _TimeListTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Icon(Icons.access_time,
-                size: 18,
+                size: 18.r,
                 color: selected
                     ? Colors.white
                     : (isDark ? Colors.grey[200] : const Color(0xFF111827))),

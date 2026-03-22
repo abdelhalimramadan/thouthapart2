@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:thotha_mobile_app/core/helpers/constants.dart';
 import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
@@ -249,8 +250,6 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final baseFontSize = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -259,7 +258,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
           _isEditMode ? 'تعديل الطلب' : 'إضافة طلب حالة',
           style: TextStyles.font18DarkBlueBold.copyWith(
             fontFamily: 'Cairo',
-            fontSize: baseFontSize * 1.125,
+            fontSize: 18.sp,
             color: isDark ? Colors.white : null,
           ),
         ),
@@ -267,7 +266,9 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         backgroundColor: isDark ? const Color(0xFF2D2D2D) : Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(
-            color: isDark ? Colors.white : ColorsManager.darkBlue),
+          color: isDark ? Colors.white : ColorsManager.darkBlue,
+          size: 24.r,
+        ),
       ),
       backgroundColor:
           isDark ? const Color(0xFF1E1E1E) : ColorsManager.offWhite,
@@ -275,78 +276,80 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         child: Directionality(
           textDirection: ui.TextDirection.rtl,
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(width * 0.06),
+            padding: EdgeInsets.all(24.r),
             child: Form(
               key: _formKey,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                    maxWidth: width >= 600 ? 500 : double.infinity),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ── Header ────────────────────────────────────────
-                    Text(
-                      'بيانات الحالة',
-                      style: TextStyles.font18DarkBlueBold.copyWith(
-                        fontFamily: 'Cairo',
-                        fontSize: baseFontSize * 1.125,
-                        color: isDark ? Colors.white : null,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 500.w,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ── Header ────────────────────────────────────────
+                      Text(
+                        'بيانات الحالة',
+                        style: TextStyles.font18DarkBlueBold.copyWith(
+                          fontFamily: 'Cairo',
+                          fontSize: 18.sp,
+                          color: isDark ? Colors.white : null,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'قم بملء البيانات التالية لنشر طلب حالة جديد',
-                      style: TextStyles.font14GrayRegular.copyWith(
-                        fontFamily: 'Cairo',
-                        fontSize: baseFontSize * 0.875,
-                        color: isDark ? Colors.grey[400] : null,
+                      SizedBox(height: 8.h),
+                      Text(
+                        'قم بملء البيانات التالية لنشر طلب حالة جديد',
+                        style: TextStyles.font14GrayRegular.copyWith(
+                          fontFamily: 'Cairo',
+                          fontSize: 14.sp,
+                          color: isDark ? Colors.grey[400] : null,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
+                      SizedBox(height: 24.h),
 
-                    // ── Doctor Info Card (auto-filled) ────────────────
-                    _buildInfoCard(isDark, baseFontSize),
-                    const SizedBox(height: 24),
+                      // ── Doctor Info Card (auto-filled) ────────────────
+                      _buildInfoCard(isDark),
+                      SizedBox(height: 24.h),
 
-                    // ── DateTime picker ───────────────────────────────
-                    _buildLabel('التاريخ والوقت', baseFontSize, isDark),
-                    const SizedBox(height: 8),
-                    _buildDateTimePicker(isDark, baseFontSize, width),
-                    const SizedBox(height: 20),
+                      // ── DateTime picker ───────────────────────────────
+                      _buildLabel('التاريخ والوقت', isDark),
+                      SizedBox(height: 8.h),
+                      _buildDateTimePicker(isDark),
+                      SizedBox(height: 20.h),
 
-                    // ── Description ───────────────────────────────────
-                    _buildLabel('وصف الحالة (اختياري)', baseFontSize, isDark),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _descriptionController,
-                      maxLines: 4,
-                      maxLength: 500,
-                      textDirection: ui.TextDirection.rtl,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        color: isDark ? Colors.white : Colors.black,
+                      // ── Description ───────────────────────────────────
+                      _buildLabel('وصف الحالة (اختياري)', isDark),
+                      SizedBox(height: 8.h),
+                      TextFormField(
+                        controller: _descriptionController,
+                        maxLines: 4,
+                        maxLength: 500,
+                        textDirection: ui.TextDirection.rtl,
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          color: isDark ? Colors.white : Colors.black,
+                          fontSize: 14.sp,
+                        ),
+                        decoration: _buildDecoration(
+                          hint: 'أضف وصفاً تفصيلياً للحالة...',
+                          icon: Icons.description_outlined,
+                          isDark: isDark,
+                        ),
                       ),
-                      decoration: _buildDecoration(
-                        hint: 'أضف وصفاً تفصيلياً للحالة...',
-                        icon: Icons.description_outlined,
-                        isDark: isDark,
-                        width: width,
-                        baseFontSize: baseFontSize,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
+                      SizedBox(height: 32.h),
 
-                    // ── Publish Button ────────────────────────────────
-                    AppTextButton(
-                      buttonText: _isEditMode ? 'تحديث الطلب' : 'نشر الطلب',
-                      textStyle: TextStyles.font16WhiteSemiBold.copyWith(
-                        fontFamily: 'Cairo',
-                        fontSize: baseFontSize,
+                      // ── Publish Button ────────────────────────────────
+                      AppTextButton(
+                        buttonText: _isEditMode ? 'تحديث الطلب' : 'نشر الطلب',
+                        textStyle: TextStyles.font16WhiteSemiBold.copyWith(
+                          fontFamily: 'Cairo',
+                          fontSize: 16.sp,
+                        ),
+                        backgroundColor: ColorsManager.mainBlue,
+                        onPressed: _publishRequest,
                       ),
-                      backgroundColor: ColorsManager.mainBlue,
-                      onPressed: _publishRequest,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -358,21 +361,21 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
 
   // ── Doctor Info Card ──────────────────────────────────────────────────────
 
-  Widget _buildInfoCard(bool isDark, double baseFontSize) {
+  Widget _buildInfoCard(bool isDark) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF2D2D2D) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            blurRadius: 8.r,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
@@ -385,15 +388,13 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                   label: 'الاسم',
                   value: '$_firstName $_lastName',
                   isDark: isDark,
-                  baseFontSize: baseFontSize,
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
                 _buildInfoRow(
                   icon: Icons.medical_services_outlined,
                   label: 'التخصص',
                   value: _category.isNotEmpty ? _category : 'غير محدد',
                   isDark: isDark,
-                  baseFontSize: baseFontSize,
                 ),
               ],
             ),
@@ -405,19 +406,20 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
     required String label,
     required String value,
     required bool isDark,
-    required double baseFontSize,
   }) {
     return Row(
       children: [
-        Icon(icon,
-            color: isDark ? Colors.grey[400] : ColorsManager.mainBlue,
-            size: 20),
-        const SizedBox(width: 10),
+        Icon(
+          icon,
+          color: isDark ? Colors.grey[400] : ColorsManager.mainBlue,
+          size: 20.r,
+        ),
+        SizedBox(width: 10.w),
         Text(
           '$label: ',
           style: TextStyle(
             fontFamily: 'Cairo',
-            fontSize: baseFontSize * 0.875,
+            fontSize: 14.sp,
             color: isDark ? Colors.grey[400] : Colors.grey[600],
             fontWeight: FontWeight.w500,
           ),
@@ -427,7 +429,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
             value,
             style: TextStyle(
               fontFamily: 'Cairo',
-              fontSize: baseFontSize * 0.875,
+              fontSize: 14.sp,
               color: isDark ? Colors.white : Colors.black87,
               fontWeight: FontWeight.w600,
             ),
@@ -440,7 +442,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
 
   // ── DateTime Picker ───────────────────────────────────────────────────────
 
-  Widget _buildDateTimePicker(bool isDark, double baseFontSize, double width) {
+  Widget _buildDateTimePicker(bool isDark) {
     final hasDate = _selectedDate != null;
     final hasTime = _selectedTime != null;
 
@@ -451,12 +453,12 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
           child: GestureDetector(
             onTap: _pickDate,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
               decoration: BoxDecoration(
                 color: isDark
                     ? const Color(0xFF2D2D2D)
                     : ColorsManager.moreLighterGray,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(
                   color:
                       isDark ? Colors.grey.shade700 : ColorsManager.lighterGray,
@@ -465,17 +467,18 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.calendar_today_outlined,
-                      size: 18,
-                      color:
-                          isDark ? Colors.grey[400] : ColorsManager.mainBlue),
-                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    size: 18.r,
+                    color: isDark ? Colors.grey[400] : ColorsManager.mainBlue,
+                  ),
+                  SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
                       hasDate ? _formattedDate : 'التاريخ',
                       style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: baseFontSize * 0.8,
+                        fontSize: 13.sp,
                         color: hasDate
                             ? (isDark ? Colors.white : Colors.black87)
                             : Colors.grey,
@@ -487,18 +490,18 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12.w),
         // Time
         Expanded(
           child: GestureDetector(
             onTap: _pickTime,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
               decoration: BoxDecoration(
                 color: isDark
                     ? const Color(0xFF2D2D2D)
                     : ColorsManager.moreLighterGray,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(
                   color:
                       isDark ? Colors.grey.shade700 : ColorsManager.lighterGray,
@@ -507,17 +510,18 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.access_time_outlined,
-                      size: 18,
-                      color:
-                          isDark ? Colors.grey[400] : ColorsManager.mainBlue),
-                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.access_time_outlined,
+                    size: 18.r,
+                    color: isDark ? Colors.grey[400] : ColorsManager.mainBlue,
+                  ),
+                  SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
                       hasTime ? _formattedTime : 'الوقت',
                       style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: baseFontSize * 0.8,
+                        fontSize: 13.sp,
                         color: hasTime
                             ? (isDark ? Colors.white : Colors.black87)
                             : Colors.grey,
@@ -535,12 +539,12 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  Widget _buildLabel(String label, double baseFontSize, bool isDark) {
+  Widget _buildLabel(String label, bool isDark) {
     return Text(
       label,
       style: TextStyles.font14DarkBlueMedium.copyWith(
         fontFamily: 'Cairo',
-        fontSize: baseFontSize * 0.875,
+        fontSize: 14.sp,
         color: isDark ? Colors.white : null,
       ),
     );
@@ -550,41 +554,42 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
     required String hint,
     required IconData icon,
     required bool isDark,
-    required double width,
-    required double baseFontSize,
   }) {
     return InputDecoration(
       isDense: true,
-      contentPadding:
-          EdgeInsets.symmetric(horizontal: width * 0.04, vertical: 16),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       hintText: hint,
       hintStyle: TextStyle(
         fontFamily: 'Cairo',
-        fontSize: baseFontSize * 0.875,
+        fontSize: 14.sp,
         color: isDark ? Colors.grey[500] : Colors.grey[400],
       ),
-      prefixIcon: Icon(icon,
-          color: isDark ? Colors.grey[400] : ColorsManager.mainBlue, size: 22),
+      prefixIcon: Icon(
+        icon,
+        color: isDark ? Colors.grey[400] : ColorsManager.mainBlue,
+        size: 22.r,
+      ),
       fillColor:
           isDark ? const Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
       filled: true,
       enabledBorder: OutlineInputBorder(
         borderSide: BorderSide(
-            color: isDark ? Colors.grey.shade700 : ColorsManager.lighterGray,
-            width: 1.3),
-        borderRadius: BorderRadius.circular(16),
+          color: isDark ? Colors.grey.shade700 : ColorsManager.lighterGray,
+          width: 1.3,
+        ),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       focusedBorder: OutlineInputBorder(
         borderSide: const BorderSide(color: ColorsManager.mainBlue, width: 1.3),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       errorBorder: OutlineInputBorder(
         borderSide: const BorderSide(color: Colors.red, width: 1.3),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderSide: const BorderSide(color: Colors.red, width: 1.3),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
       ),
     );
   }

@@ -316,12 +316,8 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final height = size.height;
-    final baseFontSize = width * 0.04;
+    final height = 1.sh;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -330,7 +326,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
           style: TextStyle(
             fontFamily: 'Cairo',
             fontWeight: FontWeight.w700,
-            fontSize: baseFontSize * 1.125,
+            fontSize: 18.sp,
           ),
         ),
         centerTitle: true,
@@ -338,12 +334,14 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
       floatingActionButton: (widget.showAddCaseButton && _isDoctorLoggedIn)
           ? FloatingActionButton.extended(
               onPressed: () => _updateCategoryAndNavigate(),
-              label: const Text(
+              label: Text(
                 'نشر حالة جديدة',
-                style:
-                    TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp),
               ),
-              icon: const Icon(Icons.add_task_rounded, color: Colors.white),
+              icon: Icon(Icons.add_task_rounded, color: Colors.white, size: 24.r),
               backgroundColor: ColorsManager.mainBlue,
             )
           : null,
@@ -358,7 +356,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                       physics: const AlwaysScrollableScrollPhysics(),
                       children: [
                         SizedBox(height: height * 0.2),
-                        _buildError(baseFontSize),
+                        _buildError(),
                       ],
                     )
                   : _requests.isEmpty
@@ -366,30 +364,27 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                           physics: const AlwaysScrollableScrollPhysics(),
                           children: [
                             SizedBox(height: height * 0.2),
-                            _buildEmpty(baseFontSize, width),
+                            _buildEmpty(),
                           ],
                         )
                       : ListView.separated(
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: EdgeInsets.fromLTRB(
-                            width * 0.04,
-                            16,
-                            width * 0.04,
-                            100, // space for FAB
+                            16.w,
+                            16.h,
+                            16.w,
+                            100.h, // space for FAB
                           ),
                           itemCount: _requests.length,
                           separatorBuilder: (context, index) =>
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16.h),
                           itemBuilder: (context, index) {
                             return GestureDetector(
                               onTap: () => _showCaseDetails(_requests[index]),
                               child: _buildRequestCard(
                                 context,
                                 _requests[index],
-                                width,
-                                baseFontSize,
                                 isDark,
-                                theme,
                                 _isDoctorLoggedIn,
                               ),
                             );
@@ -403,21 +398,19 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
   Widget _buildRequestCard(
     BuildContext context,
     CaseRequestModel req,
-    double width,
-    double baseFontSize,
     bool isDark,
-    ThemeData theme,
     bool isLoggedIn,
   ) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            blurRadius: 8.r,
+            offset: Offset(0, 3.h),
           ),
         ],
         border: Border.all(
@@ -425,7 +418,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -438,7 +431,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                     req.categoryName,
                     style: TextStyle(
                       fontFamily: 'Cairo',
-                      fontSize: baseFontSize * 1.05,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
                       color: ColorsManager.mainBlue,
                     ),
@@ -449,32 +442,32 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                   children: [
                     if (req.id != null)
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 3),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 10.w, vertical: 3.h),
                         decoration: BoxDecoration(
                           color: ColorsManager.mainBlue.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(20.r),
                         ),
                         child: Text(
                           '#${req.id}',
                           style: TextStyle(
                             fontFamily: 'Cairo',
-                            fontSize: baseFontSize * 0.72,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.bold,
                             color: ColorsManager.mainBlue,
                           ),
                         ),
                       ),
                     if (isLoggedIn) ...[
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8.w),
                       Material(
                         color: Colors.red.withOpacity(0.08),
                         shape: const CircleBorder(),
                         child: IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.delete_outline_rounded,
                             color: Colors.red,
-                            size: 20,
+                            size: 20.r,
                           ),
                           tooltip: 'حذف الطلب',
                           onPressed: () => _deleteRequest(req),
@@ -487,17 +480,17 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
             ),
 
             // Doctor name
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Row(
               children: [
-                Icon(Icons.person_outline, size: 15, color: Colors.grey[500]),
-                const SizedBox(width: 4),
+                Icon(Icons.person_outline, size: 15.r, color: Colors.grey[500]),
+                SizedBox(width: 4.w),
                 Expanded(
                   child: Text(
                     req.doctorFullName,
                     style: TextStyle(
                       fontFamily: 'Cairo',
-                      fontSize: baseFontSize * 0.88,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: isDark ? Colors.grey[200] : Colors.grey[800],
                     ),
@@ -510,12 +503,12 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
             // City · University
             if (req.doctorCityName.isNotEmpty ||
                 req.doctorUniversityName.isNotEmpty) ...[
-              const SizedBox(height: 5),
+              SizedBox(height: 5.h),
               Row(
                 children: [
                   Icon(Icons.location_on_outlined,
-                      size: 15, color: Colors.grey[500]),
-                  const SizedBox(width: 4),
+                      size: 15.r, color: Colors.grey[500]),
+                  SizedBox(width: 4.w),
                   Expanded(
                     child: Text(
                       [req.doctorCityName, req.doctorUniversityName]
@@ -523,7 +516,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                           .join(' · '),
                       style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: baseFontSize * 0.82,
+                        fontSize: 13.sp,
                         color: isDark ? Colors.grey[400] : Colors.grey[600],
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -535,16 +528,17 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
 
             // Phone
             if (req.doctorPhoneNumber.isNotEmpty) ...[
-              const SizedBox(height: 5),
+              SizedBox(height: 5.h),
               Row(
                 children: [
-                  Icon(Icons.phone_outlined, size: 15, color: Colors.grey[500]),
-                  const SizedBox(width: 4),
+                  Icon(Icons.phone_outlined,
+                      size: 15.r, color: Colors.grey[500]),
+                  SizedBox(width: 4.w),
                   Text(
                     req.doctorPhoneNumber,
                     style: TextStyle(
                       fontFamily: 'Cairo',
-                      fontSize: baseFontSize * 0.82,
+                      fontSize: 13.sp,
                       color: isDark ? Colors.grey[400] : Colors.grey[600],
                     ),
                   ),
@@ -555,19 +549,19 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
             // Description
             if (req.description.isNotEmpty &&
                 req.description != 'No details') ...[
-              const SizedBox(height: 10),
+              SizedBox(height: 10.h),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(10.r),
                 decoration: BoxDecoration(
                   color: isDark ? Colors.grey[850] : const Color(0xFFF9FAFB),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(
                   req.description,
                   style: TextStyle(
                     fontFamily: 'Cairo',
-                    fontSize: baseFontSize * 0.85,
+                    fontSize: 14.sp,
                     color: isDark ? Colors.grey[200] : Colors.grey[800],
                     height: 1.5,
                   ),
@@ -575,9 +569,9 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
               ),
             ],
 
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             const Divider(height: 1),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
 
             // Date and time chips + Book Now (for Guest)
             Row(
@@ -588,15 +582,13 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                       _buildChip(
                         icon: Icons.calendar_today_outlined,
                         text: req.formattedDate,
-                        baseFontSize: baseFontSize,
                         isDark: isDark,
                       ),
-                      const SizedBox(width: 10),
+                      SizedBox(width: 10.w),
                       if (req.formattedTime.isNotEmpty)
                         _buildChip(
                           icon: Icons.access_time_outlined,
                           text: req.formattedTime,
-                          baseFontSize: baseFontSize,
                           isDark: isDark,
                         ),
                     ],
@@ -650,25 +642,24 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
   Widget _buildChip({
     required IconData icon,
     required String text,
-    required double baseFontSize,
     required bool isDark,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
       decoration: BoxDecoration(
         color: isDark ? Colors.grey[800] : Colors.grey[100],
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: ColorsManager.mainBlue),
-          const SizedBox(width: 5),
+          Icon(icon, size: 14.r, color: ColorsManager.mainBlue),
+          SizedBox(width: 5.w),
           Text(
             text,
             style: TextStyle(
               fontFamily: 'Cairo',
-              fontSize: baseFontSize * 0.75,
+              fontSize: 12.sp,
               color: isDark ? Colors.grey[200] : Colors.grey[800],
             ),
           ),
@@ -677,32 +668,32 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     );
   }
 
-  Widget _buildEmpty(double baseFontSize, double width) {
+  Widget _buildEmpty() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.assignment_outlined,
-            size: 70 * (width / 390),
+            size: 70.r,
             color: Colors.grey[400],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Text(
             'لا توجد حالات في هذا التخصص حالياً',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Cairo',
-              fontSize: baseFontSize * 0.95,
+              fontSize: 16.sp,
               color: Colors.grey[600],
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             'كن أول من ينشر حالة!',
             style: TextStyle(
               fontFamily: 'Cairo',
-              fontSize: baseFontSize * 0.85,
+              fontSize: 14.sp,
               color: ColorsManager.mainBlue,
               fontWeight: FontWeight.w600,
             ),
@@ -712,26 +703,26 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     );
   }
 
-  Widget _buildError(double baseFontSize) {
+  Widget _buildError() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline_rounded,
-              size: 56, color: Colors.redAccent),
-          const SizedBox(height: 12),
+          Icon(Icons.error_outline_rounded,
+              size: 56.r, color: Colors.redAccent),
+          SizedBox(height: 12.h),
           Text(
             _error ?? 'حدث خطأ غير متوقع',
             textAlign: TextAlign.center,
-            style:
-                const TextStyle(fontFamily: 'Cairo', color: Colors.redAccent),
+            style: TextStyle(
+                fontFamily: 'Cairo', color: Colors.redAccent, fontSize: 14.sp),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           ElevatedButton.icon(
             onPressed: _loadRequests,
-            icon: const Icon(Icons.refresh),
-            label: const Text('إعادة المحاولة',
-                style: TextStyle(fontFamily: 'Cairo')),
+            icon: Icon(Icons.refresh, size: 20.r),
+            label: Text('إعادة المحاولة',
+                style: TextStyle(fontFamily: 'Cairo', fontSize: 14.sp)),
             style: ElevatedButton.styleFrom(
                 backgroundColor: ColorsManager.mainBlue),
           ),
@@ -758,16 +749,14 @@ class _CaseDetailsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final width = MediaQuery.of(context).size.width;
-    final baseFontSize = width * 0.04;
 
     return Container(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
       padding: EdgeInsets.fromLTRB(
-          20, 12, 20, MediaQuery.of(context).viewInsets.bottom + 24),
+          20.w, 12.h, 20.w, MediaQuery.of(context).viewInsets.bottom + 24.h),
       child: SingleChildScrollView(
         child: Directionality(
           textDirection: TextDirection.rtl,
@@ -778,12 +767,12 @@ class _CaseDetailsSheet extends StatelessWidget {
               // ── Drag handle ──
               Center(
                 child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
+                  width: 40.w,
+                  height: 4.h,
+                  margin: EdgeInsets.only(bottom: 16.h),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
               ),
@@ -794,70 +783,63 @@ class _CaseDetailsSheet extends StatelessWidget {
                   'تفاصيل الحالة',
                   style: TextStyle(
                     fontFamily: 'Cairo',
-                    fontSize: baseFontSize * 1.2,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
                     color: isDark ? Colors.white : Colors.black87,
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               Divider(color: isDark ? Colors.grey[700] : Colors.grey[200]),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
 
               // ── Details rows ──
               _DetailRow(
                   icon: Icons.medical_services_outlined,
                   label: 'التخصص',
                   value: req.categoryName,
-                  isDark: isDark,
-                  baseFontSize: baseFontSize),
+                  isDark: isDark),
               _DetailRow(
                   icon: Icons.person_outline,
                   label: 'الطبيب',
                   value: req.doctorFullName,
-                  isDark: isDark,
-                  baseFontSize: baseFontSize),
+                  isDark: isDark),
               _DetailRow(
                   icon: Icons.phone_outlined,
                   label: 'الهاتف',
                   value: req.doctorPhoneNumber,
-                  isDark: isDark,
-                  baseFontSize: baseFontSize),
+                  isDark: isDark),
               _DetailRow(
                   icon: Icons.location_city_outlined,
                   label: 'المدينة',
                   value: req.doctorCityName,
-                  isDark: isDark,
-                  baseFontSize: baseFontSize),
+                  isDark: isDark),
               _DetailRow(
                   icon: Icons.school_outlined,
                   label: 'الجامعة',
                   value: req.doctorUniversityName,
-                  isDark: isDark,
-                  baseFontSize: baseFontSize),
+                  isDark: isDark),
               _DetailRow(
                   icon: Icons.calendar_today_outlined,
                   label: 'التاريخ',
                   value: req.formattedDate,
-                  isDark: isDark,
-                  baseFontSize: baseFontSize),
+                  isDark: isDark),
               _DetailRow(
                   icon: Icons.access_time_outlined,
                   label: 'الوقت',
                   value: req.formattedTime,
-                  isDark: isDark,
-                  baseFontSize: baseFontSize),
+                  isDark: isDark),
 
               // ── Description ──
               if (req.description.isNotEmpty &&
                   req.description != 'No details') ...[
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(12.r),
                   decoration: BoxDecoration(
                     color: isDark ? Colors.grey[850] : const Color(0xFFF9FAFB),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                     border: Border.all(
                         color: isDark
                             ? Colors.grey[700]!
@@ -867,7 +849,7 @@ class _CaseDetailsSheet extends StatelessWidget {
                     req.description,
                     style: TextStyle(
                       fontFamily: 'Cairo',
-                      fontSize: baseFontSize * 0.9,
+                      fontSize: 14.sp,
                       color: isDark ? Colors.grey[200] : Colors.grey[800],
                       height: 1.6,
                     ),
@@ -875,22 +857,22 @@ class _CaseDetailsSheet extends StatelessWidget {
                 ),
               ],
 
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // ── Book Now button ──
               if (showBookNow)
                 SizedBox(
                   width: double.infinity,
-                  height: 52,
+                  height: 52.h,
                   child: ElevatedButton.icon(
                     onPressed: onBookNow,
-                    icon: const Icon(Icons.calendar_month_rounded,
-                        color: Colors.white),
+                    icon: Icon(Icons.calendar_month_rounded,
+                        color: Colors.white, size: 24.r),
                     label: Text(
                       'احجز الآن',
                       style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: baseFontSize * 1.05,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -898,7 +880,7 @@ class _CaseDetailsSheet extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorsManager.mainBlue,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                          borderRadius: BorderRadius.circular(14.r)),
                       elevation: 2,
                     ),
                   ),
@@ -919,31 +901,29 @@ class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
   final bool isDark;
-  final double baseFontSize;
 
   const _DetailRow({
     required this.icon,
     required this.label,
     required this.value,
     required this.isDark,
-    required this.baseFontSize,
   });
 
   @override
   Widget build(BuildContext context) {
     if (value.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: 6.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: ColorsManager.mainBlue),
-          const SizedBox(width: 10),
+          Icon(icon, size: 18.r, color: ColorsManager.mainBlue),
+          SizedBox(width: 10.w),
           Text(
             '$label: ',
             style: TextStyle(
               fontFamily: 'Cairo',
-              fontSize: baseFontSize * 0.88,
+              fontSize: 14.sp,
               fontWeight: FontWeight.bold,
               color: isDark ? Colors.grey[300] : Colors.grey[700],
             ),
@@ -953,7 +933,7 @@ class _DetailRow extends StatelessWidget {
               value,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: baseFontSize * 0.88,
+                fontSize: 14.sp,
                 color: isDark ? Colors.grey[100] : Colors.grey[900],
               ),
             ),

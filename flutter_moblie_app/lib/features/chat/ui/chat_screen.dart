@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thotha_mobile_app/core/networking/api_constants.dart';
 import 'package:thotha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
@@ -18,15 +19,10 @@ class _ChatScreenState extends State<ChatScreen> {
     'Content-Type': 'application/json'
   };
 
-  // CSS equivalents:
-  // --color-1: #95F8C9 (unused in web UI)
-  // --color-2: #53CAF9
-  // --color-3: #53caf928
   static const Color _color2 = Color(0xFF53CAF9);
   static const Color _color3 = Color(0x2853CAF9);
   static const Color _outline = Color(0xFFCCCCE5);
   static const String _thinkingText = 'يفكر.....';
-  static const Color _textInk = Color(0xFF083B52);
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -167,7 +163,7 @@ class _ChatScreenState extends State<ChatScreen> {
         if (a is Map) {
           final aid = (a['id'] ?? a['answer_id'] ?? a['value'])?.toString();
           final at = (a['text'] ?? a['label'] ?? a['answer_text'] ?? a['title'])
-              ?.toString();
+               ?.toString();
           if (aid != null && aid.isNotEmpty && at != null && at.isNotEmpty) {
             answers.add(_FlowAnswer(id: aid, text: at));
           }
@@ -270,9 +266,6 @@ class _ChatScreenState extends State<ChatScreen> {
       final res = await _dio.get('/category/getCategories');
       final data = res.data;
 
-      // API may return:
-      // - List directly: [ {id, name, name_ar, ...}, ... ]
-      // - Map wrapper: { categories: [...] } OR { data: [...] }
       final List? raw = data is List
           ? data
           : (data is Map ? (data['categories'] ?? data['data']) as List? : null);
@@ -366,22 +359,15 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final mq = MediaQuery.of(context);
-    final width = mq.size.width;
     final theme = Theme.of(context);
 
-    // Match CSS-ish responsive font sizing (clamp(0.85rem..0.95rem)).
-    final baseFontSize = (width * 0.036).clamp(13.0, 16.0);
-
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Column(
         children: [
-          _header(width, baseFontSize, theme),
+          _header(theme),
           Expanded(
             child: _chatBody(
-              width,
-              baseFontSize,
               theme,
               bottomPadding: _chatMode ? 0 : 0,
             ),
@@ -389,24 +375,27 @@ class _ChatScreenState extends State<ChatScreen> {
           if (_chatMode)
             SafeArea(
               top: false,
-              child: _footer(width, baseFontSize, theme),
+              child: _footer(theme),
             ),
         ],
       ),
     );
   }
 
-  Widget _header(double width, double baseFontSize, ThemeData theme) {
+  Widget _header(ThemeData theme) {
     final topPad = MediaQuery.of(context).padding.top;
     return Container(
       padding: EdgeInsets.only(
-        left: 22,
-        right: 22,
-        bottom: 15,
-        top: topPad + 15,
+        left: 22.w,
+        right: 22.w,
+        bottom: 15.h,
+        top: topPad + 15.h,
       ),
-      decoration: const BoxDecoration(
-        color: _color2,
+      decoration: BoxDecoration(
+        color: theme.brightness == Brightness.dark ? theme.cardColor : _color2,
+        border: theme.brightness == Brightness.dark 
+            ? Border(bottom: BorderSide(color: theme.dividerColor)) 
+            : null,
       ),
       child: Stack(
         alignment: Alignment.center,
@@ -415,14 +404,14 @@ class _ChatScreenState extends State<ChatScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SvgPicture.asset('assets/svg/ثوثه الدكتور 1.svg',
-                  width: 32 * (width / 390), height: 32 * (width / 390)),
-              const SizedBox(width: 8),
+                  width: 32.r, height: 32.r),
+              SizedBox(width: 8.w),
               Text(
                 'ثوثة الطبيب الذكي',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,
-                  fontSize: baseFontSize * 1.1,
+                  fontSize: 18.sp,
                   color: Colors.white,
                 ),
               ),
@@ -442,12 +431,12 @@ class _ChatScreenState extends State<ChatScreen> {
                   );
                 }
               },
-              child: const Padding(
-                padding: EdgeInsets.all(8),
+              child: Padding(
+                padding: EdgeInsets.all(8.r),
                 child: Icon(
                   Icons.arrow_forward_ios,
                   color: Colors.white,
-                  size: 24,
+                  size: 24.r,
                 ),
               ),
             ),
@@ -458,70 +447,73 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _chatBody(
-    double width,
-    double baseFontSize,
     ThemeData theme, {
     required double bottomPadding,
   }) {
     return SingleChildScrollView(
       controller: _scrollController,
-      padding: EdgeInsets.fromLTRB(width * 0.05, 25, width * 0.05,
-          25 + (bottomPadding > 0 ? bottomPadding : 0)),
+      padding: EdgeInsets.fromLTRB(16.w, 25.h, 16.w,
+          25.h + (bottomPadding > 0 ? bottomPadding : 0)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _botMessage('👋🏻 اهلا بك\nازاى اقدر اساعدك؟', width, baseFontSize),
+          _botMessage('👋🏻 اهلا بك\nازاى اقدر اساعدك؟'),
           if (_isLoading && _flowItems.isEmpty) ...[
-            const SizedBox(height: 16),
-            _botMessage('...جاري تجهيز الأسئلة', width, baseFontSize),
+            SizedBox(height: 16.h),
+            _botMessage('...جاري تجهيز الأسئلة'),
           ],
           for (final item in _flowItems) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             if (item.type == _FlowType.question) ...[
-              _botMessage(item.question!.text, width, baseFontSize),
+              _botMessage(item.question!.text),
               if (!_chatMode &&
                   _activeQuestionId == item.question!.id &&
                   item.question!.answers.isNotEmpty) ...[
-                const SizedBox(height: 14),
-                _quickReplies(item.question!, width, baseFontSize),
+                SizedBox(height: 14.h),
+                _quickReplies(item.question!),
               ],
             ] else if (item.type == _FlowType.result) ...[
-              _botMessage(item.text, width, baseFontSize),
+              _botMessage(item.text),
               if (item.category != null) ...[
-                const SizedBox(height: 14),
-                _resultButton(item.category!, width, baseFontSize),
+                SizedBox(height: 14.h),
+                _resultButton(item.category!),
               ],
             ] else ...[
-              _userMessage(item.text, width, baseFontSize),
+              _userMessage(item.text),
             ],
           ],
           for (final m in _chatHistory) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             if (m.role == _ChatRole.user)
-              _userMessage(m.text, width, baseFontSize)
+              _userMessage(m.text)
             else
-              _botMessage(m.text, width, baseFontSize),
+              _botMessage(m.text),
           ],
         ],
       ),
     );
   }
 
-  Widget _footer(double width, double baseFontSize, ThemeData theme) {
+  Widget _footer(ThemeData theme) {
     final hasText = _inputController.text.trim().isNotEmpty;
     final isFocused = _inputFocusNode.hasFocus;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(22, 15, 22, 20),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      padding: EdgeInsets.fromLTRB(22.w, 15.h, 22.w, 20.h),
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        border: theme.brightness == Brightness.dark 
+            ? Border(top: BorderSide(color: theme.dividerColor)) 
+            : null,
       ),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
+          color: theme.brightness == Brightness.dark ? theme.cardColor : Colors.white,
+          borderRadius: BorderRadius.circular(32.r),
           border: Border.all(
-              color: isFocused ? _color2 : _outline, width: isFocused ? 2 : 1),
+              color: isFocused ? _color2 : (theme.brightness == Brightness.dark ? Colors.grey[700]! : _outline), 
+              width: isFocused ? 2 : 1),
         ),
         child: Row(
           children: [
@@ -531,30 +523,33 @@ class _ChatScreenState extends State<ChatScreen> {
                 focusNode: _inputFocusNode,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _sendChatMessage(),
-                style: const TextStyle(fontFamily: 'Cairo', color: _textInk),
+                style: TextStyle(
+                    fontFamily: 'Cairo', 
+                    color: theme.colorScheme.onSurface,
+                    fontSize: 16.sp),
                 decoration: InputDecoration(
                   hintText: 'اكتب رسالتك..............................',
-                  hintStyle: const TextStyle(
-                      fontFamily: 'Cairo', color: Color(0xFF6B8090)),
+                  hintStyle: TextStyle(
+                      fontFamily: 'Cairo', color: Color(0xFF6B8090), fontSize: 14.sp),
                   border: InputBorder.none,
                   contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
+                      EdgeInsets.symmetric(horizontal: 17.w, vertical: 12.h),
                 ),
               ),
             ),
             if (hasText)
               Padding(
-                padding: const EdgeInsets.only(left: 8),
+                padding: EdgeInsets.only(left: 8.w),
                 child: InkWell(
                   onTap: _isLoading ? null : _sendChatMessage,
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(999.r),
                   child: Container(
-                    height: 35,
-                    width: 35,
+                    height: 35.r,
+                    width: 35.r,
                     decoration: const BoxDecoration(
                         shape: BoxShape.circle, color: _color2),
-                    child: const Icon(Icons.arrow_upward,
-                        color: Colors.white, size: 18),
+                    child: Icon(Icons.arrow_upward,
+                        color: Colors.white, size: 18.r),
                   ),
                 ),
               ),
@@ -564,32 +559,35 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _botAvatar({required double size, required double factor}) {
+  Widget _botAvatar({required double size}) {
     return Container(
-      height: size * factor,
-      width: size * factor,
-      padding: EdgeInsets.all(size * factor * 0.18),
+      height: size.r,
+      width: size.r,
+      padding: EdgeInsets.all(size.r * 0.18),
       decoration: const BoxDecoration(color: _color2, shape: BoxShape.circle),
       child: SvgPicture.asset('assets/svg/ثوثه الدكتور 1.svg'),
     );
   }
 
-  Widget _botMessage(String text, double width, double baseFontSize) {
+  Widget _botMessage(String text) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Flexible(
           child: Container(
-            constraints: BoxConstraints(maxWidth: width * 0.75),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            constraints: BoxConstraints(maxWidth: 0.75.sw),
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             decoration: BoxDecoration(
-              color: _color3,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(13),
-                topRight: Radius.circular(13),
-                bottomRight: Radius.circular(13),
-                bottomLeft: Radius.circular(3),
+              color: theme.brightness == Brightness.dark 
+                  ? theme.colorScheme.surfaceVariant.withOpacity(0.5) 
+                  : _color3,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(13.r),
+                topRight: Radius.circular(13.r),
+                bottomRight: Radius.circular(13.r),
+                bottomLeft: Radius.circular(3.r),
               ),
             ),
             child: Text(
@@ -597,33 +595,33 @@ class _ChatScreenState extends State<ChatScreen> {
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: baseFontSize,
+                fontSize: 14.sp,
                 height: 1.5,
-                color: _textInk,
+                color: theme.colorScheme.onSurface,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
         ),
-        const SizedBox(width: 8),
-        _botAvatar(size: 32, factor: width / 390),
+        SizedBox(width: 8.w),
+        _botAvatar(size: 32),
       ],
     );
   }
 
-  Widget _userMessage(String text, double width, double baseFontSize) {
+  Widget _userMessage(String text) {
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
-        constraints: BoxConstraints(maxWidth: width * 0.75),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        constraints: BoxConstraints(maxWidth: 0.75.sw),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: _color2,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(13),
-            topRight: Radius.circular(13),
-            bottomRight: Radius.circular(3),
-            bottomLeft: Radius.circular(13),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(13.r),
+            topRight: Radius.circular(13.r),
+            bottomRight: Radius.circular(3.r),
+            bottomLeft: Radius.circular(13.r),
           ),
         ),
         child: Text(
@@ -631,7 +629,7 @@ class _ChatScreenState extends State<ChatScreen> {
           textAlign: TextAlign.right,
           style: TextStyle(
             fontFamily: 'Cairo',
-            fontSize: baseFontSize,
+            fontSize: 14.sp,
             height: 1.5,
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -641,7 +639,8 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _quickReplies(_FlowQuestion q, double width, double baseFontSize) {
+  Widget _quickReplies(_FlowQuestion q) {
+    final theme = Theme.of(context);
     final answers = q.answers;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -652,12 +651,16 @@ class _ChatScreenState extends State<ChatScreen> {
             child: ElevatedButton(
               onPressed: _isLoading ? null : () => _submitAnswer(q, a),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _color3,
-                foregroundColor: const Color(0xFF083B52),
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                backgroundColor: theme.brightness == Brightness.dark 
+                    ? theme.cardColor 
+                    : _color3,
+                foregroundColor: theme.colorScheme.onSurface,
+                side: theme.brightness == Brightness.dark 
+                    ? BorderSide(color: theme.dividerColor) 
+                    : null,
+                padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(999.r),
                 ),
               ),
               child: Text(
@@ -665,13 +668,13 @@ class _ChatScreenState extends State<ChatScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Cairo',
-                  fontSize: baseFontSize,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
         ],
       ],
     );
@@ -699,19 +702,19 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  Widget _resultButton(String category, double width, double baseFontSize) {
+  Widget _resultButton(String category) {
     return Column(
       children: [
         Center(
           child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 6),
+            margin: EdgeInsets.symmetric(vertical: 6.h),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
                   color: _color2.withValues(alpha: 0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  blurRadius: 10.r,
+                  offset: Offset(0, 4.h),
                 ),
               ],
             ),
@@ -722,12 +725,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 foregroundColor: Colors.white,
                 elevation: 0,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                    EdgeInsets.symmetric(horizontal: 28.w, vertical: 14.h),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
+                    borderRadius: BorderRadius.circular(16.r)),
               ),
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: width * 0.75),
+                constraints: BoxConstraints(maxWidth: 0.75.sw),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [
@@ -739,30 +742,30 @@ class _ChatScreenState extends State<ChatScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontFamily: 'Cairo',
-                          fontSize: (baseFontSize + 1).clamp(14.0, 16.0),
+                          fontSize: 15.sp,
                           fontWeight: FontWeight.w700,
                           height: 1.2,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    const Icon(Icons.arrow_back_rounded, size: 20),
+                    SizedBox(width: 10.w),
+                    Icon(Icons.arrow_back_rounded, size: 20.r),
                   ],
                 ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10.h),
         Center(
           child: OutlinedButton.icon(
             onPressed: _isLoading ? null : _restartSession,
-            icon: const Icon(Icons.refresh_rounded, size: 18, color: _color2),
+            icon: Icon(Icons.refresh_rounded, size: 18.r, color: _color2),
             label: Text(
               'إعادة المحادثة من البداية',
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: (baseFontSize - 1).clamp(12.0, 14.0),
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
                 color: _color2,
               ),
@@ -770,8 +773,8 @@ class _ChatScreenState extends State<ChatScreen> {
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: _color2, width: 1.5),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999)),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  borderRadius: BorderRadius.circular(999.r)),
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
             ),
           ),
         ),

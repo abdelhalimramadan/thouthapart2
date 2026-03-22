@@ -181,8 +181,6 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final baseFontSize = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return WillPopScope(
@@ -196,7 +194,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
             'تعديل الطلب',
             style: TextStyles.font18DarkBlueBold.copyWith(
               fontFamily: 'Cairo',
-              fontSize: baseFontSize * 1.125,
+              fontSize: 18.sp,
               color: isDark ? Colors.white : null,
             ),
           ),
@@ -205,9 +203,10 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
           elevation: 0,
           iconTheme: IconThemeData(
             color: isDark ? Colors.white : ColorsManager.darkBlue,
+            size: 24.r,
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 24.r),
             onPressed: () => Navigator.pop(context, false),
           ),
         ),
@@ -217,103 +216,104 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
           child: Directionality(
             textDirection: ui.TextDirection.rtl,
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(width * 0.06),
+              padding: EdgeInsets.all(24.r),
               child: Form(
                 key: _formKey,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: width >= 600 ? 500 : double.infinity,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ── Header ───────────────────────────────────────
-                      Text(
-                        'تعديل بيانات الحالة',
-                        style: TextStyles.font18DarkBlueBold.copyWith(
-                          fontFamily: 'Cairo',
-                          fontSize: baseFontSize * 1.125,
-                          color: isDark ? Colors.white : null,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: 500.w,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ── Header ───────────────────────────────────────
+                        Text(
+                          'تعديل بيانات الحالة',
+                          style: TextStyles.font18DarkBlueBold.copyWith(
+                            fontFamily: 'Cairo',
+                            fontSize: 18.sp,
+                            color: isDark ? Colors.white : null,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'قم بتعديل البيانات التالية للطلب',
-                        style: TextStyles.font14GrayRegular.copyWith(
-                          fontFamily: 'Cairo',
-                          color: isDark ? Colors.grey[400] : null,
+                        SizedBox(height: 8.h),
+                        Text(
+                          'قم بتعديل البيانات التالية للطلب',
+                          style: TextStyles.font14GrayRegular.copyWith(
+                            fontFamily: 'Cairo',
+                            color: isDark ? Colors.grey[400] : null,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 24.h),
+                        SizedBox(height: 24.h),
 
-                      // ── Request Info Card ────────────────────────────
-                      _buildRequestInfoCard(isDark, baseFontSize),
-                      SizedBox(height: 24.h),
+                        // ── Request Info Card ────────────────────────────
+                        _buildRequestInfoCard(isDark),
+                        SizedBox(height: 24.h),
 
-                      // ── DateTime Picker ──────────────────────────────
-                      _buildLabel('التاريخ والوقت', baseFontSize, isDark),
-                      SizedBox(height: 8.h),
-                      _buildDateTimePicker(isDark, baseFontSize, width),
-                      SizedBox(height: 20.h),
+                        // ── DateTime Picker ──────────────────────────────
+                        _buildLabel('التاريخ والوقت', isDark),
+                        SizedBox(height: 8.h),
+                        _buildDateTimePicker(isDark),
+                        SizedBox(height: 20.h),
 
-                      // ── Description ──────────────────────────────────
-                      _buildLabel('وصف الحالة (اختياري)', baseFontSize, isDark),
-                      SizedBox(height: 8.h),
-                      TextFormField(
-                        controller: _descriptionController,
-                        maxLines: 4,
-                        maxLength: 500,
-                        textDirection: ui.TextDirection.rtl,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          color: isDark ? Colors.white : Colors.black,
+                        // ── Description ──────────────────────────────────
+                        _buildLabel('وصف الحالة (اختياري)', isDark),
+                        SizedBox(height: 8.h),
+                        TextFormField(
+                          controller: _descriptionController,
+                          maxLines: 4,
+                          maxLength: 500,
+                          textDirection: ui.TextDirection.rtl,
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            color: isDark ? Colors.white : Colors.black,
+                            fontSize: 14.sp,
+                          ),
+                          decoration: _buildDecoration(
+                            hint: 'أضف وصفاً تفصيلياً للحالة...',
+                            icon: Icons.description_outlined,
+                            isDark: isDark,
+                          ),
                         ),
-                        decoration: _buildDecoration(
-                          hint: 'أضف وصفاً تفصيلياً للحالة...',
-                          icon: Icons.description_outlined,
-                          isDark: isDark,
-                          width: width,
-                          baseFontSize: baseFontSize,
-                        ),
-                      ),
-                      SizedBox(height: 32.h),
+                        SizedBox(height: 32.h),
 
-                      // ── Save Button ──────────────────────────────────
-                      _isLoading
-                          ? Center(
-                              child: CircularProgressIndicator(
-                                color: ColorsManager.mainBlue,
+                        // ── Save Button ──────────────────────────────────
+                        _isLoading
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                  color: ColorsManager.mainBlue,
+                                ),
+                              )
+                            : Column(
+                                children: [
+                                  AppTextButton(
+                                    buttonText: 'حفظ التعديلات',
+                                    textStyle:
+                                        TextStyles.font16WhiteSemiBold.copyWith(
+                                      fontFamily: 'Cairo',
+                                      fontSize: 16.sp,
+                                    ),
+                                    backgroundColor: ColorsManager.mainBlue,
+                                    onPressed: _saveRequest,
+                                  ),
+                                  SizedBox(height: 16.h),
+                                  // ── Cancel Button ────────────────────────────────
+                                  AppTextButton(
+                                    buttonText: 'إلغاء',
+                                    textStyle:
+                                        TextStyles.font16WhiteSemiBold.copyWith(
+                                      fontFamily: 'Cairo',
+                                      fontSize: 16.sp,
+                                      color: ColorsManager.mainBlue,
+                                    ),
+                                    backgroundColor: Colors.transparent,
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                  ),
+                                ],
                               ),
-                            )
-                          : Column(
-                              children: [
-                                AppTextButton(
-                                  buttonText: 'حفظ التعديلات',
-                                  textStyle:
-                                      TextStyles.font16WhiteSemiBold.copyWith(
-                                    fontFamily: 'Cairo',
-                                    fontSize: baseFontSize,
-                                  ),
-                                  backgroundColor: ColorsManager.mainBlue,
-                                  onPressed: _saveRequest,
-                                ),
-                                SizedBox(height: 16.h),
-                                // ── Cancel Button ────────────────────────────────
-                                AppTextButton(
-                                  buttonText: 'إلغاء',
-                                  textStyle:
-                                      TextStyles.font16WhiteSemiBold.copyWith(
-                                    fontFamily: 'Cairo',
-                                    fontSize: baseFontSize,
-                                    color: ColorsManager.mainBlue,
-                                  ),
-                                  backgroundColor: Colors.transparent,
-                                  onPressed: () =>
-                                      Navigator.pop(context, false),
-                                ),
-                              ],
-                            ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -326,10 +326,10 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
 
   // ── UI Helpers ────────────────────────────────────────────────────────────
 
-  Widget _buildRequestInfoCard(bool isDark, double baseFontSize) {
+  Widget _buildRequestInfoCard(bool isDark) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF2D2D2D) : Colors.white,
         borderRadius: BorderRadius.circular(16.r),
@@ -346,7 +346,6 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
             label: 'التخصص',
             value: widget.request.categoryName,
             isDark: isDark,
-            baseFontSize: baseFontSize,
           ),
           SizedBox(height: 12.h),
           // Doctor Name
@@ -355,7 +354,6 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
             label: 'الطبيب',
             value: widget.request.doctorFullName,
             isDark: isDark,
-            baseFontSize: baseFontSize,
           ),
           SizedBox(height: 12.h),
           // Request ID
@@ -364,7 +362,6 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
             label: 'رقم الطلب',
             value: '#${widget.request.id}',
             isDark: isDark,
-            baseFontSize: baseFontSize,
           ),
         ],
       ),
@@ -376,21 +373,20 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
     required String label,
     required String value,
     required bool isDark,
-    required double baseFontSize,
   }) {
     return Row(
       children: [
         Icon(
           icon,
           color: isDark ? Colors.grey[400] : ColorsManager.mainBlue,
-          size: 20.sp,
+          size: 20.r,
         ),
         SizedBox(width: 10.w),
         Text(
           '$label: ',
           style: TextStyle(
             fontFamily: 'Cairo',
-            fontSize: baseFontSize * 0.875,
+            fontSize: 14.sp,
             color: isDark ? Colors.grey[400] : Colors.grey[600],
             fontWeight: FontWeight.w500,
           ),
@@ -400,7 +396,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
             value,
             style: TextStyle(
               fontFamily: 'Cairo',
-              fontSize: baseFontSize * 0.875,
+              fontSize: 14.sp,
               color: isDark ? Colors.white : Colors.black87,
               fontWeight: FontWeight.w600,
             ),
@@ -411,7 +407,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
     );
   }
 
-  Widget _buildDateTimePicker(bool isDark, double baseFontSize, double width) {
+  Widget _buildDateTimePicker(bool isDark) {
     final hasDate = _selectedDate != null;
     final hasTime = _selectedTime != null;
 
@@ -438,7 +434,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                 children: [
                   Icon(
                     Icons.calendar_today_outlined,
-                    size: 18.sp,
+                    size: 18.r,
                     color: isDark ? Colors.grey[400] : ColorsManager.mainBlue,
                   ),
                   SizedBox(width: 8.w),
@@ -447,7 +443,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                       hasDate ? _formattedDate : 'التاريخ',
                       style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: baseFontSize * 0.8,
+                        fontSize: 13.sp,
                         color: hasDate
                             ? (isDark ? Colors.white : Colors.black87)
                             : Colors.grey,
@@ -481,7 +477,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                 children: [
                   Icon(
                     Icons.access_time_filled_rounded,
-                    size: 18.sp,
+                    size: 18.r,
                     color: isDark ? Colors.grey[400] : ColorsManager.mainBlue,
                   ),
                   SizedBox(width: 8.w),
@@ -490,7 +486,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                       hasTime ? _formattedTime : 'الوقت',
                       style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: baseFontSize * 0.8,
+                        fontSize: 13.sp,
                         color: hasTime
                             ? (isDark ? Colors.white : Colors.black87)
                             : Colors.grey,
@@ -506,12 +502,12 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
     );
   }
 
-  Widget _buildLabel(String text, double baseFontSize, bool isDark) {
+  Widget _buildLabel(String text, bool isDark) {
     return Text(
       text,
       style: TextStyle(
         fontFamily: 'Cairo',
-        fontSize: baseFontSize * 0.875,
+        fontSize: 14.sp,
         fontWeight: FontWeight.w600,
         color: isDark ? Colors.white : Colors.black87,
       ),
@@ -522,20 +518,18 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
     required String hint,
     required IconData icon,
     required bool isDark,
-    required double width,
-    required double baseFontSize,
   }) {
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(
         fontFamily: 'Cairo',
         color: isDark ? Colors.grey[600] : Colors.grey[400],
-        fontSize: baseFontSize * 0.875,
+        fontSize: 14.sp,
       ),
       prefixIcon: Icon(
         icon,
         color: isDark ? Colors.grey[500] : ColorsManager.mainBlue,
-        size: 20.sp,
+        size: 20.r,
       ),
       filled: true,
       fillColor:

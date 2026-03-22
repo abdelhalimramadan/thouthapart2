@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
@@ -132,13 +133,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final height = size.height;
-    final baseFontSize = width * 0.04;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
@@ -151,8 +149,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 center: const Alignment(-0.7, -0.7),
                 radius: 1.5,
                 colors: [
-                  ColorsManager.layerBlur1.withAlpha(102),
-                  ColorsManager.layerBlur1.withAlpha(25),
+                  isDarkMode
+                      ? ColorsManager.layerBlur1.withAlpha(50)
+                      : ColorsManager.layerBlur1.withAlpha(102),
+                  isDarkMode
+                      ? ColorsManager.layerBlur1.withAlpha(20)
+                      : ColorsManager.layerBlur1.withAlpha(25),
                   Colors.transparent,
                 ],
                 stops: const [0.0, 0.3, 0.8],
@@ -169,8 +171,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 center: const Alignment(0.7, 0.7),
                 radius: 1.5,
                 colors: [
-                  ColorsManager.layerBlur2.withAlpha(102),
-                  ColorsManager.layerBlur2.withAlpha(25),
+                  isDarkMode
+                      ? ColorsManager.layerBlur2.withAlpha(50)
+                      : ColorsManager.layerBlur2.withAlpha(102),
+                  isDarkMode
+                      ? ColorsManager.layerBlur2.withAlpha(20)
+                      : ColorsManager.layerBlur2.withAlpha(25),
                   Colors.transparent,
                 ],
                 stops: const [0.1, 0.3, 0.8],
@@ -182,28 +188,34 @@ class _LoginScreenState extends State<LoginScreen> {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 return SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: width * 0.06,
-                      vertical: height * 0.03,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24.w,
+                        vertical: 24.h,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
                         Container(
                           width: double.infinity,
                           constraints: BoxConstraints(
-                            maxWidth: width >= 600 ? 500 : double.infinity,
+                            maxWidth: 1.sw >= 600 ? 500.w : double.infinity,
                           ),
-                          padding: EdgeInsets.all(width * 0.06),
+                          padding: EdgeInsets.all(24.r),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16.0),
+                            color: Theme.of(context).cardTheme.color,
+                            borderRadius: BorderRadius.circular(16.r),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withAlpha(25),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
+                                color: isDarkMode
+                                    ? Colors.black.withAlpha(102)
+                                    : Colors.black.withAlpha(25),
+                                blurRadius: 10.r,
+                                offset: Offset(0, 4.h),
                               ),
                             ],
                           ),
@@ -218,16 +230,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                   Center(
                                     child: Image.asset(
                                       'assets/images/splash-logo.png',
-                                      width: width * 0.2,
-                                      height: width * 0.2,
+                                      width: 80.w,
+                                      height: 80.h,
                                       fit: BoxFit.contain,
                                     ),
                                   ),
-                                  SizedBox(height: height * 0.01),
+                                  SizedBox(height: 8.h),
                                   Text(
                                     'تسجيل الدخول',
                                     style: TextStyle(
-                                      fontSize: baseFontSize * 1.5,
+                                      fontSize: 24.sp,
                                       fontWeight: FontWeight.bold,
                                       color: ColorsManager.mainBlue,
                                       fontFamily: 'Cairo',
@@ -236,41 +248,49 @@ class _LoginScreenState extends State<LoginScreen> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  SizedBox(height: height * 0.01),
+                                  SizedBox(height: 8.h),
                                   Text(
                                     'ادخل البريد الإلكتروني وكلمة المرور',
                                     style: TextStyle(
-                                      fontSize: baseFontSize * 0.875,
-                                      color: Colors.grey,
+                                      fontSize: 14.sp,
+                                      color: isDarkMode
+                                          ? Colors.white70
+                                          : Colors.grey,
                                       fontFamily: 'Cairo',
                                     ),
                                     textAlign: TextAlign.center,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  SizedBox(height: height * 0.02),
+                                  SizedBox(height: 16.h),
 
                                   if (errorMessage != null)
                                     Container(
-                                      padding: const EdgeInsets.all(12),
-                                      margin: const EdgeInsets.only(bottom: 16),
+                                      padding: EdgeInsets.all(12.r),
+                                      margin: EdgeInsets.only(bottom: 16.h),
                                       decoration: BoxDecoration(
-                                        color: Colors.red[50],
-                                        borderRadius: BorderRadius.circular(8),
-                                        border:
-                                            Border.all(color: Colors.red[200]!),
+                                        color: isDarkMode
+                                            ? Colors.red.withOpacity(0.15)
+                                            : Colors.red[50],
+                                        borderRadius: BorderRadius.circular(8.r),
+                                        border: Border.all(
+                                            color: isDarkMode
+                                                ? Colors.red.shade900
+                                                : Colors.red[200]!),
                                       ),
                                       child: Row(
                                         children: [
-                                          const Icon(Icons.error_outline,
-                                              color: Colors.red),
-                                          const SizedBox(width: 8),
+                                          Icon(Icons.error_outline,
+                                              color: isDarkMode ? Colors.red[300] : Colors.red,
+                                              size: 20.r),
+                                          SizedBox(width: 8.w),
                                           Expanded(
                                             child: Text(
                                               errorMessage!,
-                                              style: const TextStyle(
-                                                color: Colors.red,
+                                              style: TextStyle(
+                                                color: isDarkMode ? Colors.red[300] : Colors.red,
                                                 fontFamily: 'Cairo',
+                                                fontSize: 13.sp,
                                               ),
                                               softWrap: true,
                                             ),
@@ -283,14 +303,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   TextFormField(
                                     controller: emailController,
                                     keyboardType: TextInputType.emailAddress,
-                                    decoration: InputDecoration(
+                                    decoration: const InputDecoration(
                                       labelText: 'البريد الإلكتروني',
-                                      prefixIcon:
-                                          const Icon(Icons.email_outlined),
-                                      border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
+                                      prefixIcon: Icon(Icons.email_outlined),
                                     ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
@@ -303,7 +318,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       return null;
                                     },
                                   ),
-                                  SizedBox(height: height * 0.02),
+                                  SizedBox(height: 16.h),
 
                                   // Password Field
                                   TextFormField(
@@ -325,10 +340,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                           });
                                         },
                                       ),
-                                      border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
                                     ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
@@ -340,7 +351,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       return null;
                                     },
                                   ),
-                                  SizedBox(height: height * 0.01),
+                                  SizedBox(height: 8.h),
 
                                   // Forgot Password & Remember Me
                                   Row(
@@ -356,7 +367,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           child: Text(
                                             'نسيت كلمة المرور؟',
                                             style: TextStyle(
-                                              fontSize: baseFontSize * 0.8,
+                                              fontSize: 13.sp,
                                               color: ColorsManager.mainBlue,
                                               decoration:
                                                   TextDecoration.underline,
@@ -370,7 +381,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       Row(
                                         children: [
                                           Transform.scale(
-                                            scale: 0.9,
+                                            scale: 0.9.r,
                                             child: Checkbox(
                                               value: rememberMe,
                                               onChanged: (bool? value) {
@@ -384,8 +395,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                           Text(
                                             'تذكرني',
                                             style: TextStyle(
-                                              fontSize: baseFontSize * 0.8,
-                                              color: ColorsManager.darkBlue,
+                                              fontSize: 13.sp,
+                                              color: isDarkMode
+                                                  ? Colors.white
+                                                  : ColorsManager.darkBlue,
                                               fontWeight: FontWeight.w500,
                                               fontFamily: 'Cairo',
                                             ),
@@ -394,34 +407,34 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: height * 0.02),
+                                  SizedBox(height: 16.h),
 
                                   // Login Button
                                   SizedBox(
                                     width: double.infinity,
-                                    height: 52,
+                                    height: 52.h,
                                     child: ElevatedButton(
                                       onPressed: isLoading ? null : _login,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: ColorsManager.mainBlue,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                              BorderRadius.circular(8.0),
+                                              BorderRadius.circular(8.r),
                                         ),
                                       ),
                                       child: isLoading
-                                          ? const SizedBox(
-                                              width: 20,
-                                              height: 20,
-                                              child: CircularProgressIndicator(
+                                          ? SizedBox(
+                                              width: 20.w,
+                                              height: 20.h,
+                                              child: const CircularProgressIndicator(
                                                 strokeWidth: 2,
                                                 color: Colors.white,
                                               ),
                                             )
-                                          : const Text(
+                                          : Text(
                                               'تسجيل الدخول',
                                               style: TextStyle(
-                                                fontSize: 16,
+                                                fontSize: 16.sp,
                                                 color: Colors.white,
                                                 fontFamily: 'Cairo',
                                                 fontWeight: FontWeight.bold,
@@ -429,19 +442,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                             ),
                                     ),
                                   ),
-                                  SizedBox(height: height * 0.01),
+                                  SizedBox(height: 8.h),
                                   Text(
                                     'بالدخول، أنت توافق على الشروط والأحكام.',
                                     style: TextStyle(
-                                      fontSize: baseFontSize * 0.8,
-                                      color: Colors.grey,
+                                      fontSize: 13.sp,
+                                      color: isDarkMode
+                                          ? Colors.white60
+                                          : Colors.grey,
                                       fontFamily: 'Cairo',
                                     ),
                                     textAlign: TextAlign.center,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  SizedBox(height: height * 0.02),
+                                  SizedBox(height: 16.h),
                                   // Sign up link
                                   Wrap(
                                     alignment: WrapAlignment.center,
@@ -451,8 +466,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                       Text(
                                         'هل ليس لديك حساب بالفعل؟ ',
                                         style: TextStyle(
-                                          fontSize: baseFontSize * 0.8,
-                                          color: ColorsManager.darkBlue,
+                                          fontSize: 13.sp,
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : ColorsManager.darkBlue,
                                           fontWeight: FontWeight.w500,
                                           fontFamily: 'Cairo',
                                         ),
@@ -465,7 +482,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         child: Text(
                                           'إنشاء حساب',
                                           style: TextStyle(
-                                            fontSize: baseFontSize * 0.8,
+                                            fontSize: 13.sp,
                                             color: ColorsManager.mainBlue,
                                             fontWeight: FontWeight.bold,
                                             decoration:
@@ -481,7 +498,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(height: height * 0.02),
+                        SizedBox(height: 16.h),
                         // Back button
                         GestureDetector(
                           onTap: () {
@@ -493,9 +510,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: Container(
                             width: double.infinity,
                             constraints: BoxConstraints(
-                              maxWidth: width >= 600 ? 500 : double.infinity,
+                              maxWidth: 1.sw >= 600 ? 500.w : double.infinity,
                             ),
-                            height: 52,
+                            height: 52.h,
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 begin: Alignment.centerLeft,
@@ -505,20 +522,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ColorsManager.layerBlur2,
                                 ],
                               ),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(12.r),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withAlpha(25),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
+                                  blurRadius: 8.r,
+                                  offset: Offset(0, 4.h),
                                 ),
                               ],
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Text(
                                 'الرجوع للصفحة الرئيسية',
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 14.sp,
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
                                   fontFamily: 'Cairo',
@@ -530,12 +547,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
-        ],
-      ),
-    );
+        ),
+      ],
+    ),
+  );
   }
 }

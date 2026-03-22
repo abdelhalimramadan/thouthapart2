@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:thotha_mobile_app/core/utils/notification_helper.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
-import 'package:thotha_mobile_app/features/notifications/ui/notifications_screen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/utils/notification_helper.dart';
+import '../drawer/doctor_drawer_screen.dart';
+import '../../../notifications/ui/notifications_screen.dart';
 
 class DoctorBookingRecordsScreen extends StatefulWidget {
   const DoctorBookingRecordsScreen({super.key});
@@ -17,10 +18,6 @@ class _DoctorBookingRecordsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final height = size.height;
-    final baseFontSize = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -31,14 +28,14 @@ class _DoctorBookingRecordsScreenState
       backgroundColor: theme.scaffoldBackgroundColor,
       drawer: const DoctorDrawer(),
       appBar: AppBar(
-        toolbarHeight: 75.6,
+        toolbarHeight: 70.h,
         elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
         automaticallyImplyLeading: false,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu, size: 24 * (width / 390)),
+            icon: Icon(Icons.menu, size: 24.r),
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ),
@@ -48,18 +45,17 @@ class _DoctorBookingRecordsScreenState
           children: [
             Image.asset(
               'assets/images/splash-logo.png',
-              width: 37 * (width / 390),
-              height: 40 * (width / 390),
+              width: 36.w,
+              height: 36.w,
               fit: BoxFit.contain,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
             Text(
               'لوحة التحكم',
               style: textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
-                fontSize: baseFontSize * 1.125, // 18
-                fontWeight: FontWeight.w600,
-                height: 1.5,
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -68,7 +64,7 @@ class _DoctorBookingRecordsScreenState
           Stack(
             children: [
               IconButton(
-                icon: Icon(Icons.notifications_none, size: 24 * (width / 390)),
+                icon: Icon(Icons.notifications_none, size: 24.r),
                 onPressed: () {
                   NotificationHelper.hasUnreadNotifications = false;
                   Navigator.push(
@@ -82,11 +78,11 @@ class _DoctorBookingRecordsScreenState
               ),
               if (NotificationHelper.getUnreadCount() > 0)
                 Positioned(
-                  right: 8,
-                  top: 10,
+                  right: 8.w,
+                  top: 10.h,
                   child: Container(
-                    width: 16 * (width / 390),
-                    height: 16 * (width / 390),
+                    width: 16.w,
+                    height: 16.w,
                     decoration: BoxDecoration(
                       color: colorScheme.error,
                       shape: BoxShape.circle,
@@ -98,7 +94,7 @@ class _DoctorBookingRecordsScreenState
                             : '${NotificationHelper.getUnreadCount()}',
                         style: textTheme.labelSmall?.copyWith(
                           color: colorScheme.onError,
-                          fontSize: baseFontSize * 0.625, // 10
+                          fontSize: 10.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -107,17 +103,17 @@ class _DoctorBookingRecordsScreenState
                 ),
             ],
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.1),
+          preferredSize: Size.fromHeight(1.h),
           child: Container(
-            height: 1.1,
+            height: 1.h,
             color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
           ),
         ),
       ),
-      body: _buildMainContent(context, width, height, baseFontSize),
+      body: _buildMainContent(context),
     );
   }
 
@@ -129,7 +125,6 @@ class _DoctorBookingRecordsScreenState
     required String time,
     required String service,
     required String profileImage,
-    required double baseFontSize,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -142,87 +137,83 @@ class _DoctorBookingRecordsScreenState
         return Container(
           decoration: BoxDecoration(
             color: theme.cardTheme.color ?? theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
           ),
           padding: EdgeInsets.only(
-            top: 20,
-            left: 20,
-            right: 20,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 28,
+            top: 20.h,
+            left: 20.w,
+            right: 20.w,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 28.h,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 40,
-                height: 4,
+                width: 40.w,
+                height: 4.h,
                 decoration: BoxDecoration(
                   color: isDark ? Colors.grey[600] : Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               Row(
                 textDirection: TextDirection.rtl,
                 children: [
                   Container(
-                    width: 64,
-                    height: 64,
+                    width: 64.w,
+                    height: 64.w,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                       image: DecorationImage(
                         image: AssetImage(profileImage),
                         fit: BoxFit.cover,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   Text(
                     patientName,
                     style: TextStyle(
                       fontFamily: 'Cairo',
                       fontWeight: FontWeight.w700,
-                      fontSize: baseFontSize * 1.25,
+                      fontSize: 20.sp,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               Divider(
                   color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               _buildDetailRow(
                 context: context,
                 icon: Icons.phone_outlined,
                 label: 'رقم الهاتف',
                 value: phone,
-                baseFontSize: baseFontSize,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14.h),
               _buildDetailRow(
                 context: context,
                 icon: Icons.calendar_month_outlined,
                 label: 'التاريخ',
                 value: date,
-                baseFontSize: baseFontSize,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14.h),
               _buildDetailRow(
                 context: context,
                 icon: Icons.access_time_outlined,
                 label: 'الوقت',
                 value: time,
-                baseFontSize: baseFontSize,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14.h),
               _buildDetailRow(
                 context: context,
                 icon: Icons.medical_services_outlined,
                 label: 'التخصص',
                 value: service,
-                baseFontSize: baseFontSize,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
             ],
           ),
         );
@@ -235,7 +226,6 @@ class _DoctorBookingRecordsScreenState
     required IconData icon,
     required String label,
     required String value,
-    required double baseFontSize,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -243,15 +233,15 @@ class _DoctorBookingRecordsScreenState
       textDirection: TextDirection.rtl,
       children: [
         Container(
-          width: 38,
-          height: 38,
+          width: 38.w,
+          height: 38.w,
           decoration: BoxDecoration(
             color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
           ),
-          child: Icon(icon, size: 18, color: const Color(0xFF021433)),
+          child: Icon(icon, size: 18.r, color: isDark ? Colors.white : const Color(0xFF021433)),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12.w),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -259,7 +249,7 @@ class _DoctorBookingRecordsScreenState
               label,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: baseFontSize * 0.75,
+                fontSize: 12.sp,
                 color: Colors.grey,
               ),
             ),
@@ -268,7 +258,7 @@ class _DoctorBookingRecordsScreenState
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w600,
-                fontSize: baseFontSize * 0.9,
+                fontSize: 14.sp,
               ),
             ),
           ],
@@ -287,8 +277,6 @@ class _DoctorBookingRecordsScreenState
     required String status,
     required Color statusColor,
     required String profileImage,
-    required double width,
-    required double baseFontSize,
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -303,14 +291,13 @@ class _DoctorBookingRecordsScreenState
         time: time,
         service: service,
         profileImage: profileImage,
-        baseFontSize: baseFontSize,
       ),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(14.r),
         decoration: BoxDecoration(
           color: theme.cardTheme.color ?? colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
               color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
           boxShadow: [
@@ -318,8 +305,8 @@ class _DoctorBookingRecordsScreenState
               color: isDark
                   ? Colors.black.withAlpha((0.3 * 255).round())
                   : Colors.grey.withAlpha((0.08 * 255).round()),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+              blurRadius: 10.r,
+              offset: Offset(0, 2.h),
             ),
           ],
         ),
@@ -329,17 +316,17 @@ class _DoctorBookingRecordsScreenState
           children: [
             // Patient Image
             Container(
-              width: 52 * (width / 390),
-              height: 52 * (width / 390),
+              width: 52.w,
+              height: 52.w,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
                 image: DecorationImage(
                   image: AssetImage(profileImage),
                   fit: BoxFit.cover,
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: 10.w),
             // Name
             Expanded(
               child: Text(
@@ -350,18 +337,18 @@ class _DoctorBookingRecordsScreenState
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,
-                  fontSize: baseFontSize * 1.0,
+                  fontSize: 16.sp,
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
             // Status badge
             Container(
               padding: EdgeInsets.symmetric(
-                  horizontal: 10 * (width / 390), vertical: 4 * (width / 390)),
+                  horizontal: 10.w, vertical: 4.h),
               decoration: BoxDecoration(
                 color: statusColor,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               child: Text(
                 status,
@@ -369,7 +356,7 @@ class _DoctorBookingRecordsScreenState
                   color: Colors.white,
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.bold,
-                  fontSize: baseFontSize * 0.7,
+                  fontSize: 12.sp,
                 ),
               ),
             ),
@@ -379,30 +366,29 @@ class _DoctorBookingRecordsScreenState
     );
   }
 
-  Widget _buildMainContent(
-      BuildContext context, double width, double height, double baseFontSize) {
+  Widget _buildMainContent(BuildContext context) {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 10),
+            padding: EdgeInsets.symmetric(vertical: 10.h),
             child: Text(
               'سجل الحجوزات',
               textAlign: TextAlign.right,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w700,
-                fontSize: baseFontSize * 1.5,
+                fontSize: 24.sp,
                 height: 1.5,
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _buildBookingCard(
             context: context,
             patientName: 'زياد جمال',
@@ -413,10 +399,8 @@ class _DoctorBookingRecordsScreenState
             status: 'مكتمل',
             statusColor: Colors.greenAccent,
             profileImage: 'assets/images/zozjpg.jpg',
-            width: width,
-            baseFontSize: baseFontSize,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _buildBookingCard(
             context: context,
             patientName: 'عبدالحليم رمضان',
@@ -427,10 +411,8 @@ class _DoctorBookingRecordsScreenState
             status: 'انتظار',
             statusColor: Colors.orangeAccent,
             profileImage: 'assets/images/halim.jpg',
-            width: width,
-            baseFontSize: baseFontSize,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _buildBookingCard(
             context: context,
             patientName: 'محمد اشرف',
@@ -441,10 +423,8 @@ class _DoctorBookingRecordsScreenState
             status: 'ملغي',
             statusColor: Colors.redAccent,
             profileImage: 'assets/images/kateb.jpg',
-            width: width,
-            baseFontSize: baseFontSize,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _buildBookingCard(
             context: context,
             patientName: 'جوزيف جورح',
@@ -455,10 +435,8 @@ class _DoctorBookingRecordsScreenState
             status: 'مكتمل',
             statusColor: Colors.greenAccent,
             profileImage: 'assets/images/joseoh.jpeg',
-            width: width,
-            baseFontSize: baseFontSize,
           ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 16.h),
         ],
       ),
     );

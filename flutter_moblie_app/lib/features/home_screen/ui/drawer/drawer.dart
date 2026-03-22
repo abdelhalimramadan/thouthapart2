@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:thotha_mobile_app/core/routing/routes.dart';
 import 'package:thotha_mobile_app/core/theming/theme_provider.dart';
 import 'package:thotha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
 import 'package:thotha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
 import 'package:thotha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart';
-
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thotha_mobile_app/features/chat/ui/chat_screen.dart';
-
-import '../../../../core/theming/colors.dart';
 
 class HomeDrawer extends StatelessWidget {
   const HomeDrawer({super.key});
@@ -22,20 +20,21 @@ class HomeDrawer extends StatelessWidget {
     Color? iconColor,
     Color? textColor,
     VoidCallback? onTap,
-    required double baseFontSize,
+    double? fontSize,
   }) {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         child: Directionality(
           textDirection: TextDirection.rtl,
           child: Row(
             children: [
               customIcon ??
                   Icon(icon,
+                      size: 24.r,
                       color: iconColor ?? Theme.of(context).iconTheme.color),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Text(
                   title,
@@ -43,7 +42,7 @@ class HomeDrawer extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.bold,
-                        fontSize: baseFontSize, // 16sp
+                        fontSize: fontSize ?? 16.sp,
                         color: textColor ??
                             Theme.of(context).colorScheme.onSurface,
                       ),
@@ -63,16 +62,18 @@ class HomeDrawer extends StatelessWidget {
     required ValueChanged<bool> onChanged,
     IconData? icon,
     Color? iconColor,
-    required double baseFontSize,
+    double? fontSize,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Row(
           children: [
-            Icon(icon, color: iconColor ?? Theme.of(context).iconTheme.color),
-            const SizedBox(width: 12),
+            Icon(icon,
+                size: 24.r,
+                color: iconColor ?? Theme.of(context).iconTheme.color),
+            SizedBox(width: 12.w),
             Expanded(
               child: Text(
                 title,
@@ -80,7 +81,7 @@ class HomeDrawer extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontFamily: 'Cairo',
                       fontWeight: FontWeight.bold,
-                      fontSize: baseFontSize,
+                      fontSize: fontSize ?? 16.sp,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
               ),
@@ -100,9 +101,6 @@ class HomeDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final baseFontSize = width * 0.04;
     final double topPad = MediaQuery.of(context).padding.top;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -120,13 +118,13 @@ class HomeDrawer extends StatelessWidget {
                   children: [
                     // Header Section
                     Container(
-                      padding: EdgeInsets.only(top: topPad, bottom: 20),
+                      padding: EdgeInsets.only(top: topPad, bottom: 20.h),
                       decoration: BoxDecoration(
                         color: theme.cardColor,
                         border: Border(
                           bottom: BorderSide(
                             color: theme.dividerColor.withValues(alpha: 0.1),
-                            width: 1,
+                            width: 1.w,
                           ),
                         ),
                       ),
@@ -138,25 +136,25 @@ class HomeDrawer extends StatelessWidget {
                               icon: Icon(
                                 Icons.close,
                                 color: colorScheme.onSurface,
-                                size: 28,
+                                size: 28.r,
                               ),
                               onPressed: () => Navigator.of(context).pop(),
                             ),
                           ),
                           Image.asset(
                             'assets/images/splash-logo.png',
-                            width: 70 * (width / 390),
-                            height: 70 * (width / 390),
+                            width: 70.w,
+                            height: 70.h,
                             fit: BoxFit.contain,
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12.h),
                           Text(
                             'رعاية ذكية، لمسة طبية',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: baseFontSize * 0.875,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.bold,
-                              color: ColorsManager.fontColor,
+                              color: theme.colorScheme.onSurface,
                               fontFamily: 'Cairo',
                             ),
                           ),
@@ -169,7 +167,7 @@ class HomeDrawer extends StatelessWidget {
                       context,
                       title: 'الصفحة الرئيسية',
                       icon: Icons.home_outlined,
-                      baseFontSize: baseFontSize,
+                      fontSize: 16.sp,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamedAndRemoveUntil(
@@ -184,10 +182,10 @@ class HomeDrawer extends StatelessWidget {
                       title: 'ثوثه المساعد',
                       customIcon: SvgPicture.asset(
                         'assets/svg/ثوثه الدكتور 1.svg',
-                        width: 24,
-                        height: 24,
+                        width: 24.w,
+                        height: 24.h,
                       ),
-                      baseFontSize: baseFontSize,
+                      fontSize: 16.sp,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(
@@ -206,7 +204,7 @@ class HomeDrawer extends StatelessWidget {
                           value: themeProvider.isDarkMode,
                           onChanged: (v) => themeProvider.toggleTheme(v),
                           icon: Icons.dark_mode_outlined,
-                          baseFontSize: baseFontSize,
+                          fontSize: 16.sp,
                         );
                       },
                     ),
@@ -214,7 +212,7 @@ class HomeDrawer extends StatelessWidget {
                       context,
                       title: 'الشروط والأحكام',
                       icon: Icons.description_outlined,
-                      baseFontSize: baseFontSize,
+                      fontSize: 16.sp,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(
@@ -230,7 +228,7 @@ class HomeDrawer extends StatelessWidget {
                       context,
                       title: 'سياسة الخصوصية',
                       icon: Icons.shield_outlined,
-                      baseFontSize: baseFontSize,
+                      fontSize: 16.sp,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(
@@ -245,7 +243,7 @@ class HomeDrawer extends StatelessWidget {
                       context,
                       title: 'المساعدة والدعم',
                       icon: Icons.help_outline,
-                      baseFontSize: baseFontSize,
+                      fontSize: 16.sp,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(
@@ -260,7 +258,7 @@ class HomeDrawer extends StatelessWidget {
                       context,
                       title: 'تسجيل الدخول',
                       icon: Icons.login_outlined,
-                      baseFontSize: baseFontSize,
+                      fontSize: 16.sp,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamedAndRemoveUntil(
@@ -276,17 +274,17 @@ class HomeDrawer extends StatelessWidget {
 
               // Footer Section
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: EdgeInsets.symmetric(vertical: 16.h),
                 child: Column(
                   children: [
                     const Divider(indent: 32, endIndent: 32),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8.h),
                     Text(
                       'الإصدار 1.0.0',
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.bold,
-                        fontSize: baseFontSize * 0.75,
+                        fontSize: 12.sp,
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),
