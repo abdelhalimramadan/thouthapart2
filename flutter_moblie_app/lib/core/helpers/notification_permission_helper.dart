@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class NotificationPermissionHelper {
-  static Future<void> showNotificationPermissionDialog(
+  static Future<bool?> showNotificationPermissionDialog(
       BuildContext context) async {
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final baseFontSize = width * 0.04;
 
-    await showDialog(
+    return await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
@@ -42,7 +42,7 @@ class NotificationPermissionHelper {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context, false),
             child: const Text(
               'ليس الآن',
               style: TextStyle(
@@ -54,7 +54,7 @@ class NotificationPermissionHelper {
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(context, true);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).primaryColor,

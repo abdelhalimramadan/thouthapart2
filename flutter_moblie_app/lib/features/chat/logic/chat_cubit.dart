@@ -22,7 +22,7 @@ class ChatCubit extends Cubit<ChatState> {
       
       final flowItems = <FlowItem>[];
       final chatHistory = <ChatItem>[];
-      
+
       _processResponse(response, flowItems, chatHistory, response.sessionId, true, categories);
     } else {
       emit(ChatState.error(result['error'] ?? 'فشل في بدء المحادثة'));

@@ -13,11 +13,25 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _checkLocationPermission();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkLocationPermission();
+    }
   }
 
   @override
@@ -58,7 +72,6 @@ class _SplashScreenState extends State<SplashScreen> {
           onPressed: () async {
             Navigator.of(context).pop();
             await Geolocator.openLocationSettings();
-            _checkLocationPermission();
           },
         );
       }
@@ -74,8 +87,9 @@ class _SplashScreenState extends State<SplashScreen> {
             title: 'إذن الموقع مطلوب',
             content:
                 'يحتاج التطبيق إلى إذن الموقع ليعمل بشكل صحيح. يرجى منح الإذن.',
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
+              await Geolocator.requestPermission();
               _checkLocationPermission();
             },
           );
@@ -93,7 +107,6 @@ class _SplashScreenState extends State<SplashScreen> {
           onPressed: () async {
             Navigator.of(context).pop();
             await Geolocator.openAppSettings();
-            _checkLocationPermission();
           },
         );
       }
@@ -109,7 +122,8 @@ class _SplashScreenState extends State<SplashScreen> {
     NotificationSettings settings =
         await FirebaseMessaging.instance.getNotificationSettings();
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional) {
       if (mounted) {
         Navigator.pushReplacementNamed(context, Routes.onBoardingScreen);
       }
@@ -125,21 +139,32 @@ class _SplashScreenState extends State<SplashScreen> {
             await Geolocator.openAppSettings();
           },
         );
-        _checkNotificationPermission();
+        // Remove immediate recursive check to avoid double-dialog.
+        // The check will be triggered by didChangeAppLifecycleState when resuming.
       }
       return;
     }
 
     if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
       if (mounted) {
-        await NotificationPermissionHelper.showNotificationPermissionDialog(
-            context);
-        await FirebaseMessaging.instance.requestPermission(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-        _checkNotificationPermission();
+        final result =
+            await NotificationPermissionHelper.showNotificationPermissionDialog(
+                context);
+        if (!mounted) return;
+        if (result == true) {
+          await FirebaseMessaging.instance.requestPermission(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
+          if (!mounted) return;
+          // After first-time system prompt, always proceed to avoid immediate "Go to Settings" dialog.
+          Navigator.pushReplacementNamed(context, Routes.onBoardingScreen);
+        } else {
+          // If user chose "Not Now" (false) or dismissed the dialog (null),
+          // proceed to onboarding.
+          Navigator.pushReplacementNamed(context, Routes.onBoardingScreen);
+        }
       }
       return;
     }
