@@ -31,6 +31,40 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
     final colorScheme = theme.colorScheme;
     final doctor = widget.doctor;
 
+    // Check if doctor data is valid - if not, show error message
+    if (!doctor.hasValidData) {
+      return Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          margin: EdgeInsets.symmetric(horizontal: 16.w),
+          padding: EdgeInsets.all(16.r),
+          decoration: BoxDecoration(
+            color: theme.cardTheme.color ?? colorScheme.surface,
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'عذراً، بيانات الطبيب غير صحيحة',
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.red,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('إغلاق', style: TextStyle(fontFamily: 'Cairo')),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Align(
       alignment: Alignment.topCenter,
       child: Container(

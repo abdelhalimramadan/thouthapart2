@@ -26,4 +26,11 @@ abstract class DoctorModel with _$DoctorModel {
       _$DoctorModelFromJson(json);
 
   String get fullName => '$firstName $lastName';
+
+  bool get hasValidData {
+    return firstName.isNotEmpty && 
+           lastName.isNotEmpty && 
+           categoryName.isNotEmpty && 
+           cityName.isNotEmpty;
+  }
 }
