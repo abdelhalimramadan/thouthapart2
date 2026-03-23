@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:meta/meta.dart';
-import 'package:thotha_mobile_app/core/helpers/phone_helper.dart';
-import 'package:thotha_mobile_app/core/networking/api_constants.dart';
-import 'package:thotha_mobile_app/core/networking/otp_service.dart';
+import 'package:thoutha_mobile_app/core/helpers/phone_helper.dart';
+import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
+import 'package:thoutha_mobile_app/core/networking/otp_service.dart';
 
 part 'sign_up_state.dart';
 

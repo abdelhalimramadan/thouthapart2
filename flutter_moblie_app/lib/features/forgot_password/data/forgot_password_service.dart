@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:thotha_mobile_app/core/helpers/phone_helper.dart';
-import 'package:thotha_mobile_app/core/networking/api_constants.dart';
+import 'package:thoutha_mobile_app/core/helpers/phone_helper.dart';
+import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
 
 /// Handles all password-reset API calls.
 ///

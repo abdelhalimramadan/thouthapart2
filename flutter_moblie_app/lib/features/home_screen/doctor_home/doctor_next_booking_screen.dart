@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
-import 'package:thotha_mobile_app/core/networking/api_service.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
-import 'package:thotha_mobile_app/features/notifications/ui/notifications_screen.dart';
+import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thoutha_mobile_app/core/networking/api_service.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
+import 'package:thoutha_mobile_app/features/notifications/ui/notifications_screen.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui show TextDirection;
 

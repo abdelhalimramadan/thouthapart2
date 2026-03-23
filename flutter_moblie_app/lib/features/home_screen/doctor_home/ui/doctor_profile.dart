@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 
-import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
-import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
-import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/profile_cubit.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/profile_state.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/account_deletion_screen.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
-import 'package:thotha_mobile_app/features/forgot_password/ui/change_password_screen.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/my_requests_screen.dart';
+import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
+import 'package:thoutha_mobile_app/core/networking/models/university_model.dart';
+import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/logic/profile_cubit.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/logic/profile_state.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/ui/account_deletion_screen.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
+import 'package:thoutha_mobile_app/features/forgot_password/ui/change_password_screen.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/ui/my_requests_screen.dart';
 
 class DoctorProfileScreen extends StatelessWidget {
   const DoctorProfileScreen({super.key});

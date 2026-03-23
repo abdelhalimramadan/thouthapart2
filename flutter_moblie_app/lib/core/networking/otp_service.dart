@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:thotha_mobile_app/core/helpers/phone_helper.dart';
-import 'package:thotha_mobile_app/core/networking/api_constants.dart';
-import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
-import 'package:thotha_mobile_app/core/networking/connectivity_service.dart';
+import 'package:thoutha_mobile_app/core/helpers/phone_helper.dart';
+import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
+import 'package:thoutha_mobile_app/core/networking/dio_factory.dart';
+import 'package:thoutha_mobile_app/core/networking/connectivity_service.dart';
 import 'dart:async';
 
 class OtpService {

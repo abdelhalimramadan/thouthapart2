@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_body.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
+import 'package:thoutha_mobile_app/features/home_screen/data/models/case_request_body.dart';
+import 'package:thoutha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
 import 'add_edit_case_request_state.dart';
 
 class AddEditCaseRequestCubit extends Cubit<AddEditCaseRequestState> {

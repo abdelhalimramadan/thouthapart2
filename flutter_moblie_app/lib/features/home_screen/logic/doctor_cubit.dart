@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
-import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/repositories/doctor_repository.dart';
-import 'package:thotha_mobile_app/features/home_screen/logic/doctor_state.dart';
+import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
+import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
+import 'package:thoutha_mobile_app/features/home_screen/data/repositories/doctor_repository.dart';
+import 'package:thoutha_mobile_app/features/home_screen/logic/doctor_state.dart';
 
 class DoctorCubit extends Cubit<DoctorState> {
   final DoctorRepository _repository;

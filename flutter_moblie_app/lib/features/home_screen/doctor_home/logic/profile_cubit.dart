@@ -1,11 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
-import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
-import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
-import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/logic/profile_state.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/repos/profile_repository.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
+import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
+import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
+import 'package:thoutha_mobile_app/core/networking/models/university_model.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/logic/profile_state.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/data/repos/profile_repository.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
 
 class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
   final ProfileRepository _repository;

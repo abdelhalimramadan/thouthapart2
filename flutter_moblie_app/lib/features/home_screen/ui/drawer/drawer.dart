@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:thotha_mobile_app/core/routing/routes.dart';
-import 'package:thotha_mobile_app/core/theming/theme_provider.dart';
-import 'package:thotha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
-import 'package:thotha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
-import 'package:thotha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart';
+import 'package:thoutha_mobile_app/core/routing/routes.dart';
+import 'package:thoutha_mobile_app/core/theming/theme_provider.dart';
+import 'package:thoutha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
+import 'package:thoutha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
+import 'package:thoutha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:thotha_mobile_app/features/chat/ui/chat_screen.dart';
+import 'package:thoutha_mobile_app/features/chat/ui/chat_screen.dart';
 
 class HomeDrawer extends StatelessWidget {
   const HomeDrawer({super.key});

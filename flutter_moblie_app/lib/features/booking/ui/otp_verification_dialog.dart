@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pinput/pinput.dart';
-import 'package:thotha_mobile_app/core/networking/otp_service.dart';
+import 'package:thoutha_mobile_app/core/networking/otp_service.dart';
 
 class OtpVerificationDialog extends StatefulWidget {
   final String contactInfo;

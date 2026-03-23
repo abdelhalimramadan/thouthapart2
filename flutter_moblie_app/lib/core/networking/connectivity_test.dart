@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thotha_mobile_app/core/networking/connectivity_service.dart';
+import 'package:thoutha_mobile_app/core/networking/connectivity_service.dart';
 
 class ConnectivityTestScreen extends StatefulWidget {
   const ConnectivityTestScreen({Key? key}) : super(key: key);
