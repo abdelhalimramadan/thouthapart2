@@ -189,14 +189,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               Divider(
                   color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
               SizedBox(height: 12.h),
-              // Phone
-              _buildDetailRow(
-                context: context,
-                icon: Icons.phone_outlined,
-                label: 'رقم الهاتف',
-                value: phone,
-              ),
-              SizedBox(height: 14.h),
               // Date
               _buildDetailRow(
                 context: context,
@@ -542,7 +534,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       padding: EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 10.h),
       child: _isLoadingName
           ? SizedBox(
-              height: 30.h, child: const CircularProgressIndicator(strokeWidth: 2))
+              height: 30.h,
+              child: const CircularProgressIndicator(strokeWidth: 2))
           : Text(
               _firstName != null
                   ? 'مرحباً، د/ $_firstName 👋'
@@ -744,9 +737,8 @@ class _AppointmentCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 10.w,
-                      vertical: 4.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                   decoration: BoxDecoration(
                     color: statusColor,
                     borderRadius: BorderRadius.circular(12.r),
@@ -771,7 +763,8 @@ class _AppointmentCard extends StatelessWidget {
                       fontFamily: 'Cairo',
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
-                      color: isDark ? Colors.blue[300] : const Color(0xFF1D61E7),
+                      color:
+                          isDark ? Colors.blue[300] : const Color(0xFF1D61E7),
                     ),
                   ),
                 ),
@@ -803,9 +796,7 @@ class _AppointmentCard extends StatelessWidget {
             Row(
               textDirection: ui.TextDirection.rtl,
               children: [
-                _InfoChip(
-                    icon: Icons.phone_outlined,
-                    text: phone),
+                _InfoChip(icon: Icons.phone_outlined, text: phone),
               ],
             ),
             SizedBox(height: 8.h),
@@ -813,12 +804,9 @@ class _AppointmentCard extends StatelessWidget {
               textDirection: ui.TextDirection.rtl,
               children: [
                 _InfoChip(
-                    icon: Icons.calendar_today_outlined,
-                    text: displayDate),
+                    icon: Icons.calendar_today_outlined, text: displayDate),
                 SizedBox(width: 8.w),
-                _InfoChip(
-                    icon: Icons.access_time_outlined,
-                    text: displayTime),
+                _InfoChip(icon: Icons.access_time_outlined, text: displayTime),
               ],
             ),
           ],
@@ -842,7 +830,9 @@ class _InfoChip extends StatelessWidget {
           color: isDark ? Colors.grey[800]?.withAlpha(150) : Colors.grey[100],
           borderRadius: BorderRadius.circular(8.r)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 13.r, color: isDark ? Colors.blue[300] : const Color(0xFF1D61E7)),
+        Icon(icon,
+            size: 13.r,
+            color: isDark ? Colors.blue[300] : const Color(0xFF1D61E7)),
         SizedBox(width: 4.w),
         Text(text,
             style: TextStyle(

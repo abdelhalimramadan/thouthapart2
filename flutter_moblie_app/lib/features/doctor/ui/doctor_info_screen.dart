@@ -50,8 +50,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
             children: [
               Container(
                 width: double.infinity,
-                padding:
-                    EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
@@ -67,8 +66,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Icon(Icons.close,
-                          size: 24.r,
-                          color: theme.iconTheme.color),
+                          size: 24.r, color: theme.iconTheme.color),
                     ),
                     Text(
                       'تفاصيل الطبيب',
@@ -259,7 +257,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                             width: double.infinity,
                             padding: EdgeInsets.all(12.r),
                             decoration: BoxDecoration(
-                               borderRadius: BorderRadius.circular(8.r),
+                              borderRadius: BorderRadius.circular(8.r),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
@@ -274,12 +272,6 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                   icon: Icons.location_on_outlined,
                                   title: 'العنوان',
                                   subtitle: doctor.cityName,
-                                ),
-                                SizedBox(height: 10.h),
-                                _InfoTile(
-                                  icon: Icons.phone_outlined,
-                                  title: 'رقم الهاتف',
-                                  subtitle: doctor.phoneNumber,
                                 ),
                                 SizedBox(height: 10.h),
                                 if (doctor.email != null)
@@ -306,8 +298,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                               ),
                               SizedBox(width: 8.w),
                               Icon(Icons.calendar_today_outlined,
-                                  size: 18.r,
-                                  color: const Color(0xFF0B8FAC)),
+                                  size: 18.r, color: const Color(0xFF0B8FAC)),
                               SizedBox(width: 6.w),
                             ],
                           ),
@@ -318,10 +309,8 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                               scrollDirection: Axis.horizontal,
                               reverse: true,
                               itemCount: 4,
-                              padding:
-                                  EdgeInsets.symmetric(horizontal: 8.w),
-                              separatorBuilder: (_, __) =>
-                                  SizedBox(width: 8.w),
+                              padding: EdgeInsets.symmetric(horizontal: 8.w),
+                              separatorBuilder: (_, __) => SizedBox(width: 8.w),
                               itemBuilder: (context, index) {
                                 final days = [
                                   'الأحد',
@@ -420,8 +409,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                   ),
                                 ),
                                 Icon(Icons.sticky_note_2_outlined,
-                                    color: const Color(0xFF3B82F6),
-                                    size: 20.r),
+                                    color: const Color(0xFF3B82F6), size: 20.r),
                               ],
                             ),
                           ),
@@ -532,9 +520,7 @@ class _InfoTile extends StatelessWidget {
   final String subtitle;
 
   const _InfoTile(
-      {required this.icon,
-      required this.title,
-      required this.subtitle});
+      {required this.icon, required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -596,10 +582,7 @@ class _DayChip extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;
 
-  const _DayChip(
-      {required this.label,
-      this.selected = false,
-      this.onTap});
+  const _DayChip({required this.label, this.selected = false, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -655,10 +638,7 @@ class _TimeListTile extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;
 
-  const _TimeListTile(
-      {required this.label,
-      this.selected = false,
-      this.onTap});
+  const _TimeListTile({required this.label, this.selected = false, this.onTap});
 
   @override
   Widget build(BuildContext context) {

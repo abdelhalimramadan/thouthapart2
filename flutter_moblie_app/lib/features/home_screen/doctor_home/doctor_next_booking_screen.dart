@@ -77,7 +77,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
       appBar: AppBar(
         toolbarHeight: 75.6,
         elevation: 0,
-        backgroundColor: isDark ? Colors.transparent : theme.colorScheme.surface,
+        backgroundColor:
+            isDark ? Colors.transparent : theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
         automaticallyImplyLeading: false,
         leading: Builder(
@@ -245,15 +246,6 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
               Divider(
                   color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
               const SizedBox(height: 12),
-              // Phone
-              _buildDetailRow(
-                context: context,
-                icon: Icons.phone_outlined,
-                label: 'رقم الهاتف',
-                value: phone,
-                baseFontSize: baseFontSize,
-              ),
-              const SizedBox(height: 14),
               // Date
               _buildDetailRow(
                 context: context,
@@ -307,7 +299,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
             color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, size: 18, color: isDark ? Colors.white : const Color(0xFF021433)),
+          child: Icon(icon,
+              size: 18, color: isDark ? Colors.white : const Color(0xFF021433)),
         ),
         const SizedBox(width: 12),
         Column(
@@ -367,7 +360,9 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isDark ? Colors.grey[900]?.withAlpha(200) : (theme.cardTheme.color ?? colorScheme.surface),
+          color: isDark
+              ? Colors.grey[900]?.withAlpha(200)
+              : (theme.cardTheme.color ?? colorScheme.surface),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
               color: isDark ? Colors.grey[800]! : const Color(0xFFE5E7EB)),

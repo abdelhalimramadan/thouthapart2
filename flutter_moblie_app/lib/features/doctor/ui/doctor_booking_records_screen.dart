@@ -188,13 +188,6 @@ class _DoctorBookingRecordsScreenState
               SizedBox(height: 12.h),
               _buildDetailRow(
                 context: context,
-                icon: Icons.phone_outlined,
-                label: 'رقم الهاتف',
-                value: phone,
-              ),
-              SizedBox(height: 14.h),
-              _buildDetailRow(
-                context: context,
                 icon: Icons.calendar_month_outlined,
                 label: 'التاريخ',
                 value: date,

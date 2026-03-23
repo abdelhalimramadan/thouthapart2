@@ -115,9 +115,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
       }
 
       if (widget.cityName != null && widget.cityName!.isNotEmpty) {
-        all = all
-            .where((r) => r.doctorCityName == widget.cityName)
-            .toList();
+        all = all.where((r) => r.doctorCityName == widget.cityName).toList();
         print('Requests after city filter: ${all.length}');
       }
 
@@ -341,7 +339,8 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                     fontWeight: FontWeight.bold,
                     fontSize: 14.sp),
               ),
-              icon: Icon(Icons.add_task_rounded, color: Colors.white, size: 24.r),
+              icon:
+                  Icon(Icons.add_task_rounded, color: Colors.white, size: 24.r),
               backgroundColor: ColorsManager.mainBlue,
             )
           : null,
@@ -783,11 +782,6 @@ class _CaseDetailsSheet extends StatelessWidget {
                   icon: Icons.person_outline,
                   label: 'الطبيب',
                   value: req.doctorFullName,
-                  isDark: isDark),
-              _DetailRow(
-                  icon: Icons.phone_outlined,
-                  label: 'الهاتف',
-                  value: req.doctorPhoneNumber,
                   isDark: isDark),
               _DetailRow(
                   icon: Icons.location_city_outlined,
