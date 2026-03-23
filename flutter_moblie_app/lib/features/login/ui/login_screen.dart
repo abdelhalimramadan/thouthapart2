@@ -270,7 +270,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       margin: EdgeInsets.only(bottom: 16.h),
                                       decoration: BoxDecoration(
                                         color: isDarkMode
-                                            ? Colors.red.withOpacity(0.15)
+                                            ? Colors.red.withValues(alpha: 0.15)
                                             : Colors.red[50],
                                         borderRadius: BorderRadius.circular(8.r),
                                         border: Border.all(

@@ -5,7 +5,6 @@ import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
 import 'package:thoutha_mobile_app/core/theming/theme_provider.dart';
 import 'package:thoutha_mobile_app/features/about_app/ui/about_app_screen.dart' show AboutAppScreen;
-import 'package:thoutha_mobile_app/features/doctor/ui/doctor_home_screen.dart';
 import 'package:thoutha_mobile_app/features/doctor/ui/doctor_next_booking_screen.dart';
 import 'package:thoutha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
 import 'package:thoutha_mobile_app/features/home_screen/doctor_home/ui/doctor_profile.dart';
@@ -15,6 +14,7 @@ import 'package:thoutha_mobile_app/features/login/ui/login_screen.dart';
 import 'package:thoutha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart' show PrivacyPolicyScreen;
 import 'package:thoutha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart' show TermsAndConditionsScreen;
 
+import '../../home_screen/doctor_home/ui/doctor_home_screen.dart';
 import '../../profile/data/models/doctor_profile_model.dart';
 
 

@@ -473,8 +473,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             horizontal: 1.sw * 0.05, vertical: 10.h),
                         decoration: BoxDecoration(
                           color: isDark
-                              ? Colors.grey[800]?.withOpacity(0.5)
-                              : const Color(0xFFD9D9D9).withOpacity(0.3),
+                              ? Colors.grey[800]?.withValues(alpha: 0.5)
+                              : const Color(0xFFD9D9D9).withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(10.r),
                         ),
                         child: Row(
@@ -713,8 +713,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               horizontal: 12.w, vertical: 10.h),
                           decoration: BoxDecoration(
                             color: isDark
-                                ? Colors.orange.withOpacity(0.15)
-                                : Colors.orange.withOpacity(0.1),
+                                ? Colors.orange.withValues(alpha: 0.15)
+                                : Colors.orange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8.r),
                             border: Border.all(
                                 color: isDark

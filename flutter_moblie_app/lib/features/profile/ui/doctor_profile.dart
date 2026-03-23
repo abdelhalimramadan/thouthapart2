@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
-
+import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thoutha_mobile_app/core/networking/models/university_model.dart';
-import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
+import 'package:thoutha_mobile_app/features/doctor/ui/account_deletion_screen.dart';
+import 'package:thoutha_mobile_app/features/forgot_password/ui/change_password_screen.dart';
+import 'package:thoutha_mobile_app/features/profile/data/models/doctor_profile_model.dart';
 import 'package:thoutha_mobile_app/features/profile/logic/profile_cubit.dart';
 import 'package:thoutha_mobile_app/features/profile/logic/profile_state.dart';
-import 'package:thoutha_mobile_app/features/profile/data/models/doctor_profile_model.dart';
-import 'package:thoutha_mobile_app/features/doctor/ui/account_deletion_screen.dart';
-import 'package:thoutha_mobile_app/features/doctor/ui/doctor_home_screen.dart';
 import 'package:thoutha_mobile_app/features/requests/ui/my_requests_screen.dart';
-import 'package:thoutha_mobile_app/features/forgot_password/ui/change_password_screen.dart';
+
+import '../../home_screen/doctor_home/ui/doctor_home_screen.dart';
 
 class DoctorProfileScreen extends StatelessWidget {
   const DoctorProfileScreen({super.key});
@@ -271,6 +271,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -579,7 +580,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
           Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: theme.cardTheme.color ?? (isDark ? Colors.grey[900] : Colors.white),
+              color: theme.cardTheme.color ??
+                  (isDark ? Colors.grey[900] : Colors.white),
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(

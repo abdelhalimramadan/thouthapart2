@@ -581,7 +581,7 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             decoration: BoxDecoration(
               color: theme.brightness == Brightness.dark 
-                  ? theme.colorScheme.surfaceVariant.withOpacity(0.5) 
+                  ? theme.colorScheme.surfaceVariant.withValues(alpha: 0.5) 
                   : _color3,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(13.r),

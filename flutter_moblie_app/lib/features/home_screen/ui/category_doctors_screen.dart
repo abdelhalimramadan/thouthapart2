@@ -407,7 +407,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
         borderRadius: BorderRadius.circular(14.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 8.r,
             offset: Offset(0, 3.h),
           ),
@@ -444,7 +444,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                         padding: EdgeInsets.symmetric(
                             horizontal: 10.w, vertical: 3.h),
                         decoration: BoxDecoration(
-                          color: ColorsManager.mainBlue.withOpacity(0.1),
+                          color: ColorsManager.mainBlue.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20.r),
                         ),
                         child: Text(
@@ -460,7 +460,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                     if (isLoggedIn) ...[
                       SizedBox(width: 8.w),
                       Material(
-                        color: Colors.red.withOpacity(0.08),
+                        color: Colors.red.withValues(alpha: 0.08),
                         shape: const CircleBorder(),
                         child: IconButton(
                           icon: Icon(

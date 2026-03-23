@@ -132,7 +132,7 @@ class MyRequestsView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.assignment_late_outlined,
-              size: 80.r, color: Colors.grey.withOpacity(0.5)),
+              size: 80.r, color: Colors.grey.withValues(alpha: 0.5)),
           SizedBox(height: 16.h),
           Text(
             'لا توجد طلبات حالياً',
@@ -233,7 +233,7 @@ class _RequestCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10.r,
             offset: Offset(0, 4.h),
           ),
@@ -251,7 +251,7 @@ class _RequestCard extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [
                     ColorsManager.mainBlue,
-                    ColorsManager.mainBlue.withOpacity(0.8),
+                    ColorsManager.mainBlue.withValues(alpha: 0.8),
                   ],
                 ),
               ),
@@ -275,7 +275,7 @@ class _RequestCard extends StatelessWidget {
                     padding:
                         EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Text(
@@ -330,7 +330,7 @@ class _RequestCard extends StatelessWidget {
                       padding: EdgeInsets.all(12.w),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? Colors.white.withOpacity(0.05)
+                            ? Colors.white.withValues(alpha: 0.05)
                             : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(12.r),
                       ),
@@ -425,7 +425,7 @@ class _RequestCard extends StatelessWidget {
         Row(
           children: [
             Icon(icon,
-                size: 14.r, color: ColorsManager.mainBlue.withOpacity(0.7)),
+                size: 14.r, color: ColorsManager.mainBlue.withValues(alpha: 0.7)),
             SizedBox(width: 4.w),
             Text(label,
                 style: TextStyle(
