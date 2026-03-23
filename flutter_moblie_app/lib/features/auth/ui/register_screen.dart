@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:thotha_mobile_app/core/helpers/spacing.dart';
-import 'package:thotha_mobile_app/core/routing/routes.dart';
-import 'package:thotha_mobile_app/core/theming/colors.dart';
-import 'package:thotha_mobile_app/core/theming/styles.dart';
-import 'package:thotha_mobile_app/features/auth/data/auth_service.dart';
+import 'package:thoutha_mobile_app/core/helpers/spacing.dart';
+import 'package:thoutha_mobile_app/core/routing/routes.dart';
+import 'package:thoutha_mobile_app/core/theming/colors.dart';
+import 'package:thoutha_mobile_app/core/theming/styles.dart';
+import 'package:thoutha_mobile_app/features/auth/data/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

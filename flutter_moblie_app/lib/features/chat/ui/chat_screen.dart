@@ -2,9 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:thotha_mobile_app/core/networking/api_constants.dart';
-import 'package:thotha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
-import 'package:thotha_mobile_app/core/routing/routes.dart';
+import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
+import 'package:thoutha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
+import 'package:thoutha_mobile_app/core/routing/routes.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});

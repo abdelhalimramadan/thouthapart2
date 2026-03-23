@@ -1,5 +1,5 @@
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:thotha_mobile_app/features/appointments/data/appointments_service.dart';
+import 'package:thoutha_mobile_app/features/appointments/data/appointments_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

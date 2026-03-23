@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thotha_mobile_app/core/theming/theme_provider.dart';
+import 'package:thoutha_mobile_app/core/theming/theme_provider.dart';
 
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/my_requests_screen.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/doctor_profile.dart';
-import 'package:thotha_mobile_app/features/login/ui/login_screen.dart';
-import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
-import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
-import 'package:thotha_mobile_app/core/networking/api_service.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/ui/my_requests_screen.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/ui/doctor_profile.dart';
+import 'package:thoutha_mobile_app/features/login/ui/login_screen.dart';
+import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
+import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thoutha_mobile_app/core/networking/api_service.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
 
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/doctor_next_booking_screen.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/doctor_next_booking_screen.dart';
 
-import 'package:thotha_mobile_app/features/home_screen/ui/secondary_home_screen.dart';
-import 'package:thotha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
-import 'package:thotha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
-import 'package:thotha_mobile_app/features/about_app/ui/about_app_screen.dart';
-import 'package:thotha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart';
+import 'package:thoutha_mobile_app/features/home_screen/ui/secondary_home_screen.dart';
+import 'package:thoutha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
+import 'package:thoutha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
+import 'package:thoutha_mobile_app/features/about_app/ui/about_app_screen.dart';
+import 'package:thoutha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart';
 
 class DoctorDrawer extends StatefulWidget {
   const DoctorDrawer({super.key});

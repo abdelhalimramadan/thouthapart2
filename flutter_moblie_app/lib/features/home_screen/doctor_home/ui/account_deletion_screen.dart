@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
-import 'package:thotha_mobile_app/core/networking/api_service.dart';
+import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
+import 'package:thoutha_mobile_app/core/networking/api_service.dart';
 
 import '../../../../core/routing/routes.dart';
 

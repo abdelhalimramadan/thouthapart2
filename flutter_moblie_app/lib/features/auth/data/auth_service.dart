@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:thotha_mobile_app/core/helpers/constants.dart';
-import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
-import 'package:thotha_mobile_app/core/networking/api_constants.dart';
-import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
+import 'package:thoutha_mobile_app/core/helpers/constants.dart';
+import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
+import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
+import 'package:thoutha_mobile_app/core/networking/dio_factory.dart';
 
 class AuthService {
   final Dio _dio = DioFactory.getDio();

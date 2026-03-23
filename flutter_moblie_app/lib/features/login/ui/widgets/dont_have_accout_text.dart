@@ -1,4 +1,4 @@
-import 'package:thotha_mobile_app/core/helpers/extentions.dart';
+import 'package:thoutha_mobile_app/core/helpers/extentions.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 

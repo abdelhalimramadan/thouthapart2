@@ -1,5 +1,5 @@
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:thotha_mobile_app/features/onboarding/widgets/doctor_image_and_text.dart';
+import 'package:thoutha_mobile_app/features/onboarding/widgets/doctor_image_and_text.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/routing/routes.dart';

@@ -1,5 +1,5 @@
-import 'package:thotha_mobile_app/core/routing/app_router.dart';
-import 'package:thotha_mobile_app/doc_app.dart';
+import 'package:thoutha_mobile_app/core/routing/app_router.dart';
+import 'package:thoutha_mobile_app/doc_app.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 

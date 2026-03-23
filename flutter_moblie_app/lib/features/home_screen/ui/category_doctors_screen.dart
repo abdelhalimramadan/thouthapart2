@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
-import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
-import 'package:thotha_mobile_app/core/networking/api_service.dart';
-import 'package:thotha_mobile_app/core/theming/colors.dart';
-import 'package:thotha_mobile_app/features/booking/ui/booking_confirmation_screen.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/ui/add_case_request_screen.dart';
-import 'package:thotha_mobile_app/core/helpers/constants.dart';
+import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
+import 'package:thoutha_mobile_app/core/networking/api_service.dart';
+import 'package:thoutha_mobile_app/core/theming/colors.dart';
+import 'package:thoutha_mobile_app/features/booking/ui/booking_confirmation_screen.dart';
+import 'package:thoutha_mobile_app/features/home_screen/data/models/case_request_model.dart';
+import 'package:thoutha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/ui/add_case_request_screen.dart';
+import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 
 class CategoryDoctorsScreen extends StatefulWidget {
   final String categoryName;
@@ -115,9 +115,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
       }
 
       if (widget.cityName != null && widget.cityName!.isNotEmpty) {
-        all = all
-            .where((r) => r.doctorCityName == widget.cityName)
-            .toList();
+        all = all.where((r) => r.doctorCityName == widget.cityName).toList();
         print('Requests after city filter: ${all.length}');
       }
 
@@ -341,7 +339,8 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                     fontWeight: FontWeight.bold,
                     fontSize: 14.sp),
               ),
-              icon: Icon(Icons.add_task_rounded, color: Colors.white, size: 24.r),
+              icon:
+                  Icon(Icons.add_task_rounded, color: Colors.white, size: 24.r),
               backgroundColor: ColorsManager.mainBlue,
             )
           : null,
@@ -520,26 +519,6 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                         color: isDark ? Colors.grey[400] : Colors.grey[600],
                       ),
                       overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-
-            // Phone
-            if (req.doctorPhoneNumber.isNotEmpty) ...[
-              SizedBox(height: 5.h),
-              Row(
-                children: [
-                  Icon(Icons.phone_outlined,
-                      size: 15.r, color: Colors.grey[500]),
-                  SizedBox(width: 4.w),
-                  Text(
-                    req.doctorPhoneNumber,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 13.sp,
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
                     ),
                   ),
                 ],
@@ -803,11 +782,6 @@ class _CaseDetailsSheet extends StatelessWidget {
                   icon: Icons.person_outline,
                   label: 'الطبيب',
                   value: req.doctorFullName,
-                  isDark: isDark),
-              _DetailRow(
-                  icon: Icons.phone_outlined,
-                  label: 'الهاتف',
-                  value: req.doctorPhoneNumber,
                   isDark: isDark),
               _DetailRow(
                   icon: Icons.location_city_outlined,

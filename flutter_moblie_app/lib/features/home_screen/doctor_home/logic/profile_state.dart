@@ -1,8 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
-import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
-import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
+import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
+import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
+import 'package:thoutha_mobile_app/core/networking/models/university_model.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
 import 'package:dio/dio.dart';
 
 part 'profile_state.freezed.dart';

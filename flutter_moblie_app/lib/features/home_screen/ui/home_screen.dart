@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:thotha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
-import 'package:thotha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
+import 'package:thoutha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
+import 'package:thoutha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:dio/dio.dart';
-import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
-import 'package:thotha_mobile_app/features/home_screen/logic/doctor_cubit.dart';
-import 'package:thotha_mobile_app/features/home_screen/logic/doctor_state.dart';
-import 'package:thotha_mobile_app/core/helpers/shared_pref_helper.dart';
-import 'package:thotha_mobile_app/core/helpers/constants.dart';
-import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
+import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thoutha_mobile_app/features/home_screen/logic/doctor_cubit.dart';
+import 'package:thoutha_mobile_app/features/home_screen/logic/doctor_state.dart';
+import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
+import 'package:thoutha_mobile_app/core/helpers/constants.dart';
+import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen(

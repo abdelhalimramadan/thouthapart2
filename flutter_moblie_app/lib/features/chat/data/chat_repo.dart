@@ -1,5 +1,5 @@
-import 'package:thotha_mobile_app/core/networking/api_service.dart';
-import 'package:thotha_mobile_app/core/networking/api_constants.dart';
+import 'package:thoutha_mobile_app/core/networking/api_service.dart';
+import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
 
 class ChatRepo {
   final ApiService _apiService;

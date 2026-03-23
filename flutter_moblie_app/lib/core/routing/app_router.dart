@@ -1,4 +1,4 @@
-import 'package:thotha_mobile_app/core/routing/routes.dart';
+import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/login/ui/login_screen.dart';

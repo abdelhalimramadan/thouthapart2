@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:thotha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 
-import 'package:thotha_mobile_app/core/networking/api_service.dart';
-import 'package:thotha_mobile_app/core/theming/colors.dart';
-import 'package:thotha_mobile_app/core/theming/styles.dart';
-import 'package:thotha_mobile_app/core/widgets/app_text_button.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
+import 'package:thoutha_mobile_app/core/networking/api_service.dart';
+import 'package:thoutha_mobile_app/core/theming/colors.dart';
+import 'package:thoutha_mobile_app/core/theming/styles.dart';
+import 'package:thoutha_mobile_app/core/widgets/app_text_button.dart';
+import 'package:thoutha_mobile_app/features/home_screen/data/models/case_request_model.dart';
 
 class EditRequestScreen extends StatefulWidget {
   final CaseRequestModel request;

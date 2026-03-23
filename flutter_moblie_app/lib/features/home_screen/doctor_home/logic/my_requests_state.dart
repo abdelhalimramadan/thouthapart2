@@ -1,4 +1,4 @@
-import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
+import 'package:thoutha_mobile_app/features/home_screen/data/models/case_request_model.dart';
 
 abstract class MyRequestsState {}
 

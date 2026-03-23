@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
-import 'package:thotha_mobile_app/core/networking/api_constants.dart';
-import 'package:thotha_mobile_app/core/networking/dio_factory.dart';
-import 'package:thotha_mobile_app/core/networking/models/category_model.dart';
-import 'package:thotha_mobile_app/core/networking/models/city_model.dart';
-import 'package:thotha_mobile_app/core/networking/models/university_model.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/models/doctor_model.dart';
-import 'package:thotha_mobile_app/features/home_screen/data/models/case_request_model.dart';
-import 'package:thotha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
+import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
+import 'package:thoutha_mobile_app/core/networking/dio_factory.dart';
+import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
+import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
+import 'package:thoutha_mobile_app/core/networking/models/university_model.dart';
+import 'package:thoutha_mobile_app/features/home_screen/data/models/doctor_model.dart';
+import 'package:thoutha_mobile_app/features/home_screen/data/models/case_request_model.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
 
 /// Centralised API service.
 ///
