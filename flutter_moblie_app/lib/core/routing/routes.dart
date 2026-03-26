@@ -18,4 +18,5 @@ class Routes {
   static const String termsAndConditionsScreen = '/terms_and_conditions';
   static const String notificationsScreen = '/notifications';
   static const String accountDeletionScreen = '/account-deletion';
+  static const String doctorBookingRecordsScreen = '/doctor-booking-records';
 }

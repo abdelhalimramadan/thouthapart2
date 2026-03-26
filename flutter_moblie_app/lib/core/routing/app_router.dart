@@ -13,6 +13,7 @@ import '../../features/reset_password/ui/reset_password_screen.dart';
 import '../../features/home_screen/ui/home_screen.dart';
 import '../../features/notifications/ui/notifications_screen.dart';
 import '../../features/home_screen/doctor_home/ui/account_deletion_screen.dart';
+import '../../features/home_screen/doctor_home/ui/doctor_booking_records_screen.dart';
 
 class AppRouter {
   Route generateRoute(RouteSettings settings) {
@@ -71,6 +72,10 @@ class AppRouter {
       case Routes.accountDeletionScreen:
         return MaterialPageRoute(
           builder: (context) => const AccountDeletionScreen(),
+        );
+      case Routes.doctorBookingRecordsScreen:
+        return MaterialPageRoute(
+          builder: (context) => const DoctorBookingRecordsScreen(),
         );
 
       default:

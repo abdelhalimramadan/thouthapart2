@@ -12,6 +12,7 @@ import 'package:thoutha_mobile_app/core/networking/api_service.dart';
 import 'package:thoutha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
 
 import 'package:thoutha_mobile_app/features/home_screen/doctor_home/doctor_next_booking_screen.dart';
+import 'package:thoutha_mobile_app/features/home_screen/doctor_home/ui/doctor_booking_records_screen.dart';
 
 import 'package:thoutha_mobile_app/features/home_screen/ui/secondary_home_screen.dart';
 import 'package:thoutha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
@@ -521,9 +522,27 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                   ),
                   _menuItem(
                     context,
+                    title: 'سجل الحجوزات',
+                    icon: Icons.history_outlined,
+                    isSelected: currentIndex == 4,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          settings:
+                              const RouteSettings(name: 'booking-records'),
+                          builder: (context) => const DoctorBookingRecordsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
                     title: 'طلباتي',
                     icon: Icons.assignment_outlined,
-                    isSelected: currentIndex == 4,
+                    isSelected: currentIndex == 5,
                     width: width,
                     baseFontSize: baseFontSize,
                     onTap: () {
