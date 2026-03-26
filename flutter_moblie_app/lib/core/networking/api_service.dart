@@ -5,9 +5,9 @@ import 'package:thoutha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thoutha_mobile_app/core/networking/models/university_model.dart';
-import 'package:thoutha_mobile_app/features/home_screen/data/models/doctor_model.dart';
-import 'package:thoutha_mobile_app/features/home_screen/data/models/case_request_model.dart';
-import 'package:thoutha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
+import 'package:thoutha_mobile_app/features/doctor/data/models/doctor_model.dart';
+import 'package:thoutha_mobile_app/features/requests/data/models/case_request_model.dart';
+import 'package:thoutha_mobile_app/features/profile/data/models/doctor_profile_model.dart';
 
 /// Centralised API service.
 ///
@@ -31,7 +31,8 @@ class ApiService {
   // ── Helpers ──────────────────────────────────────────────────────────────
 
   /// Generic GET helper
-  Future<Map<String, dynamic>> get(String path, {Map<String, dynamic>? query}) async {
+  Future<Map<String, dynamic>> get(String path,
+      {Map<String, dynamic>? query}) async {
     try {
       final res = await _dio.get(path, queryParameters: query);
       return _okData(res.data);
@@ -333,7 +334,6 @@ class ApiService {
       return _fail('حدث خطأ غير متوقع');
     }
   }
-
 
   Future<Map<String, dynamic>> getRequestsByDoctorId() async {
     try {

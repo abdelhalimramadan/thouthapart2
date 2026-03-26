@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/utils/notification_helper.dart';
-import '../widgets/doctor_drawer_screen.dart';
+import '../drawer_doctor/doctor_drawer_screen.dart';
 import '../../notifications/ui/notifications_screen.dart';
 
 class DoctorBookingRecordsScreen extends StatefulWidget {
@@ -232,7 +232,9 @@ class _DoctorBookingRecordsScreenState
             color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(8.r),
           ),
-          child: Icon(icon, size: 18.r, color: isDark ? Colors.white : const Color(0xFF021433)),
+          child: Icon(icon,
+              size: 18.r,
+              color: isDark ? Colors.white : const Color(0xFF021433)),
         ),
         SizedBox(width: 12.w),
         Column(
@@ -337,8 +339,7 @@ class _DoctorBookingRecordsScreenState
             SizedBox(width: 8.w),
             // Status badge
             Container(
-              padding: EdgeInsets.symmetric(
-                  horizontal: 10.w, vertical: 4.h),
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
               decoration: BoxDecoration(
                 color: statusColor,
                 borderRadius: BorderRadius.circular(12.r),

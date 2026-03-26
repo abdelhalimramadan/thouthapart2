@@ -7,15 +7,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:dio/dio.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
-import 'package:thoutha_mobile_app/features/home_screen/logic/doctor_cubit.dart';
-import 'package:thoutha_mobile_app/features/home_screen/logic/doctor_state.dart';
+import 'package:thoutha_mobile_app/features/doctor/logic/doctor_cubit.dart';
+import 'package:thoutha_mobile_app/features/doctor/logic/doctor_state.dart';
 import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen(
-      {super.key, this.drawer = const HomeDrawer(), this.showAddCaseCategory = false});
+      {super.key,
+      this.drawer = const HomeDrawer(),
+      this.showAddCaseCategory = false});
   final Widget drawer;
   final bool showAddCaseCategory;
 
@@ -31,7 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int? _selectedCityId;
   // All candidate strings returned by Nominatim (state, county, city, etc.)
   List<String> _gpsNameCandidates = [];
-  bool _gpsFinished = false; // true once GPS attempt completes (success or fail)
+  bool _gpsFinished =
+      false; // true once GPS attempt completes (success or fail)
   bool _autoSelectApplied = false;
   bool _isLoggedIn = false;
   bool _isDetecting = false;
@@ -136,7 +139,8 @@ class _HomeScreenState extends State<HomeScreen> {
       'تركيبات متحركة',
     ];
 
-    final fileName = index < svgFiles.length ? svgFiles[index] : 'placeholder.svg';
+    final fileName =
+        index < svgFiles.length ? svgFiles[index] : 'placeholder.svg';
     final resolvedAssetPath =
         assetPath.isNotEmpty ? assetPath : 'assets/svg/$fileName';
     final resolvedCategoryName = categoryName.isNotEmpty
@@ -236,18 +240,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) {
       setState(() {
         _isLoggedIn = token.isNotEmpty && token != 'null';
-        if (_isLoggedIn) {
-          _selectedCityId = null;
-          _gpsNameCandidates = [];
-          _gpsFinished = false;
-          _autoSelectApplied = false;
-          _isDetecting = false;
-          _gpsFailureMessage = null;
-        }
       });
-      if (!_isLoggedIn) {
-        _autoDetectCity();
-      }
+      // Auto-detect city for all users (logged in or not)
+      _autoDetectCity();
     }
   }
 
@@ -275,7 +270,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Tries to match any GPS candidate against the loaded cities list.
   void _tryAutoSelectCity() {
-    if (_isLoggedIn) return;
     if (_autoSelectApplied || _selectedCityId != null) return;
     if (!_gpsFinished || _loadedCities.isEmpty) return;
 
@@ -308,7 +302,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _autoDetectCity() async {
-    if (_isLoggedIn) return;
     if (mounted) setState(() => _isDetecting = true);
     try {
       LocationPermission perm = await Geolocator.checkPermission();
@@ -453,12 +446,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 final categories = state.categories;
                 final cities = state.cities;
 
-                final filteredCategories =
-                    (_searchController.text.isEmpty || categories.isEmpty)
-                        ? categories
-                        : categories
-                            .where((c) => c.name.contains(_searchController.text))
-                            .toList();
+                final filteredCategories = (_searchController.text.isEmpty ||
+                        categories.isEmpty)
+                    ? categories
+                    : categories
+                        .where((c) => c.name.contains(_searchController.text))
+                        .toList();
 
                 final visibleCategories = filteredCategories.toList();
 
@@ -481,7 +474,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Padding(
                               padding: EdgeInsets.symmetric(horizontal: 12.w),
-                              child: Icon(Icons.search, color: Colors.grey, size: 22.r),
+                              child: Icon(Icons.search,
+                                  color: Colors.grey, size: 22.r),
                             ),
                             Expanded(
                               child: TextField(
@@ -510,7 +504,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             IconButton(
-                              icon: Icon(Icons.mic, color: Colors.grey, size: 22.r),
+                              icon: Icon(Icons.mic,
+                                  color: Colors.grey, size: 22.r),
                               onPressed: () {},
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
@@ -669,8 +664,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                       height: 18.h,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color:
-                                            Theme.of(context).colorScheme.primary,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
                                       ),
                                     )
                                   : Icon(Icons.arrow_drop_down,
@@ -725,7 +721,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Row(
                             children: [
                               Icon(Icons.location_off,
-                                  color: isDark ? Colors.orange[300] : Colors.orange,
+                                  color: isDark
+                                      ? Colors.orange[300]
+                                      : Colors.orange,
                                   size: 18.r),
                               SizedBox(width: 8.w),
                               Expanded(
@@ -748,16 +746,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       // Services Header
                       Container(
                         width: double.infinity,
-                        margin:
-                            EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                        margin: EdgeInsets.symmetric(
+                            horizontal: 16.w, vertical: 12.h),
                         child: Text(
                           'الخدمات المتوفرة',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontFamily: 'Cairo',
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17.sp,
-                                height: 1.2,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontFamily: 'Cairo',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 17.sp,
+                                    height: 1.2,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -765,7 +764,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       // Categories Grid
                       if (visibleCategories.isNotEmpty)
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 1.sw * 0.05),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 1.sw * 0.05),
                           child: LayoutBuilder(
                             builder: (context, constraints) {
                               final crossAxisCount = 1.sw > 600 ? 4 : 2;
@@ -789,7 +789,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   if (_selectedCityId != null) {
                                     try {
                                       selectedCityName = cities
-                                          .firstWhere((c) => c.id == _selectedCityId)
+                                          .firstWhere(
+                                              (c) => c.id == _selectedCityId)
                                           .name;
                                     } catch (_) {}
                                   }

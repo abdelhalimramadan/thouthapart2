@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thoutha_mobile_app/core/theming/theme_provider.dart';
-
-import 'package:thoutha_mobile_app/features/home_screen/doctor_home/ui/my_requests_screen.dart';
-import 'package:thoutha_mobile_app/features/home_screen/doctor_home/ui/doctor_home_screen.dart';
-import 'package:thoutha_mobile_app/features/home_screen/doctor_home/ui/doctor_profile.dart';
-import 'package:thoutha_mobile_app/features/login/ui/login_screen.dart';
-import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
-import 'package:thoutha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
-
-import 'package:thoutha_mobile_app/features/home_screen/doctor_home/doctor_next_booking_screen.dart';
-
-import 'package:thoutha_mobile_app/features/home_screen/ui/secondary_home_screen.dart';
-import 'package:thoutha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart';
+import 'package:thoutha_mobile_app/core/theming/theme_provider.dart';
+import 'package:thoutha_mobile_app/features/about_app/ui/about_app_screen.dart'
+    show AboutAppScreen;
+import 'package:thoutha_mobile_app/features/doctor/ui/doctor_booking_records_screen.dart';
+import 'package:thoutha_mobile_app/features/doctor/ui/doctor_next_booking_screen.dart';
 import 'package:thoutha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
-import 'package:thoutha_mobile_app/features/about_app/ui/about_app_screen.dart';
-import 'package:thoutha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart';
+import 'package:thoutha_mobile_app/features/profile/ui/doctor_profile.dart';
+import 'package:thoutha_mobile_app/features/requests/ui/my_requests_screen.dart';
+import 'package:thoutha_mobile_app/features/doctor/ui/secondary_home_screen.dart'
+    show SecondaryHomeScreen;
+import 'package:thoutha_mobile_app/features/login/ui/login_screen.dart';
+import 'package:thoutha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart'
+    show PrivacyPolicyScreen;
+import 'package:thoutha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart'
+    show TermsAndConditionsScreen;
+
+import '../ui/doctor_home_screen.dart';
+import '../../profile/data/models/doctor_profile_model.dart';
 
 class DoctorDrawer extends StatefulWidget {
   const DoctorDrawer({super.key});
@@ -338,8 +341,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                 gradient: LinearGradient(
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
-                  colors: isDark 
-                      ? [_cCyan.withAlpha(200), _cGreen.withAlpha(200)] 
+                  colors: isDark
+                      ? [_cCyan.withAlpha(200), _cGreen.withAlpha(200)]
                       : [_cCyan, _cGreen],
                 ),
               ),
@@ -521,9 +524,28 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                   ),
                   _menuItem(
                     context,
+                    title: 'سجل الحجوزات',
+                    icon: Icons.history,
+                    isSelected: currentIndex == 4,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          settings:
+                              const RouteSettings(name: 'booking-records'),
+                          builder: (context) =>
+                              const DoctorBookingRecordsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
                     title: 'طلباتي',
                     icon: Icons.assignment_outlined,
-                    isSelected: currentIndex == 4,
+                    isSelected: currentIndex == 5,
                     width: width,
                     baseFontSize: baseFontSize,
                     onTap: () {

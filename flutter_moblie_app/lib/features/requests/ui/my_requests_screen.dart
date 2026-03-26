@@ -9,7 +9,7 @@ import 'package:thoutha_mobile_app/features/requests/data/logic/my_requests_stat
 
 import 'package:thoutha_mobile_app/features/requests/ui/edit_request_screen.dart';
 
-import '../../home_screen/doctor_home/ui/doctor_home_screen.dart';
+import '../../doctor/ui/doctor_home_screen.dart';
 
 class MyRequestsScreen extends StatelessWidget {
   const MyRequestsScreen({super.key});
@@ -47,8 +47,8 @@ class MyRequestsView extends StatelessWidget {
         backgroundColor: ColorsManager.mainBlue,
         elevation: 0,
         leading: IconButton(
-          icon:
-              Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 24.r),
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: Colors.white, size: 24.r),
           onPressed: () {
             Navigator.pushReplacement(
               context,
@@ -426,7 +426,8 @@ class _RequestCard extends StatelessWidget {
         Row(
           children: [
             Icon(icon,
-                size: 14.r, color: ColorsManager.mainBlue.withValues(alpha: 0.7)),
+                size: 14.r,
+                color: ColorsManager.mainBlue.withValues(alpha: 0.7)),
             SizedBox(width: 4.w),
             Text(label,
                 style: TextStyle(
@@ -516,4 +517,3 @@ class _RequestCard extends StatelessWidget {
     );
   }
 }
-

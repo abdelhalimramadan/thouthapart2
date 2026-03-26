@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
-import 'package:thoutha_mobile_app/features/doctor/widgets/doctor_drawer_screen.dart';
+import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
 import 'package:thoutha_mobile_app/features/notifications/ui/notifications_screen.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui show TextDirection;
@@ -77,7 +77,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
       appBar: AppBar(
         toolbarHeight: 75.6,
         elevation: 0,
-        backgroundColor: isDark ? Colors.transparent : theme.colorScheme.surface,
+        backgroundColor:
+            isDark ? Colors.transparent : theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
         automaticallyImplyLeading: false,
         leading: Builder(
@@ -307,7 +308,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
             color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, size: 18, color: isDark ? Colors.white : const Color(0xFF021433)),
+          child: Icon(icon,
+              size: 18, color: isDark ? Colors.white : const Color(0xFF021433)),
         ),
         const SizedBox(width: 12),
         Column(
@@ -367,7 +369,9 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isDark ? Colors.grey[900]?.withAlpha(200) : (theme.cardTheme.color ?? colorScheme.surface),
+          color: isDark
+              ? Colors.grey[900]?.withAlpha(200)
+              : (theme.cardTheme.color ?? colorScheme.surface),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
               color: isDark ? Colors.grey[800]! : const Color(0xFFE5E7EB)),

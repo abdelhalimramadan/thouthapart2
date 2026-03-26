@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
 import '../../../core/widgets/app_text_button.dart';
-import '../../home_screen/doctor_home/ui/doctor_profile.dart';
+import '../../profile/ui/doctor_profile.dart';
 
 import '../data/forgot_password_service.dart';
 

@@ -1,7 +1,7 @@
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
 import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
-import 'package:thoutha_mobile_app/features/home_screen/data/models/doctor_model.dart';
+import 'package:thoutha_mobile_app/features/doctor/data/models/doctor_model.dart';
 import 'package:thoutha_mobile_app/features/requests/data/models/case_request_model.dart';
 
 class DoctorRepository {
@@ -33,7 +33,6 @@ class DoctorRepository {
     if (result['success'] == true) {
       return result['data'] as List<CaseRequestModel>;
     }
-
 
     throw Exception(result['error'] ?? 'فشل في تحميل الطلبات');
   }

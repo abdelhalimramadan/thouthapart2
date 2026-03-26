@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:thoutha_mobile_app/features/home_screen/data/repositories/case_request_repo.dart';
+import 'package:thoutha_mobile_app/features/requests/data/repos/case_request_repo.dart';
 
 import '../../../../core/helpers/shared_pref_helper.dart' show SharedPrefHelper;
 import '../../../../core/helpers/constants.dart' show SharedPrefKeys;
@@ -81,11 +81,6 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
   Future<void> deleteRequest(CaseRequestModel request) async {
     final currentList = List<CaseRequestModel>.from(_visibleRequests);
 
-
-
-
-
-
     // Read cached doctorId so the backend can verify ownership
     int doctorId = await SharedPrefHelper.getInt('doctor_id');
     if (doctorId == 0) {
@@ -93,20 +88,13 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
       doctorId = int.tryParse(s) ?? 0;
     }
 
-
-
     final result = await _repo.deleteRequest(request.id ?? 0,
         doctorId: doctorId == 0 ? null : doctorId);
-
-
 
     if (result['success'] == true) {
       final beforeCount = currentList.length;
       currentList.removeWhere((r) => r.id == request.id);
       final afterCount = currentList.length;
-
-
-
 
       if (currentList.isEmpty) {
         emit(MyRequestsEmpty());

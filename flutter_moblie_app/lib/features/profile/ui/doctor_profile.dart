@@ -12,7 +12,7 @@ import 'package:thoutha_mobile_app/features/profile/logic/profile_cubit.dart';
 import 'package:thoutha_mobile_app/features/profile/logic/profile_state.dart';
 import 'package:thoutha_mobile_app/features/requests/ui/my_requests_screen.dart';
 
-import '../../home_screen/doctor_home/ui/doctor_home_screen.dart';
+import '../../doctor/ui/doctor_home_screen.dart';
 
 class DoctorProfileScreen extends StatelessWidget {
   const DoctorProfileScreen({super.key});

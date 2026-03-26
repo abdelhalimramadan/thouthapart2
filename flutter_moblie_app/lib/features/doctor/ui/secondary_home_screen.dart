@@ -9,13 +9,13 @@ import 'package:thoutha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
-import 'package:thoutha_mobile_app/features/home_screen/logic/doctor_cubit.dart';
+import 'package:thoutha_mobile_app/features/doctor/logic/doctor_cubit.dart';
 
-import 'package:thoutha_mobile_app/features/home_screen/logic/doctor_state.dart';
+import 'package:thoutha_mobile_app/features/doctor/logic/doctor_state.dart';
 import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/features/login/ui/login_screen.dart';
-import 'package:thoutha_mobile_app/features/home_screen/doctor_home/drawer/doctor_drawer_screen.dart';
+import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
 
 class SecondaryHomeScreen extends StatefulWidget {
   const SecondaryHomeScreen(
@@ -312,7 +312,6 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
       'تركيبات متحركة.svg',
       'تيجان وجسور.svg',
       'طب أسنان الأطفال.svg',
-
     ];
 
     final categoryNames = [
@@ -326,9 +325,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
       'تركيبات  متحركة',
       'تيجان وجسور',
       'طب أسنان الأطفال',
-
     ];
-
 
     final fileName =
         index < svgFiles.length ? svgFiles[index] : 'placeholder.svg';

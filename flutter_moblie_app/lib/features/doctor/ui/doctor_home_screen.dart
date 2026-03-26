@@ -6,8 +6,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/helpers/constants.dart';
 import '../../../../core/helpers/shared_pref_helper.dart';
 import '../../../../core/utils/notification_helper.dart';
-import '../drawer/doctor_drawer_screen.dart';
-import '../../../notifications/ui/notifications_screen.dart';
+import '../drawer_doctor/doctor_drawer_screen.dart';
+import '../../notifications/ui/notifications_screen.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/networking/api_service.dart';
 
@@ -43,22 +43,11 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
 
   // ── Data Fetching ──────────────────────────────────────────────
 
-  /// Fetches the doctor's first name from cache or API, then saves the
-  /// Fetch doctor's name from cache or token
+  /// Fetches the doctor's first name from JWT token (priority 1),
+  /// then API (priority 2), cache is NOT used to avoid stale data
   Future<void> _fetchDoctorName() async {
     try {
-      // Try cache first — avoids unnecessary network call
-      final cached = await SharedPrefHelper.getString('first_name');
-      if (cached.isNotEmpty) {
-        if (mounted)
-          setState(() {
-            _firstName = cached;
-            _isLoadingName = false;
-          });
-        return;
-      }
-
-      // Decode JWT token directly — no extra HTTP call needed
+      // Priority 1: Try JWT token first
       final token =
           await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
       if (token != null && token.isNotEmpty) {
@@ -80,11 +69,28 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               if (fn != null && fn.isNotEmpty) {
                 await SharedPrefHelper.setData('first_name', fn);
                 if (mounted) setState(() => _firstName = fn);
+                return; // Success — exit early
               }
             }
           }
         } catch (_) {}
       }
+
+      // Priority 2: Fetch from API if token decode fails
+      try {
+        final result = await _apiService.getDoctorById();
+        if (result['success'] == true && result['data'] != null) {
+          // ignore: avoid_dynamic_calls
+          final fn =
+              result['data']['firstName'] ?? result['data']['first_name'];
+          if (fn != null && fn.toString().isNotEmpty) {
+            final fnStr = fn.toString();
+            await SharedPrefHelper.setData('first_name', fnStr);
+            if (mounted) setState(() => _firstName = fnStr);
+            return;
+          }
+        }
+      } catch (_) {}
     } catch (_) {
       // Silently fail — UI shows fallback "دكتور"
     } finally {
