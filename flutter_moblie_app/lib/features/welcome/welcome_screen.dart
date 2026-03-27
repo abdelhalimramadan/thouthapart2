@@ -47,7 +47,7 @@ class WelcomeScreen extends StatelessWidget {
 
                   // Subtitle
                   Text(
-                    'عيادة الأسنان',
+                    'برنامج الأسنان',
                     style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 36.sp,
