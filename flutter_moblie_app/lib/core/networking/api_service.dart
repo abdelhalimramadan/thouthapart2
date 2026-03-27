@@ -291,6 +291,7 @@ class ApiService {
 
   /// PUT /api/request/editRequest/{requestId}
   /// Body: { description, dateTime }
+  /// dateTime format: "2026-03-10T15:30:00"
   Future<Map<String, dynamic>> editRequest(
     int requestId,
     String description,
@@ -299,10 +300,20 @@ class ApiService {
     try {
       await DioFactory.addDioHeaders();
 
+      // Validate inputs
+      if (description.trim().isEmpty) {
+        return _fail('الوصف مطلوب');
+      }
+      if (dateTime.trim().isEmpty) {
+        return _fail('التاريخ والوقت مطلوب');
+      }
+
       final body = {
-        'description': description,
-        'dateTime': dateTime,
+        'description': description.trim(),
+        'dateTime': dateTime.trim(),
       };
+
+      debugPrint('Sending edit request: Body = $body');
 
       final res = await _dio.put(
         '${ApiConstants.editRequest}/$requestId',
@@ -312,11 +323,15 @@ class ApiService {
       if (res.statusCode == 200 || res.statusCode == 201) {
         return _okData(res.data)..['message'] = 'تم تحديث الطلب بنجاح';
       }
-      return _fail('فشل في تحديث الطلب', code: res.statusCode);
+      return _fail('فشل في تحديث الطلب: ${res.statusCode}',
+          code: res.statusCode);
     } on DioException catch (e) {
+      debugPrint('Edit request error: ${e.message}');
+      debugPrint('Response: ${e.response?.data}');
       return _fail(_dioError(e), code: e.response?.statusCode);
-    } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+    } catch (e) {
+      debugPrint('Unexpected error in editRequest: $e');
+      return _fail('حدث خطأ غير متوقع: $e');
     }
   }
 
@@ -374,58 +389,51 @@ class ApiService {
     }
   }
 
+  /// DELETE /api/request/deleteRequest/{requestId}
   Future<Map<String, dynamic>> deleteRequest(int id, {int? doctorId}) async {
     try {
       await DioFactory.addDioHeaders();
 
       // Debug logging
-      print('=== deleteRequest Debug ===');
-      print('Request ID to delete: $id');
-      print('Doctor ID: $doctorId');
-      print('API Endpoint: ${ApiConstants.deleteRequest}');
+      debugPrint('=== deleteRequest Debug ===');
+      debugPrint('Request ID to delete: $id');
+      debugPrint('Doctor ID: $doctorId');
+      debugPrint('API Endpoint: ${ApiConstants.deleteRequest}/$id');
 
-      // Build query parameters ensuring ID is included
-      final params = <String, dynamic>{
-        'id': id,
-        'requestId': id, // Try both parameter names to be safe
-      };
-      if (doctorId != null && doctorId != 0) {
-        params['doctorId'] = doctorId;
-      }
+      // Build the URL with the request ID in the path
+      final url = '${ApiConstants.deleteRequest}/$id';
 
-      print('Query Parameters: $params');
+      debugPrint('Full URL: $url');
 
-      final res = await _dio.delete(
-        ApiConstants.deleteRequest,
-        queryParameters: {'id': id}, // Primary parameter
-        // If the above doesn't work, the API should handle it with doctorId verification
-      );
+      final res = await _dio.delete(url);
 
-      print('Delete Response Status: ${res.statusCode}');
-      print('Delete Response Data: ${res.data}');
+      debugPrint('Delete Response Status: ${res.statusCode}');
+      debugPrint('Delete Response Data: ${res.data}');
 
       if (res.statusCode == 200 || res.statusCode == 204) {
-        print('✓ Request ID $id deleted successfully');
-        return {'success': true};
+        debugPrint('✓ Request ID $id deleted successfully');
+        return {'success': true, 'message': 'تم حذف الطلب بنجاح'};
       }
-      if (res.statusCode == 403)
+      if (res.statusCode == 403) {
         return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: 403);
+      }
       return _fail('فشل في حذف الطلب', code: res.statusCode);
     } on DioException catch (e) {
-      print('=== deleteRequest DioException ===');
-      print('Status Code: ${e.response?.statusCode}');
-      print('Response Data: ${e.response?.data}');
-      print('Error: ${e.message}');
+      debugPrint('=== deleteRequest DioException ===');
+      debugPrint('Status Code: ${e.response?.statusCode}');
+      debugPrint('Response Data: ${e.response?.data}');
+      debugPrint('Error: ${e.message}');
 
       final code = e.response?.statusCode;
-      if (code == 403)
+      if (code == 403) {
         return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: code);
+      }
       if (code == 404) return _fail('الطلب غير موجود', code: code);
       if (code == 500) return _fail('خطأ في الخادم، حاول مرة أخرى', code: code);
       return _fail(_dioError(e), code: code);
     } catch (e) {
-      print('=== deleteRequest Unexpected Error ===');
-      print('Error: $e');
+      debugPrint('=== deleteRequest Unexpected Error ===');
+      debugPrint('Error: $e');
       return _fail('حدث خطأ غير متوقع');
     }
   }

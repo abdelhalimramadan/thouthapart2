@@ -44,9 +44,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _precacheOnboardingImages() async {
     final images = [
-      'assets/images/1-onboarding.jpg',
-      'assets/images/on boarding 2.jpg',
-      'assets/images/onbourding3.jpg',
+      'assets/images/onboarding1.jpg',
+      'assets/images/onboarding2.jpg',
+      'assets/images/onboarding3.jpg',
     ];
 
     try {

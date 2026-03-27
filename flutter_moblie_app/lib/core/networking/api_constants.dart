@@ -39,7 +39,8 @@ class ApiConstants {
   static const String createCaseRequest = '/api/request/createRequest';
   static const String updateCaseRequest = '/api/request/updateRequest';
   static const String getRequestById = '/api/request/getRequestById';
-  static const String deleteRequest = '/api/request/deleteRequest';
+  static const String deleteRequest =
+      '/api/request/deleteRequest'; // {requestId} will be appended
   static const String getRequestsByDoctorId =
       '/api/request/getRequestsByDoctorId';
   static const String editRequest = '/api/request/editRequest';

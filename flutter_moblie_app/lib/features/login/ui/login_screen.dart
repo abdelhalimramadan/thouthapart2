@@ -89,18 +89,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (result['success'] == true) {
         if (mounted) {
-          final Widget next = const DoctorHomeScreen();
-
-          Navigator.of(context).pushReplacement(
-            PageRouteBuilder(
-              settings: widget.nextRouteSettings,
-              pageBuilder: (context, animation, secondaryAnimation) => next,
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return FadeTransition(opacity: animation, child: child);
-              },
-              transitionDuration: const Duration(milliseconds: 300),
-            ),
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            Routes.welcomeScreen,
+            (route) => false,
           );
         }
       } else {
@@ -512,7 +504,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           GestureDetector(
                             onTap: () {
                               Navigator.of(context).pushNamedAndRemoveUntil(
-                                Routes.categoriesScreen,
+                               // Routes.categoriesScreen,
+                                Routes.welcomeScreen,
                                 (route) => false,
                               );
                             },

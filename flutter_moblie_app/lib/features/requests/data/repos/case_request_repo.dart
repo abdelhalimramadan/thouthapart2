@@ -21,16 +21,24 @@ class CaseRequestRepo {
   Future<Map<String, dynamic>> updateCaseRequest(
       int requestId, CaseRequestBody body) async {
     try {
+      // Validate data before sending
+      if (body.description.trim().isEmpty || body.dateTime.trim().isEmpty) {
+        return {
+          'success': false,
+          'error': 'يجب ملء جميع الحقول المطلوبة',
+        };
+      }
+
       final response = await _apiService.editRequest(
         requestId,
-        body.description,
-        body.dateTime,
+        body.description.trim(),
+        body.dateTime.trim(),
       );
       return response;
     } catch (e) {
       return {
         'success': false,
-        'error': e.toString(),
+        'error': 'خطأ: ${e.toString()}',
       };
     }
   }
@@ -46,16 +54,10 @@ class CaseRequestRepo {
     }
   }
 
-
   Future<Map<String, dynamic>> deleteRequest(int id, {int? doctorId}) async {
     try {
-
-
-
       return await _apiService.deleteRequest(id, doctorId: doctorId);
     } catch (e) {
-
-
       return {
         'success': false,
         'error': e.toString(),

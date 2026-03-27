@@ -17,11 +17,18 @@ class AddEditCaseRequestCubit extends Cubit<AddEditCaseRequestState> {
   }) async {
     emit(const AddEditCaseRequestState.loading());
 
+    // Validate inputs
+    if (description.trim().isEmpty && dateTime.trim().isEmpty) {
+      emit(AddEditCaseRequestState.error(
+          message: 'يرجى ملء الوصف والتاريخ والوقت'));
+      return;
+    }
+
     final body = CaseRequestBody(
       description: description.trim().isEmpty
           ? 'لا توجد تفاصيل إضافية'
           : description.trim(),
-      dateTime: dateTime,
+      dateTime: dateTime.trim(),
     );
 
     // Call update if requestId is provided, otherwise create new

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/login/ui/login_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
+import '../../features/welcome/welcome_screen.dart';
 import '../../features/reset_password/ui/otp_verification_screen.dart';
 import '../../features/sign_up/ui/sign_up_screen.dart';
 import '../../features/splash_screen/splash_screen.dart';
@@ -24,6 +25,10 @@ class AppRouter {
       case Routes.splashScreen:
         return MaterialPageRoute(
           builder: (context) => const SplashScreen(),
+        );
+      case Routes.welcomeScreen:
+        return MaterialPageRoute(
+          builder: (context) => const WelcomeScreen(),
         );
       case Routes.onBoardingScreen:
         return MaterialPageRoute(
