@@ -33,8 +33,8 @@ class DoctorImageAndText extends StatelessWidget {
                 children: [
                   // Image container
                   Container(
-                    width: isTablet ? 380.w : 280.w,
-                    height: isTablet ? 380.w : 280.w,
+                    width: isTablet ? 420.w : 320.w,
+                    height: isTablet ? 420.w : 320.w,
                     margin: EdgeInsets.only(bottom: 32.h),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
