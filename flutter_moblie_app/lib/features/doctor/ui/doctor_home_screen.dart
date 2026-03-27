@@ -536,13 +536,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         ]),
         SizedBox(width: 8.w),
       ],
-      bottom: PreferredSize(
-        preferredSize: Size.fromHeight(1.h),
-        child: Divider(
-          height: 1,
-          color: theme.dividerColor.withAlpha(isDark ? 50 : 255),
-        ),
-      ),
     );
   }
 
