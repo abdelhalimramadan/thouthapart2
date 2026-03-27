@@ -22,6 +22,7 @@ class SignUpCubit extends Cubit<SignUpState> {
     String? studyYear,
     String? governorate,
     String? category,
+    String? confirmPassword,
   }) async {
     try {
       emit(SignUpLoading());
@@ -74,6 +75,8 @@ class SignUpCubit extends Cubit<SignUpState> {
           'cityName': governorate.trim(),
         if (category != null && category.trim().isNotEmpty)
           'categoryName': category.trim(),
+        if (confirmPassword != null && confirmPassword.trim().isNotEmpty)
+          'confirmPassword': confirmPassword.trim(),
       };
 
       print('✅ SignUp Request URL: ${ApiConstants.baseUrl}/api/auth/signup');
