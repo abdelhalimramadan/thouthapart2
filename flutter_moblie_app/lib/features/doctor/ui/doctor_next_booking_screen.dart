@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
+import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
 import 'package:thoutha_mobile_app/features/notifications/ui/notifications_screen.dart';
+import 'package:thoutha_mobile_app/features/doctor/widgets/appointment_card_widget.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui show TextDirection;
 
@@ -351,11 +353,15 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
     required double width,
     required double baseFontSize,
   }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-
-    return GestureDetector(
+    return AppointmentCardWidget(
+      context: context,
+      patientName: patientName,
+      phone: phone,
+      service: service,
+      time: time,
+      date: date,
+      statusLabel: status,
+      statusColor: statusColor,
       onTap: () => _showBookingDetails(
         context: context,
         patientName: patientName,
@@ -365,173 +371,58 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         service: service,
         baseFontSize: baseFontSize,
       ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: isDark
-              ? Colors.grey[900]?.withAlpha(200)
-              : (theme.cardTheme.color ?? colorScheme.surface),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-              color: isDark ? Colors.grey[800]! : const Color(0xFFE5E7EB)),
-          boxShadow: [
-            BoxShadow(
-              color: isDark
-                  ? Colors.black.withAlpha((0.3 * 255).round())
-                  : Colors.grey.withAlpha((0.08 * 255).round()),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+      actionButtons: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () =>
+                  _handleAppointmentStatus(context, appointmentId, 'APPROVED'),
+              icon: const Icon(Icons.thumb_up_outlined),
+              label: Text(
+                'قبول',
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+                foregroundColor: Colors.white,
+                elevation: 2,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
             ),
-          ],
-        ),
-        child: Column(
-          children: [
-            // Row: name | status badge
-            Row(
-              textDirection: ui.TextDirection.rtl,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Name
-                Expanded(
-                  child: Text(
-                    patientName,
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.w600,
-                      fontSize: baseFontSize * 1.0,
-                    ),
-                  ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () =>
+                  _handleAppointmentStatus(context, appointmentId, 'REJECTED'),
+              icon: const Icon(Icons.thumb_down_outlined),
+              label: Text(
+                'رفض',
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
                 ),
-                const SizedBox(width: 8),
-                // Status badge
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 10 * (width / 390),
-                      vertical: 4 * (width / 390)),
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    status,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.bold,
-                      fontSize: baseFontSize * 0.7,
-                    ),
-                  ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                elevation: 2,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              ],
+              ),
             ),
-            const SizedBox(height: 12),
-            // Patient details row
-            Row(
-              textDirection: ui.TextDirection.rtl,
-              children: [
-                Icon(Icons.phone_outlined, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 8),
-                Text(
-                  phone,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: baseFontSize * 0.8,
-                    color: isDark ? Colors.white70 : Colors.grey[700],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // Date and Time row
-            Row(
-              textDirection: ui.TextDirection.rtl,
-              children: [
-                Icon(Icons.calendar_today_outlined,
-                    size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 8),
-                Text(
-                  date,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: baseFontSize * 0.8,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Icon(Icons.access_time_outlined,
-                    size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 8),
-                Text(
-                  time,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: baseFontSize * 0.8,
-                    color: isDark ? Colors.white70 : Colors.grey[700],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            // Buttons row
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () =>
-                        _updateAppointmentStatus(appointmentId, 'APPROVED'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF0FDF4),
-                      foregroundColor: const Color(0xFF16A34A),
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                        side: const BorderSide(color: Color(0xFF16A34A)),
-                      ),
-                    ),
-                    child: Text(
-                      'قبول',
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w500,
-                        fontSize: baseFontSize * 0.875,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () =>
-                        _updateAppointmentStatus(appointmentId, 'CANCELLED'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFEF2F2),
-                      foregroundColor: const Color(0xFFE7000B),
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                        side: const BorderSide(color: Color(0xFFE7000B)),
-                      ),
-                    ),
-                    child: Text(
-                      'رفض',
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w500,
-                        fontSize: baseFontSize * 0.875,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -645,6 +536,11 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
   }
 
   /// Update appointment status and navigate to history
+  Future<void> _handleAppointmentStatus(
+      BuildContext context, int appointmentId, String status) async {
+    await _updateAppointmentStatus(appointmentId, status);
+  }
+
   Future<void> _updateAppointmentStatus(
       int appointmentId, String status) async {
     try {
@@ -668,10 +564,22 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           ),
         );
 
-        // Refresh the list after a short delay
-        await Future.delayed(const Duration(milliseconds: 500));
-        if (mounted) {
-          _fetchPendingAppointments();
+        // Navigate to booking records if approved
+        if (status == 'APPROVED') {
+          await Future.delayed(const Duration(milliseconds: 500));
+          if (mounted) {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              Routes.doctorBookingRecordsScreen,
+              (route) => route.isFirst,
+            );
+          }
+        } else {
+          // Refresh the list for other statuses
+          await Future.delayed(const Duration(milliseconds: 500));
+          if (mounted) {
+            _fetchPendingAppointments();
+          }
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
