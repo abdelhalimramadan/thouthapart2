@@ -20,19 +20,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // List of onboarding pages data
   final List<Map<String, String>> _pages = [
     {
-      'image': 'assets/images/1-onboarding.jpg',
+      'image': 'assets/images/onboarding1.jpg',
       'title': 'اعثر على أفضل الأطباء',
       'description':
           'في ثوثة جمعنا أفضل طلاب وأطباء الأسنان عشان نقدم لك رعاية حقيقية بأسعار طلابية. ابتسامتك في أيد أمينة، مع نخبة من أمهر الأطباء الشباب.',
     },
     {
-      'image': 'assets/images/on boarding 2.jpg',
+      'image': 'assets/images/onboarding2.jpg',
       'title': 'احجز موعدك بسهولة',
       'description':
           'اختار الموعد المناسب لك واحجز مع طبيبك المفضل في ثواني. خدمة حجز المواعديد لدينا سهلة وسريعة وآمنة.',
     },
     {
-      'image': 'assets/images/onbourding3.jpg',
+      'image': 'assets/images/onboarding3.jpg',
       'title': 'متابعة دقيقة لصحة أسنانك',
       'description':
           'احصل على سجل كامل لعلاجاتك ومواعيدك القادمة. نحن نهتم بابتسامتك من أول زيارة.',
@@ -108,7 +108,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 );
               },
             ),
-
 
             // Action Buttons Container
             Positioned(

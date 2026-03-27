@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/utils/notification_helper.dart';
-import '../widgets/doctor_drawer_screen.dart';
+import '../../../../core/di/dependency_injection.dart';
+import '../../../../core/networking/api_service.dart';
+import '../../../../core/routing/routes.dart';
+import '../drawer_doctor/doctor_drawer_screen.dart';
 import '../../notifications/ui/notifications_screen.dart';
+import '../widgets/appointment_card_widget.dart';
 
 class DoctorBookingRecordsScreen extends StatefulWidget {
   const DoctorBookingRecordsScreen({super.key});
@@ -15,6 +19,50 @@ class DoctorBookingRecordsScreen extends StatefulWidget {
 class _DoctorBookingRecordsScreenState
     extends State<DoctorBookingRecordsScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late ApiService _apiService;
+  List<Map<String, dynamic>> _approvedAppointments = [];
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiService = getIt<ApiService>();
+    _fetchApprovedAppointments();
+  }
+
+  Future<void> _fetchApprovedAppointments() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
+      final result = await _apiService.getApprovedAppointments();
+
+      if (!mounted) return;
+
+      if (result['success'] == true) {
+        setState(() {
+          _approvedAppointments =
+              List<Map<String, dynamic>>.from(result['data'] as List);
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _error = result['error']?.toString() ?? 'فشل في تحميل الحجوزات';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'حدث خطأ: ${e.toString()}';
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +172,6 @@ class _DoctorBookingRecordsScreenState
     required String date,
     required String time,
     required String service,
-    required String profileImage,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -166,7 +213,7 @@ class _DoctorBookingRecordsScreenState
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12.r),
                       image: DecorationImage(
-                        image: AssetImage(profileImage),
+                        image: const AssetImage('assets/images/dكتور.png'),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -232,7 +279,9 @@ class _DoctorBookingRecordsScreenState
             color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(8.r),
           ),
-          child: Icon(icon, size: 18.r, color: isDark ? Colors.white : const Color(0xFF021433)),
+          child: Icon(icon,
+              size: 18.r,
+              color: isDark ? Colors.white : const Color(0xFF021433)),
         ),
         SizedBox(width: 12.w),
         Column(
@@ -262,6 +311,7 @@ class _DoctorBookingRecordsScreenState
 
   Widget _buildBookingCard({
     required BuildContext context,
+    required int appointmentId,
     required String patientName,
     required String phone,
     required String service,
@@ -269,13 +319,16 @@ class _DoctorBookingRecordsScreenState
     required String date,
     required String status,
     required Color statusColor,
-    required String profileImage,
   }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-
-    return GestureDetector(
+    return AppointmentCardWidget(
+      context: context,
+      patientName: patientName,
+      phone: phone,
+      service: service,
+      time: time,
+      date: date,
+      statusLabel: status,
+      statusColor: statusColor,
       onTap: () => _showBookingDetails(
         context: context,
         patientName: patientName,
@@ -283,84 +336,228 @@ class _DoctorBookingRecordsScreenState
         date: date,
         time: time,
         service: service,
-        profileImage: profileImage,
       ),
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(14.r),
-        decoration: BoxDecoration(
-          color: theme.cardTheme.color ?? colorScheme.surface,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-              color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
-          boxShadow: [
-            BoxShadow(
-              color: isDark
-                  ? Colors.black.withAlpha((0.3 * 255).round())
-                  : Colors.grey.withAlpha((0.08 * 255).round()),
-              blurRadius: 10.r,
-              offset: Offset(0, 2.h),
-            ),
-          ],
-        ),
-        child: Row(
-          textDirection: TextDirection.rtl,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Patient Image
-            Container(
-              width: 52.w,
-              height: 52.w,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.r),
-                image: DecorationImage(
-                  image: AssetImage(profileImage),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            SizedBox(width: 10.w),
-            // Name
-            Expanded(
-              child: Text(
-                patientName,
-                textAlign: TextAlign.right,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium?.copyWith(
+      actionButtons: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () =>
+                  _handleConfirmAppointment(context, appointmentId),
+              icon: const Icon(Icons.check_circle_outline),
+              label: Text(
+                'تأكيد',
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,
-                  fontSize: 16.sp,
+                  fontSize: 14.sp,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+                foregroundColor: Colors.white,
+                elevation: 2,
+                padding: EdgeInsets.symmetric(vertical: 12.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
               ),
             ),
-            SizedBox(width: 8.w),
-            // Status badge
-            Container(
-              padding: EdgeInsets.symmetric(
-                  horizontal: 10.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: statusColor,
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Text(
-                status,
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () => _handleCancelAppointment(context, appointmentId),
+              icon: const Icon(Icons.close_outlined),
+              label: Text(
+                'إلغاء',
                 style: TextStyle(
-                  color: Colors.white,
                   fontFamily: 'Cairo',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14.sp,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                elevation: 2,
+                padding: EdgeInsets.symmetric(vertical: 12.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
+  Future<void> _handleConfirmAppointment(
+      BuildContext context, int appointmentId) async {
+    try {
+      final apiService = getIt<ApiService>();
+      final result =
+          await apiService.updateAppointmentStatus(appointmentId, 'DONE');
+
+      if (!mounted) return;
+
+      if (result['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'تم تأكيد الحجز بنجاح',
+              style: TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+
+        // Navigate to confirmed appointments screen
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (mounted) {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              Routes.doctorConfirmedAppointmentsScreen,
+              (route) => route.isFirst,
+            );
+          }
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['error'] ?? 'فشل في تحديث الحجز',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'حدث خطأ: ${e.toString()}',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleCancelAppointment(
+      BuildContext context, int appointmentId) async {
+    try {
+      final apiService = getIt<ApiService>();
+      final result =
+          await apiService.updateAppointmentStatus(appointmentId, 'CANCELLED');
+
+      if (!mounted) return;
+
+      if (result['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'تم إلغاء الحجز بنجاح',
+              style: TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        _fetchApprovedAppointments();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['error'] ?? 'فشل في إلغاء الحجز',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'حدث خطأ: ${e.toString()}',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Widget _buildMainContent(BuildContext context) {
     final theme = Theme.of(context);
+
+    if (_isLoading) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48.r,
+              color: Colors.red,
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              _error!,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontFamily: 'Cairo',
+              ),
+            ),
+            SizedBox(height: 24.h),
+            ElevatedButton(
+              onPressed: _fetchApprovedAppointments,
+              child: Text(
+                'إعادة المحاولة',
+                style: const TextStyle(fontFamily: 'Cairo'),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_approvedAppointments.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.calendar_today_outlined,
+              size: 48.r,
+              color: Colors.grey[400],
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              'لا توجد حجوزات معتمدة',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontFamily: 'Cairo',
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
@@ -382,53 +579,32 @@ class _DoctorBookingRecordsScreenState
             ),
           ),
           SizedBox(height: 12.h),
-          _buildBookingCard(
-            context: context,
-            patientName: 'زياد جمال',
-            phone: '01012345678',
-            service: 'تقويم اسنان',
-            time: '11:30 صباحا',
-            date: '2025-11-29',
-            status: 'مكتمل',
-            statusColor: Colors.greenAccent,
-            profileImage: 'assets/images/zozjpg.jpg',
-          ),
-          SizedBox(height: 12.h),
-          _buildBookingCard(
-            context: context,
-            patientName: 'عبدالحليم رمضان',
-            phone: '01098765432',
-            service: 'حشو عصب',
-            time: '02:45 مساءً',
-            date: '2025-11-30',
-            status: 'انتظار',
-            statusColor: Colors.orangeAccent,
-            profileImage: 'assets/images/halim.jpg',
-          ),
-          SizedBox(height: 12.h),
-          _buildBookingCard(
-            context: context,
-            patientName: 'محمد اشرف',
-            phone: '01156781234',
-            service: 'تنظيف أسنان',
-            time: '10:15 صباحا',
-            date: '2025-12-01',
-            status: 'ملغي',
-            statusColor: Colors.redAccent,
-            profileImage: 'assets/images/kateb.jpg',
-          ),
-          SizedBox(height: 12.h),
-          _buildBookingCard(
-            context: context,
-            patientName: 'جوزيف جورح',
-            phone: '01234567890',
-            service: 'تركيب كوبري',
-            time: '04:30 مساءً',
-            date: '2025-12-02',
-            status: 'مكتمل',
-            statusColor: Colors.greenAccent,
-            profileImage: 'assets/images/joseoh.jpeg',
-          ),
+          ..._approvedAppointments.asMap().entries.map((entry) {
+            final appointment = entry.value;
+            return Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: _buildBookingCard(
+                context: context,
+                appointmentId: appointment['id'] ?? 0,
+                patientName:
+                    '${appointment['patientFirstName'] ?? 'مريض'} ${appointment['patientLastName'] ?? ''}'
+                        .trim(),
+                phone: appointment['patientPhoneNumber'] ?? '',
+                service: appointment['categoryName'] ?? '',
+                time: appointment['appointmentDate'] != null
+                    ? appointment['appointmentDate']
+                        .toString()
+                        .split('T')[1]
+                        .substring(0, 5)
+                    : '',
+                date: appointment['appointmentDate'] != null
+                    ? appointment['appointmentDate'].toString().split('T')[0]
+                    : '',
+                status: appointment['status'] ?? 'معتمد',
+                statusColor: Colors.greenAccent,
+              ),
+            );
+          }).toList(),
           SizedBox(height: MediaQuery.of(context).padding.bottom + 16.h),
         ],
       ),

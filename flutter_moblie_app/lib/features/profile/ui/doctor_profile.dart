@@ -12,7 +12,7 @@ import 'package:thoutha_mobile_app/features/profile/logic/profile_cubit.dart';
 import 'package:thoutha_mobile_app/features/profile/logic/profile_state.dart';
 import 'package:thoutha_mobile_app/features/requests/ui/my_requests_screen.dart';
 
-import '../../home_screen/doctor_home/ui/doctor_home_screen.dart';
+import '../../doctor/ui/doctor_home_screen.dart';
 
 class DoctorProfileScreen extends StatelessWidget {
   const DoctorProfileScreen({super.key});
@@ -639,15 +639,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                       _yearCtrl.text.isNotEmpty ? _yearCtrl.text : profile.year,
                   onTap: () => _showSelectionDialog(
                     title: 'اختر السنة الدراسية',
-                    items: const [
-                      'الأولى',
-                      'الثانية',
-                      'الثالثة',
-                      'الرابعة',
-                      'الخامسة',
-                      'امتياز',
-                      'مزاول'
-                    ],
+                    items: const ['الرابعة', 'الخامسة', 'امتياز'],
                     controller: _yearCtrl,
                   ),
                 ),

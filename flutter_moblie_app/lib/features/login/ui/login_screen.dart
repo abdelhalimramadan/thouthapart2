@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
 import '../../auth/data/auth_service.dart';
-import '../../home_screen/doctor_home/ui/doctor_home_screen.dart';
+import '../../doctor/ui/doctor_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, this.nextScreen, this.nextRouteSettings});
@@ -200,360 +200,369 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                        Container(
-                          width: double.infinity,
-                          constraints: BoxConstraints(
-                            maxWidth: 1.sw >= 600 ? 500.w : double.infinity,
-                          ),
-                          padding: EdgeInsets.all(24.r),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardTheme.color,
-                            borderRadius: BorderRadius.circular(16.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: isDarkMode
-                                    ? Colors.black.withAlpha(102)
-                                    : Colors.black.withAlpha(25),
-                                blurRadius: 10.r,
-                                offset: Offset(0, 4.h),
-                              ),
-                            ],
-                          ),
-                          child: Directionality(
-                            textDirection: TextDirection.rtl,
-                            child: Form(
-                              key: _formKey,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Center(
-                                    child: Image.asset(
-                                      'assets/images/splash-logo.png',
-                                      width: 80.w,
-                                      height: 80.h,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                  SizedBox(height: 8.h),
-                                  Text(
-                                    'تسجيل الدخول',
-                                    style: TextStyle(
-                                      fontSize: 24.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: ColorsManager.mainBlue,
-                                      fontFamily: 'Cairo',
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  SizedBox(height: 8.h),
-                                  Text(
-                                    'ادخل البريد الإلكتروني وكلمة المرور',
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      color: isDarkMode
-                                          ? Colors.white70
-                                          : Colors.grey,
-                                      fontFamily: 'Cairo',
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  SizedBox(height: 16.h),
-
-                                  if (errorMessage != null)
-                                    Container(
-                                      padding: EdgeInsets.all(12.r),
-                                      margin: EdgeInsets.only(bottom: 16.h),
-                                      decoration: BoxDecoration(
-                                        color: isDarkMode
-                                            ? Colors.red.withValues(alpha: 0.15)
-                                            : Colors.red[50],
-                                        borderRadius: BorderRadius.circular(8.r),
-                                        border: Border.all(
-                                            color: isDarkMode
-                                                ? Colors.red.shade900
-                                                : Colors.red[200]!),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.error_outline,
-                                              color: isDarkMode ? Colors.red[300] : Colors.red,
-                                              size: 20.r),
-                                          SizedBox(width: 8.w),
-                                          Expanded(
-                                            child: Text(
-                                              errorMessage!,
-                                              style: TextStyle(
-                                                color: isDarkMode ? Colors.red[300] : Colors.red,
-                                                fontFamily: 'Cairo',
-                                                fontSize: 13.sp,
-                                              ),
-                                              softWrap: true,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-
-                                  // Email Field
-                                  TextFormField(
-                                    controller: emailController,
-                                    keyboardType: TextInputType.emailAddress,
-                                    decoration: const InputDecoration(
-                                      labelText: 'البريد الإلكتروني',
-                                      prefixIcon: Icon(Icons.email_outlined),
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'الرجاء إدخال البريد الإلكتروني';
-                                      }
-                                      if (!RegExp(r'^[^@]+@[^\s]+\.[^\s]+$')
-                                          .hasMatch(value)) {
-                                        return 'الرجاء إدخال بريد إلكتروني صالح';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  SizedBox(height: 16.h),
-
-                                  // Password Field
-                                  TextFormField(
-                                    controller: passwordController,
-                                    obscureText: isObscureText,
-                                    decoration: InputDecoration(
-                                      labelText: 'كلمة المرور',
-                                      prefixIcon:
-                                          const Icon(Icons.lock_outline),
-                                      suffixIcon: IconButton(
-                                        icon: Icon(
-                                          isObscureText
-                                              ? Icons.visibility_off
-                                              : Icons.visibility,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            isObscureText = !isObscureText;
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'الرجاء إدخال كلمة المرور';
-                                      }
-                                      if (value.length < 6) {
-                                        return 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  SizedBox(height: 8.h),
-
-                                  // Forgot Password & Remember Me
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Flexible(
-                                        child: TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pushNamed(
-                                                Routes.forgotPasswordScreen);
-                                          },
-                                          child: Text(
-                                            'نسيت كلمة المرور؟',
-                                            style: TextStyle(
-                                              fontSize: 13.sp,
-                                              color: ColorsManager.mainBlue,
-                                              decoration:
-                                                  TextDecoration.underline,
-                                              fontFamily: 'Cairo',
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          Transform.scale(
-                                            scale: 0.9.r,
-                                            child: Checkbox(
-                                              value: rememberMe,
-                                              onChanged: (bool? value) {
-                                                _handleRememberMe(
-                                                    value ?? false);
-                                              },
-                                              activeColor:
-                                                  ColorsManager.mainBlue,
-                                            ),
-                                          ),
-                                          Text(
-                                            'تذكرني',
-                                            style: TextStyle(
-                                              fontSize: 13.sp,
-                                              color: isDarkMode
-                                                  ? Colors.white
-                                                  : ColorsManager.darkBlue,
-                                              fontWeight: FontWeight.w500,
-                                              fontFamily: 'Cairo',
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 16.h),
-
-                                  // Login Button
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height: 52.h,
-                                    child: ElevatedButton(
-                                      onPressed: isLoading ? null : _login,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: ColorsManager.mainBlue,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8.r),
-                                        ),
-                                      ),
-                                      child: isLoading
-                                          ? SizedBox(
-                                              width: 20.w,
-                                              height: 20.h,
-                                              child: const CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: Colors.white,
-                                              ),
-                                            )
-                                          : Text(
-                                              'تسجيل الدخول',
-                                              style: TextStyle(
-                                                fontSize: 16.sp,
-                                                color: Colors.white,
-                                                fontFamily: 'Cairo',
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                    ),
-                                  ),
-                                  SizedBox(height: 8.h),
-                                  Text(
-                                    'بالدخول، أنت توافق على الشروط والأحكام.',
-                                    style: TextStyle(
-                                      fontSize: 13.sp,
-                                      color: isDarkMode
-                                          ? Colors.white60
-                                          : Colors.grey,
-                                      fontFamily: 'Cairo',
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  SizedBox(height: 16.h),
-                                  // Sign up link
-                                  Wrap(
-                                    alignment: WrapAlignment.center,
-                                    crossAxisAlignment:
-                                        WrapCrossAlignment.center,
-                                    children: [
-                                      Text(
-                                        'هل ليس لديك حساب بالفعل؟ ',
-                                        style: TextStyle(
-                                          fontSize: 13.sp,
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : ColorsManager.darkBlue,
-                                          fontWeight: FontWeight.w500,
-                                          fontFamily: 'Cairo',
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.pushNamed(
-                                              context, Routes.signUpScreen);
-                                        },
-                                        child: Text(
-                                          'إنشاء حساب',
-                                          style: TextStyle(
-                                            fontSize: 13.sp,
-                                            color: ColorsManager.mainBlue,
-                                            fontWeight: FontWeight.bold,
-                                            decoration:
-                                                TextDecoration.underline,
-                                            fontFamily: 'Cairo',
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 16.h),
-                        // Back button
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).pushNamedAndRemoveUntil(
-                              Routes.categoriesScreen,
-                              (route) => false,
-                            );
-                          },
-                          child: Container(
+                          Container(
                             width: double.infinity,
                             constraints: BoxConstraints(
                               maxWidth: 1.sw >= 600 ? 500.w : double.infinity,
                             ),
-                            height: 52.h,
+                            padding: EdgeInsets.all(24.r),
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                                colors: [
-                                  ColorsManager.layerBlur1,
-                                  ColorsManager.layerBlur2,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(12.r),
+                              color: Theme.of(context).cardTheme.color,
+                              borderRadius: BorderRadius.circular(16.r),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withAlpha(25),
-                                  blurRadius: 8.r,
+                                  color: isDarkMode
+                                      ? Colors.black.withAlpha(102)
+                                      : Colors.black.withAlpha(25),
+                                  blurRadius: 10.r,
                                   offset: Offset(0, 4.h),
                                 ),
                               ],
                             ),
-                            child: Center(
-                              child: Text(
-                                'الرجوع للصفحة الرئيسية',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: 'Cairo',
+                            child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: Form(
+                                key: _formKey,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Center(
+                                      child: Image.asset(
+                                        'assets/images/splash-logo.png',
+                                        width: 80.w,
+                                        height: 80.h,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8.h),
+                                    Text(
+                                      'تسجيل الدخول',
+                                      style: TextStyle(
+                                        fontSize: 24.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: ColorsManager.mainBlue,
+                                        fontFamily: 'Cairo',
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: 8.h),
+                                    Text(
+                                      'ادخل البريد الإلكتروني وكلمة المرور',
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: isDarkMode
+                                            ? Colors.white70
+                                            : Colors.grey,
+                                        fontFamily: 'Cairo',
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: 16.h),
+
+                                    if (errorMessage != null)
+                                      Container(
+                                        padding: EdgeInsets.all(12.r),
+                                        margin: EdgeInsets.only(bottom: 16.h),
+                                        decoration: BoxDecoration(
+                                          color: isDarkMode
+                                              ? Colors.red
+                                                  .withValues(alpha: 0.15)
+                                              : Colors.red[50],
+                                          borderRadius:
+                                              BorderRadius.circular(8.r),
+                                          border: Border.all(
+                                              color: isDarkMode
+                                                  ? Colors.red.shade900
+                                                  : Colors.red[200]!),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.error_outline,
+                                                color: isDarkMode
+                                                    ? Colors.red[300]
+                                                    : Colors.red,
+                                                size: 20.r),
+                                            SizedBox(width: 8.w),
+                                            Expanded(
+                                              child: Text(
+                                                errorMessage!,
+                                                style: TextStyle(
+                                                  color: isDarkMode
+                                                      ? Colors.red[300]
+                                                      : Colors.red,
+                                                  fontFamily: 'Cairo',
+                                                  fontSize: 13.sp,
+                                                ),
+                                                softWrap: true,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                    // Email Field
+                                    TextFormField(
+                                      controller: emailController,
+                                      keyboardType: TextInputType.emailAddress,
+                                      decoration: const InputDecoration(
+                                        labelText: 'البريد الإلكتروني',
+                                        prefixIcon: Icon(Icons.email_outlined),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'الرجاء إدخال البريد الإلكتروني';
+                                        }
+                                        if (!RegExp(r'^[^@]+@[^\s]+\.[^\s]+$')
+                                            .hasMatch(value)) {
+                                          return 'الرجاء إدخال بريد إلكتروني صالح';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    SizedBox(height: 16.h),
+
+                                    // Password Field
+                                    TextFormField(
+                                      controller: passwordController,
+                                      obscureText: isObscureText,
+                                      decoration: InputDecoration(
+                                        labelText: 'كلمة المرور',
+                                        prefixIcon:
+                                            const Icon(Icons.lock_outline),
+                                        suffixIcon: IconButton(
+                                          icon: Icon(
+                                            isObscureText
+                                                ? Icons.visibility_off
+                                                : Icons.visibility,
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              isObscureText = !isObscureText;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'الرجاء إدخال كلمة المرور';
+                                        }
+                                        if (value.length < 6) {
+                                          return 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    SizedBox(height: 8.h),
+
+                                    // Forgot Password & Remember Me
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Flexible(
+                                          child: TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pushNamed(
+                                                  Routes.forgotPasswordScreen);
+                                            },
+                                            child: Text(
+                                              'نسيت كلمة المرور؟',
+                                              style: TextStyle(
+                                                fontSize: 13.sp,
+                                                color: ColorsManager.mainBlue,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                                fontFamily: 'Cairo',
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ),
+                                        Row(
+                                          children: [
+                                            Transform.scale(
+                                              scale: 0.9.r,
+                                              child: Checkbox(
+                                                value: rememberMe,
+                                                onChanged: (bool? value) {
+                                                  _handleRememberMe(
+                                                      value ?? false);
+                                                },
+                                                activeColor:
+                                                    ColorsManager.mainBlue,
+                                              ),
+                                            ),
+                                            Text(
+                                              'تذكرني',
+                                              style: TextStyle(
+                                                fontSize: 13.sp,
+                                                color: isDarkMode
+                                                    ? Colors.white
+                                                    : ColorsManager.darkBlue,
+                                                fontWeight: FontWeight.w500,
+                                                fontFamily: 'Cairo',
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 16.h),
+
+                                    // Login Button
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 52.h,
+                                      child: ElevatedButton(
+                                        onPressed: isLoading ? null : _login,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              ColorsManager.mainBlue,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.r),
+                                          ),
+                                        ),
+                                        child: isLoading
+                                            ? SizedBox(
+                                                width: 20.w,
+                                                height: 20.h,
+                                                child:
+                                                    const CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            : Text(
+                                                'تسجيل الدخول',
+                                                style: TextStyle(
+                                                  fontSize: 16.sp,
+                                                  color: Colors.white,
+                                                  fontFamily: 'Cairo',
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 8.h),
+                                    Text(
+                                      'بالدخول، أنت توافق على الشروط والأحكام.',
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        color: isDarkMode
+                                            ? Colors.white60
+                                            : Colors.grey,
+                                        fontFamily: 'Cairo',
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: 16.h),
+                                    // Sign up link
+                                    Wrap(
+                                      alignment: WrapAlignment.center,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      children: [
+                                        Text(
+                                          'هل ليس لديك حساب بالفعل؟ ',
+                                          style: TextStyle(
+                                            fontSize: 13.sp,
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : ColorsManager.darkBlue,
+                                            fontWeight: FontWeight.w500,
+                                            fontFamily: 'Cairo',
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.pushNamed(
+                                                context, Routes.signUpScreen);
+                                          },
+                                          child: Text(
+                                            'إنشاء حساب',
+                                            style: TextStyle(
+                                              fontSize: 13.sp,
+                                              color: ColorsManager.mainBlue,
+                                              fontWeight: FontWeight.bold,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                              fontFamily: 'Cairo',
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                          SizedBox(height: 16.h),
+                          // Back button
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                Routes.categoriesScreen,
+                                (route) => false,
+                              );
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              constraints: BoxConstraints(
+                                maxWidth: 1.sw >= 600 ? 500.w : double.infinity,
+                              ),
+                              height: 52.h,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                  colors: [
+                                    ColorsManager.layerBlur1,
+                                    ColorsManager.layerBlur2,
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(12.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withAlpha(25),
+                                    blurRadius: 8.r,
+                                    offset: Offset(0, 4.h),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'الرجوع للصفحة الرئيسية',
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'Cairo',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
   }
 }

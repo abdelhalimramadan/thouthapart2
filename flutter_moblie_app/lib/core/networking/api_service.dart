@@ -5,9 +5,9 @@ import 'package:thoutha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thoutha_mobile_app/core/networking/models/university_model.dart';
-import 'package:thoutha_mobile_app/features/home_screen/data/models/doctor_model.dart';
-import 'package:thoutha_mobile_app/features/home_screen/data/models/case_request_model.dart';
-import 'package:thoutha_mobile_app/features/home_screen/doctor_home/data/models/doctor_profile_model.dart';
+import 'package:thoutha_mobile_app/features/doctor/data/models/doctor_model.dart';
+import 'package:thoutha_mobile_app/features/requests/data/models/case_request_model.dart';
+import 'package:thoutha_mobile_app/features/profile/data/models/doctor_profile_model.dart';
 
 /// Centralised API service.
 ///
@@ -31,7 +31,8 @@ class ApiService {
   // ── Helpers ──────────────────────────────────────────────────────────────
 
   /// Generic GET helper
-  Future<Map<String, dynamic>> get(String path, {Map<String, dynamic>? query}) async {
+  Future<Map<String, dynamic>> get(String path,
+      {Map<String, dynamic>? query}) async {
     try {
       final res = await _dio.get(path, queryParameters: query);
       return _okData(res.data);
@@ -333,7 +334,6 @@ class ApiService {
       return _fail('حدث خطأ غير متوقع');
     }
   }
-
 
   Future<Map<String, dynamic>> getRequestsByDoctorId() async {
     try {
@@ -678,6 +678,74 @@ class ApiService {
         );
       }
       return _fail('فشل في تحميل الحجوزات', code: res.statusCode);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
+  /// GET /api/appointment/getApproved
+  /// Requires: Bearer JWT_TOKEN
+  /// Returns: List of approved appointments
+  Future<Map<String, dynamic>> getApprovedAppointments() async {
+    try {
+      await DioFactory.addDioHeaders();
+
+      final res = await _dio.get(ApiConstants.approvedAppointments);
+
+      if (res.statusCode == 200) {
+        if (res.data is List) {
+          return _okList(
+            (res.data as List)
+                .map((e) => Map<String, dynamic>.from(e as Map))
+                .toList(),
+          );
+        } else if (res.data is Map && (res.data as Map).containsKey('data')) {
+          final data = (res.data as Map)['data'];
+          if (data is List) {
+            return _okList(
+              data.map((e) => Map<String, dynamic>.from(e as Map)).toList(),
+            );
+          }
+        }
+        return _okList([]);
+      }
+      return _fail('فشل في تحميل الحجوزات المعتمدة', code: res.statusCode);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode);
+    } catch (_) {
+      return _fail('حدث خطأ غير متوقع');
+    }
+  }
+
+  /// GET /api/appointment/getDone
+  /// Fetch all confirmed (DONE status) appointments for the doctor
+  /// Requires: Bearer JWT_TOKEN (Doctor)
+  Future<Map<String, dynamic>> getDoneAppointments() async {
+    try {
+      await DioFactory.addDioHeaders();
+
+      final res = await _dio.get(ApiConstants.doneAppointments);
+
+      if (res.statusCode == 200) {
+        if (res.data is List) {
+          return _okList(
+            (res.data as List)
+                .map((e) => Map<String, dynamic>.from(e as Map))
+                .toList(),
+          );
+        } else if (res.data is Map && (res.data as Map).containsKey('data')) {
+          final data = (res.data as Map)['data'];
+          if (data is List) {
+            return _okList(
+              data.map((e) => Map<String, dynamic>.from(e as Map)).toList(),
+            );
+          }
+        }
+        return _okList([]);
+      }
+      return _fail('فشل في تحميل الحجوزات المؤكدة', code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {

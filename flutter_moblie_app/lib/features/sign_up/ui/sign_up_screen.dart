@@ -26,6 +26,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   String? _selectedCollege;
   String? _selectedStudyYear;
@@ -39,6 +41,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool hasNumber = false;
   bool hasMinLength = false;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   final ApiService _apiService = ApiService();
   List<CityModel> _cities = [];
@@ -115,6 +118,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     emailController.dispose();
     phoneController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -250,7 +254,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   key: _formKey,
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       SizedBox(height: 16.h),
                                       Image.asset(
@@ -288,7 +293,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         textInputAction: TextInputAction.next,
                                         decoration: const InputDecoration(
                                           labelText: 'الاسم الأول',
-                                          prefixIcon: Icon(Icons.person_outline),
+                                          prefixIcon:
+                                              Icon(Icons.person_outline),
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
@@ -304,7 +310,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         textInputAction: TextInputAction.next,
                                         decoration: const InputDecoration(
                                           labelText: 'الاسم الأخير',
-                                          prefixIcon: Icon(Icons.person_outline),
+                                          prefixIcon:
+                                              Icon(Icons.person_outline),
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
@@ -317,16 +324,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       // Email Field
                                       TextFormField(
                                         controller: emailController,
-                                        keyboardType: TextInputType.emailAddress,
+                                        keyboardType:
+                                            TextInputType.emailAddress,
                                         decoration: const InputDecoration(
                                           labelText: 'البريد الإلكتروني',
-                                          prefixIcon: Icon(Icons.email_outlined),
+                                          prefixIcon:
+                                              Icon(Icons.email_outlined),
+                                          helperText: 'يجب أن ينتهي بـ .edu.eg',
                                         ),
                                         validator: (value) {
                                           if (value == null ||
                                               value.isEmpty ||
                                               !AppRegex.isEmailValid(value)) {
                                             return 'الرجاء إدخال بريد إلكتروني صالح';
+                                          }
+                                          if (!value.endsWith('.edu.eg')) {
+                                            return 'البريد الإلكتروني يجب أن ينتهي بـ .edu.eg';
                                           }
                                           return null;
                                         },
@@ -338,12 +351,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         keyboardType: TextInputType.phone,
                                         decoration: const InputDecoration(
                                           labelText: 'رقم الهاتف',
-                                          prefixIcon: Icon(Icons.phone_outlined),
+                                          prefixIcon:
+                                              Icon(Icons.phone_outlined),
                                         ),
                                         validator: (value) {
                                           if (value == null ||
                                               value.isEmpty ||
-                                              !AppRegex.isPhoneNumberValid(value)) {
+                                              !AppRegex.isPhoneNumberValid(
+                                                  value)) {
                                             return 'الرجاء إدخال رقم هاتف صالح';
                                           }
                                           return null;
@@ -354,9 +369,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       _isLoadingUniversities
                                           ? const Center(
                                               key: ValueKey('uni_loading'),
-                                              child: CircularProgressIndicator())
+                                              child:
+                                                  CircularProgressIndicator())
                                           : DropdownButtonFormField<String>(
-                                              key: const ValueKey('uni_dropdown'),
+                                              key: const ValueKey(
+                                                  'uni_dropdown'),
                                               isExpanded: true,
                                               decoration: const InputDecoration(
                                                 labelText: 'اختر الكلية',
@@ -369,7 +386,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               onChanged: (v) => setState(
                                                   () => _selectedCollege = v),
                                               validator: (value) {
-                                                if (value == null || value.isEmpty) {
+                                                if (value == null ||
+                                                    value.isEmpty) {
                                                   return 'الرجاء اختيار الكلية';
                                                 }
                                                 return null;
@@ -386,8 +404,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             .map((y) => DropdownMenuItem(
                                                 value: y, child: Text(y)))
                                             .toList(),
-                                        onChanged: (v) =>
-                                            setState(() => _selectedStudyYear = v),
+                                        onChanged: (v) => setState(
+                                            () => _selectedStudyYear = v),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
                                             return 'الرجاء اختيار السنة الدراسية';
@@ -400,22 +418,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       _isLoadingCities
                                           ? const Center(
                                               key: ValueKey('city_loading'),
-                                              child: CircularProgressIndicator())
+                                              child:
+                                                  CircularProgressIndicator())
                                           : DropdownButtonFormField<String>(
-                                              key: const ValueKey('city_dropdown'),
+                                              key: const ValueKey(
+                                                  'city_dropdown'),
                                               isExpanded: true,
                                               decoration: const InputDecoration(
                                                 labelText: 'اختر المحافظة',
                                               ),
                                               items: _cities
-                                                  .map((city) => DropdownMenuItem(
-                                                      value: city.name,
-                                                      child: Text(city.name)))
+                                                  .map((city) =>
+                                                      DropdownMenuItem(
+                                                          value: city.name,
+                                                          child:
+                                                              Text(city.name)))
                                                   .toList(),
-                                              onChanged: (v) => setState(
-                                                  () => _selectedGovernorate = v),
+                                              onChanged: (v) => setState(() =>
+                                                  _selectedGovernorate = v),
                                               validator: (value) {
-                                                if (value == null || value.isEmpty) {
+                                                if (value == null ||
+                                                    value.isEmpty) {
                                                   return 'الرجاء اختيار المحافظة';
                                                 }
                                                 return null;
@@ -426,22 +449,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       _isLoadingCategories
                                           ? const Center(
                                               key: ValueKey('cat_loading'),
-                                              child: CircularProgressIndicator())
+                                              child:
+                                                  CircularProgressIndicator())
                                           : DropdownButtonFormField<String>(
-                                              key: const ValueKey('cat_dropdown'),
+                                              key: const ValueKey(
+                                                  'cat_dropdown'),
                                               isExpanded: true,
                                               decoration: const InputDecoration(
                                                 labelText: 'اختر التخصص',
                                               ),
                                               items: _categories
-                                                  .map((cat) => DropdownMenuItem(
-                                                      value: cat.name,
-                                                      child: Text(cat.name)))
+                                                  .map((cat) =>
+                                                      DropdownMenuItem(
+                                                          value: cat.name,
+                                                          child:
+                                                              Text(cat.name)))
                                                   .toList(),
                                               onChanged: (v) => setState(
                                                   () => _selectedCategory = v),
                                               validator: (value) {
-                                                if (value == null || value.isEmpty) {
+                                                if (value == null ||
+                                                    value.isEmpty) {
                                                   return 'الرجاء اختيار التخصص';
                                                 }
                                                 return null;
@@ -461,14 +489,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             hasSpecialCharacters =
                                                 AppRegex.hasSpecialCharacter(
                                                     password);
-                                            hasNumber = AppRegex.hasNumber(password);
+                                            hasNumber =
+                                                AppRegex.hasNumber(password);
                                             hasMinLength =
                                                 AppRegex.hasMinLength(password);
                                           });
                                         },
                                         decoration: InputDecoration(
                                           labelText: 'كلمة المرور',
-                                          prefixIcon: const Icon(Icons.lock_outline),
+                                          prefixIcon:
+                                              const Icon(Icons.lock_outline),
                                           suffixIcon: IconButton(
                                             icon: Icon(
                                               _obscurePassword
@@ -477,7 +507,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             ),
                                             onPressed: () {
                                               setState(() {
-                                                _obscurePassword = !_obscurePassword;
+                                                _obscurePassword =
+                                                    !_obscurePassword;
                                               });
                                             },
                                           ),
@@ -490,10 +521,46 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         },
                                       ),
                                       SizedBox(height: 16.h),
+                                      // Confirm Password Field
+                                      TextFormField(
+                                        controller: confirmPasswordController,
+                                        obscureText: _obscureConfirmPassword,
+                                        decoration: InputDecoration(
+                                          labelText: 'تأكيد كلمة المرور',
+                                          prefixIcon:
+                                              const Icon(Icons.lock_outline),
+                                          suffixIcon: IconButton(
+                                            icon: Icon(
+                                              _obscureConfirmPassword
+                                                  ? Icons.visibility_off
+                                                  : Icons.visibility,
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                _obscureConfirmPassword =
+                                                    !_obscureConfirmPassword;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'الرجاء تأكيد كلمة المرور';
+                                          }
+                                          if (value !=
+                                              passwordController.text) {
+                                            return 'كلمات المرور غير متطابقة';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+
+                                      SizedBox(height: 16.h),
                                       PasswordValidations(
                                         hasLowerCase: hasLowerCase,
                                         hasUpperCase: hasUpperCase,
-                                        hasSpecialCharacters: hasSpecialCharacters,
+                                        hasSpecialCharacters:
+                                            hasSpecialCharacters,
                                         hasNumber: hasNumber,
                                         hasMinLength: hasMinLength,
                                       ),
@@ -513,7 +580,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                     textStyle: TextStyle(
                                                       fontSize: 16.sp,
                                                       color: Colors.white,
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                       fontFamily: 'Cairo',
                                                     ),
                                                     onPressed: () {
@@ -540,32 +608,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                         context
                                                             .read<SignUpCubit>()
                                                             .signUp(
-                                                               email: emailController
-                                                                  .text
-                                                                  .trim(),
-                                                               password:
-                                                                   passwordController
-                                                                       .text,
-                                                               firstName:
-                                                                   firstNameController
-                                                                       .text
-                                                                       .trim(),
-                                                               lastName:
-                                                                   lastNameController
-                                                                       .text
-                                                                       .trim(),
-                                                               phone: phoneController
-                                                                   .text
-                                                                   .trim(),
-                                                               college:
-                                                                   _selectedCollege,
-                                                               studyYear:
-                                                                   _selectedStudyYear,
-                                                               governorate:
-                                                                   _selectedGovernorate,
-                                                               category:
-                                                                   _selectedCategory,
-                                                             );
+                                                              email:
+                                                                  emailController
+                                                                      .text
+                                                                      .trim(),
+                                                              password:
+                                                                  passwordController
+                                                                      .text,
+                                                              firstName:
+                                                                  firstNameController
+                                                                      .text
+                                                                      .trim(),
+                                                              lastName:
+                                                                  lastNameController
+                                                                      .text
+                                                                      .trim(),
+                                                              phone:
+                                                                  phoneController
+                                                                      .text
+                                                                      .trim(),
+                                                              college:
+                                                                  _selectedCollege,
+                                                              studyYear:
+                                                                  _selectedStudyYear,
+                                                              governorate:
+                                                                  _selectedGovernorate,
+                                                              category:
+                                                                  _selectedCategory,
+                                                            );
                                                       }
                                                     },
                                                   ),
@@ -591,8 +661,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           ),
                                           TextButton(
                                             onPressed: () {
-                                              Navigator.of(context)
-                                                  .pushNamed(Routes.loginScreen);
+                                              Navigator.of(context).pushNamed(
+                                                  Routes.loginScreen);
                                             },
                                             child: Text(
                                               'تسجيل الدخول',
