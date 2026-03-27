@@ -14,7 +14,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver {
+class _SplashScreenState extends State<SplashScreen>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -44,8 +45,8 @@ class _SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver
   Future<void> _precacheOnboardingImages() async {
     final images = [
       'assets/images/1-onboarding.jpg',
-      'assets/images/2-inboarding.jpg',
-      'assets/images/3-onboarding.jpg',
+      'assets/images/on boarding 2.jpg',
+      'assets/images/onbourding3.jpg',
     ];
 
     try {
