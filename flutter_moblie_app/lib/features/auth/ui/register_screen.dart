@@ -256,8 +256,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     validator: (value) => _validateRequired(value, 'الكلية'),
                   ),
                   verticalSpace(16),
-                  TextFormField(
-                    controller: _yearController,
+                  DropdownButtonFormField<String>(
+                    isExpanded: true,
                     decoration: InputDecoration(
                       labelText: 'السنة الدراسية',
                       prefixIcon: const Icon(Icons.calendar_today_outlined),
@@ -265,6 +265,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
+                    items: const ['الرابعة', 'الخامسة', 'امتياز']
+                        .map((year) => DropdownMenuItem(
+                              value: year,
+                              child: Text(year),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        _yearController.text = value;
+                      }
+                    },
+                    value: _yearController.text.isNotEmpty
+                        ? _yearController.text
+                        : null,
                     validator: (value) =>
                         _validateRequired(value, 'السنة الدراسية'),
                   ),
