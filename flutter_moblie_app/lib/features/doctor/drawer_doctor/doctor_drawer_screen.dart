@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
@@ -7,6 +8,7 @@ import 'package:thoutha_mobile_app/core/theming/theme_provider.dart';
 import 'package:thoutha_mobile_app/features/about_app/ui/about_app_screen.dart'
     show AboutAppScreen;
 import 'package:thoutha_mobile_app/features/doctor/ui/doctor_booking_records_screen.dart';
+import 'package:thoutha_mobile_app/features/doctor/ui/doctor_confirmed_appointments_screen.dart';
 import 'package:thoutha_mobile_app/features/doctor/ui/doctor_next_booking_screen.dart';
 import 'package:thoutha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
 import 'package:thoutha_mobile_app/features/profile/ui/doctor_profile.dart';
@@ -38,6 +40,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
   String? _email;
   String? _profileImage;
   int? _doctorId;
+  String _appVersion = '1.0.0';
   bool _isLoadingName = false;
 
   static const _cCyan = Color(0xFF84E5F3);
@@ -50,6 +53,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     super.initState();
     _apiService = getIt<ApiService>();
     _fetchDoctorInfo();
+    _fetchAppVersion();
     DoctorDrawer.profileImageNotifier.addListener(_updateProfileImage);
   }
 
@@ -64,6 +68,19 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
       setState(() {
         _profileImage = DoctorDrawer.profileImageNotifier.value;
       });
+    }
+  }
+
+  Future<void> _fetchAppVersion() async {
+    try {
+      final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      if (mounted) {
+        setState(() {
+          _appVersion = packageInfo.version;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching app version: $e');
     }
   }
 
@@ -543,9 +560,28 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                   ),
                   _menuItem(
                     context,
+                    title: 'الحجوزات المؤكدة',
+                    icon: Icons.check_circle_outline,
+                    isSelected: currentIndex == 5,
+                    width: width,
+                    baseFontSize: baseFontSize,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          settings: const RouteSettings(
+                              name: 'confirmed-appointments'),
+                          builder: (context) =>
+                              const DoctorConfirmedAppointmentsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _menuItem(
+                    context,
                     title: 'طلباتي',
                     icon: Icons.assignment_outlined,
-                    isSelected: currentIndex == 5,
+                    isSelected: currentIndex == 6,
                     width: width,
                     baseFontSize: baseFontSize,
                     onTap: () {
@@ -660,10 +696,10 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
                 child: Text(
-                  'الإصدار 1.0.2',
+                  'الإصدار $_appVersion',
                   style: textTheme.bodySmall?.copyWith(
                     fontFamily: 'Cairo',
-                    color: isDark ? Colors.grey[400] : Colors.grey[700],
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
               ),

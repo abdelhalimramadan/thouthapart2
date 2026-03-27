@@ -19,4 +19,6 @@ class Routes {
   static const String notificationsScreen = '/notifications';
   static const String accountDeletionScreen = '/account-deletion';
   static const String doctorBookingRecordsScreen = '/doctor-booking-records';
+  static const String doctorConfirmedAppointmentsScreen =
+      '/doctor-confirmed-appointments';
 }

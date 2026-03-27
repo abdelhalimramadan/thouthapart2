@@ -3,24 +3,23 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/utils/notification_helper.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/networking/api_service.dart';
-import '../../../../core/routing/routes.dart';
 import '../drawer_doctor/doctor_drawer_screen.dart';
 import '../../notifications/ui/notifications_screen.dart';
 import '../widgets/appointment_card_widget.dart';
 
-class DoctorBookingRecordsScreen extends StatefulWidget {
-  const DoctorBookingRecordsScreen({super.key});
+class DoctorConfirmedAppointmentsScreen extends StatefulWidget {
+  const DoctorConfirmedAppointmentsScreen({super.key});
 
   @override
-  State<DoctorBookingRecordsScreen> createState() =>
-      _DoctorBookingRecordsScreenState();
+  State<DoctorConfirmedAppointmentsScreen> createState() =>
+      _DoctorConfirmedAppointmentsScreenState();
 }
 
-class _DoctorBookingRecordsScreenState
-    extends State<DoctorBookingRecordsScreen> {
+class _DoctorConfirmedAppointmentsScreenState
+    extends State<DoctorConfirmedAppointmentsScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late ApiService _apiService;
-  List<Map<String, dynamic>> _approvedAppointments = [];
+  List<Map<String, dynamic>> _confirmedAppointments = [];
   bool _isLoading = true;
   String? _error;
 
@@ -28,29 +27,30 @@ class _DoctorBookingRecordsScreenState
   void initState() {
     super.initState();
     _apiService = getIt<ApiService>();
-    _fetchApprovedAppointments();
+    _fetchConfirmedAppointments();
   }
 
-  Future<void> _fetchApprovedAppointments() async {
+  Future<void> _fetchConfirmedAppointments() async {
     try {
       setState(() {
         _isLoading = true;
         _error = null;
       });
 
-      final result = await _apiService.getApprovedAppointments();
+      final result = await _apiService.getDoneAppointments();
 
       if (!mounted) return;
 
       if (result['success'] == true) {
         setState(() {
-          _approvedAppointments =
+          _confirmedAppointments =
               List<Map<String, dynamic>>.from(result['data'] as List);
           _isLoading = false;
         });
       } else {
         setState(() {
-          _error = result['error']?.toString() ?? 'فشل في تحميل الحجوزات';
+          _error =
+              result['error']?.toString() ?? 'فشل في تحميل الحجوزات المؤكدة';
           _isLoading = false;
         });
       }
@@ -311,14 +311,11 @@ class _DoctorBookingRecordsScreenState
 
   Widget _buildBookingCard({
     required BuildContext context,
-    required int appointmentId,
     required String patientName,
     required String phone,
     required String service,
     required String time,
     required String date,
-    required String status,
-    required Color statusColor,
   }) {
     return AppointmentCardWidget(
       context: context,
@@ -327,8 +324,8 @@ class _DoctorBookingRecordsScreenState
       service: service,
       time: time,
       date: date,
-      statusLabel: status,
-      statusColor: statusColor,
+      statusLabel: 'مؤكدة',
+      statusColor: Colors.greenAccent,
       onTap: () => _showBookingDetails(
         context: context,
         patientName: patientName,
@@ -337,163 +334,7 @@ class _DoctorBookingRecordsScreenState
         time: time,
         service: service,
       ),
-      actionButtons: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () =>
-                  _handleConfirmAppointment(context, appointmentId),
-              icon: const Icon(Icons.check_circle_outline),
-              label: Text(
-                'تأكيد',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14.sp,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
-                foregroundColor: Colors.white,
-                elevation: 2,
-                padding: EdgeInsets.symmetric(vertical: 12.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () => _handleCancelAppointment(context, appointmentId),
-              icon: const Icon(Icons.close_outlined),
-              label: Text(
-                'إلغاء',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14.sp,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444),
-                foregroundColor: Colors.white,
-                elevation: 2,
-                padding: EdgeInsets.symmetric(vertical: 12.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
-  }
-
-  Future<void> _handleConfirmAppointment(
-      BuildContext context, int appointmentId) async {
-    try {
-      final apiService = getIt<ApiService>();
-      final result =
-          await apiService.updateAppointmentStatus(appointmentId, 'DONE');
-
-      if (!mounted) return;
-
-      if (result['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'تم تأكيد الحجز بنجاح',
-              style: TextStyle(fontFamily: 'Cairo'),
-            ),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-
-        // Navigate to confirmed appointments screen
-        Future.delayed(const Duration(milliseconds: 600), () {
-          if (mounted) {
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              Routes.doctorConfirmedAppointmentsScreen,
-              (route) => route.isFirst,
-            );
-          }
-        });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              result['error'] ?? 'فشل في تحديث الحجز',
-              style: const TextStyle(fontFamily: 'Cairo'),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'حدث خطأ: ${e.toString()}',
-              style: const TextStyle(fontFamily: 'Cairo'),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _handleCancelAppointment(
-      BuildContext context, int appointmentId) async {
-    try {
-      final apiService = getIt<ApiService>();
-      final result =
-          await apiService.updateAppointmentStatus(appointmentId, 'CANCELLED');
-
-      if (!mounted) return;
-
-      if (result['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'تم إلغاء الحجز بنجاح',
-              style: TextStyle(fontFamily: 'Cairo'),
-            ),
-            backgroundColor: Colors.orange,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        _fetchApprovedAppointments();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              result['error'] ?? 'فشل في إلغاء الحجز',
-              style: const TextStyle(fontFamily: 'Cairo'),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'حدث خطأ: ${e.toString()}',
-              style: const TextStyle(fontFamily: 'Cairo'),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 
   Widget _buildMainContent(BuildContext context) {
@@ -525,7 +366,7 @@ class _DoctorBookingRecordsScreenState
             ),
             SizedBox(height: 24.h),
             ElevatedButton(
-              onPressed: _fetchApprovedAppointments,
+              onPressed: _fetchConfirmedAppointments,
               child: Text(
                 'إعادة المحاولة',
                 style: const TextStyle(fontFamily: 'Cairo'),
@@ -536,7 +377,7 @@ class _DoctorBookingRecordsScreenState
       );
     }
 
-    if (_approvedAppointments.isEmpty) {
+    if (_confirmedAppointments.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -548,7 +389,7 @@ class _DoctorBookingRecordsScreenState
             ),
             SizedBox(height: 16.h),
             Text(
-              'لا توجد حجوزات معتمدة',
+              'لا توجد حجوزات مؤكدة',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontFamily: 'Cairo',
                 color: Colors.grey[600],
@@ -568,7 +409,7 @@ class _DoctorBookingRecordsScreenState
             width: double.infinity,
             padding: EdgeInsets.symmetric(vertical: 10.h),
             child: Text(
-              'سجل الحجوزات',
+              'الحجوزات المؤكدة',
               textAlign: TextAlign.right,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
@@ -579,13 +420,12 @@ class _DoctorBookingRecordsScreenState
             ),
           ),
           SizedBox(height: 12.h),
-          ..._approvedAppointments.asMap().entries.map((entry) {
+          ..._confirmedAppointments.asMap().entries.map((entry) {
             final appointment = entry.value;
             return Padding(
               padding: EdgeInsets.only(bottom: 12.h),
               child: _buildBookingCard(
                 context: context,
-                appointmentId: appointment['id'] ?? 0,
                 patientName:
                     '${appointment['patientFirstName'] ?? 'مريض'} ${appointment['patientLastName'] ?? ''}'
                         .trim(),
@@ -600,8 +440,6 @@ class _DoctorBookingRecordsScreenState
                 date: appointment['appointmentDate'] != null
                     ? appointment['appointmentDate'].toString().split('T')[0]
                     : '',
-                status: appointment['status'] ?? 'معتمد',
-                statusColor: Colors.greenAccent,
               ),
             );
           }).toList(),

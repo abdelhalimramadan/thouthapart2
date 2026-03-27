@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/helpers/constants.dart';
 import '../../../../core/helpers/shared_pref_helper.dart';
 import '../../../../core/utils/notification_helper.dart';
+import '../../../../core/routing/routes.dart';
 import '../drawer_doctor/doctor_drawer_screen.dart';
 import '../../notifications/ui/notifications_screen.dart';
 import '../../../../core/di/dependency_injection.dart';
@@ -374,10 +375,22 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
           ),
         );
 
-        // Refresh the list after a short delay
-        await Future.delayed(const Duration(milliseconds: 500));
-        if (mounted) {
-          _fetchPendingAppointments();
+        // Navigate to booking records if approved
+        if (status == 'APPROVED') {
+          await Future.delayed(const Duration(milliseconds: 500));
+          if (mounted) {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              Routes.doctorBookingRecordsScreen,
+              (route) => route.isFirst,
+            );
+          }
+        } else {
+          // Refresh the list for other statuses
+          await Future.delayed(const Duration(milliseconds: 500));
+          if (mounted) {
+            _fetchPendingAppointments();
+          }
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
