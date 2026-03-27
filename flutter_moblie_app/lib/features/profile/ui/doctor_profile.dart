@@ -639,15 +639,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                       _yearCtrl.text.isNotEmpty ? _yearCtrl.text : profile.year,
                   onTap: () => _showSelectionDialog(
                     title: 'اختر السنة الدراسية',
-                    items: const [
-                      'الأولى',
-                      'الثانية',
-                      'الثالثة',
-                      'الرابعة',
-                      'الخامسة',
-                      'امتياز',
-                      'مزاول'
-                    ],
+                    items: const ['الرابعة', 'الخامسة', 'امتياز'],
                     controller: _yearCtrl,
                   ),
                 ),
