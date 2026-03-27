@@ -42,7 +42,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _onSkipPressed() {
     Navigator.pushNamedAndRemoveUntil(
       context,
-      Routes.categoriesScreen,
+      Routes.welcomeScreen,
       (route) => false,
     );
   }
