@@ -615,6 +615,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                               password:
                                                                   passwordController
                                                                       .text,
+                                                              confirmPassword:
+                                                                  confirmPasswordController
+                                                                      .text,
                                                               firstName:
                                                                   firstNameController
                                                                       .text
