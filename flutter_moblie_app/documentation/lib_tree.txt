@@ -1,0 +1,257 @@
+﻿Folder PATH listing for volume Windows
+Volume serial number is 6C3D-C365
+C:\FLUTTER\THOUTHAPART2\FLUTTER_MOBLIE_APP\LIB
+|   doc_app.dart
+|   firebase_options.dart
+|   main.dart
+|   
++---core
+|   +---di
+|   |       dependency_injection.dart
+|   |       
+|   +---helpers
+|   |       app_regex.dart
+|   |       constants.dart
+|   |       extentions.dart
+|   |       firebase_notifications.dart
+|   |       notification_permission_helper.dart
+|   |       phone_helper.dart
+|   |       shared_pref_helper.dart
+|   |       spacing.dart
+|   |       
+|   +---networking
+|   |   |   api_constants.dart
+|   |   |   api_error_handler.dart
+|   |   |   api_error_model.dart
+|   |   |   api_result.dart
+|   |   |   api_service.dart
+|   |   |   connectivity_service.dart
+|   |   |   connectivity_test.dart
+|   |   |   dio_factory.dart
+|   |   |   otp_service.dart
+|   |   |   
+|   |   \---models
+|   |           category_model.dart
+|   |           city_model.dart
+|   |           university_model.dart
+|   |           
+|   +---routing
+|   |       app_router.dart
+|   |       navigator_service.dart
+|   |       routes.dart
+|   |       
+|   +---services
+|   +---theming
+|   |       app_theme.dart
+|   |       colors.dart
+|   |       dark_screen.dart
+|   |       font_weight.dart
+|   |       styles.dart
+|   |       theme_provider.dart
+|   |       
+|   +---utils
+|   |       notification_helper.dart
+|   |       
+|   \---widgets
+|           app_text_button.dart
+|           
+\---features
+    +---about_app
+    |   \---ui
+    |           about_app_screen.dart
+    |           
+    +---appointments
+    |   +---data
+    |   |       appointments_service.dart
+    |   |       
+    |   \---ui
+    |           appointments_screen.dart
+    |           
+    +---auth
+    |   +---data
+    |   |       auth_service.dart
+    |   |       
+    |   \---ui
+    |           register_screen.dart
+    |           
+    +---booking
+    |   \---ui
+    |           booking_confirmation_screen.dart
+    |           otp_verification_dialog.dart
+    |           
+    +---chat
+    |   +---data
+    |   |   |   chat_repo.dart
+    |   |   |   
+    |   |   \---models
+    |   |           chat_models.dart
+    |   |           chat_models.freezed.dart
+    |   |           chat_models.g.dart
+    |   |           
+    |   +---logic
+    |   |       chat_cubit.dart
+    |   |       chat_state.dart
+    |   |       chat_state.freezed.dart
+    |   |       
+    |   \---ui
+    |           chat_screen.dart
+    |           
+    +---doctor
+    |   +---data
+    |   |   +---models
+    |   |   |       doctor_model.dart
+    |   |   |       doctor_model.freezed.dart
+    |   |   |       doctor_model.g.dart
+    |   |   |       
+    |   |   \---repos
+    |   |           doctor_repository.dart
+    |   |           
+    |   +---drawer_doctor
+    |   |       doctor_drawer_screen.dart
+    |   |       
+    |   +---logic
+    |   |       doctor_cubit.dart
+    |   |       doctor_state.dart
+    |   |       
+    |   +---ui
+    |   |       account_deletion_screen.dart
+    |   |       doctor_booking_records_screen.dart
+    |   |       doctor_confirmed_appointments_screen.dart
+    |   |       doctor_home_screen.dart
+    |   |       doctor_info_screen.dart
+    |   |       doctor_next_booking_screen.dart
+    |   |       secondary_home_screen.dart
+    |   |       
+    |   \---widgets
+    |           appointment_card_widget.dart
+    |           
+    +---forgot_password
+    |   +---data
+    |   |       forgot_password_service.dart
+    |   |       
+    |   \---ui
+    |           change_password_screen.dart
+    |           forgot_password_screen.dart
+    |           
+    +---help_and_support
+    |   \---ui
+    |           help_and_support_screen.dart
+    |           
+    +---home_screen
+    |   +---doctor_home
+    |   |   \---ui
+    |   |       \---widgets
+    |   \---ui
+    |       |   category_doctors_screen.dart
+    |       |   home_screen.dart
+    |       |   
+    |       \---drawer
+    |               drawer.dart
+    |               
+    +---login
+    |   +---data
+    |   |   \---models
+    |   |           login_request_body.dart
+    |   |           login_request_body.g.dart
+    |   |           
+    |   \---ui
+    |       |   login_screen.dart
+    |       |   
+    |       \---widgets
+    |               dont_have_accout_text.dart
+    |               email_and_password.dart
+    |               password_validations.dart
+    |               terms_and_conditions_text.dart
+    |               
+    +---main_layout
+    |   \---ui
+    |           main_layout_screen.dart
+    |           
+    +---notifications
+    |   +---data
+    |   |   +---models
+    |   |   |       patient_booking_model.dart
+    |   |   |       patient_booking_model.freezed.dart
+    |   |   |       patient_booking_model.g.dart
+    |   |   |       
+    |   |   \---repos
+    |   |           notification_repo.dart
+    |   |           
+    |   \---ui
+    |           notifications_screen.dart
+    |           
+    +---onboarding
+    |   |   onboarding_screen.dart
+    |   |   
+    |   \---widgets
+    |           doctor_image_and_text.dart
+    |           
+    +---privacy_policy
+    |   \---ui
+    |           privacy_policy_screen.dart
+    |           
+    +---profile
+    |   +---data
+    |   |   +---models
+    |   |   |       doctor_profile_model.dart
+    |   |   |       doctor_profile_model.freezed.dart
+    |   |   |       doctor_profile_model.g.dart
+    |   |   |       
+    |   |   \---repos
+    |   |           profile_repository.dart
+    |   |           
+    |   +---logic
+    |   |       profile_cubit.dart
+    |   |       profile_state.dart
+    |   |       profile_state.freezed.dart
+    |   |       
+    |   \---ui
+    |           doctor_profile.dart
+    |           
+    +---requests
+    |   +---data
+    |   |   +---logic
+    |   |   |       add_edit_case_request_cubit.dart
+    |   |   |       add_edit_case_request_state.dart
+    |   |   |       add_edit_case_request_state.freezed.dart
+    |   |   |       my_requests_cubit.dart
+    |   |   |       my_requests_state.dart
+    |   |   |       
+    |   |   +---models
+    |   |   |       case_request_body.dart
+    |   |   |       case_request_model.dart
+    |   |   |       case_request_model.freezed.dart
+    |   |   |       case_request_model.g.dart
+    |   |   |       
+    |   |   \---repos
+    |   |           case_request_repo.dart
+    |   |           doctor_repository.dart
+    |   |           
+    |   \---ui
+    |           add_case_request_screen.dart
+    |           edit_request_screen.dart
+    |           my_requests_screen.dart
+    |           
+    +---reset_password
+    |   \---ui
+    |           otp_verification_screen.dart
+    |           reset_password_screen.dart
+    |           
+    +---sign_up
+    |   +---logic
+    |   |       sign_up_cubit.dart
+    |   |       sign_up_state.dart
+    |   |       
+    |   \---ui
+    |           sign_up_screen.dart
+    |           
+    +---splash_screen
+    |       splash_screen.dart
+    |       
+    +---terms_and_conditions
+    |   \---ui
+    |           terms_and_conditions_screen.dart
+    |           
+    \---welcome
+            welcome_screen.dart
+            
