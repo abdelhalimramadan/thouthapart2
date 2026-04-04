@@ -10,8 +10,8 @@ abstract class NotificationLogModel with _$NotificationLogModel {
     required String title,
     @Default('') String body,
     @JsonKey(name: 'status') @Default('SENT') String status,
-    @JsonKey(name: 'created_at') required String createdAt,
-    @JsonKey(name: 'updated_at') String? updatedAt,
+    @JsonKey(name: 'createdAt') required String createdAt,
+    @JsonKey(name: 'updatedAt') String? updatedAt,
     @Default(false) bool readStatus,
     @Default({}) Map<String, dynamic> payload,
     // Optional payload fields
