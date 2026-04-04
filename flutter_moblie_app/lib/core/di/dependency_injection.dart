@@ -1,9 +1,11 @@
 import 'package:get_it/get_it.dart';
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
+import 'package:thoutha_mobile_app/core/services/firebase_messaging_service.dart';
 import 'package:thoutha_mobile_app/features/doctor/data/repos/doctor_repository.dart';
 import 'package:thoutha_mobile_app/features/requests/data/repos/case_request_repo.dart';
 import 'package:thoutha_mobile_app/features/doctor/logic/doctor_cubit.dart';
 import 'package:thoutha_mobile_app/features/notifications/data/repos/notification_repo.dart';
+import 'package:thoutha_mobile_app/features/notifications/logic/notifications_cubit.dart';
 import 'package:thoutha_mobile_app/features/profile/data/repos/profile_repository.dart';
 import 'package:thoutha_mobile_app/features/profile/logic/profile_cubit.dart';
 import 'package:thoutha_mobile_app/features/requests/data/logic/my_requests_cubit.dart';
@@ -13,6 +15,9 @@ final getIt = GetIt.instance;
 Future<void> setupGetIt() async {
   // Services
   getIt.registerLazySingleton<ApiService>(() => ApiService());
+  getIt.registerLazySingleton<FirebaseMessagingService>(
+    () => FirebaseMessagingService(),
+  );
 
   // Repositories
   getIt.registerLazySingleton<DoctorRepository>(
@@ -22,7 +27,7 @@ Future<void> setupGetIt() async {
     () => CaseRequestRepo(getIt()),
   );
   getIt.registerLazySingleton<INotificationRepo>(
-    () => NotificationRepo(),
+    () => NotificationRepo(getIt<ApiService>()),
   );
   getIt.registerLazySingleton<ProfileRepository>(
     () => ProfileRepository(),
@@ -37,5 +42,8 @@ Future<void> setupGetIt() async {
   );
   getIt.registerFactory<MyRequestsCubit>(
     () => MyRequestsCubit(getIt()),
+  );
+  getIt.registerFactory<NotificationsCubit>(
+    () => NotificationsCubit(getIt()),
   );
 }

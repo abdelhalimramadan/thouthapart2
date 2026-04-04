@@ -1,0 +1,29 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'notification_log_model.freezed.dart';
+part 'notification_log_model.g.dart';
+
+@freezed
+abstract class NotificationLogModel with _$NotificationLogModel {
+  const factory NotificationLogModel({
+    required int id,
+    required String title,
+    @Default('') String body,
+    @JsonKey(name: 'status') @Default('SENT') String status,
+    @JsonKey(name: 'created_at') required String createdAt,
+    @JsonKey(name: 'updated_at') String? updatedAt,
+    @Default(false) bool readStatus,
+    @Default({}) Map<String, dynamic> payload,
+    // Optional payload fields
+    @Default('') String? appointmentId,
+    @Default('') String? messageId,
+    @Default('') String? doctorId,
+    @Default('') String? type,
+    @Default('') String? time,
+    @Default('') String? clinic,
+    @Default('') String? doctorName,
+  }) = _NotificationLogModel;
+
+  factory NotificationLogModel.fromJson(Map<String, dynamic> json) =>
+      _$NotificationLogModelFromJson(json);
+}

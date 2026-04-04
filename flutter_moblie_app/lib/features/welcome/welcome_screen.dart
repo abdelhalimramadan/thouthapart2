@@ -220,6 +220,39 @@ class WelcomeScreen extends StatelessWidget {
 
                   SizedBox(height: 20.h),
 
+                  // Home Button
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 54.h,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, Routes.categoriesScreen);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              ColorsManager.mainBlue.withValues(alpha: 0.7),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          elevation: 4,
+                        ),
+                        child: Text(
+                          'الذهاب للرئيسية',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 20.h),
+
                   // Copyright
                   Text(
                     'جميع الحقوق محفوظة © ثوثة 2026',

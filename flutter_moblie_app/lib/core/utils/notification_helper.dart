@@ -1,8 +1,28 @@
+import 'dart:developer';
+
+import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thoutha_mobile_app/features/notifications/logic/notifications_cubit.dart';
+
 class NotificationHelper {
   static bool hasUnreadNotifications = false;
 
   static int getUnreadCount() {
-    // For now, return a dummy value. In real app, fetch from server or local storage.
-    return hasUnreadNotifications ? 5 : 0; // Example: 5 unread if true
+    try {
+      final cubit = getIt<NotificationsCubit>();
+      return cubit.getUnreadCount();
+    } catch (e) {
+      log('Error getting unread count: $e');
+      return 0;
+    }
+  }
+
+  /// Mark notifications as fetched (for the bell icon counter)
+  static void markAsRead() {
+    hasUnreadNotifications = false;
+  }
+
+  /// Update the unread state
+  static void setHasUnread(bool hasUnread) {
+    hasUnreadNotifications = hasUnread;
   }
 }

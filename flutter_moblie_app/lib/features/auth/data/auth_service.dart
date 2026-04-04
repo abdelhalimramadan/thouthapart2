@@ -4,6 +4,7 @@ import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
 import 'package:thoutha_mobile_app/core/networking/dio_factory.dart';
+import 'package:thoutha_mobile_app/core/services/firebase_messaging_service.dart';
 
 class AuthService {
   final Dio _dio = DioFactory.getDio();
@@ -115,6 +116,9 @@ class AuthService {
         } catch (_) {
           // ignore persistence failures; UI can fallback to /me
         }
+
+        // Register FCM token with backend asynchronously (non-blocking)
+        _registerFcmTokenAsync();
 
         return {
           'success': true,
@@ -296,5 +300,18 @@ class AuthService {
         'error': 'حدث خطأ غير متوقع: ${e.toString()}',
       };
     }
+  }
+
+  /// Register FCM token with the backend asynchronously.
+  /// Does NOT block login flow - runs in background.
+  void _registerFcmTokenAsync() {
+    // Fire-and-forget: register token without blocking login
+    Future.microtask(() async {
+      try {
+        await FirebaseMessagingService().registerTokenWithBackend();
+      } catch (e) {
+        print('Background FCM registration error: $e');
+      }
+    });
   }
 }

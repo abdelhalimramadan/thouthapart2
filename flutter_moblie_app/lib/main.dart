@@ -5,6 +5,8 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import 'core/di/dependency_injection.dart';
 import 'core/routing/app_router.dart';
+import 'core/services/firebase_messaging_service.dart';
+import 'features/notifications/data/repos/notification_repo.dart';
 import 'doc_app.dart';
 import 'firebase_options.dart';
 
@@ -15,6 +17,11 @@ void main() async {
 
   // Setup Dependency Injection
   await setupGetIt();
+
+  // Initialize Firebase Messaging Service
+  final firebaseMessagingService = getIt<FirebaseMessagingService>();
+  final notificationRepo = getIt<INotificationRepo>();
+  await firebaseMessagingService.initialize(notificationRepo);
 
   // Initialize Arabic locale data for date formatting
   await initializeDateFormatting('ar');

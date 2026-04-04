@@ -699,6 +699,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                   'الإصدار $_appVersion',
                   style: textTheme.bodySmall?.copyWith(
                     fontFamily: 'Cairo',
+                    fontWeight: FontWeight.bold,
                     color: isDark ? Colors.white : Colors.black,
                   ),
                 ),

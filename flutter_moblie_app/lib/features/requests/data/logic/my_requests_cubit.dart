@@ -92,9 +92,7 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
         doctorId: doctorId == 0 ? null : doctorId);
 
     if (result['success'] == true) {
-      final beforeCount = currentList.length;
       currentList.removeWhere((r) => r.id == request.id);
-      final afterCount = currentList.length;
 
       if (currentList.isEmpty) {
         emit(MyRequestsEmpty());

@@ -55,6 +55,30 @@ class ApiService {
     }
   }
 
+  /// Generic PUT helper
+  Future<Map<String, dynamic>> put(String path, {dynamic data}) async {
+    try {
+      final res = await _dio.put(path, data: data);
+      return _okData(res.data);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode);
+    } catch (e) {
+      return _fail(e.toString());
+    }
+  }
+
+  /// Generic DELETE helper
+  Future<Map<String, dynamic>> delete(String path) async {
+    try {
+      final res = await _dio.delete(path);
+      return _okData(res.data);
+    } on DioException catch (e) {
+      return _fail(_dioError(e), code: e.response?.statusCode);
+    } catch (e) {
+      return _fail(e.toString());
+    }
+  }
+
   /// Wraps a successful list response.
   Map<String, dynamic> _okList(List items) => {'success': true, 'data': items};
 

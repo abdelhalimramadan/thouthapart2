@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
 import '../../auth/data/auth_service.dart';
-import '../../doctor/ui/doctor_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, this.nextScreen, this.nextRouteSettings});
@@ -89,10 +88,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (result['success'] == true) {
         if (mounted) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            Routes.welcomeScreen,
-            (route) => false,
+          Navigator.of(context).pushReplacementNamed(
+            Routes.doctorHomeScreen,
+            arguments: widget.nextRouteSettings?.arguments,
           );
         }
       } else {
@@ -504,7 +502,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           GestureDetector(
                             onTap: () {
                               Navigator.of(context).pushNamedAndRemoveUntil(
-                               // Routes.categoriesScreen,
+                                // Routes.categoriesScreen,
                                 Routes.welcomeScreen,
                                 (route) => false,
                               );

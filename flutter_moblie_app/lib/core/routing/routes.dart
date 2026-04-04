@@ -15,6 +15,7 @@ class Routes {
   static const String bookingConfirmationScreen = '/booking-confirmation';
   static const String appointmentsScreen = '/appointments';
   static const String mainLayoutScreen = '/main-layout';
+  static const String doctorHomeScreen = '/doctor-home';
   static const String helpAndSupportScreen = '/help_and_support';
   static const String termsAndConditionsScreen = '/terms_and_conditions';
   static const String notificationsScreen = '/notifications';
