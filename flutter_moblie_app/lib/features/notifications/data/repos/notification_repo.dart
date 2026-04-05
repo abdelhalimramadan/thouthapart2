@@ -12,6 +12,7 @@ abstract class INotificationRepo {
   Future<bool> registerDeviceToken({
     required String fcmToken,
     required String deviceType,
+    int? userId,
     String? deviceModel,
     String? osVersion,
   });
@@ -48,6 +49,7 @@ class NotificationRepo implements INotificationRepo {
   Future<bool> registerDeviceToken({
     required String fcmToken,
     required String deviceType,
+    int? userId,
     String? deviceModel,
     String? osVersion,
   }) async {
@@ -55,6 +57,7 @@ class NotificationRepo implements INotificationRepo {
       log('📱 Registering device token with Java backend...');
 
       final request = DeviceTokenRequest(
+        userId: userId,
         fcmToken: fcmToken,
         deviceType: deviceType,
         deviceModel: deviceModel,
@@ -140,7 +143,8 @@ class NotificationRepo implements INotificationRepo {
       log('📍 Marking notification $notificationId as read...');
 
       final response = await _apiService.put(
-        ApiConstants.markNotificationAsRead.replaceFirst('{id}', '$notificationId'),
+        ApiConstants.markNotificationAsRead
+            .replaceFirst('{id}', '$notificationId'),
       );
 
       final success = response['success'] == true;

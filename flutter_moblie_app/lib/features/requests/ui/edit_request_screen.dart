@@ -120,11 +120,6 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
           ? 'لا توجد تفاصيل إضافية'
           : _descriptionController.text.trim();
 
-
-
-
-
-
       final result = await apiService.editRequest(
         widget.request.id ?? 0,
         description,

@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:dio/dio.dart';
+import 'package:get_it/get_it.dart';
 import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
+import 'package:thoutha_mobile_app/core/networking/api_service.dart';
 import 'package:thoutha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thoutha_mobile_app/core/services/firebase_messaging_service.dart';
 
@@ -57,9 +60,19 @@ class AuthService {
         // Always save the email used for login to support fallback
         await SharedPrefHelper.setData('email', email);
 
+        int? doctorId;
+
         // Try to persist user's name/email from the login response if available
         try {
           final data = response.data;
+
+          // ── DIAGNOSTIC LOG ────────────────────────────────────────────────
+          // Print the FULL login response so we can see the exact JSON keys.
+          // Check your logcat/debug console for this line after logging in.
+          log('🔍 LOGIN RESPONSE FULL DATA: ${jsonEncode(data)}',
+              name: 'AuthService');
+          // ─────────────────────────────────────────────────────────────────
+
           String? f;
           String? l;
           String? e;
@@ -70,13 +83,20 @@ class AuthService {
           String? c;
 
           if (data is Map) {
-            // Common shapes: top-level or nested under 'user'
+            // Common shapes: top-level or nested under 'user' / 'doctor' / 'data'
             Map? userMap;
             if (data['user'] is Map) {
               userMap = data['user'] as Map;
+            } else if (data['doctor'] is Map) {
+              userMap = data['doctor'] as Map;
+            } else if (data['data'] is Map) {
+              userMap = data['data'] as Map;
             } else {
               userMap = data;
             }
+
+            log('🗺️ userMap keys: ${userMap.keys.toList()}',
+                name: 'AuthService');
 
             f = (userMap['first_name'] ?? userMap['firstName']) as String?;
             l = (userMap['last_name'] ?? userMap['lastName']) as String?;
@@ -86,14 +106,27 @@ class AuthService {
             g = (userMap['governorate'] ?? userMap['city']) as String?;
             fa = (userMap['faculty'] ?? userMap['college']) as String?;
             c = (userMap['category'] ?? userMap['specialization'])?.toString();
-            final id =
-                userMap['id'] ?? userMap['doctor_id'] ?? userMap['doctorId'];
+
+            // Try ALL common id key names
+            final id = userMap['id'] ??
+                userMap['doctor_id'] ??
+                userMap['doctorId'] ??
+                userMap['userId'] ??
+                userMap['user_id'];
+
+            log('🪪 Raw id value from response: $id (type: ${id.runtimeType})',
+                name: 'AuthService');
 
             // احفظ التوكن في الـ cache أيضاً (بالإضافة للـ secure storage)
             await SharedPrefHelper.setData('auth_token', token);
 
             if (id != null) {
-              await SharedPrefHelper.setData('doctor_id', id);
+              doctorId = int.tryParse(id.toString());
+              log('✅ doctorId resolved to: $doctorId', name: 'AuthService');
+              await SharedPrefHelper.setData('doctor_id', doctorId ?? id);
+            } else {
+              log('❌ No id field found in userMap! FCM token will be registered WITHOUT user_id.',
+                  name: 'AuthService');
             }
 
             if (f != null && f.isNotEmpty) {
@@ -112,13 +145,19 @@ class AuthService {
               if (c != null && c.isNotEmpty)
                 await SharedPrefHelper.setData('category', c);
             }
+          } else {
+            log('⚠️ Login response.data is NOT a Map! Type: ${data.runtimeType}',
+                name: 'AuthService');
           }
-        } catch (_) {
-          // ignore persistence failures; UI can fallback to /me
+        } catch (e, st) {
+          // Log persistence failures — do NOT silently ignore them
+          log('❌ Error parsing login response: $e\n$st', name: 'AuthService');
         }
 
         // Register FCM token with backend asynchronously (non-blocking)
-        _registerFcmTokenAsync();
+        log('📲 Calling _registerFcmTokenAsync with doctorId=$doctorId',
+            name: 'AuthService');
+        _registerFcmTokenAsync(doctorId);
 
         return {
           'success': true,
@@ -304,13 +343,37 @@ class AuthService {
 
   /// Register FCM token with the backend asynchronously.
   /// Does NOT block login flow - runs in background.
-  void _registerFcmTokenAsync() {
-    // Fire-and-forget: register token without blocking login
+  void _registerFcmTokenAsync(int? loginHintId) {
     Future.microtask(() async {
       try {
-        await FirebaseMessagingService().registerTokenWithBackend();
+        int? resolvedId = loginHintId;
+
+        // If the login response didn't give us an ID, fall back to profile API.
+        // Use getIt singleton — it has _notificationRepo properly injected.
+        if (resolvedId == null) {
+          log('ℹ️ No ID from login response — fetching from profile API',
+              name: 'AuthService');
+          final result = await GetIt.I<ApiService>().getDoctorById();
+          if (result['success'] == true && result['data'] != null) {
+            try {
+              resolvedId = (result['data'] as dynamic).id as int?;
+            } catch (_) {}
+          }
+        }
+
+        if (resolvedId == null) {
+          log('❌ Could not resolve user_id — skipping FCM registration (backend requires user_id)',
+              name: 'AuthService');
+          return;
+        }
+
+        log('📲 Registering FCM token with user_id=$resolvedId',
+            name: 'AuthService');
+        // Use getIt singleton — NOT FirebaseMessagingService() which has no _notificationRepo
+        await GetIt.I<FirebaseMessagingService>()
+            .registerTokenWithBackend(userId: resolvedId);
       } catch (e) {
-        print('Background FCM registration error: $e');
+        log('❌ Background FCM registration error: $e', name: 'AuthService');
       }
     });
   }

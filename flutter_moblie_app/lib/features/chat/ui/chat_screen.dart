@@ -163,7 +163,7 @@ class _ChatScreenState extends State<ChatScreen> {
         if (a is Map) {
           final aid = (a['id'] ?? a['answer_id'] ?? a['value'])?.toString();
           final at = (a['text'] ?? a['label'] ?? a['answer_text'] ?? a['title'])
-               ?.toString();
+              ?.toString();
           if (aid != null && aid.isNotEmpty && at != null && at.isNotEmpty) {
             answers.add(_FlowAnswer(id: aid, text: at));
           }
@@ -268,7 +268,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
       final List? raw = data is List
           ? data
-          : (data is Map ? (data['categories'] ?? data['data']) as List? : null);
+          : (data is Map
+              ? (data['categories'] ?? data['data']) as List?
+              : null);
 
       if (raw != null) {
         final parsed = <Map<String, dynamic>>[];
@@ -277,8 +279,7 @@ class _ChatScreenState extends State<ChatScreen> {
         }
         if (mounted) setState(() => _categories = parsed);
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   /// ابحث عن category_id باستخدام الاسم المترجم
@@ -393,8 +394,8 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       decoration: BoxDecoration(
         color: theme.brightness == Brightness.dark ? theme.cardColor : _color2,
-        border: theme.brightness == Brightness.dark 
-            ? Border(bottom: BorderSide(color: theme.dividerColor)) 
+        border: theme.brightness == Brightness.dark
+            ? Border(bottom: BorderSide(color: theme.dividerColor))
             : null,
       ),
       child: Stack(
@@ -452,8 +453,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }) {
     return SingleChildScrollView(
       controller: _scrollController,
-      padding: EdgeInsets.fromLTRB(16.w, 25.h, 16.w,
-          25.h + (bottomPadding > 0 ? bottomPadding : 0)),
+      padding: EdgeInsets.fromLTRB(
+          16.w, 25.h, 16.w, 25.h + (bottomPadding > 0 ? bottomPadding : 0)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -502,17 +503,23 @@ class _ChatScreenState extends State<ChatScreen> {
       padding: EdgeInsets.fromLTRB(22.w, 15.h, 22.w, 20.h),
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
-        border: theme.brightness == Brightness.dark 
-            ? Border(top: BorderSide(color: theme.dividerColor)) 
+        border: theme.brightness == Brightness.dark
+            ? Border(top: BorderSide(color: theme.dividerColor))
             : null,
       ),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
-          color: theme.brightness == Brightness.dark ? theme.cardColor : Colors.white,
+          color: theme.brightness == Brightness.dark
+              ? theme.cardColor
+              : Colors.white,
           borderRadius: BorderRadius.circular(32.r),
           border: Border.all(
-              color: isFocused ? _color2 : (theme.brightness == Brightness.dark ? Colors.grey[700]! : _outline), 
+              color: isFocused
+                  ? _color2
+                  : (theme.brightness == Brightness.dark
+                      ? Colors.grey[700]!
+                      : _outline),
               width: isFocused ? 2 : 1),
         ),
         child: Row(
@@ -524,13 +531,15 @@ class _ChatScreenState extends State<ChatScreen> {
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _sendChatMessage(),
                 style: TextStyle(
-                    fontFamily: 'Cairo', 
+                    fontFamily: 'Cairo',
                     color: theme.colorScheme.onSurface,
                     fontSize: 16.sp),
                 decoration: InputDecoration(
                   hintText: 'اكتب رسالتك..............................',
                   hintStyle: TextStyle(
-                      fontFamily: 'Cairo', color: Color(0xFF6B8090), fontSize: 14.sp),
+                      fontFamily: 'Cairo',
+                      color: Color(0xFF6B8090),
+                      fontSize: 14.sp),
                   border: InputBorder.none,
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 17.w, vertical: 12.h),
@@ -580,8 +589,8 @@ class _ChatScreenState extends State<ChatScreen> {
             constraints: BoxConstraints(maxWidth: 0.75.sw),
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             decoration: BoxDecoration(
-              color: theme.brightness == Brightness.dark 
-                  ? theme.colorScheme.surfaceVariant.withValues(alpha: 0.5) 
+              color: theme.brightness == Brightness.dark
+                  ? theme.colorScheme.surfaceVariant.withValues(alpha: 0.5)
                   : _color3,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(13.r),
@@ -651,12 +660,12 @@ class _ChatScreenState extends State<ChatScreen> {
             child: ElevatedButton(
               onPressed: _isLoading ? null : () => _submitAnswer(q, a),
               style: ElevatedButton.styleFrom(
-                backgroundColor: theme.brightness == Brightness.dark 
-                    ? theme.cardColor 
+                backgroundColor: theme.brightness == Brightness.dark
+                    ? theme.cardColor
                     : _color3,
                 foregroundColor: theme.colorScheme.onSurface,
-                side: theme.brightness == Brightness.dark 
-                    ? BorderSide(color: theme.dividerColor) 
+                side: theme.brightness == Brightness.dark
+                    ? BorderSide(color: theme.dividerColor)
                     : null,
                 padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
                 shape: RoundedRectangleBorder(
@@ -724,8 +733,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 backgroundColor: _color2,
                 foregroundColor: Colors.white,
                 elevation: 0,
-                padding:
-                    EdgeInsets.symmetric(horizontal: 28.w, vertical: 14.h),
+                padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 14.h),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16.r)),
               ),

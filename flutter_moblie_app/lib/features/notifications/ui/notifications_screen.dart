@@ -47,7 +47,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           _cubit.markAllAsRead();
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('تم وضع علامة على كل الإشعارات كمقروءة'),
+                              content:
+                                  Text('تم وضع علامة على كل الإشعارات كمقروءة'),
                               duration: Duration(seconds: 2),
                             ),
                           );

@@ -314,9 +314,9 @@ class FirebaseMessagingService {
   }
 
   /// Register device token with Java backend
-  /// Called after successful authentication
-  /// Request includes: fcmToken, deviceType (ANDROID/IOS), deviceModel, osVersion
-  Future<bool> registerTokenWithBackend() async {
+  /// Called after successful authentication or during app startup
+  /// Request includes: fcmToken, deviceType (ANDROID/IOS), deviceModel, osVersion, and optional userId
+  Future<bool> registerTokenWithBackend({int? userId}) async {
     try {
       final token = await SharedPrefHelper.getString(SharedPrefKeys.fcmToken);
 
@@ -330,6 +330,7 @@ class FirebaseMessagingService {
       final success = await _notificationRepo.registerDeviceToken(
         fcmToken: token,
         deviceType: Platform.isAndroid ? 'ANDROID' : 'IOS',
+        userId: userId,
         deviceModel: _getDeviceModel(),
         osVersion: Platform.operatingSystemVersion,
       );

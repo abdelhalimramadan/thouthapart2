@@ -14,6 +14,8 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$DeviceTokenRequest {
+  @JsonKey(name: 'user_id')
+  int? get userId;
   String get fcmToken;
   String get deviceType; // 'ANDROID' or 'IOS'
   String? get deviceModel;
@@ -35,6 +37,7 @@ mixin _$DeviceTokenRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DeviceTokenRequest &&
+            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.fcmToken, fcmToken) ||
                 other.fcmToken == fcmToken) &&
             (identical(other.deviceType, deviceType) ||
@@ -47,12 +50,12 @@ mixin _$DeviceTokenRequest {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, fcmToken, deviceType, deviceModel, osVersion);
+  int get hashCode => Object.hash(
+      runtimeType, userId, fcmToken, deviceType, deviceModel, osVersion);
 
   @override
   String toString() {
-    return 'DeviceTokenRequest(fcmToken: $fcmToken, deviceType: $deviceType, deviceModel: $deviceModel, osVersion: $osVersion)';
+    return 'DeviceTokenRequest(userId: $userId, fcmToken: $fcmToken, deviceType: $deviceType, deviceModel: $deviceModel, osVersion: $osVersion)';
   }
 }
 
@@ -63,7 +66,8 @@ abstract mixin class $DeviceTokenRequestCopyWith<$Res> {
       _$DeviceTokenRequestCopyWithImpl;
   @useResult
   $Res call(
-      {String fcmToken,
+      {@JsonKey(name: 'user_id') int? userId,
+      String fcmToken,
       String deviceType,
       String? deviceModel,
       String? osVersion});
@@ -82,12 +86,17 @@ class _$DeviceTokenRequestCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? userId = freezed,
     Object? fcmToken = null,
     Object? deviceType = null,
     Object? deviceModel = freezed,
     Object? osVersion = freezed,
   }) {
     return _then(_self.copyWith(
+      userId: freezed == userId
+          ? _self.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as int?,
       fcmToken: null == fcmToken
           ? _self.fcmToken
           : fcmToken // ignore: cast_nullable_to_non_nullable
@@ -201,16 +210,16 @@ extension DeviceTokenRequestPatterns on DeviceTokenRequest {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String fcmToken, String deviceType, String? deviceModel,
-            String? osVersion)?
+    TResult Function(@JsonKey(name: 'user_id') int? userId, String fcmToken,
+            String deviceType, String? deviceModel, String? osVersion)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _DeviceTokenRequest() when $default != null:
-        return $default(_that.fcmToken, _that.deviceType, _that.deviceModel,
-            _that.osVersion);
+        return $default(_that.userId, _that.fcmToken, _that.deviceType,
+            _that.deviceModel, _that.osVersion);
       case _:
         return orElse();
     }
@@ -231,15 +240,15 @@ extension DeviceTokenRequestPatterns on DeviceTokenRequest {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String fcmToken, String deviceType, String? deviceModel,
-            String? osVersion)
+    TResult Function(@JsonKey(name: 'user_id') int? userId, String fcmToken,
+            String deviceType, String? deviceModel, String? osVersion)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _DeviceTokenRequest():
-        return $default(_that.fcmToken, _that.deviceType, _that.deviceModel,
-            _that.osVersion);
+        return $default(_that.userId, _that.fcmToken, _that.deviceType,
+            _that.deviceModel, _that.osVersion);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -259,15 +268,15 @@ extension DeviceTokenRequestPatterns on DeviceTokenRequest {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String fcmToken, String deviceType, String? deviceModel,
-            String? osVersion)?
+    TResult? Function(@JsonKey(name: 'user_id') int? userId, String fcmToken,
+            String deviceType, String? deviceModel, String? osVersion)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _DeviceTokenRequest() when $default != null:
-        return $default(_that.fcmToken, _that.deviceType, _that.deviceModel,
-            _that.osVersion);
+        return $default(_that.userId, _that.fcmToken, _that.deviceType,
+            _that.deviceModel, _that.osVersion);
       case _:
         return null;
     }
@@ -278,13 +287,17 @@ extension DeviceTokenRequestPatterns on DeviceTokenRequest {
 @JsonSerializable()
 class _DeviceTokenRequest implements DeviceTokenRequest {
   const _DeviceTokenRequest(
-      {required this.fcmToken,
+      {@JsonKey(name: 'user_id') this.userId,
+      required this.fcmToken,
       required this.deviceType,
       this.deviceModel,
       this.osVersion});
   factory _DeviceTokenRequest.fromJson(Map<String, dynamic> json) =>
       _$DeviceTokenRequestFromJson(json);
 
+  @override
+  @JsonKey(name: 'user_id')
+  final int? userId;
   @override
   final String fcmToken;
   @override
@@ -315,6 +328,7 @@ class _DeviceTokenRequest implements DeviceTokenRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _DeviceTokenRequest &&
+            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.fcmToken, fcmToken) ||
                 other.fcmToken == fcmToken) &&
             (identical(other.deviceType, deviceType) ||
@@ -327,12 +341,12 @@ class _DeviceTokenRequest implements DeviceTokenRequest {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, fcmToken, deviceType, deviceModel, osVersion);
+  int get hashCode => Object.hash(
+      runtimeType, userId, fcmToken, deviceType, deviceModel, osVersion);
 
   @override
   String toString() {
-    return 'DeviceTokenRequest(fcmToken: $fcmToken, deviceType: $deviceType, deviceModel: $deviceModel, osVersion: $osVersion)';
+    return 'DeviceTokenRequest(userId: $userId, fcmToken: $fcmToken, deviceType: $deviceType, deviceModel: $deviceModel, osVersion: $osVersion)';
   }
 }
 
@@ -345,7 +359,8 @@ abstract mixin class _$DeviceTokenRequestCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String fcmToken,
+      {@JsonKey(name: 'user_id') int? userId,
+      String fcmToken,
       String deviceType,
       String? deviceModel,
       String? osVersion});
@@ -364,12 +379,17 @@ class __$DeviceTokenRequestCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
+    Object? userId = freezed,
     Object? fcmToken = null,
     Object? deviceType = null,
     Object? deviceModel = freezed,
     Object? osVersion = freezed,
   }) {
     return _then(_DeviceTokenRequest(
+      userId: freezed == userId
+          ? _self.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as int?,
       fcmToken: null == fcmToken
           ? _self.fcmToken
           : fcmToken // ignore: cast_nullable_to_non_nullable

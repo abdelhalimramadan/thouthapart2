@@ -126,7 +126,9 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: Text('حذف',
                   style: TextStyle(
-                      fontFamily: 'Cairo', fontSize: 14.sp, color: Colors.white)),
+                      fontFamily: 'Cairo',
+                      fontSize: 14.sp,
+                      color: Colors.white)),
             ),
           ],
         );
@@ -142,11 +144,12 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg,
-            style: TextStyle(fontFamily: 'Cairo', fontSize: 14.sp)),
+        content:
+            Text(msg, style: TextStyle(fontFamily: 'Cairo', fontSize: 14.sp)),
         backgroundColor: isError ? Colors.red[700] : Colors.green[700],
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
         margin: EdgeInsets.all(16.r),
       ),
     );
@@ -298,8 +301,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                             if (_errorMessage != null)
                               Container(
                                 alignment: Alignment.centerRight,
-                                padding:
-                                    EdgeInsets.symmetric(vertical: 8.h),
+                                padding: EdgeInsets.symmetric(vertical: 8.h),
                                 child: Text(
                                   _errorMessage!,
                                   style: TextStyle(
@@ -318,7 +320,8 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                         _buildCancelButton(isDark),
 
                         SizedBox(
-                            height: MediaQuery.of(context).padding.bottom + 24.h),
+                            height:
+                                MediaQuery.of(context).padding.bottom + 24.h),
                       ],
                     ),
                   ),
@@ -461,8 +464,8 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14.r)),
           ),
           onPressed: _isLoading ? null : _confirmDeleteAccount,
           child: _isLoading

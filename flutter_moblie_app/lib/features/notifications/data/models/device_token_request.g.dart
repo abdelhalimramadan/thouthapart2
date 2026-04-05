@@ -8,6 +8,7 @@ part of 'device_token_request.dart';
 
 _DeviceTokenRequest _$DeviceTokenRequestFromJson(Map<String, dynamic> json) =>
     _DeviceTokenRequest(
+      userId: (json['user_id'] as num?)?.toInt(),
       fcmToken: json['fcmToken'] as String,
       deviceType: json['deviceType'] as String,
       deviceModel: json['deviceModel'] as String?,
@@ -16,6 +17,7 @@ _DeviceTokenRequest _$DeviceTokenRequestFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$DeviceTokenRequestToJson(_DeviceTokenRequest instance) =>
     <String, dynamic>{
+      'user_id': instance.userId,
       'fcmToken': instance.fcmToken,
       'deviceType': instance.deviceType,
       'deviceModel': instance.deviceModel,

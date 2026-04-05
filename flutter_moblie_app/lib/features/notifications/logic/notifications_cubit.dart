@@ -7,7 +7,8 @@ part 'notifications_state.dart';
 class NotificationsCubit extends Cubit<NotificationsState> {
   final INotificationRepo _notificationRepo;
 
-  NotificationsCubit(this._notificationRepo) : super(const NotificationsState.initial());
+  NotificationsCubit(this._notificationRepo)
+      : super(const NotificationsState.initial());
 
   /// Fetch all notifications from API
   Future<void> fetchNotifications() async {
@@ -18,7 +19,8 @@ class NotificationsCubit extends Cubit<NotificationsState> {
 
   /// Mark a specific notification as read
   Future<void> markAsRead(int notificationId) async {
-    final success = await _notificationRepo.markNotificationAsRead(notificationId);
+    final success =
+        await _notificationRepo.markNotificationAsRead(notificationId);
     if (success) {
       // Refresh notifications after marking as read
       await fetchNotifications();
@@ -61,4 +63,3 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     return 0;
   }
 }
-

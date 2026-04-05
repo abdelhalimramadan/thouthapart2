@@ -11,6 +11,8 @@ import '../drawer_doctor/doctor_drawer_screen.dart';
 import '../../notifications/ui/notifications_screen.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/networking/api_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../notifications/logic/notifications_cubit.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DoctorHomeScreen
@@ -425,28 +427,18 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     }
   }
 
-  void _openNotifications() {
-    NotificationHelper.hasUnreadNotifications = false;
-    Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const NotificationsScreen()))
-        .then((_) {
-      if (mounted) setState(() {});
-    });
-  }
-
   // ── Build ──────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final tt = theme.textTheme;
-    final unreadCount = NotificationHelper.getUnreadCount();
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
       drawer: const DoctorDrawer(),
-      appBar: _buildAppBar(cs, tt, unreadCount, theme),
+      appBar: _buildAppBar(cs, tt, theme),
       body: RefreshIndicator(
         onRefresh: _fetchPendingAppointments,
         child: SingleChildScrollView(
@@ -469,7 +461,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   PreferredSizeWidget _buildAppBar(
     ColorScheme cs,
     TextTheme tt,
-    int unreadCount,
     ThemeData theme,
   ) {
     final cs = theme.colorScheme;
@@ -506,34 +497,60 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         ],
       ),
       actions: [
-        Stack(children: [
-          IconButton(
-            icon: Icon(Icons.notifications_none, size: 24.r),
-            onPressed: _openNotifications,
-          ),
-          if (unreadCount > 0)
-            Positioned(
-              right: 8.w,
-              top: 10.h,
-              child: Container(
-                width: 16.w,
-                height: 16.w,
-                decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.error,
-                    shape: BoxShape.circle),
-                child: Center(
-                  child: Text(
-                    unreadCount > 9 ? '9+' : '$unreadCount',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onError,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
+        BlocProvider(
+          create: (_) => getIt<NotificationsCubit>()..fetchNotifications(),
+          child: BlocBuilder<NotificationsCubit, NotificationsState>(
+            builder: (context, state) {
+              int reactiveUnreadCount = 0;
+              if (state is SuccessState) {
+                reactiveUnreadCount = state.notifications
+                    .where((n) => !n.readStatus)
+                    .length;
+              }
+
+              return Stack(children: [
+                IconButton(
+                  icon: Icon(Icons.notifications_none, size: 24.r),
+                  onPressed: () {
+                    NotificationHelper.hasUnreadNotifications = false;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const NotificationsScreen()),
+                    ).then((_) {
+                      // Refresh when coming back
+                      if (context.mounted) {
+                        context.read<NotificationsCubit>().fetchNotifications();
+                      }
+                    });
+                  },
                 ),
-              ),
-            ),
-        ]),
+                if (reactiveUnreadCount > 0)
+                  Positioned(
+                    right: 8.w,
+                    top: 10.h,
+                    child: Container(
+                      width: 16.w,
+                      height: 16.w,
+                      decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.error,
+                          shape: BoxShape.circle),
+                      child: Center(
+                        child: Text(
+                          reactiveUnreadCount > 9 ? '9+' : '$reactiveUnreadCount',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onError,
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ]);
+            },
+          ),
+        ),
         SizedBox(width: 8.w),
       ],
     );

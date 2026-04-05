@@ -5,7 +5,8 @@ class NotificationsState {
 
   const factory NotificationsState.initial() = InitialState;
   const factory NotificationsState.loading() = LoadingState;
-  const factory NotificationsState.success(List<NotificationLogModel> notifications) = SuccessState;
+  const factory NotificationsState.success(
+      List<NotificationLogModel> notifications) = SuccessState;
   const factory NotificationsState.failure(String message) = FailureState;
 }
 
@@ -28,4 +29,3 @@ class FailureState extends NotificationsState {
 
   const FailureState(this.message) : super._();
 }
-

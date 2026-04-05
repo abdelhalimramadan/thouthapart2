@@ -19,9 +19,9 @@ mixin _$NotificationLogModel {
   String get body;
   @JsonKey(name: 'status')
   String get status;
-  @JsonKey(name: 'created_at')
+  @JsonKey(name: 'createdAt')
   String get createdAt;
-  @JsonKey(name: 'updated_at')
+  @JsonKey(name: 'updatedAt')
   String? get updatedAt;
   bool get readStatus;
   Map<String, dynamic> get payload; // Optional payload fields
@@ -110,8 +110,8 @@ abstract mixin class $NotificationLogModelCopyWith<$Res> {
       String title,
       String body,
       @JsonKey(name: 'status') String status,
-      @JsonKey(name: 'created_at') String createdAt,
-      @JsonKey(name: 'updated_at') String? updatedAt,
+      @JsonKey(name: 'createdAt') String createdAt,
+      @JsonKey(name: 'updatedAt') String? updatedAt,
       bool readStatus,
       Map<String, dynamic> payload,
       String? appointmentId,
@@ -315,8 +315,8 @@ extension NotificationLogModelPatterns on NotificationLogModel {
             String title,
             String body,
             @JsonKey(name: 'status') String status,
-            @JsonKey(name: 'created_at') String createdAt,
-            @JsonKey(name: 'updated_at') String? updatedAt,
+            @JsonKey(name: 'createdAt') String createdAt,
+            @JsonKey(name: 'updatedAt') String? updatedAt,
             bool readStatus,
             Map<String, dynamic> payload,
             String? appointmentId,
@@ -373,8 +373,8 @@ extension NotificationLogModelPatterns on NotificationLogModel {
             String title,
             String body,
             @JsonKey(name: 'status') String status,
-            @JsonKey(name: 'created_at') String createdAt,
-            @JsonKey(name: 'updated_at') String? updatedAt,
+            @JsonKey(name: 'createdAt') String createdAt,
+            @JsonKey(name: 'updatedAt') String? updatedAt,
             bool readStatus,
             Map<String, dynamic> payload,
             String? appointmentId,
@@ -429,8 +429,8 @@ extension NotificationLogModelPatterns on NotificationLogModel {
             String title,
             String body,
             @JsonKey(name: 'status') String status,
-            @JsonKey(name: 'created_at') String createdAt,
-            @JsonKey(name: 'updated_at') String? updatedAt,
+            @JsonKey(name: 'createdAt') String createdAt,
+            @JsonKey(name: 'updatedAt') String? updatedAt,
             bool readStatus,
             Map<String, dynamic> payload,
             String? appointmentId,
@@ -475,8 +475,8 @@ class _NotificationLogModel implements NotificationLogModel {
       required this.title,
       this.body = '',
       @JsonKey(name: 'status') this.status = 'SENT',
-      @JsonKey(name: 'created_at') required this.createdAt,
-      @JsonKey(name: 'updated_at') this.updatedAt,
+      @JsonKey(name: 'createdAt') required this.createdAt,
+      @JsonKey(name: 'updatedAt') this.updatedAt,
       this.readStatus = false,
       final Map<String, dynamic> payload = const {},
       this.appointmentId = '',
@@ -501,10 +501,10 @@ class _NotificationLogModel implements NotificationLogModel {
   @JsonKey(name: 'status')
   final String status;
   @override
-  @JsonKey(name: 'created_at')
+  @JsonKey(name: 'createdAt')
   final String createdAt;
   @override
-  @JsonKey(name: 'updated_at')
+  @JsonKey(name: 'updatedAt')
   final String? updatedAt;
   @override
   @JsonKey()
@@ -625,8 +625,8 @@ abstract mixin class _$NotificationLogModelCopyWith<$Res>
       String title,
       String body,
       @JsonKey(name: 'status') String status,
-      @JsonKey(name: 'created_at') String createdAt,
-      @JsonKey(name: 'updated_at') String? updatedAt,
+      @JsonKey(name: 'createdAt') String createdAt,
+      @JsonKey(name: 'updatedAt') String? updatedAt,
       bool readStatus,
       Map<String, dynamic> payload,
       String? appointmentId,

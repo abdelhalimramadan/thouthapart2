@@ -273,8 +273,8 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
                       height: 48.h,
                       width: 48.w,
                       child: const Center(
-                        child: CircularProgressIndicator(
-                            color: Color(0xFF0B8FAC)),
+                        child:
+                            CircularProgressIndicator(color: Color(0xFF0B8FAC)),
                       ),
                     )
                   : Column(

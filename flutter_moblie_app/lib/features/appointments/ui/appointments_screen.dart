@@ -141,8 +141,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                         }
 
                         return GestureDetector(
-                          onTap: () => _showAppointmentDetails(
-                              context, appointment),
+                          onTap: () =>
+                              _showAppointmentDetails(context, appointment),
                           child: Card(
                             elevation: 2,
                             shape: RoundedRectangleBorder(
@@ -275,9 +275,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     );
   }
 
-  Widget _buildInfoChip(
-      {required IconData icon,
-      required String text}) {
+  Widget _buildInfoChip({required IconData icon, required String text}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
@@ -303,8 +301,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     );
   }
 
-  void _showAppointmentDetails(BuildContext context,
-      Map<String, dynamic> appointment) {
+  void _showAppointmentDetails(
+      BuildContext context, Map<String, dynamic> appointment) {
     String dateStr = '';
     if (appointment['date'] is DateTime) {
       dateStr = DateFormat('yyyy/MM/dd', 'ar').format(appointment['date']);
@@ -358,20 +356,19 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   ),
                 ),
                 SizedBox(height: 20.h),
-                _buildDetailRow(Icons.person, 'الطبيب',
-                    appointment['doctorName'] ?? ''),
+                _buildDetailRow(
+                    Icons.person, 'الطبيب', appointment['doctorName'] ?? ''),
                 SizedBox(height: 16.h),
                 _buildDetailRow(Icons.medical_services, 'التخصص',
                     appointment['specialty'] ?? ''),
                 SizedBox(height: 16.h),
+                _buildDetailRow(Icons.calendar_today, 'التاريخ', dateStr),
+                SizedBox(height: 16.h),
                 _buildDetailRow(
-                    Icons.calendar_today, 'التاريخ', dateStr),
+                    Icons.access_time, 'الوقت', appointment['time'] ?? ''),
                 SizedBox(height: 16.h),
-                _buildDetailRow(Icons.access_time, 'الوقت',
-                    appointment['time'] ?? ''),
-                SizedBox(height: 16.h),
-                _buildDetailRow(Icons.info_outline, 'الحالة',
-                    appointment['status'] ?? '',
+                _buildDetailRow(
+                    Icons.info_outline, 'الحالة', appointment['status'] ?? '',
                     color: appointment['statusColor']),
                 SizedBox(height: 20.h),
                 SizedBox(
@@ -404,8 +401,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     );
   }
 
-  Widget _buildDetailRow(
-      IconData icon, String label, String value,
+  Widget _buildDetailRow(IconData icon, String label, String value,
       {Color? color}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
@@ -416,7 +412,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             color: (color ?? const Color(0xFF0B8FAC)).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8.r),
           ),
-          child: Icon(icon, color: color ?? const Color(0xFF0B8FAC), size: 20.r),
+          child:
+              Icon(icon, color: color ?? const Color(0xFF0B8FAC), size: 20.r),
         ),
         SizedBox(width: 16.w),
         Column(

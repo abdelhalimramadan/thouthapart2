@@ -6,6 +6,7 @@ part 'device_token_request.g.dart';
 @freezed
 abstract class DeviceTokenRequest with _$DeviceTokenRequest {
   const factory DeviceTokenRequest({
+    @JsonKey(name: 'user_id') int? userId,
     required String fcmToken,
     required String deviceType, // 'ANDROID' or 'IOS'
     String? deviceModel,

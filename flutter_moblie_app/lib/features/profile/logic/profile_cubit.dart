@@ -7,7 +7,6 @@ import 'package:thoutha_mobile_app/features/profile/data/models/doctor_profile_m
 import 'package:thoutha_mobile_app/features/profile/data/repos/profile_repository.dart';
 import 'package:thoutha_mobile_app/features/profile/logic/profile_state.dart';
 
-
 class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
   final ProfileRepository _repository;
 
