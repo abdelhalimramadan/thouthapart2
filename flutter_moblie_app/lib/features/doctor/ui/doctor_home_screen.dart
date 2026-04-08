@@ -310,26 +310,32 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
           child: Icon(icon, size: 18.r, color: const Color(0xFF021433)),
         ),
         SizedBox(width: 12.w),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 12.sp,
-                color: Colors.grey,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 12.sp,
+                  color: Colors.grey,
+                ),
               ),
-            ),
-            Text(
-              value,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w600,
-                fontSize: 14.sp,
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14.sp,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -836,12 +842,13 @@ class _AppointmentCard extends StatelessWidget {
               ],
             ),
             SizedBox(height: 8.h),
-            Row(
+            Wrap(
               textDirection: ui.TextDirection.rtl,
+              spacing: 8.w,
+              runSpacing: 8.h,
               children: [
                 _InfoChip(
                     icon: Icons.calendar_today_outlined, text: displayDate),
-                SizedBox(width: 8.w),
                 _InfoChip(icon: Icons.access_time_outlined, text: displayTime),
               ],
             ),
@@ -860,6 +867,7 @@ class _InfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final maxChipTextWidth = MediaQuery.of(context).size.width * 0.34;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
       decoration: BoxDecoration(
@@ -870,11 +878,20 @@ class _InfoChip extends StatelessWidget {
             size: 13.r,
             color: isDark ? Colors.blue[300] : const Color(0xFF1D61E7)),
         SizedBox(width: 4.w),
-        Text(text,
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxChipTextWidth),
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            softWrap: false,
             style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 11.sp,
-                color: isDark ? Colors.white70 : Colors.grey[800])),
+              fontFamily: 'Cairo',
+              fontSize: 11.sp,
+              color: isDark ? Colors.white70 : Colors.grey[800],
+            ),
+          ),
+        ),
       ]),
     );
   }

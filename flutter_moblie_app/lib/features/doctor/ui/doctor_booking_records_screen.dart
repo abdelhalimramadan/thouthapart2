@@ -129,20 +129,25 @@ class _DoctorBookingRecordsScreenState
                   right: 8.w,
                   top: 10.h,
                   child: Container(
-                    width: 16.w,
-                    height: 16.w,
+                    padding: EdgeInsets.symmetric(
+                      horizontal:
+                          NotificationHelper.getUnreadCount() > 9 ? 4.w : 5.w,
+                      vertical: 1.h,
+                    ),
+                    constraints: BoxConstraints(
+                      minWidth: 16.w,
+                      minHeight: 16.h,
+                    ),
                     decoration: BoxDecoration(
                       color: colorScheme.error,
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Center(
                       child: Text(
-                        NotificationHelper.getUnreadCount() > 9
-                            ? '9+'
-                            : '${NotificationHelper.getUnreadCount()}',
+                        '${NotificationHelper.getUnreadCount()}',
                         style: textTheme.labelSmall?.copyWith(
                           color: colorScheme.onError,
-                          fontSize: 10.sp,
+                          fontSize: 9.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -219,12 +224,16 @@ class _DoctorBookingRecordsScreenState
                     ),
                   ),
                   SizedBox(width: 12.w),
-                  Text(
-                    patientName,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 20.sp,
+                  Expanded(
+                    child: Text(
+                      patientName,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 20.sp,
+                      ),
                     ),
                   ),
                 ],
@@ -284,26 +293,32 @@ class _DoctorBookingRecordsScreenState
               color: isDark ? Colors.white : const Color(0xFF021433)),
         ),
         SizedBox(width: 12.w),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 12.sp,
-                color: Colors.grey,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 12.sp,
+                  color: Colors.grey,
+                ),
               ),
-            ),
-            Text(
-              value,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w600,
-                fontSize: 14.sp,
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14.sp,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -337,15 +352,19 @@ class _DoctorBookingRecordsScreenState
         time: time,
         service: service,
       ),
-      actionButtons: Row(
+      actionButtons: Wrap(
+        spacing: 10.w,
+        runSpacing: 10.h,
         children: [
-          Expanded(
+          SizedBox(
+            width: 150.w,
             child: ElevatedButton.icon(
-              onPressed: () =>
-                  _handleConfirmAppointment(context, appointmentId),
+              onPressed: () => _handleConfirmAppointment(context, appointmentId),
               icon: const Icon(Icons.check_circle_outline),
               label: Text(
                 'تأكيد',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,
@@ -363,13 +382,15 @@ class _DoctorBookingRecordsScreenState
               ),
             ),
           ),
-          SizedBox(width: 10.w),
-          Expanded(
+          SizedBox(
+            width: 150.w,
             child: ElevatedButton.icon(
               onPressed: () => _handleCancelAppointment(context, appointmentId),
               icon: const Icon(Icons.close_outlined),
               label: Text(
                 'إلغاء',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,

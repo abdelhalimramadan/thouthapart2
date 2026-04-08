@@ -32,6 +32,18 @@ class DocApp extends StatelessWidget {
                 darkTheme: AppTheme.darkTheme,
                 themeMode:
                     themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+                builder: (context, child) {
+                  final media = MediaQuery.of(context);
+                  return MediaQuery(
+                    data: media.copyWith(
+                      textScaler: media.textScaler.clamp(
+                        minScaleFactor: 0.9,
+                        maxScaleFactor: 1.15,
+                      ),
+                    ),
+                    child: child ?? const SizedBox.shrink(),
+                  );
+                },
                 initialRoute: Routes.splashScreen,
                 onGenerateRoute: appRouter.generateRoute,
                 localizationsDelegates: const [

@@ -31,11 +31,8 @@ void main() async {
   // Initialize Arabic locale data for date formatting
   await initializeDateFormatting('ar');
 
-  // Set preferred orientations
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  // Allow all orientations so layouts can adapt on tablets and landscape.
+  await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
 
   runApp(DocApp(
     appRouter: AppRouter(),

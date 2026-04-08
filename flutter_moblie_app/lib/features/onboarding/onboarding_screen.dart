@@ -58,8 +58,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Stack(
-          children: [
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isTablet = constraints.maxWidth >= 600;
+            final bottomSpacing = constraints.maxHeight < 700 ? 20.h : 40.h;
+
+            return Stack(
+              children: [
             // Full screen gradient overlay
             Container(
               width: double.infinity,
@@ -109,49 +114,58 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               },
             ),
 
-            // Action Buttons Container
-            Positioned(
-              bottom: 40.h,
-              left: 0,
-              right: 0,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 32.w),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    GetStartedButton(
-                      isLastPage: _currentPage == _numPages - 1,
-                      onPressed: () async {
-                        if (_currentPage < _numPages - 1) {
-                          await _pageController.nextPage(
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeInOut,
-                          );
-                        } else {
-                          if (mounted) {
-                            _onSkipPressed();
-                          }
-                        }
-                      },
-                    ),
-                    if (_currentPage < _numPages - 1)
-                      TextButton(
-                        onPressed: _onSkipPressed,
-                        child: Text(
-                          'ندخل في الموضوع علي طول',
-                          style: TextStyle(
-                            color: ColorsManager.darkBlue,
-                            fontSize: 16.sp,
-                            fontFamily: 'Cairo',
-                            fontWeight: FontWeight.bold,
-                          ),
+                // Action Buttons Container
+                Positioned(
+                  bottom: bottomSpacing,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: isTablet ? 520.w : double.infinity,
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: isTablet ? 48.w : 32.w),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            GetStartedButton(
+                              isLastPage: _currentPage == _numPages - 1,
+                              onPressed: () async {
+                                if (_currentPage < _numPages - 1) {
+                                  await _pageController.nextPage(
+                                    duration: const Duration(milliseconds: 400),
+                                    curve: Curves.easeInOut,
+                                  );
+                                } else {
+                                  if (mounted) {
+                                    _onSkipPressed();
+                                  }
+                                }
+                              },
+                            ),
+                            if (_currentPage < _numPages - 1)
+                              TextButton(
+                                onPressed: _onSkipPressed,
+                                child: Text(
+                                  'ندخل في الموضوع علي طول',
+                                  style: TextStyle(
+                                    color: ColorsManager.darkBlue,
+                                    fontSize: isTablet ? 17.sp : 16.sp,
+                                    fontFamily: 'Cairo',
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                  ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );

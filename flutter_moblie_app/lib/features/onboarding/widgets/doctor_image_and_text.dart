@@ -16,15 +16,20 @@ class DoctorImageAndText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = 1.sw >= 600;
-
     return LayoutBuilder(
       builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+        final maxHeight = constraints.maxHeight;
+        final isTablet = maxWidth >= 600;
+        final imageSize = isTablet
+            ? (maxWidth * 0.48).clamp(260.0, 420.0)
+            : (maxWidth * 0.72).clamp(220.0, 340.0);
+
         return Center(
           child: SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: 20.w,
+                horizontal: isTablet ? 40.w : 20.w,
                 vertical: 16.h,
               ),
               child: Column(
@@ -33,8 +38,8 @@ class DoctorImageAndText extends StatelessWidget {
                 children: [
                   // Image container
                   Container(
-                    width: isTablet ? 420.w : 320.w,
-                    height: isTablet ? 420.w : 320.w,
+                    width: imageSize,
+                    height: imageSize,
                     margin: EdgeInsets.only(bottom: 32.h),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -70,16 +75,16 @@ class DoctorImageAndText extends StatelessWidget {
 
                   // Title
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 32.w),
+                    padding: EdgeInsets.symmetric(horizontal: isTablet ? 50.w : 32.w),
                     child: Text(
                       title,
                       textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      maxLines: isTablet ? 3 : 2,
+                      overflow: TextOverflow.fade,
                       softWrap: true,
                       style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: 24.sp,
+                        fontSize: isTablet ? 28.sp : 24.sp,
                         fontWeight: FontWeight.bold,
                         color: ColorsManager.mainBlue,
                       ),
@@ -89,21 +94,22 @@ class DoctorImageAndText extends StatelessWidget {
 
                   // Description
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    padding: EdgeInsets.symmetric(horizontal: isTablet ? 44.w : 20.w),
                     child: Text(
                       description,
                       textAlign: TextAlign.center,
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
+                      maxLines: isTablet ? 6 : 4,
+                      overflow: TextOverflow.fade,
                       softWrap: true,
                       style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: 16.sp,
+                        fontSize: isTablet ? 18.sp : 16.sp,
                         color: Colors.grey[600],
-                        height: 1.6,
+                        height: isTablet ? 1.7 : 1.6,
                       ),
                     ),
                   ),
+                  SizedBox(height: maxHeight < 700 ? 6.h : 0),
                 ],
               ),
             ),
