@@ -306,7 +306,7 @@ class OtpService {
 
     // Egyptian phone number validation (normalized without +)
     if (formattedPhone.startsWith('20')) {
-      final phoneRegex = RegExp(r'^20(1[0-2]\d{8})$');
+      final phoneRegex = RegExp(r'^20(1[0-25]\d{8})$');
       if (!phoneRegex.hasMatch(formattedPhone)) {
         return {
           'valid': false,
