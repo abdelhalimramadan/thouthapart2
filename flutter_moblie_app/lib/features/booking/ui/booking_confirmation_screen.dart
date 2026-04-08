@@ -436,7 +436,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                   if (cleanPhone.length != 11) {
                                     return 'رقم الجوال المصري يجب أن يكون 11 رقم';
                                   }
-                                  if (!RegExp(r'^01[0-2]\d{8}$')
+                                  if (!RegExp(r'^01[0-25]\d{8}$')
                                       .hasMatch(cleanPhone)) {
                                     return 'رقم الجوال المصري غير صحيح';
                                   }
@@ -444,7 +444,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                   if (cleanPhone.length != 13) {
                                     return 'رقم الجوال المصري يجب أن يكون 13 رقم مع +20';
                                   }
-                                  if (!RegExp(r'^\+201[0-2]\d{8}$')
+                                  if (!RegExp(r'^\+201[0-25]\d{8}$')
                                       .hasMatch(cleanPhone)) {
                                     return 'رقم الجوال المصري غير صحيح';
                                   }
