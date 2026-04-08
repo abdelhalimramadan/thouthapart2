@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../core/routing/routes.dart';
-import '../../../../core/theming/colors.dart';
-import '../../../../core/widgets/app_text_button.dart';
-import '../logic/sign_up_cubit.dart';
-import '../../../../core/networking/api_service.dart';
-import '../../../../core/networking/models/city_model.dart';
-import '../../../../core/networking/models/university_model.dart';
-import '../../../../core/networking/models/category_model.dart';
-import '../../../../core/helpers/app_regex.dart';
-import '../../login/ui/widgets/password_validations.dart';
-import '../../booking/ui/otp_verification_dialog.dart';
+import 'package:thoutha_mobile_app/core/helpers/app_regex.dart';
+import 'package:thoutha_mobile_app/core/networking/api_service.dart';
+import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
+import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
+import 'package:thoutha_mobile_app/core/networking/models/university_model.dart';
+import 'package:thoutha_mobile_app/core/routing/routes.dart';
+import 'package:thoutha_mobile_app/core/theming/colors.dart';
+import 'package:thoutha_mobile_app/core/widgets/app_text_button.dart';
+import 'package:thoutha_mobile_app/features/booking/ui/otp_verification_dialog.dart';
+import 'package:thoutha_mobile_app/features/login/ui/widgets/password_validations.dart';
+import 'package:thoutha_mobile_app/features/sign_up/logic/sign_up_cubit.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -291,14 +292,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       TextFormField(
                                         controller: firstNameController,
                                         textInputAction: TextInputAction.next,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(
+                                            RegExp(r'[\u0621-\u063A\u0641-\u064A\s]'),
+                                          ),
+                                        ],
                                         decoration: const InputDecoration(
                                           labelText: 'الاسم الأول',
+                                          helperText: 'ادخال الاسم بالعربي',
                                           prefixIcon:
                                               Icon(Icons.person_outline),
                                         ),
                                         validator: (value) {
-                                          if (value == null || value.isEmpty) {
+                                          if (value == null || value.trim().isEmpty) {
                                             return 'الرجاء إدخال الاسم الأول';
+                                          }
+                                          final isArabicOnly = RegExp(
+                                            r'^[\u0621-\u063A\u0641-\u064A]+(?:\s+[\u0621-\u063A\u0641-\u064A]+)*$',
+                                          ).hasMatch(value.trim());
+                                          if (!isArabicOnly) {
+                                            return 'الاسم الأول لازم يكون بالعربي فقط';
                                           }
                                           return null;
                                         },
@@ -308,14 +321,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       TextFormField(
                                         controller: lastNameController,
                                         textInputAction: TextInputAction.next,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(
+                                            RegExp(r'[\u0621-\u063A\u0641-\u064A\s]'),
+                                          ),
+                                        ],
                                         decoration: const InputDecoration(
                                           labelText: 'الاسم الأخير',
+                                          helperText: 'ادخال الاسم بالعربي',
                                           prefixIcon:
                                               Icon(Icons.person_outline),
                                         ),
                                         validator: (value) {
-                                          if (value == null || value.isEmpty) {
+                                          if (value == null || value.trim().isEmpty) {
                                             return 'الرجاء إدخال الاسم الأخير';
+                                          }
+                                          final isArabicOnly = RegExp(
+                                            r'^[\u0621-\u063A\u0641-\u064A]+(?:\s+[\u0621-\u063A\u0641-\u064A]+)*$',
+                                          ).hasMatch(value.trim());
+                                          if (!isArabicOnly) {
+                                            return 'الاسم الأخير لازم يكون بالعربي فقط';
                                           }
                                           return null;
                                         },
@@ -330,7 +355,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           labelText: 'البريد الإلكتروني',
                                           prefixIcon:
                                               Icon(Icons.email_outlined),
-                                          helperText: 'يجب أن ينتهي بـ .edu.eg',
+                                          helperText: 'يجب أن ينتهي بـ @University.edu.eg',
                                         ),
                                         validator: (value) {
                                           if (value == null ||
@@ -379,9 +404,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 labelText: 'اختر الكلية',
                                               ),
                                               items: _universities
-                                                  .map((u) => DropdownMenuItem(
-                                                      value: u.name,
-                                                      child: Text(u.name)))
+                                                   .map((u) {
+                                                     final name = u.name;
+                                                     if (name.trim().isEmpty) {
+                                                       return null;
+                                                     }
+                                                     return DropdownMenuItem<String>(
+                                                       value: name,
+                                                       child: Text(name),
+                                                     );
+                                                   })
+                                                   .whereType<DropdownMenuItem<String>>()
                                                   .toList(),
                                               onChanged: (v) => setState(
                                                   () => _selectedCollege = v),
@@ -428,11 +461,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 labelText: 'اختر المحافظة',
                                               ),
                                               items: _cities
-                                                  .map((city) =>
-                                                      DropdownMenuItem(
-                                                          value: city.name,
-                                                          child:
-                                                              Text(city.name)))
+                                                   .map((city) {
+                                                     final name = city.name;
+                                                     if (name.trim().isEmpty) {
+                                                       return null;
+                                                     }
+                                                     return DropdownMenuItem<String>(
+                                                       value: name,
+                                                       child: Text(name),
+                                                     );
+                                                   })
+                                                   .whereType<DropdownMenuItem<String>>()
                                                   .toList(),
                                               onChanged: (v) => setState(() =>
                                                   _selectedGovernorate = v),
@@ -459,11 +498,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 labelText: 'اختر التخصص',
                                               ),
                                               items: _categories
-                                                  .map((cat) =>
-                                                      DropdownMenuItem(
-                                                          value: cat.name,
-                                                          child:
-                                                              Text(cat.name)))
+                                                   .map((cat) {
+                                                     final name = cat.name;
+                                                     if (name.trim().isEmpty) {
+                                                       return null;
+                                                     }
+                                                     return DropdownMenuItem<String>(
+                                                       value: name,
+                                                       child: Text(name),
+                                                     );
+                                                   })
+                                                   .whereType<DropdownMenuItem<String>>()
                                                   .toList(),
                                               onChanged: (v) => setState(
                                                   () => _selectedCategory = v),
