@@ -530,17 +530,24 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                     right: 8.w,
                     top: 10.h,
                     child: Container(
-                      width: 16.w,
-                      height: 16.w,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: reactiveUnreadCount > 9 ? 4.w : 5.w,
+                        vertical: 1.h,
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: 16.w,
+                        minHeight: 16.h,
+                      ),
                       decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.error,
-                          shape: BoxShape.circle),
+                        color: Theme.of(context).colorScheme.error,
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
                       child: Center(
                         child: Text(
-                          reactiveUnreadCount > 9 ? '9+' : '$reactiveUnreadCount',
+                          '$reactiveUnreadCount',
                           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 color: Theme.of(context).colorScheme.onError,
-                                fontSize: 10.sp,
+                                fontSize: 9.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),

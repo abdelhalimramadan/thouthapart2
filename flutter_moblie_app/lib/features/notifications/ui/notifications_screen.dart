@@ -17,6 +17,7 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   late NotificationsCubit _cubit;
+  bool _showUnreadOnly = false;
 
   @override
   void initState() {
@@ -28,20 +29,108 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF1F1F1),
       appBar: AppBar(
-        title: const Text('الإشعارات'),
+        title: Text(
+          'الإشعارات',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontWeight: FontWeight.w700,
+            fontSize: 20.sp,
+          ),
+        ),
         centerTitle: true,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
         actions: [
           BlocBuilder<NotificationsCubit, NotificationsState>(
             bloc: _cubit,
             builder: (context, state) {
               if (state is SuccessState && state.notifications.isNotEmpty) {
+                final unreadCount =
+                    state.notifications.where((n) => n.readStatus == false).length;
+
+                return IconButton(
+                  tooltip: _showUnreadOnly
+                      ? 'عرض كل الاشعارات'
+                      : 'عرض غير المقروء فقط',
+                  onPressed: () {
+                    setState(() {
+                      _showUnreadOnly = !_showUnreadOnly;
+                    });
+                  },
+                  icon: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Icon(
+                        _showUnreadOnly
+                            ? Icons.mark_email_unread_rounded
+                            : Icons.mark_email_read_outlined,
+                        color: _showUnreadOnly
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                      ),
+                      if (unreadCount > 0)
+                        PositionedDirectional(
+                          top: -4,
+                          end: -6,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: unreadCount > 9 ? 4.w : 5.w,
+                              vertical: 1.h,
+                            ),
+                            constraints: BoxConstraints(
+                              minWidth: 16.w,
+                              minHeight: 16.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: theme.scaffoldBackgroundColor,
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              unreadCount > 99 ? '99+' : '$unreadCount',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Cairo',
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.w700,
+                                height: 1.1,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          BlocBuilder<NotificationsCubit, NotificationsState>(
+            bloc: _cubit,
+            builder: (context, state) {
+              if (state is SuccessState && state.notifications.isNotEmpty) {
                 return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  padding: EdgeInsetsDirectional.only(end: 10.w),
                   child: Center(
-                    child: PopupMenuButton(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : Colors.black.withValues(alpha: 0.04),
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: PopupMenuButton(
                       onSelected: (value) {
                         if (value == 'mark_all_read') {
                           _cubit.markAllAsRead();
@@ -66,7 +155,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           child: Text('حذف الكل'),
                         ),
                       ],
-                      icon: const Icon(Icons.more_vert),
+                      icon: const Icon(Icons.more_vert_rounded),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14.r),
+                      ),
+                    ),
                     ),
                   ),
                 );
@@ -76,91 +169,188 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           )
         ],
       ),
-      body: BlocBuilder<NotificationsCubit, NotificationsState>(
-        bloc: _cubit,
-        builder: (context, state) {
+      body: Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF1F1F1),
+        ),
+        child: BlocBuilder<NotificationsCubit, NotificationsState>(
+          bloc: _cubit,
+          builder: (context, state) {
           if (state is LoadingState) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           } else if (state is SuccessState) {
+            final visibleNotifications = _showUnreadOnly
+                ? state.notifications.where((n) => n.readStatus == false).toList()
+                : state.notifications;
+
             if (state.notifications.isEmpty) {
               return _buildEmptyState();
             }
+
+            if (visibleNotifications.isEmpty) {
+              return _buildNoUnreadState();
+            }
+
             return RefreshIndicator(
               onRefresh: () async {
                 await _cubit.fetchNotifications();
               },
+              color: theme.colorScheme.primary,
               child: ListView.builder(
-                padding: EdgeInsets.all(8.w),
-                itemCount: state.notifications.length,
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                padding: EdgeInsets.fromLTRB(14.w, 8.h, 14.w, 20.h),
+                itemCount: visibleNotifications.length,
                 itemBuilder: (context, index) {
-                  final notification = state.notifications[index];
+                  final notification = visibleNotifications[index];
                   return _buildNotificationCard(context, notification);
                 },
               ),
             );
           } else if (state is FailureState) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64.r,
-                    color: Colors.red,
-                  ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    'حدث خطأ: ${state.message}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16.sp,
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 20.w),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(18.r),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.28)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      size: 54.r,
                       color: Colors.red,
-                      fontFamily: 'Cairo',
                     ),
-                  ),
-                  SizedBox(height: 32.h),
-                  ElevatedButton(
-                    onPressed: () => _cubit.fetchNotifications(),
-                    child: const Text('حاول مرة أخرى'),
-                  ),
-                ],
+                    SizedBox(height: 12.h),
+                    Text(
+                      'تعذر تحميل الإشعارات',
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 17.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        fontFamily: 'Cairo',
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    FilledButton.icon(
+                      onPressed: _cubit.fetchNotifications,
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: const Text('إعادة المحاولة'),
+                    ),
+                  ],
+                ),
               ),
             );
           }
           return _buildEmptyState();
-        },
+          },
+        ),
       ),
     );
   }
 
+
   Widget _buildEmptyState() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.notifications_none_rounded,
-            size: 80.r,
-            color: Colors.grey[400],
+          Container(
+            width: 94.r,
+            height: 94.r,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.06)
+                  : theme.colorScheme.primary.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.notifications_none_rounded,
+              size: 52.r,
+              color: theme.colorScheme.primary,
+            ),
           ),
           SizedBox(height: 16.h),
           Text(
-            'لا توجد إشعارات',
+            'لا توجد اشعارات',
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
+              color: theme.colorScheme.onSurface,
               fontFamily: 'Cairo',
             ),
           ),
           SizedBox(height: 8.h),
           Text(
-            'سيتم عرض إشعاراتك هنا عند وصولها',
+            'سيتم عرض الاشعارات هنا عند وصولها',
             style: TextStyle(
               fontSize: 14.sp,
-              color: Colors.grey[500],
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+              fontFamily: 'Cairo',
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20.h),
+          OutlinedButton.icon(
+            onPressed: _cubit.fetchNotifications,
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text(
+              'تحديث',
+              style: TextStyle(fontFamily: 'Cairo'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoUnreadState() {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.mark_email_read_rounded,
+            size: 56.r,
+            color: theme.colorScheme.primary,
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            'كل الاشعارات مقروءة',
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurface,
+              fontFamily: 'Cairo',
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            'اضغط على الايقونة لعرض كل الاشعارات',
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
               fontFamily: 'Cairo',
             ),
           ),
@@ -169,28 +359,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  Widget _buildNotificationCard(
-    BuildContext context,
-    dynamic notification,
-  ) {
+  Widget _buildNotificationCard(BuildContext context, dynamic notification) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Try to parse createdAt for formatting
     DateTime? createdDate;
     try {
       createdDate = DateTime.parse(notification.createdAt);
-    } catch (e) {
+    } catch (_) {
       createdDate = null;
     }
 
     String timeStr = '';
     if (createdDate != null) {
-      final now = DateTime.now();
-      final difference = now.difference(createdDate);
-
+      final difference = DateTime.now().difference(createdDate);
       if (difference.inMinutes < 1) {
-        timeStr = 'الآن';
+        timeStr = 'الان';
       } else if (difference.inMinutes < 60) {
         timeStr = 'منذ ${difference.inMinutes} دقيقة';
       } else if (difference.inHours < 24) {
@@ -202,102 +386,294 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       }
     }
 
-    return Card(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
       margin: EdgeInsets.symmetric(vertical: 6.h),
-      color: notification.readStatus
-          ? theme.cardColor
-          : (isDark ? Colors.blue[900]?.withOpacity(0.3) : Colors.blue[50]),
-      elevation: notification.readStatus ? 0 : 2,
-      child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-        leading: Container(
-          width: 50.w,
-          height: 50.h,
-          decoration: BoxDecoration(
-            color: notification.readStatus
-                ? theme.colorScheme.surface
-                : theme.primaryColor.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Icon(
-            Icons.notifications_active,
-            color: notification.readStatus ? Colors.grey : theme.primaryColor,
-            size: 24.r,
-          ),
+      decoration: BoxDecoration(
+        color: notification.readStatus
+            ? theme.cardColor
+            : (isDark
+                ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                : theme.colorScheme.primary.withValues(alpha: 0.08)),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: notification.readStatus
+              ? theme.dividerColor.withValues(alpha: 0.25)
+              : theme.colorScheme.primary.withValues(alpha: 0.35),
         ),
-        title: Text(
-          notification.title ?? 'بدون عنوان',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight:
-                notification.readStatus ? FontWeight.normal : FontWeight.bold,
-            fontFamily: 'Cairo',
-            color: notification.readStatus
-                ? theme.colorScheme.onSurface.withOpacity(0.7)
-                : theme.colorScheme.onSurface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 4.h),
-            Text(
-              notification.body ?? 'بدون محتوى',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
-                fontFamily: 'Cairo',
-              ),
-            ),
-            SizedBox(height: 6.h),
-            Text(
-              timeStr.isNotEmpty ? timeStr : 'وقت غير معروف',
-              style: TextStyle(
-                fontSize: 10.sp,
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
-                fontFamily: 'Cairo',
-              ),
-            ),
-          ],
-        ),
-        trailing: PopupMenuButton(
-          onSelected: (value) {
-            if (value == 'mark_read') {
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16.r),
+          onTap: () {
+            if (!notification.readStatus) {
               _cubit.markAsRead(notification.id);
-            } else if (value == 'delete') {
-              _cubit.deleteNotification(notification.id);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('تم حذف الإشعار'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
             }
+            _showNotificationDetailsSheet(
+              context,
+              notification,
+              createdDate,
+              timeStr,
+            );
           },
-          itemBuilder: (context) => [
-            if (!notification.readStatus)
-              const PopupMenuItem(
-                value: 'mark_read',
-                child: Text('وضع علامة كمقروء'),
+          child: Stack(
+        children: [
+          PositionedDirectional(
+            start: 0,
+            top: 0,
+            bottom: 0,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              width: 4.w,
+              decoration: BoxDecoration(
+                color: notification.readStatus
+                    ? Colors.transparent
+                    : theme.colorScheme.primary,
+                borderRadius: BorderRadiusDirectional.only(
+                  topStart: Radius.circular(16.r),
+                  bottomStart: Radius.circular(16.r),
+                ),
               ),
-            const PopupMenuItem(
-              value: 'delete',
-              child: Text('حذف'),
             ),
-          ],
-          icon: Icon(
-            Icons.more_vert,
-            size: 20.r,
-            color: theme.colorScheme.onSurface.withOpacity(0.5),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+            leading: Container(
+              width: 44.w,
+              height: 44.h,
+              decoration: BoxDecoration(
+                color: notification.readStatus
+                    ? theme.colorScheme.surface
+                    : theme.colorScheme.primary.withValues(alpha: 0.16),
+                shape: BoxShape.circle,
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(8.r),
+                child: Opacity(
+                  opacity: notification.readStatus ? 0.78 : 1,
+                  child: Image.asset(
+                    'assets/images/splash-logo.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    notification.title ?? 'بدون عنوان',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: notification.readStatus
+                          ? FontWeight.w500
+                          : FontWeight.w700,
+                      fontFamily: 'Cairo',
+                    ),
+                  ),
+                ),
+                if (!notification.readStatus)
+                  Container(
+                    width: 8.r,
+                    height: 8.r,
+                    margin: EdgeInsetsDirectional.only(start: 6.w),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+              ],
+            ),
+            subtitle: Padding(
+              padding: EdgeInsets.only(top: 4.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    notification.body ?? 'بدون محتوى',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      height: 1.45,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+                      fontFamily: 'Cairo',
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.schedule_rounded,
+                        size: 12.r,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                      ),
+                      SizedBox(width: 4.w),
+                      Text(
+                        timeStr.isNotEmpty ? timeStr : 'وقت غير معروف',
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          fontFamily: 'Cairo',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            trailing: PopupMenuButton(
+              onSelected: (value) {
+                if (value == 'mark_read') {
+                  _cubit.markAsRead(notification.id);
+                } else if (value == 'delete') {
+                  _cubit.deleteNotification(notification.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('تم حذف الاشعار'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
+              },
+              itemBuilder: (context) => [
+                if (!notification.readStatus)
+                  const PopupMenuItem(
+                    value: 'mark_read',
+                    child: Text('وضع علامة كمقروء'),
+                  ),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Text('حذف'),
+                ),
+              ],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14.r),
+              ),
+              icon: Icon(
+                Icons.more_horiz_rounded,
+                size: 20.r,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+          ),
+        ],
           ),
         ),
       ),
     );
   }
+
+  void _showNotificationDetailsSheet(
+    BuildContext context,
+    dynamic notification,
+    DateTime? createdDate,
+    String relativeTime,
+  ) {
+    final theme = Theme.of(context);
+    final title = (notification.title?.toString().trim().isNotEmpty ?? false)
+        ? notification.title.toString().trim()
+        : 'بدون عنوان';
+    final body = (notification.body?.toString().trim().isNotEmpty ?? false)
+        ? notification.body.toString().trim()
+        : 'بدون محتوى';
+
+    final fullDate = createdDate != null
+        ? intl.DateFormat('dd/MM/yyyy - HH:mm', 'ar').format(createdDate)
+        : 'وقت غير معروف';
+    final shownRelativeTime =
+        relativeTime.isNotEmpty ? relativeTime : 'وقت غير معروف';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: theme.cardColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 20.h),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    body,
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 14.sp,
+                      height: 1.5,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: theme.dividerColor.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'الوقت: $shownRelativeTime',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 12.sp,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          'التاريخ: $fullDate',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 12.sp,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
 
   void _showDeleteAllDialog() {
     showDialog(
