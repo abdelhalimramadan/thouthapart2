@@ -24,6 +24,20 @@ abstract class NotificationLogModel with _$NotificationLogModel {
     @Default('') String? doctorName,
   }) = _NotificationLogModel;
 
-  factory NotificationLogModel.fromJson(Map<String, dynamic> json) =>
-      _$NotificationLogModelFromJson(json);
+  factory NotificationLogModel.fromJson(Map<String, dynamic> json) {
+    final normalized = Map<String, dynamic>.from(json);
+
+    // Backend can send read flag under different keys, normalize to readStatus.
+    final dynamic statusValue = normalized['status'];
+    final bool fallbackFromStatus =
+        statusValue is String && statusValue.toUpperCase() == 'READ';
+
+    normalized['readStatus'] = normalized['readStatus'] ??
+        normalized['isRead'] ??
+        normalized['read'] ??
+        normalized['seen'] ??
+        fallbackFromStatus;
+
+    return _$NotificationLogModelFromJson(normalized);
+  }
 }

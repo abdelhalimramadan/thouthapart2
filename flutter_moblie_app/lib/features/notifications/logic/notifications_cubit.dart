@@ -11,8 +11,10 @@ class NotificationsCubit extends Cubit<NotificationsState> {
       : super(const NotificationsState.initial());
 
   /// Fetch all notifications from API
-  Future<void> fetchNotifications() async {
-    emit(const NotificationsState.loading());
+  Future<void> fetchNotifications({bool showLoading = true}) async {
+    if (showLoading) {
+      emit(const NotificationsState.loading());
+    }
     final notifications = await _notificationRepo.getNotifications();
     emit(NotificationsState.success(notifications));
   }
@@ -29,10 +31,21 @@ class NotificationsCubit extends Cubit<NotificationsState> {
 
   /// Mark all notifications as read
   Future<void> markAllAsRead() async {
+    final currentState = state;
+    if (currentState is SuccessState) {
+      final updated = currentState.notifications
+          .map((notification) => notification.copyWith(readStatus: true))
+          .toList();
+      emit(NotificationsState.success(updated));
+    }
+
     final success = await _notificationRepo.markAllNotificationsAsRead();
     if (success) {
-      // Refresh notifications after marking all as read
-      await fetchNotifications();
+      // Sync with backend in background without showing loading flicker.
+      await fetchNotifications(showLoading: false);
+    } else {
+      // Re-sync from backend if optimistic update fails.
+      await fetchNotifications(showLoading: false);
     }
   }
 
