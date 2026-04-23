@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/utils/notification_helper.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/networking/api_service.dart';
@@ -76,14 +75,14 @@ class _DoctorBookingRecordsScreenState
       backgroundColor: theme.scaffoldBackgroundColor,
       drawer: const DoctorDrawer(),
       appBar: AppBar(
-        toolbarHeight: 70.h,
+        toolbarHeight: 70,
         elevation: 0,
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
         automaticallyImplyLeading: false,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu, size: 24.r),
+            icon: Icon(Icons.menu, size: 24),
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ),
@@ -93,77 +92,20 @@ class _DoctorBookingRecordsScreenState
           children: [
             Image.asset(
               'assets/images/splash-logo.png',
-              width: 36.w,
-              height: 36.w,
+              width: 36,
+              height: 36,
               fit: BoxFit.contain,
             ),
-            SizedBox(width: 8.w),
+            SizedBox(width: 8),
             Text(
-              'لوحة التحكم',
+              'سجل الحجوزات',
               style: textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
-                fontSize: 18.sp,
+                fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ],
-        ),
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: Icon(Icons.notifications_none, size: 24.r),
-                onPressed: () {
-                  NotificationHelper.hasUnreadNotifications = false;
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const NotificationsScreen()),
-                  ).then((_) {
-                    if (mounted) setState(() {});
-                  });
-                },
-              ),
-              if (NotificationHelper.getUnreadCount() > 0)
-                Positioned(
-                  right: 8.w,
-                  top: 10.h,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal:
-                          NotificationHelper.getUnreadCount() > 9 ? 4.w : 5.w,
-                      vertical: 1.h,
-                    ),
-                    constraints: BoxConstraints(
-                      minWidth: 16.w,
-                      minHeight: 16.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.error,
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${NotificationHelper.getUnreadCount()}',
-                        style: textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onError,
-                          fontSize: 9.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          SizedBox(width: 8.w),
-        ],
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1.h),
-          child: Container(
-            height: 1.h,
-            color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
-          ),
         ),
       ),
       body: _buildMainContent(context),
@@ -189,41 +131,41 @@ class _DoctorBookingRecordsScreenState
         return Container(
           decoration: BoxDecoration(
             color: theme.cardTheme.color ?? theme.colorScheme.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: EdgeInsets.only(
-            top: 20.h,
-            left: 20.w,
-            right: 20.w,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 28.h,
+            top: 20,
+            left: 20,
+            right: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 28,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 40.w,
-                height: 4.h,
+                width: 40,
+                height: 4,
                 decoration: BoxDecoration(
                   color: isDark ? Colors.grey[600] : Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2.r),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 20),
               Row(
                 textDirection: TextDirection.rtl,
                 children: [
                   Container(
-                    width: 64.w,
-                    height: 64.w,
+                    width: 64,
+                    height: 64,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(12),
                       image: DecorationImage(
                         image: const AssetImage('assets/images/dكتور.png'),
                         fit: BoxFit.cover,
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       patientName,
@@ -232,37 +174,37 @@ class _DoctorBookingRecordsScreenState
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.w700,
-                        fontSize: 20.sp,
+                        fontSize: 20,
                       ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 20),
               Divider(
                   color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
-              SizedBox(height: 12.h),
+              SizedBox(height: 12),
               _buildDetailRow(
                 context: context,
                 icon: Icons.calendar_month_outlined,
                 label: 'التاريخ',
                 value: date,
               ),
-              SizedBox(height: 14.h),
+              SizedBox(height: 14),
               _buildDetailRow(
                 context: context,
                 icon: Icons.access_time_outlined,
                 label: 'الوقت',
                 value: time,
               ),
-              SizedBox(height: 14.h),
+              SizedBox(height: 14),
               _buildDetailRow(
                 context: context,
                 icon: Icons.medical_services_outlined,
                 label: 'التخصص',
                 value: service,
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 24),
             ],
           ),
         );
@@ -282,17 +224,17 @@ class _DoctorBookingRecordsScreenState
       textDirection: TextDirection.rtl,
       children: [
         Container(
-          width: 38.w,
-          height: 38.w,
+          width: 38,
+          height: 38,
           decoration: BoxDecoration(
             color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(8.r),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon,
-              size: 18.r,
+              size: 18,
               color: isDark ? Colors.white : const Color(0xFF021433)),
         ),
-        SizedBox(width: 12.w),
+        SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,7 +245,7 @@ class _DoctorBookingRecordsScreenState
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: 'Cairo',
-                  fontSize: 12.sp,
+                  fontSize: 12,
                   color: Colors.grey,
                 ),
               ),
@@ -314,7 +256,7 @@ class _DoctorBookingRecordsScreenState
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,
-                  fontSize: 14.sp,
+                  fontSize: 14,
                 ),
               ),
             ],
@@ -352,12 +294,9 @@ class _DoctorBookingRecordsScreenState
         time: time,
         service: service,
       ),
-      actionButtons: Wrap(
-        spacing: 10.w,
-        runSpacing: 10.h,
+      actionButtons: Row(
         children: [
-          SizedBox(
-            width: 150.w,
+          Expanded(
             child: ElevatedButton.icon(
               onPressed: () => _handleConfirmAppointment(context, appointmentId),
               icon: const Icon(Icons.check_circle_outline),
@@ -368,22 +307,22 @@ class _DoctorBookingRecordsScreenState
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,
-                  fontSize: 14.sp,
+                  fontSize: 14,
                 ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF10B981),
                 foregroundColor: Colors.white,
                 elevation: 2,
-                padding: EdgeInsets.symmetric(vertical: 12.h),
+                padding: EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
           ),
-          SizedBox(
-            width: 150.w,
+          const SizedBox(width: 10),
+          Expanded(
             child: ElevatedButton.icon(
               onPressed: () => _handleCancelAppointment(context, appointmentId),
               icon: const Icon(Icons.close_outlined),
@@ -394,16 +333,16 @@ class _DoctorBookingRecordsScreenState
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,
-                  fontSize: 14.sp,
+                  fontSize: 14,
                 ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFEF4444),
                 foregroundColor: Colors.white,
                 elevation: 2,
-                padding: EdgeInsets.symmetric(vertical: 12.h),
+                padding: EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
@@ -533,10 +472,10 @@ class _DoctorBookingRecordsScreenState
           children: [
             Icon(
               Icons.error_outline,
-              size: 48.r,
+              size: 48,
               color: Colors.red,
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
             Text(
               _error!,
               textAlign: TextAlign.center,
@@ -544,7 +483,7 @@ class _DoctorBookingRecordsScreenState
                 fontFamily: 'Cairo',
               ),
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 24),
             ElevatedButton(
               onPressed: _fetchApprovedAppointments,
               child: Text(
@@ -564,10 +503,10 @@ class _DoctorBookingRecordsScreenState
           children: [
             Icon(
               Icons.calendar_today_outlined,
-              size: 48.r,
+              size: 48,
               color: Colors.grey[400],
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
             Text(
               'لا توجد حجوزات معتمدة',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -581,29 +520,29 @@ class _DoctorBookingRecordsScreenState
     }
 
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Container(
             width: double.infinity,
-            padding: EdgeInsets.symmetric(vertical: 10.h),
+            padding: EdgeInsets.symmetric(vertical: 10),
             child: Text(
               'سجل الحجوزات',
               textAlign: TextAlign.right,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w700,
-                fontSize: 24.sp,
+                fontSize: 24,
                 height: 1.5,
               ),
             ),
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 12),
           ..._approvedAppointments.asMap().entries.map((entry) {
             final appointment = entry.value;
             return Padding(
-              padding: EdgeInsets.only(bottom: 12.h),
+              padding: EdgeInsets.only(bottom: 12),
               child: _buildBookingCard(
                 context: context,
                 appointmentId: appointment['id'] ?? 0,
@@ -626,7 +565,7 @@ class _DoctorBookingRecordsScreenState
               ),
             );
           }).toList(),
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 16.h),
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
         ],
       ),
     );

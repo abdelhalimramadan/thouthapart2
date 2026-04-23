@@ -1,6 +1,5 @@
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:thoutha_mobile_app/features/onboarding/widgets/doctor_image_and_text.dart';
 import 'package:flutter/material.dart';
+import 'package:thoutha_mobile_app/features/onboarding/widgets/doctor_image_and_text.dart';
 
 import '../../core/routing/routes.dart';
 import '../../core/theming/colors.dart';
@@ -42,7 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _onSkipPressed() {
     Navigator.pushNamedAndRemoveUntil(
       context,
-      Routes.welcomeScreen,
+      Routes.categoriesScreen,
       (route) => false,
     );
   }
@@ -55,117 +54,112 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isTablet = screenWidth >= 600;
+    final bottomSpacing = screenHeight < 700 ? screenHeight * 0.05 : screenHeight * 0.08;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isTablet = constraints.maxWidth >= 600;
-            final bottomSpacing = constraints.maxHeight < 700 ? 20.h : 40.h;
-
-            return Stack(
-              children: [
-            // Full screen gradient overlay
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: const Alignment(-0.8, -0.5),
-                  radius: 1.2,
-                  colors: [
-                    ColorsManager.layerBlur1.withAlpha(80),
-                    ColorsManager.layerBlur1.withAlpha(30),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.4, 1.0],
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: const Alignment(-0.8, -0.5),
+            radius: 1.2,
+            colors: [
+              ColorsManager.layerBlur1.withAlpha(80),
+              ColorsManager.layerBlur1.withAlpha(30),
+              Colors.transparent,
+            ],
+            stops: const [0.0, 0.4, 1.0],
+          ),
+        ),
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: const Alignment(0.8, 0.5),
+              radius: 1.2,
+              colors: [
+                ColorsManager.layerBlur2.withAlpha(80),
+                ColorsManager.layerBlur2.withAlpha(30),
+                Colors.transparent,
+              ],
+              stops: const [0.0, 0.4, 1.0],
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+                children: [
+                // PageView
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: _onPageChanged,
+                    itemCount: _pages.length,
+                    itemBuilder: (context, index) {
+                      return DoctorImageAndText(
+                        imagePath: _pages[index]['image']!,
+                        title: _pages[index]['title']!,
+                        description: _pages[index]['description']!,
+                        key: ValueKey('onboarding_$index'),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ),
-            // Bottom-right gradient overlay
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: const Alignment(0.8, 0.5),
-                  radius: 1.2,
-                  colors: [
-                    ColorsManager.layerBlur2.withAlpha(80),
-                    ColorsManager.layerBlur2.withAlpha(30),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.4, 1.0],
-                ),
-              ),
-            ),
-
-            PageView.builder(
-              controller: _pageController,
-              onPageChanged: _onPageChanged,
-              itemCount: _pages.length,
-              itemBuilder: (context, index) {
-                return DoctorImageAndText(
-                  imagePath: _pages[index]['image']!,
-                  title: _pages[index]['title']!,
-                  description: _pages[index]['description']!,
-                  key: ValueKey('onboarding_$index'),
-                );
-              },
-            ),
-
                 // Action Buttons Container
-                Positioned(
-                  bottom: bottomSpacing,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: isTablet ? 520.w : double.infinity,
+                Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: isTablet ? screenWidth * 0.85 : double.infinity,
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 48.0 : 32.0,
                       ),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: isTablet ? 48.w : 32.w),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            GetStartedButton(
-                              isLastPage: _currentPage == _numPages - 1,
-                              onPressed: () async {
-                                if (_currentPage < _numPages - 1) {
-                                  await _pageController.nextPage(
-                                    duration: const Duration(milliseconds: 400),
-                                    curve: Curves.easeInOut,
-                                  );
-                                } else {
-                                  if (mounted) {
-                                    _onSkipPressed();
-                                  }
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GetStartedButton(
+                            isLastPage: _currentPage == _numPages - 1,
+                            onPressed: () async {
+                              if (_currentPage < _numPages - 1) {
+                                await _pageController.nextPage(
+                                  duration: const Duration(milliseconds: 400),
+                                  curve: Curves.easeInOut,
+                                );
+                              } else {
+                                if (mounted) {
+                                  _onSkipPressed();
                                 }
-                              },
-                            ),
-                            if (_currentPage < _numPages - 1)
-                              TextButton(
-                                onPressed: _onSkipPressed,
-                                child: Text(
-                                  'ندخل في الموضوع علي طول',
-                                  style: TextStyle(
-                                    color: ColorsManager.darkBlue,
-                                    fontSize: isTablet ? 17.sp : 16.sp,
-                                    fontFamily: 'Cairo',
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              }
+                            },
+                          ),
+                          if (_currentPage < _numPages - 1)
+                            TextButton(
+                              onPressed: _onSkipPressed,
+                              child: Text(
+                                'ندخل في الموضوع علي طول',
+                                style: TextStyle(
+                                  color: ColorsManager.darkBlue,
+                                  fontSize: isTablet ? 17 : 16,
+                                  fontFamily: 'Cairo',
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                          ],
-                        ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
                 ),
+                SizedBox(height: bottomSpacing),
               ],
-            );
-          },
+            ),
+          ),
         ),
       ),
     );
@@ -190,14 +184,20 @@ class PageIndicator extends StatelessWidget {
         pageCount,
         (index) => AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          margin: EdgeInsets.symmetric(horizontal: 4.w),
-          width: currentPage == index ? 20.w : 8.w,
-          height: 8.h,
+          margin: EdgeInsets.symmetric(
+            horizontal: 4,
+          ),
+          width: currentPage == index
+              ? 20
+              : 8,
+          height: 8,
           decoration: BoxDecoration(
             color: currentPage == index
                 ? ColorsManager.mainBlue
                 : Colors.grey.withAlpha(76),
-            borderRadius: BorderRadius.circular(4.r),
+            borderRadius: BorderRadius.circular(
+              4,
+            ),
           ),
         ),
       ),
@@ -219,13 +219,15 @@ class GetStartedButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 52.h,
+      height: 52,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: ColorsManager.mainBlue,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(
+              16,
+            ),
           ),
           elevation: 0,
         ),
@@ -233,7 +235,7 @@ class GetStartedButton extends StatelessWidget {
           isLastPage ? 'ابدأ الآن' : 'التالي',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 16.sp,
+            fontSize: 16,
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
           ),

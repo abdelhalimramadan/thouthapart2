@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thoutha_mobile_app/core/helpers/app_regex.dart';
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
 import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
@@ -226,26 +225,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                         child: Padding(
                           padding: EdgeInsets.symmetric(
-                            horizontal: 24.w,
-                            vertical: 24.h,
+                            horizontal: 24,
+                            vertical: 24,
                           ),
                           child: Center(
                             child: Container(
                               width: double.infinity,
                               constraints: BoxConstraints(
-                                maxWidth: 1.sw >= 600 ? 500.w : double.infinity,
+                                maxWidth: MediaQuery.of(context).size.width >= 600 ? 500 : double.infinity,
                               ),
-                              padding: EdgeInsets.all(24.r),
+                              padding: EdgeInsets.all(24),
                               decoration: BoxDecoration(
                                 color: Theme.of(context).cardTheme.color,
-                                borderRadius: BorderRadius.circular(16.r),
+                                borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
                                     color: isDarkMode
                                         ? Colors.black.withAlpha(102)
                                         : Colors.black.withAlpha(25),
-                                    blurRadius: 10.r,
-                                    offset: Offset(0, 4.h),
+                                    blurRadius: 10,
+                                    offset: Offset(0, 4),
                                   ),
                                 ],
                               ),
@@ -258,17 +257,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       Image.asset(
                                         'assets/images/splash-logo.png',
-                                        width: 80.w,
-                                        height: 80.h,
+                                        width: 80,
+                                        height: 80,
                                         fit: BoxFit.contain,
                                       ),
                                       Text(
                                         ' إنشاء حساب',
                                         style: TextStyle(
-                                          fontSize: 24.sp,
+                                          fontSize: 24,
                                           fontWeight: FontWeight.bold,
                                           color: isDarkMode
                                               ? Colors.white
@@ -279,7 +278,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       Text(
                                         'أنشئ حسابك للبدء في استخدام التطبيق.',
                                         style: TextStyle(
-                                          fontSize: 14.sp,
+                                          fontSize: 14,
                                           color: isDarkMode
                                               ? Colors.white70
                                               : Colors.grey,
@@ -287,14 +286,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       // First Name Field
                                       TextFormField(
                                         controller: firstNameController,
                                         textInputAction: TextInputAction.next,
                                         inputFormatters: [
                                           FilteringTextInputFormatter.allow(
-                                            RegExp(r'[\u0621-\u063A\u0641-\u064A\s]'),
+                                            RegExp(r'[\u0621-\u064A\s]'),
                                           ),
                                         ],
                                         decoration: const InputDecoration(
@@ -307,23 +306,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           if (value == null || value.trim().isEmpty) {
                                             return 'الرجاء إدخال الاسم الأول';
                                           }
-                                          final isArabicOnly = RegExp(
-                                            r'^[\u0621-\u063A\u0641-\u064A]+(?:\s+[\u0621-\u063A\u0641-\u064A]+)*$',
-                                          ).hasMatch(value.trim());
-                                          if (!isArabicOnly) {
+                                          if (!AppRegex.isArabicName(value.trim())) {
                                             return 'الاسم الأول لازم يكون بالعربي فقط';
                                           }
                                           return null;
                                         },
                                       ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       // Last Name Field
                                       TextFormField(
                                         controller: lastNameController,
                                         textInputAction: TextInputAction.next,
                                         inputFormatters: [
                                           FilteringTextInputFormatter.allow(
-                                            RegExp(r'[\u0621-\u063A\u0641-\u064A\s]'),
+                                            RegExp(r'[\u0621-\u064A\s]'),
                                           ),
                                         ],
                                         decoration: const InputDecoration(
@@ -336,16 +332,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           if (value == null || value.trim().isEmpty) {
                                             return 'الرجاء إدخال الاسم الأخير';
                                           }
-                                          final isArabicOnly = RegExp(
-                                            r'^[\u0621-\u063A\u0641-\u064A]+(?:\s+[\u0621-\u063A\u0641-\u064A]+)*$',
-                                          ).hasMatch(value.trim());
-                                          if (!isArabicOnly) {
+                                          if (!AppRegex.isArabicName(value.trim())) {
                                             return 'الاسم الأخير لازم يكون بالعربي فقط';
                                           }
                                           return null;
                                         },
                                       ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       // Email Field
                                       TextFormField(
                                         controller: emailController,
@@ -369,7 +362,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           return null;
                                         },
                                       ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       // Phone Number Field
                                       TextFormField(
                                         controller: phoneController,
@@ -389,7 +382,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           return null;
                                         },
                                       ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       // University/College Dropdown
                                       _isLoadingUniversities
                                           ? const Center(
@@ -426,7 +419,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 return null;
                                               },
                                             ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       // Study Year Dropdown
                                       DropdownButtonFormField<String>(
                                         isExpanded: true,
@@ -446,7 +439,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           return null;
                                         },
                                       ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       // City/Governorate Dropdown
                                       _isLoadingCities
                                           ? const Center(
@@ -483,7 +476,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 return null;
                                               },
                                             ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       // Category/Specialty Dropdown
                                       _isLoadingCategories
                                           ? const Center(
@@ -520,7 +513,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 return null;
                                               },
                                             ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       // Password Field
                                       TextFormField(
                                         controller: passwordController,
@@ -565,7 +558,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           return null;
                                         },
                                       ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       // Confirm Password Field
                                       TextFormField(
                                         controller: confirmPasswordController,
@@ -600,7 +593,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         },
                                       ),
 
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       PasswordValidations(
                                         hasLowerCase: hasLowerCase,
                                         hasUpperCase: hasUpperCase,
@@ -609,13 +602,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         hasNumber: hasNumber,
                                         hasMinLength: hasMinLength,
                                       ),
-                                      SizedBox(height: 24.h),
+                                      SizedBox(height: 24),
                                       // Sign Up Button
                                       BlocBuilder<SignUpCubit, SignUpState>(
                                         builder: (context, state) {
                                           return SizedBox(
                                             width: double.infinity,
-                                            height: 52.h,
+                                            height: 52,
                                             child: state is SignUpLoading
                                                 ? const Center(
                                                     child:
@@ -623,7 +616,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 : AppTextButton(
                                                     buttonText: 'إنشاء حساب',
                                                     textStyle: TextStyle(
-                                                      fontSize: 16.sp,
+                                                      fontSize: 16,
                                                       color: Colors.white,
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -690,7 +683,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           );
                                         },
                                       ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       Wrap(
                                         alignment: WrapAlignment.center,
                                         crossAxisAlignment:
@@ -699,7 +692,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           Text(
                                             'لديك حساب بالفعل؟',
                                             style: TextStyle(
-                                              fontSize: 13.sp,
+                                              fontSize: 13,
                                               color: isDarkMode
                                                   ? Colors.white
                                                   : ColorsManager.darkBlue,
@@ -715,7 +708,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             child: Text(
                                               'تسجيل الدخول',
                                               style: TextStyle(
-                                                fontSize: 13.sp,
+                                                fontSize: 13,
                                                 color: ColorsManager.mainBlue,
                                                 fontWeight: FontWeight.bold,
                                                 decoration:

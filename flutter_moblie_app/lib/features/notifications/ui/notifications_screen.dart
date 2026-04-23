@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thoutha_mobile_app/features/notifications/logic/notifications_cubit.dart';
 import 'package:intl/intl.dart' as intl;
@@ -34,15 +33,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF1F1F1),
-      appBar: AppBar(
-        title: Text(
-          'الإشعارات',
-          style: TextStyle(
-            fontFamily: 'Cairo',
-            fontWeight: FontWeight.w700,
-            fontSize: 20.sp,
-          ),
-        ),
+       appBar: AppBar(
+         title: Text(
+           'الإشعارات',
+           style: TextStyle(
+             fontFamily: 'Cairo',
+             fontWeight: FontWeight.w700,
+             fontSize: 20,
+           ),
+         ),
         centerTitle: true,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -57,7 +56,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
                 return IconButton(
                   tooltip: _showUnreadOnly
-                      ? 'عرض كل الاشعارات'
+                      ? 'عرض كل الإشعارات'
                       : 'عرض غير المقروء فقط',
                   onPressed: () {
                     setState(() {
@@ -75,40 +74,40 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             ? theme.colorScheme.primary
                             : theme.colorScheme.onSurface.withValues(alpha: 0.75),
                       ),
-                      if (unreadCount > 0)
-                        PositionedDirectional(
-                          top: -4,
-                          end: -6,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: unreadCount > 9 ? 4.w : 5.w,
-                              vertical: 1.h,
-                            ),
-                            constraints: BoxConstraints(
-                              minWidth: 16.w,
-                              minHeight: 16.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(
-                                color: theme.scaffoldBackgroundColor,
-                                width: 1,
-                              ),
-                            ),
-                            child: Text(
-                              unreadCount > 99 ? '99+' : '$unreadCount',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Cairo',
-                                fontSize: 9.sp,
-                                fontWeight: FontWeight.w700,
-                                height: 1.1,
-                              ),
-                            ),
-                          ),
-                        ),
+                       if (unreadCount > 0)
+                         PositionedDirectional(
+                           top: -4,
+                           end: -6,
+                           child: Container(
+                             padding: EdgeInsets.symmetric(
+                               horizontal: unreadCount > 9 ? 4 : 5,
+                               vertical: 1,
+                             ),
+                             constraints: BoxConstraints(
+                               minWidth: 16,
+                               minHeight: 16,
+                             ),
+                             decoration: BoxDecoration(
+                               color: Colors.red,
+                               borderRadius: BorderRadius.circular(12),
+                               border: Border.all(
+                                 color: theme.scaffoldBackgroundColor,
+                                 width: 1,
+                               ),
+                             ),
+                             child: Text(
+                               unreadCount > 99 ? '99+' : '$unreadCount',
+                               textAlign: TextAlign.center,
+                               style: TextStyle(
+                                 color: Colors.white,
+                                 fontFamily: 'Cairo',
+                                 fontSize: 9,
+                                 fontWeight: FontWeight.w700,
+                                 height: 1.1,
+                               ),
+                             ),
+                           ),
+                         ),
                     ],
                   ),
                 );
@@ -120,49 +119,49 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             bloc: _cubit,
             builder: (context, state) {
               if (state is SuccessState && state.notifications.isNotEmpty) {
-                return Padding(
-                  padding: EdgeInsetsDirectional.only(end: 10.w),
-                  child: Center(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.08)
-                            : Colors.black.withValues(alpha: 0.04),
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: PopupMenuButton(
-                      onSelected: (value) {
-                        if (value == 'mark_all_read') {
-                          _cubit.markAllAsRead();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text('تم وضع علامة على كل الإشعارات كمقروءة'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        } else if (value == 'delete_all') {
-                          _showDeleteAllDialog();
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'mark_all_read',
-                          child: Text('وضع علامة على الكل كمقروء'),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete_all',
-                          child: Text('حذف الكل'),
-                        ),
-                      ],
-                      icon: const Icon(Icons.more_vert_rounded),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.r),
-                      ),
-                    ),
-                    ),
-                  ),
-                );
+                 return Padding(
+                   padding: EdgeInsetsDirectional.only(end: 10),
+                   child: Center(
+                     child: DecoratedBox(
+                       decoration: BoxDecoration(
+                         color: isDark
+                             ? Colors.white.withValues(alpha: 0.08)
+                             : Colors.black.withValues(alpha: 0.04),
+                         borderRadius: BorderRadius.circular(12),
+                       ),
+                       child: PopupMenuButton(
+                       onSelected: (value) {
+                         if (value == 'mark_all_read') {
+                           _cubit.markAllAsRead();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('تم وضع علامة على كل الإشعارات كمقروءة'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                         } else if (value == 'delete_all') {
+                           _showDeleteAllDialog();
+                         }
+                       },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'mark_all_read',
+                            child: Text('وضع علامة على الكل كمقروء'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete_all',
+                            child: Text('حذف الكل'),
+                          ),
+                        ],
+                       icon: const Icon(Icons.more_vert_rounded),
+                       shape: RoundedRectangleBorder(
+                         borderRadius: BorderRadius.circular(14),
+                       ),
+                     ),
+                     ),
+                   ),
+                 );
               }
               return const SizedBox.shrink();
             },
@@ -202,7 +201,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 physics: const BouncingScrollPhysics(
                   parent: AlwaysScrollableScrollPhysics(),
                 ),
-                padding: EdgeInsets.fromLTRB(14.w, 8.h, 14.w, 20.h),
+                padding: EdgeInsets.fromLTRB(14, 8, 14, 20),
                 itemCount: visibleNotifications.length,
                 itemBuilder: (context, index) {
                   final notification = visibleNotifications[index];
@@ -213,11 +212,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           } else if (state is FailureState) {
             return Center(
               child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 20.w),
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                 decoration: BoxDecoration(
                   color: theme.cardColor,
-                  borderRadius: BorderRadius.circular(18.r),
+                  borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: Colors.red.withValues(alpha: 0.28)),
                 ),
                 child: Column(
@@ -225,29 +224,29 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   children: [
                     Icon(
                       Icons.error_outline_rounded,
-                      size: 54.r,
+                      size: 54,
                       color: Colors.red,
                     ),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 12),
                     Text(
                       'تعذر تحميل الإشعارات',
                       style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: 17.sp,
+                        fontSize: 17,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    SizedBox(height: 8.h),
+                    SizedBox(height: 8),
                     Text(
                       state.message,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 13.sp,
+                        fontSize: 13,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         fontFamily: 'Cairo',
                       ),
                     ),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 16),
                     FilledButton.icon(
                       onPressed: _cubit.fetchNotifications,
                       icon: const Icon(Icons.refresh_rounded),
@@ -275,8 +274,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 94.r,
-            height: 94.r,
+            width: 94,
+            height: 94,
             decoration: BoxDecoration(
               color: isDark
                   ? Colors.white.withValues(alpha: 0.06)
@@ -285,39 +284,39 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ),
             child: Icon(
               Icons.notifications_none_rounded,
-              size: 52.r,
+              size: 52,
               color: theme.colorScheme.primary,
             ),
           ),
-          SizedBox(height: 16.h),
-          Text(
-            'لا توجد اشعارات',
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
-              fontFamily: 'Cairo',
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'سيتم عرض الاشعارات هنا عند وصولها',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
-              fontFamily: 'Cairo',
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 20.h),
-          OutlinedButton.icon(
-            onPressed: _cubit.fetchNotifications,
-            icon: const Icon(Icons.refresh_rounded),
-            label: const Text(
-              'تحديث',
-              style: TextStyle(fontFamily: 'Cairo'),
-            ),
-          ),
+           SizedBox(height: 16),
+           Text(
+             'لا توجد اشعارات',
+             style: TextStyle(
+               fontSize: 20,
+               fontWeight: FontWeight.bold,
+               color: theme.colorScheme.onSurface,
+               fontFamily: 'Cairo',
+             ),
+           ),
+           SizedBox(height: 8),
+           Text(
+             'سيتم عرض الاشعارات هنا عند وصولها',
+             style: TextStyle(
+               fontSize: 14,
+               color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+               fontFamily: 'Cairo',
+             ),
+             textAlign: TextAlign.center,
+           ),
+           SizedBox(height: 20),
+           OutlinedButton.icon(
+             onPressed: _cubit.fetchNotifications,
+             icon: const Icon(Icons.refresh_rounded),
+             label: const Text(
+               'تحديث',
+               style: TextStyle(fontFamily: 'Cairo'),
+             ),
+           ),
         ],
       ),
     );
@@ -332,28 +331,28 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         children: [
           Icon(
             Icons.mark_email_read_rounded,
-            size: 56.r,
+            size: 56,
             color: theme.colorScheme.primary,
           ),
-          SizedBox(height: 12.h),
-          Text(
-            'كل الاشعارات مقروءة',
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w700,
-              color: theme.colorScheme.onSurface,
-              fontFamily: 'Cairo',
-            ),
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            'اضغط على الايقونة لعرض كل الاشعارات',
-            style: TextStyle(
-              fontSize: 13.sp,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
-              fontFamily: 'Cairo',
-            ),
-          ),
+           SizedBox(height: 12),
+           Text(
+             'كل الاشعارات مقروءة',
+             style: TextStyle(
+               fontSize: 18,
+               fontWeight: FontWeight.w700,
+               color: theme.colorScheme.onSurface,
+               fontFamily: 'Cairo',
+             ),
+           ),
+           SizedBox(height: 6),
+           Text(
+             'اضغط على الايقونة لعرض كل الاشعارات',
+             style: TextStyle(
+               fontSize: 13,
+               color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+               fontFamily: 'Cairo',
+             ),
+           ),
         ],
       ),
     );
@@ -374,28 +373,28 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (createdDate != null) {
       final difference = DateTime.now().difference(createdDate);
       if (difference.inMinutes < 1) {
-        timeStr = 'الان';
-      } else if (difference.inMinutes < 60) {
-        timeStr = 'منذ ${difference.inMinutes} دقيقة';
-      } else if (difference.inHours < 24) {
-        timeStr = 'منذ ${difference.inHours} ساعة';
-      } else if (difference.inDays < 7) {
-        timeStr = 'منذ ${difference.inDays} يوم';
-      } else {
+      timeStr = 'الآن';
+                       } else if (difference.inMinutes < 60) {
+                         timeStr = 'منذ ${difference.inMinutes} دقيقة';
+                       } else if (difference.inHours < 24) {
+                         timeStr = 'منذ ${difference.inHours} ساعة';
+                       } else if (difference.inDays < 7) {
+                         timeStr = 'منذ ${difference.inDays} يوم';
+                       } else {
         timeStr = intl.DateFormat('dd/MM/yyyy HH:mm', 'ar').format(createdDate);
       }
     }
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
-      margin: EdgeInsets.symmetric(vertical: 6.h),
+      margin: EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
         color: notification.readStatus
             ? theme.cardColor
             : (isDark
                 ? theme.colorScheme.primary.withValues(alpha: 0.12)
                 : theme.colorScheme.primary.withValues(alpha: 0.08)),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: notification.readStatus
               ? theme.dividerColor.withValues(alpha: 0.25)
@@ -412,7 +411,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(16),
           onTap: () {
             if (!notification.readStatus) {
               _cubit.markAsRead(notification.id);
@@ -432,23 +431,23 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             bottom: 0,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 220),
-              width: 4.w,
+              width: 4,
               decoration: BoxDecoration(
                 color: notification.readStatus
                     ? Colors.transparent
                     : theme.colorScheme.primary,
                 borderRadius: BorderRadiusDirectional.only(
-                  topStart: Radius.circular(16.r),
-                  bottomStart: Radius.circular(16.r),
+                  topStart: Radius.circular(16),
+                  bottomStart: Radius.circular(16),
                 ),
               ),
             ),
           ),
           ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             leading: Container(
-              width: 44.w,
-              height: 44.h,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 color: notification.readStatus
                     ? theme.colorScheme.surface
@@ -456,7 +455,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 shape: BoxShape.circle,
               ),
               child: Padding(
-                padding: EdgeInsets.all(8.r),
+                padding: EdgeInsets.all(8),
                 child: Opacity(
                   opacity: notification.readStatus ? 0.78 : 1,
                   child: Image.asset(
@@ -474,7 +473,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 14,
                       fontWeight: notification.readStatus
                           ? FontWeight.w500
                           : FontWeight.w700,
@@ -484,9 +483,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ),
                 if (!notification.readStatus)
                   Container(
-                    width: 8.r,
-                    height: 8.r,
-                    margin: EdgeInsetsDirectional.only(start: 6.w),
+                    width: 8,
+                    height: 8,
+                    margin: EdgeInsetsDirectional.only(start: 6),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primary,
                       shape: BoxShape.circle,
@@ -495,7 +494,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ],
             ),
             subtitle: Padding(
-              padding: EdgeInsets.only(top: 4.h),
+              padding: EdgeInsets.only(top: 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -504,29 +503,29 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 12.sp,
+                      fontSize: 12,
                       height: 1.45,
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
                       fontFamily: 'Cairo',
                     ),
                   ),
-                  SizedBox(height: 8.h),
+                  SizedBox(height: 8),
                   Row(
                     children: [
                       Icon(
                         Icons.schedule_rounded,
-                        size: 12.r,
+                        size: 12,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
                       ),
-                      SizedBox(width: 4.w),
-                      Text(
-                        timeStr.isNotEmpty ? timeStr : 'وقت غير معروف',
-                        style: TextStyle(
-                          fontSize: 10.sp,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                          fontFamily: 'Cairo',
-                        ),
-                      ),
+                      SizedBox(width: 4),
+                       Text(
+                         timeStr.isNotEmpty ? timeStr : 'وقت غير معروف',
+                         style: TextStyle(
+                           fontSize: 10,
+                           color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                           fontFamily: 'Cairo',
+                         ),
+                       ),
                     ],
                   ),
                 ],
@@ -538,31 +537,31 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   _cubit.markAsRead(notification.id);
                 } else if (value == 'delete') {
                   _cubit.deleteNotification(notification.id);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('تم حذف الاشعار'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                     const SnackBar(
+                       content: Text('تم حذف الإشعار'),
+                       duration: Duration(seconds: 2),
+                     ),
+                   );
                 }
               },
               itemBuilder: (context) => [
-                if (!notification.readStatus)
-                  const PopupMenuItem(
-                    value: 'mark_read',
-                    child: Text('وضع علامة كمقروء'),
-                  ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Text('حذف'),
-                ),
+                  if (!notification.readStatus)
+                   const PopupMenuItem(
+                     value: 'mark_read',
+                     child: Text('وضع علامة كمقروء'),
+                   ),
+                 const PopupMenuItem(
+                   value: 'delete',
+                   child: Text('حذف'),
+                 ),
               ],
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14.r),
+                borderRadius: BorderRadius.circular(14),
               ),
               icon: Icon(
                 Icons.more_horiz_rounded,
-                size: 20.r,
+                size: 20,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
@@ -581,18 +580,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     String relativeTime,
   ) {
     final theme = Theme.of(context);
-    final title = (notification.title?.toString().trim().isNotEmpty ?? false)
-        ? notification.title.toString().trim()
-        : 'بدون عنوان';
-    final body = (notification.body?.toString().trim().isNotEmpty ?? false)
-        ? notification.body.toString().trim()
-        : 'بدون محتوى';
+     final title = (notification.title?.toString().trim().isNotEmpty ?? false)
+         ? notification.title.toString().trim()
+         : 'بدون عنوان';
+     final body = (notification.body?.toString().trim().isNotEmpty ?? false)
+         ? notification.body.toString().trim()
+         : 'بدون محتوى';
 
-    final fullDate = createdDate != null
-        ? intl.DateFormat('dd/MM/yyyy - HH:mm', 'ar').format(createdDate)
-        : 'وقت غير معروف';
-    final shownRelativeTime =
-        relativeTime.isNotEmpty ? relativeTime : 'وقت غير معروف';
+     final fullDate = createdDate != null
+         ? intl.DateFormat('dd/MM/yyyy - HH:mm', 'ar').format(createdDate)
+         : 'وقت غير معروف';
+     final shownRelativeTime =
+         relativeTime.isNotEmpty ? relativeTime : 'وقت غير معروف';
 
     showModalBottomSheet(
       context: context,
@@ -600,12 +599,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       showDragHandle: true,
       backgroundColor: theme.cardColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return SafeArea(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 20.h),
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 20),
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: Column(
@@ -616,27 +615,27 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     title,
                     style: TextStyle(
                       fontFamily: 'Cairo',
-                      fontSize: 18.sp,
+                      fontSize: 18,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 10.h),
+                  SizedBox(height: 10),
                   Text(
                     body,
                     style: TextStyle(
                       fontFamily: 'Cairo',
-                      fontSize: 14.sp,
+                      fontSize: 14,
                       height: 1.5,
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
                     ),
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 16),
                   Container(
                     width: double.infinity,
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: theme.dividerColor.withValues(alpha: 0.35),
                       ),
@@ -645,26 +644,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'الوقت: $shownRelativeTime',
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 12.sp,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          'التاريخ: $fullDate',
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 12.sp,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
-                          ),
-                        ),
+                           'الوقت: $shownRelativeTime',
+                           style: TextStyle(
+                             fontFamily: 'Cairo',
+                             fontSize: 12,
+                             color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+                           ),
+                         ),
+                         SizedBox(height: 4),
+                         Text(
+                           'التاريخ: $fullDate',
+                           style: TextStyle(
+                             fontFamily: 'Cairo',
+                             fontSize: 12,
+                             color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+                           ),
+                         ),
                       ],
                     ),
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(height: 12),
                 ],
               ),
             ),
@@ -680,7 +679,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text(
-          'حذف جميع الإشعارات',
+           'حذف جميع الإشعارات',
           style: TextStyle(fontFamily: 'Cairo'),
         ),
         content: const Text(

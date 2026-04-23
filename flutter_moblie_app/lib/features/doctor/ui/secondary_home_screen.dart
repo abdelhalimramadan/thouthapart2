@@ -365,34 +365,31 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Display image based on file type
-            if (resolvedAssetPath.endsWith('.svg'))
-              SvgPicture.asset(
-                resolvedAssetPath,
-                width: 64 * (width / 390),
-                height: 64 * (width / 390),
-                fit: BoxFit.contain,
-                placeholderBuilder: (BuildContext context) => Container(
-                  width: 64,
-                  height: 64,
-                  color: isDark ? Colors.grey[800] : Colors.grey[200],
-                  child: const Icon(Icons.image, size: 32, color: Colors.grey),
-                ),
-              )
-            else
-              Image.asset(
-                resolvedAssetPath,
-                width: 64 * (width / 390),
-                height: 64 * (width / 390),
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: 64,
-                  height: 64,
-                  color: isDark ? Colors.grey[800] : Colors.grey[200],
-                  child: const Icon(Icons.image, size: 32, color: Colors.grey),
-                ),
-              ),
             const SizedBox(height: 12),
+            // Display image flexibly to avoid overflow and clipping.
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: resolvedAssetPath.endsWith('.svg')
+                    ? SvgPicture.asset(
+                        resolvedAssetPath,
+                        fit: BoxFit.contain,
+                        placeholderBuilder: (BuildContext context) => Container(
+                          color: isDark ? Colors.grey[800] : Colors.grey[200],
+                          child: const Icon(Icons.image, size: 32, color: Colors.grey),
+                        ),
+                      )
+                    : Image.asset(
+                        resolvedAssetPath,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: isDark ? Colors.grey[800] : Colors.grey[200],
+                          child: const Icon(Icons.image, size: 32, color: Colors.grey),
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
@@ -401,13 +398,14 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontFamily: 'Cairo',
                       fontWeight: FontWeight.w600,
-                      fontSize: baseFontSize * 0.875, // 14sp
+                      fontSize: width > 600 ? 15.0 : (baseFontSize * 0.875).clamp(12.0, 15.0),
                       height: 1.2,
                     ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            const SizedBox(height: 12),
           ],
         ),
       ),
@@ -456,13 +454,25 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
               _scaffoldKey.currentState?.openDrawer();
             },
           ),
-          title: Text(
-            'نشر حالة جديدة',
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.bold,
-              fontSize: baseFontSize * 1.1,
-            ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/images/splash-logo.png',
+                width: 36,
+                height: 36,
+                fit: BoxFit.contain,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'نشر حالة جديدة',
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.bold,
+                  fontSize: (baseFontSize * 1.1).clamp(18.0, 24.0),
+                ),
+              ),
+            ],
           ),
           centerTitle: true,
         ),
@@ -505,7 +515,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                       children: [
                         // Search Bar
                         Container(
-                          height: 48,
+                          constraints: const BoxConstraints(minHeight: 48),
                           margin: EdgeInsets.symmetric(
                               horizontal: width * 0.05, vertical: 10),
                           decoration: BoxDecoration(
@@ -533,17 +543,20 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyMedium
-                                      ?.copyWith(fontFamily: 'Cairo'),
+                                      ?.copyWith(
+                                        fontFamily: 'Cairo',
+                                        fontSize: (baseFontSize * 0.9).clamp(14.0, 16.0),
+                                      ),
                                   decoration: InputDecoration(
                                     hintText: 'ابحث عن قسم...',
                                     hintStyle: TextStyle(
                                       fontFamily: 'Cairo',
                                       color: Colors.grey[600],
-                                      fontSize: baseFontSize * 0.9,
+                                      fontSize: (baseFontSize * 0.9).clamp(14.0, 16.0),
                                     ),
                                     border: InputBorder.none,
                                     contentPadding: const EdgeInsets.symmetric(
-                                        vertical: 14),
+                                        vertical: 12),
                                   ),
                                 ),
                               ),
@@ -738,7 +751,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                 ?.copyWith(
                                   fontFamily: 'Cairo',
                                   fontWeight: FontWeight.bold,
-                                  fontSize: baseFontSize * 1.06, // 17sp
+                                  fontSize: (baseFontSize * 1.06).clamp(16.0, 22.0),
                                   height: 1.2,
                                 ),
                             textAlign: TextAlign.center,

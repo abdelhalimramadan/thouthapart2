@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:thoutha_mobile_app/core/theming/theme_provider.dart';
@@ -25,16 +24,16 @@ class HomeDrawer extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Directionality(
           textDirection: TextDirection.rtl,
           child: Row(
             children: [
               customIcon ??
                   Icon(icon,
-                      size: 24.r,
+                      size: 24,
                       color: iconColor ?? Theme.of(context).iconTheme.color),
-              SizedBox(width: 12.w),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title,
@@ -42,7 +41,7 @@ class HomeDrawer extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.bold,
-                        fontSize: fontSize ?? 16.sp,
+                        fontSize: fontSize ?? 16,
                         color: textColor ??
                             Theme.of(context).colorScheme.onSurface,
                       ),
@@ -65,15 +64,15 @@ class HomeDrawer extends StatelessWidget {
     double? fontSize,
   }) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Row(
           children: [
             Icon(icon,
-                size: 24.r,
+                size: 24,
                 color: iconColor ?? Theme.of(context).iconTheme.color),
-            SizedBox(width: 12.w),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 title,
@@ -81,7 +80,7 @@ class HomeDrawer extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontFamily: 'Cairo',
                       fontWeight: FontWeight.bold,
-                      fontSize: fontSize ?? 16.sp,
+                      fontSize: fontSize ?? 16,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
               ),
@@ -118,13 +117,12 @@ class HomeDrawer extends StatelessWidget {
                   children: [
                     // Header Section
                     Container(
-                      padding: EdgeInsets.only(top: topPad, bottom: 20.h),
+                      padding: EdgeInsets.only(top: topPad, bottom: 20),
                       decoration: BoxDecoration(
                         color: theme.cardColor,
                         border: Border(
                           bottom: BorderSide(
                             color: theme.dividerColor.withValues(alpha: 0.1),
-                            width: 1.w,
                           ),
                         ),
                       ),
@@ -136,23 +134,23 @@ class HomeDrawer extends StatelessWidget {
                               icon: Icon(
                                 Icons.close,
                                 color: colorScheme.onSurface,
-                                size: 28.r,
+                                size: 28,
                               ),
                               onPressed: () => Navigator.of(context).pop(),
                             ),
                           ),
                           Image.asset(
                             'assets/images/splash-logo.png',
-                            width: 70.w,
-                            height: 70.h,
+                            width: 70,
+                            height: 70,
                             fit: BoxFit.contain,
                           ),
-                          SizedBox(height: 12.h),
+                          const SizedBox(height: 12),
                           Text(
                             'رعاية ذكية، لمسة طبية',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 14.sp,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: theme.colorScheme.onSurface,
                               fontFamily: 'Cairo',
@@ -167,7 +165,7 @@ class HomeDrawer extends StatelessWidget {
                       context,
                       title: 'الصفحة الرئيسية',
                       icon: Icons.home_outlined,
-                      fontSize: 16.sp,
+                      fontSize: 16,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamedAndRemoveUntil(
@@ -182,10 +180,10 @@ class HomeDrawer extends StatelessWidget {
                       title: 'ثوثه المساعد',
                       customIcon: SvgPicture.asset(
                         'assets/svg/ثوثه الدكتور 1.svg',
-                        width: 24.w,
-                        height: 24.h,
+                        width: 24,
+                        height: 24,
                       ),
-                      fontSize: 16.sp,
+                      fontSize: 16,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(
@@ -204,7 +202,7 @@ class HomeDrawer extends StatelessWidget {
                           value: themeProvider.isDarkMode,
                           onChanged: (v) => themeProvider.toggleTheme(v),
                           icon: Icons.dark_mode_outlined,
-                          fontSize: 16.sp,
+                          fontSize: 16,
                         );
                       },
                     ),
@@ -212,7 +210,7 @@ class HomeDrawer extends StatelessWidget {
                       context,
                       title: 'الشروط والأحكام',
                       icon: Icons.description_outlined,
-                      fontSize: 16.sp,
+                      fontSize: 16,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(
@@ -228,7 +226,7 @@ class HomeDrawer extends StatelessWidget {
                       context,
                       title: 'سياسة الخصوصية',
                       icon: Icons.shield_outlined,
-                      fontSize: 16.sp,
+                      fontSize: 16,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(
@@ -243,7 +241,7 @@ class HomeDrawer extends StatelessWidget {
                       context,
                       title: 'المساعدة والدعم',
                       icon: Icons.help_outline,
-                      fontSize: 16.sp,
+                      fontSize: 16,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(
@@ -258,7 +256,7 @@ class HomeDrawer extends StatelessWidget {
                       context,
                       title: 'تسجيل الدخول',
                       icon: Icons.login_outlined,
-                      fontSize: 16.sp,
+                      fontSize: 16,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamedAndRemoveUntil(
@@ -274,17 +272,17 @@ class HomeDrawer extends StatelessWidget {
 
               // Footer Section
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.h),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Column(
                   children: [
                     const Divider(indent: 32, endIndent: 32),
-                    SizedBox(height: 8.h),
+                    const SizedBox(height: 8),
                     Text(
                       'الإصدار 1.0.0',
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.bold,
-                        fontSize: 12.sp,
+                        fontSize: 12,
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),

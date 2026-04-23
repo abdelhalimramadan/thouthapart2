@@ -3,7 +3,6 @@ import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
-import 'package:thoutha_mobile_app/features/notifications/ui/notifications_screen.dart';
 import 'package:thoutha_mobile_app/features/doctor/widgets/appointment_card_widget.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui show TextDirection;
@@ -77,7 +76,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       drawer: const DoctorDrawer(),
       appBar: AppBar(
-        toolbarHeight: 75.6,
+        toolbarHeight: 70,
         elevation: 0,
         backgroundColor:
             isDark ? Colors.transparent : theme.colorScheme.surface,
@@ -85,7 +84,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         automaticallyImplyLeading: false,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu, size: 24 * (width / 390)),
+            icon: const Icon(Icons.menu, size: 24),
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ),
@@ -95,68 +94,22 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           children: [
             Image.asset(
               'assets/images/splash-logo.png',
-              width: 37 * (width / 390),
-              height: 40 * (width / 390),
+              width: 36,
+              height: 36,
               fit: BoxFit.contain,
             ),
             const SizedBox(width: 8),
             Text(
-              'لوحة التحكم',
+              'الحجوزات القادمة',
               style: textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
-                fontSize: baseFontSize * 1.125,
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
-                height: 1.5,
               ),
             ),
           ],
         ),
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: Icon(Icons.notifications_none, size: 24 * (width / 390)),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const NotificationsScreen()),
-                  );
-                },
-              ),
-              Positioned(
-                right: 8,
-                top: 10,
-                child: Container(
-                  width: 16 * (width / 390),
-                  height: 16 * (width / 390),
-                  decoration: BoxDecoration(
-                    color: colorScheme.error,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '3',
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onError,
-                        fontSize: baseFontSize * 0.625,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 8),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.1),
-          child: Divider(
-            height: 1.1,
-            color: theme.dividerColor.withAlpha(isDark ? 50 : 255),
-          ),
-        ),
+        // ...existing code...
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -314,26 +267,28 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
               size: 18, color: isDark ? Colors.white : const Color(0xFF021433)),
         ),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: baseFontSize * 0.75,
-                color: Colors.grey,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
               ),
-            ),
-            Text(
-              value,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w600,
-                fontSize: baseFontSize * 0.9,
+              Text(
+                value,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -473,8 +428,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w700,
-                  fontSize: baseFontSize * 1.5,
-                  height: 1.5,
+                  fontSize: 20,
+                  height: 1.4,
                 ),
               ),
             ),

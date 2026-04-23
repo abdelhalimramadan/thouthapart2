@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/helpers/spacing.dart';
 import '../../../../core/theming/colors.dart';
@@ -40,8 +39,8 @@ class PasswordValidations extends StatelessWidget {
   Widget buildValidationRow(String text, bool hasValidated) {
     return Row(
       children: [
-        CircleAvatar(
-          radius: 2.5.r,
+        const CircleAvatar(
+          radius: 2.5,
           backgroundColor: ColorsManager.gray,
         ),
         horizontalSpace(6),

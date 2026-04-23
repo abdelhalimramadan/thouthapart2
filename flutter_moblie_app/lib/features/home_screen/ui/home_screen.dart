@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thoutha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
 import 'package:thoutha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
@@ -12,6 +11,7 @@ import 'package:thoutha_mobile_app/features/doctor/logic/doctor_state.dart';
 import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
+import 'package:thoutha_mobile_app/core/helpers/responsive_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen(
@@ -107,119 +107,128 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSquareCategory(String assetPath, int index, String categoryName,
-      {int? categoryId, String? cityName}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+   Widget _buildSquareCategory(String assetPath, int index, String categoryName,
+       {int? categoryId, String? cityName}) {
+     final isDark = Theme.of(context).brightness == Brightness.dark;
+     final screenW = MediaQuery.of(context).size.width;
+     final double iconSize = (screenW * 0.18).clamp(48.0, 90.0);
+     final double categoryMargin = 5;
+     final double borderRadius = 16;
+     final double borderWidth = 1;
+     final double blurRadius = 4;
+     final double iconLabelSpacing = 8;
+     final double labelPadding = 6;
+     final double fontSize = (screenW * 0.033).clamp(11.0, 15.0);
 
-    final svgFiles = [
-      'املغم.svg',
-      'حشو اسنان.svg',
-      'تجميلي.svg',
-      'زراعه اسنان.svg',
-      'خلع اسنان.svg',
-      'تبيض اسنان.svg',
-      'تقويم اسنان.svg',
-      'تركيبات اسنان.svg',
-      'تيجان وجسور.webp',
-      'اطفال.svg',
-      'تركيبات اسنان.svg',
-    ];
+     final svgFiles = [
+       'املغم.svg',
+       'حشو اسنان.svg',
+       'تجميلي.svg',
+       'زراعه اسنان.svg',
+       'خلع اسنان.svg',
+       'تبيض اسنان.svg',
+       'تقويم اسنان.svg',
+       'تركيبات اسنان.svg',
+       'تيجان وجسور.webp',
+       'اطفال.svg',
+       'تركيبات اسنان.svg',
+     ];
 
-    final categoryNames = [
-      'حشو املجم',
-      'حشو عصب',
-      'حشو تجميلي',
-      'زراعة الأسنان',
-      'الجراحة والخلع',
-      'تنظيف وتبيض الأسنان',
-      'تقويم الأسنان',
-      'تركيبات الأسنان',
-      'التيجان والجسور',
-      'طب أسنان الأطفال',
-      'تركيبات متحركة',
-    ];
+     final categoryNames = [
+       'حشو املجم',
+       'حشو عصب',
+       'حشو تجميلي',
+       'زراعة الأسنان',
+       'الجراحة والخلع',
+       'تنظيف وتبيض الأسنان',
+       'تقويم الأسنان',
+       'تركيبات الأسنان',
+       'التيجان والجسور',
+       'طب أسنان الأطفال',
+       'تركيبات متحركة',
+     ];
 
-    final fileName =
-        index < svgFiles.length ? svgFiles[index] : 'placeholder.svg';
-    final resolvedAssetPath =
-        assetPath.isNotEmpty ? assetPath : 'assets/svg/$fileName';
-    final resolvedCategoryName = categoryName.isNotEmpty
-        ? categoryName
-        : (index < categoryNames.length ? categoryNames[index] : '');
+     final fileName =
+         index < svgFiles.length ? svgFiles[index] : 'placeholder.svg';
+     final resolvedAssetPath =
+         assetPath.isNotEmpty ? assetPath : 'assets/svg/$fileName';
+     final resolvedCategoryName = categoryName.isNotEmpty
+         ? categoryName
+         : (index < categoryNames.length ? categoryNames[index] : '');
 
-    return GestureDetector(
-      onTap: () {
-        _handleCategoryTap(
-          categoryName: resolvedCategoryName,
-          categoryId: categoryId,
-          cityName: cityName,
-        );
-      },
-      child: Container(
-        margin: EdgeInsets.all(5.r),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardTheme.color,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
-            width: 1.w,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isDark
-                  ? Colors.black.withValues(alpha: 0.3)
-                  : Colors.grey.withValues(alpha: 0.1),
-              blurRadius: 4.r,
-              offset: Offset(0, 2.h),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Handle both SVG and regular images
-            if (resolvedAssetPath.endsWith('.svg')) ...[
-              SvgPicture.asset(
-                resolvedAssetPath,
-                width: 68.w,
-                height: 68.h,
-                fit: BoxFit.contain,
-                placeholderBuilder: (BuildContext context) => Container(
-                  width: 68.w,
-                  height: 68.h,
-                  color: isDark ? Colors.grey[800] : Colors.grey[200],
-                  child: Icon(Icons.image, size: 24.r, color: Colors.grey),
-                ),
-              ),
-            ] else ...[
-              Image.asset(
-                resolvedAssetPath,
-                width: 68.w,
-                height: 68.h,
-                fit: BoxFit.contain,
-              ),
-            ],
-            SizedBox(height: 12.h),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.w),
-              child: Text(
-                resolvedCategoryName,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14.sp,
-                      height: 1.2,
-                    ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+     return GestureDetector(
+       onTap: () {
+         _handleCategoryTap(
+           categoryName: resolvedCategoryName,
+           categoryId: categoryId,
+           cityName: cityName,
+         );
+       },
+       child: Container(
+         margin: EdgeInsets.all(categoryMargin),
+         decoration: BoxDecoration(
+           color: Theme.of(context).cardTheme.color,
+           borderRadius: BorderRadius.circular(borderRadius),
+           border: Border.all(
+             color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+             width: borderWidth,
+           ),
+           boxShadow: [
+             BoxShadow(
+               color: isDark
+                   ? Colors.black.withValues(alpha: 0.3)
+                   : Colors.grey.withValues(alpha: 0.1),
+               blurRadius: blurRadius,
+               offset: Offset(0, 2),
+             ),
+           ],
+         ),
+         child: Column(
+           mainAxisAlignment: MainAxisAlignment.center,
+           children: [
+             // Handle both SVG and regular images
+             if (resolvedAssetPath.endsWith('.svg')) ...[
+               SvgPicture.asset(
+                 resolvedAssetPath,
+                 width: iconSize,
+                 height: iconSize,
+                 fit: BoxFit.contain,
+                 placeholderBuilder: (BuildContext context) => Container(
+                   width: iconSize,
+                   height: iconSize,
+                   color: isDark ? Colors.grey[800] : Colors.grey[200],
+                   child: Icon(Icons.image, size: 24, color: Colors.grey),
+                 ),
+               ),
+             ] else ...[
+               Image.asset(
+                 resolvedAssetPath,
+                 width: iconSize,
+                 height: iconSize,
+                 fit: BoxFit.contain,
+               ),
+             ],
+             SizedBox(height: iconLabelSpacing),
+             Padding(
+               padding: EdgeInsets.symmetric(horizontal: labelPadding),
+               child: Text(
+                 resolvedCategoryName,
+                 textAlign: TextAlign.center,
+                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                       fontFamily: 'Cairo',
+                       fontWeight: FontWeight.w600,
+                       fontSize: fontSize,
+                       height: 1.2,
+                     ),
+                 maxLines: 2,
+                 overflow: TextOverflow.ellipsis,
+               ),
+             ),
+           ],
+         ),
+       ),
+     );
+   }
 
   @override
   void dispose() {
@@ -413,16 +422,16 @@ class _HomeScreenState extends State<HomeScreen> {
           automaticallyImplyLeading: false,
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
-          leading: IconButton(
-            icon: Icon(
-              Icons.menu,
-              size: 24.r,
-              color: Theme.of(context).iconTheme.color,
-            ),
-            onPressed: () {
-              _scaffoldKey.currentState?.openDrawer();
-            },
-          ),
+           leading: IconButton(
+             icon: Icon(
+               Icons.menu,
+               size: 24,
+               color: Theme.of(context).iconTheme.color,
+             ),
+             onPressed: () {
+               _scaffoldKey.currentState?.openDrawer();
+             },
+           ),
         ),
         drawer: widget.drawer,
         body: SafeArea(
@@ -461,21 +470,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       // Search Bar
                       Container(
-                        height: 48.h,
+                        height: 48,
                         margin: EdgeInsets.symmetric(
-                            horizontal: 1.sw * 0.05, vertical: 10.h),
+                            horizontal: ResponsiveUtils.screenWidth(context) * 0.05,
+                            vertical: 10),
                         decoration: BoxDecoration(
                           color: isDark
                               ? Colors.grey[800]?.withValues(alpha: 0.5)
                               : const Color(0xFFD9D9D9).withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(10.r),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
                           children: [
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12.w),
+                              padding: EdgeInsets.symmetric(horizontal: 12),
                               child: Icon(Icons.search,
-                                  color: Colors.grey, size: 22.r),
+                                  color: Colors.grey, size: 22),
                             ),
                             Expanded(
                               child: TextField(
@@ -495,123 +505,131 @@ class _HomeScreenState extends State<HomeScreen> {
                                   hintStyle: TextStyle(
                                     fontFamily: 'Cairo',
                                     color: Colors.grey[600],
-                                    fontSize: 14.sp,
+                                    fontSize: 14,
                                   ),
                                   border: InputBorder.none,
                                   contentPadding:
-                                      EdgeInsets.symmetric(vertical: 14.h),
+                                      EdgeInsets.symmetric(vertical: 14),
                                 ),
                               ),
                             ),
                             IconButton(
                               icon: Icon(Icons.mic,
-                                  color: Colors.grey, size: 22.r),
+                                  color: Colors.grey, size: 22),
                               onPressed: () {},
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
                             ),
-                            SizedBox(width: 8.w),
+                            SizedBox(width: 8),
                           ],
                         ),
                       ),
 
-                      // Gradient Card
-                      Container(
-                        width: double.infinity,
-                        height: 140.h,
-                        margin: EdgeInsets.symmetric(
-                            horizontal: 1.sw * 0.05, vertical: 12.h),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10.r),
-                          gradient: const LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [Color(0xFF95F8C9), Color(0xFF54CAF7)],
+                      // Promotional Card — Row layout is fully responsive
+                      Builder(builder: (context) {
+                        final cardW = MediaQuery.of(context).size.width;
+                        final cardH = (cardW * 0.36).clamp(120.0, 180.0);
+                        return Container(
+                          width: double.infinity,
+                          height: cardH,
+                          margin: EdgeInsets.symmetric(
+                              horizontal: cardW * 0.05,
+                              vertical: 12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            gradient: const LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [Color(0xFF95F8C9), Color(0xFF54CAF7)],
+                            ),
                           ),
-                        ),
-                        child: Stack(
-                          children: [
-                            Positioned(
-                              left: 0,
-                              top: 10.h,
-                              bottom: 10.h,
-                              child: Image.asset(
-                                'assets/images/دكتور.png',
-                                width: 1.sw * 0.4,
-                                fit: BoxFit.contain,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Flexible(
+                                flex: 4,
+                                child: Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: Image.asset(
+                                    'assets/images/دكتور.png',
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
                               ),
-                            ),
-                            Positioned(
-                              right: 20.w,
-                              top: 20.h,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    'احجز و سجل',
-                                    style: TextStyle(
-                                      fontFamily: 'Cairo',
-                                      color: Colors.white,
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                  SizedBox(height: 8.h),
-                                  SizedBox(
-                                    width: 1.sw * 0.4,
-                                    child: Text(
-                                      'مع افضل الاطباء في نطاقك',
-                                      style: TextStyle(
-                                        fontFamily: 'Cairo',
-                                        color: Colors.white,
-                                        fontSize: 13.sp,
-                                        fontWeight: FontWeight.bold,
+                              Flexible(
+                                flex: 6,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 16, right: 16, bottom: 16, left: 8),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'احجز و سجل',
+                                        style: TextStyle(
+                                          fontFamily: 'Cairo',
+                                          color: Colors.white,
+                                          fontSize: (cardW * 0.04).clamp(13.0, 18.0),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.right,
                                       ),
-                                      textAlign: TextAlign.right,
-                                    ),
-                                  ),
-                                  SizedBox(height: 12.h),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 16.w, vertical: 4.h),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(4.r),
-                                    ),
-                                    child: Text(
-                                      'احجز الان',
-                                      style: TextStyle(
-                                        fontFamily: 'Cairo',
-                                        color: Colors.black,
-                                        fontSize: 11.sp,
-                                        fontWeight: FontWeight.bold,
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        'مع افضل الاطباء في نطاقك',
+                                        style: TextStyle(
+                                          fontFamily: 'Cairo',
+                                          color: Colors.white,
+                                          fontSize: (cardW * 0.033).clamp(11.0, 15.0),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        textAlign: TextAlign.right,
                                       ),
-                                    ),
+                                      const SizedBox(height: 10),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 14, vertical: 5),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          'احجز الان',
+                                          style: TextStyle(
+                                            fontFamily: 'Cairo',
+                                            color: Colors.black,
+                                            fontSize: (cardW * 0.028).clamp(10.0, 13.0),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
+                            ],
+                          ),
+                        );
+                      }),
 
                       // City Dropdown
                       Container(
                         width: double.infinity,
                         margin: EdgeInsets.symmetric(
-                            horizontal: 1.sw * 0.06, vertical: 16.h),
+                            horizontal: ResponsiveUtils.screenWidth(context) * 0.06,
+                            vertical: 16),
                         child: Container(
-                          height: 52.h,
-                          padding: EdgeInsets.symmetric(horizontal: 12.w),
+                          height: 52,
+                          padding: EdgeInsets.symmetric(horizontal: 12),
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.surface,
-                            borderRadius: BorderRadius.circular(8.r),
+                            borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: isDark
                                   ? Colors.grey[700]!
                                   : const Color(0xFFD1D5DC),
-                              width: 1.1.w,
+                              width: 1.1,
                             ),
                             boxShadow: [
                               BoxShadow(
@@ -619,8 +637,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     .colorScheme
                                     .primary
                                     .withValues(alpha: 0.3),
-                                blurRadius: 4.r,
-                                offset: Offset(0, 1.h),
+                                blurRadius: 4,
+                                offset: Offset(0, 1),
                               ),
                             ],
                           ),
@@ -633,12 +651,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     _isDetecting
                                         ? Icons.location_searching
                                         : Icons.my_location,
-                                    size: 16.r,
+                                    size: 16,
                                     color: _isDetecting
                                         ? Theme.of(context).colorScheme.primary
                                         : Colors.grey[500],
                                   ),
-                                  SizedBox(width: 6.w),
+                                  SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
                                       _isDetecting
@@ -649,7 +667,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           .titleMedium
                                           ?.copyWith(
                                             fontFamily: 'Cairo',
-                                            fontSize: 14.sp,
+                                            fontSize: 14,
                                             fontWeight: FontWeight.w600,
                                           ),
                                       overflow: TextOverflow.ellipsis,
@@ -660,8 +678,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               isExpanded: true,
                               icon: _isDetecting
                                   ? SizedBox(
-                                      width: 18.w,
-                                      height: 18.h,
+                                      width: 18,
+                                      height: 18,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                         color: Theme.of(context)
@@ -681,7 +699,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         .titleMedium
                                         ?.copyWith(
                                           fontFamily: 'Cairo',
-                                          fontSize: 14.sp,
+                                          fontSize: 14,
                                         ),
                                     textAlign: TextAlign.right,
                                   ),
@@ -704,19 +722,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       // GPS failure banner
                       if (!_isLoggedIn && _gpsFailureMessage != null)
                         Container(
-                          margin: EdgeInsets.symmetric(horizontal: 1.sw * 0.06),
+                          margin: EdgeInsets.symmetric(
+                            horizontal: ResponsiveUtils.screenWidth(context) * 0.06),
                           padding: EdgeInsets.symmetric(
-                              horizontal: 12.w, vertical: 10.h),
+                              horizontal: 12,
+                              vertical: 10),
                           decoration: BoxDecoration(
                             color: isDark
                                 ? Colors.orange.withValues(alpha: 0.15)
                                 : Colors.orange.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8.r),
+                            borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                                 color: isDark
                                     ? Colors.orange.shade700
                                     : Colors.orange.shade300,
-                                width: 1.w),
+                                width: 1),
                           ),
                           child: Row(
                             children: [
@@ -724,14 +744,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   color: isDark
                                       ? Colors.orange[300]
                                       : Colors.orange,
-                                  size: 18.r),
-                              SizedBox(width: 8.w),
+                                  size: 18),
+                              SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   _gpsFailureMessage!,
                                   style: TextStyle(
                                     fontFamily: 'Cairo',
-                                    fontSize: 13.sp,
+                                    fontSize: 13,
                                     color: isDark
                                         ? Colors.orange[100]
                                         : Colors.orange.shade800,
@@ -747,14 +767,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         width: double.infinity,
                         margin: EdgeInsets.symmetric(
-                            horizontal: 16.w, vertical: 12.h),
+                            horizontal: 16,
+                            vertical: 12),
                         child: Text(
                           'الخدمات المتوفرة',
                           style:
                               Theme.of(context).textTheme.titleLarge?.copyWith(
                                     fontFamily: 'Cairo',
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 17.sp,
+                                    fontSize: 17,
                                     height: 1.2,
                                   ),
                           textAlign: TextAlign.center,
@@ -765,18 +786,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (visibleCategories.isNotEmpty)
                         Padding(
                           padding:
-                              EdgeInsets.symmetric(horizontal: 1.sw * 0.05),
+                              EdgeInsets.symmetric(horizontal: ResponsiveUtils.screenWidth(context) * 0.05),
                           child: LayoutBuilder(
                             builder: (context, constraints) {
-                              final crossAxisCount = 1.sw > 600 ? 4 : 2;
+                              final crossAxisCount = ResponsiveUtils.screenWidth(context) > 600 ? 4 : 2;
                               return GridView.builder(
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
                                 gridDelegate:
                                     SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: crossAxisCount,
-                                  mainAxisSpacing: 12.h,
-                                  crossAxisSpacing: 12.w,
+                                  mainAxisSpacing: 12,
+                                  crossAxisSpacing: 12,
                                   childAspectRatio: 1.0,
                                 ),
                                 itemCount: visibleCategories.length,
@@ -805,7 +826,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
 
-                      SizedBox(height: 20.h),
+                      SizedBox(height: 20),
                     ],
                   ),
                 );

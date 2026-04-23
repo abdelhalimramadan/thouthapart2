@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
 import '../../auth/data/auth_service.dart';
+import '../../../core/helpers/responsive_utils.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, this.nextScreen, this.nextRouteSettings});
@@ -177,6 +177,11 @@ class _LoginScreenState extends State<LoginScreen> {
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
+                final screenWidth = MediaQuery.of(context).size.width;
+                final screenHeight = MediaQuery.of(context).size.height;
+                final isTablet = screenWidth >= 600;
+                final baseFontSize = screenWidth * 0.04;
+
                 return SingleChildScrollView(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
@@ -184,28 +189,29 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Padding(
                       padding: EdgeInsets.symmetric(
-                        horizontal: 24.w,
-                        vertical: 24.h,
+                        horizontal: isTablet ? screenWidth * 0.1 : 24,
+                        vertical: isTablet ? screenHeight * 0.1 : 24,
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
                           Container(
-                            width: double.infinity,
                             constraints: BoxConstraints(
-                              maxWidth: 1.sw >= 600 ? 500.w : double.infinity,
+                              maxWidth: isTablet ? 550 : double.infinity,
                             ),
-                            padding: EdgeInsets.all(24.r),
+                            padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
                               color: Theme.of(context).cardTheme.color,
-                              borderRadius: BorderRadius.circular(16.r),
+                              borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
                                   color: isDarkMode
                                       ? Colors.black.withAlpha(102)
                                       : Colors.black.withAlpha(25),
-                                  blurRadius: 10.r,
-                                  offset: Offset(0, 4.h),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -221,16 +227,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                     Center(
                                       child: Image.asset(
                                         'assets/images/splash-logo.png',
-                                        width: 80.w,
-                                        height: 80.h,
+                                        width: isTablet ? 120 : 80,
+                                        height: isTablet ? 120 : 80,
                                         fit: BoxFit.contain,
                                       ),
                                     ),
-                                    SizedBox(height: 8.h),
+                                    const SizedBox(height: 16),
                                     Text(
                                       'تسجيل الدخول',
                                       style: TextStyle(
-                                        fontSize: 24.sp,
+                                        fontSize: (baseFontSize * 1.5).clamp(20.0, 28.0),
                                         fontWeight: FontWeight.bold,
                                         color: ColorsManager.mainBlue,
                                         fontFamily: 'Cairo',
@@ -239,11 +245,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    SizedBox(height: 8.h),
+                                    const SizedBox(height: 8),
                                     Text(
                                       'ادخل البريد الإلكتروني وكلمة المرور',
                                       style: TextStyle(
-                                        fontSize: 14.sp,
+                                        fontSize: (baseFontSize * 0.875).clamp(14.0, 18.0),
                                         color: isDarkMode
                                             ? Colors.white70
                                             : Colors.grey,
@@ -253,19 +259,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    SizedBox(height: 16.h),
+                                    const SizedBox(height: 24),
 
                                     if (errorMessage != null)
                                       Container(
-                                        padding: EdgeInsets.all(12.r),
-                                        margin: EdgeInsets.only(bottom: 16.h),
+                                        padding: const EdgeInsets.all(12),
+                                        margin: const EdgeInsets.only(bottom: 16),
                                         decoration: BoxDecoration(
                                           color: isDarkMode
                                               ? Colors.red
                                                   .withValues(alpha: 0.15)
                                               : Colors.red[50],
                                           borderRadius:
-                                              BorderRadius.circular(8.r),
+                                              BorderRadius.circular(8),
                                           border: Border.all(
                                               color: isDarkMode
                                                   ? Colors.red.shade900
@@ -277,8 +283,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 color: isDarkMode
                                                     ? Colors.red[300]
                                                     : Colors.red,
-                                                size: 20.r),
-                                            SizedBox(width: 8.w),
+                                                size: 20),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: Text(
                                                 errorMessage!,
@@ -287,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       ? Colors.red[300]
                                                       : Colors.red,
                                                   fontFamily: 'Cairo',
-                                                  fontSize: 13.sp,
+                                                  fontSize: (baseFontSize * 0.8).clamp(13.0, 16.0),
                                                 ),
                                                 softWrap: true,
                                               ),
@@ -300,9 +306,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                     TextFormField(
                                       controller: emailController,
                                       keyboardType: TextInputType.emailAddress,
-                                      decoration: const InputDecoration(
+                                      decoration: InputDecoration(
                                         labelText: 'البريد الإلكتروني',
-                                        prefixIcon: Icon(Icons.email_outlined),
+                                        prefixIcon: const Icon(Icons.email_outlined),
+                                        labelStyle: TextStyle(
+                                            fontSize: (baseFontSize * 0.8).clamp(14.0, 16.0)),
                                       ),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
@@ -315,7 +323,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         return null;
                                       },
                                     ),
-                                    SizedBox(height: 16.h),
+                                    const SizedBox(height: 16),
 
                                     // Password Field
                                     TextFormField(
@@ -325,6 +333,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                         labelText: 'كلمة المرور',
                                         prefixIcon:
                                             const Icon(Icons.lock_outline),
+                                        labelStyle: TextStyle(
+                                            fontSize: (baseFontSize * 0.8).clamp(14.0, 16.0)),
                                         suffixIcon: IconButton(
                                           icon: Icon(
                                             isObscureText
@@ -348,7 +358,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         return null;
                                       },
                                     ),
-                                    SizedBox(height: 8.h),
+                                    const SizedBox(height: 8),
 
                                     // Forgot Password & Remember Me
                                     Row(
@@ -364,7 +374,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             child: Text(
                                               'نسيت كلمة المرور؟',
                                               style: TextStyle(
-                                                fontSize: 13.sp,
+                                                fontSize: (baseFontSize * 0.8).clamp(13.0, 16.0),
                                                 color: ColorsManager.mainBlue,
                                                 decoration:
                                                     TextDecoration.underline,
@@ -378,7 +388,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         Row(
                                           children: [
                                             Transform.scale(
-                                              scale: 0.9.r,
+                                              scale: isTablet ? 1.1 : 0.9,
                                               child: Checkbox(
                                                 value: rememberMe,
                                                 onChanged: (bool? value) {
@@ -392,7 +402,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             Text(
                                               'تذكرني',
                                               style: TextStyle(
-                                                fontSize: 13.sp,
+                                                fontSize: (baseFontSize * 0.8).clamp(13.0, 16.0),
                                                 color: isDarkMode
                                                     ? Colors.white
                                                     : ColorsManager.darkBlue,
@@ -404,12 +414,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                       ],
                                     ),
-                                    SizedBox(height: 16.h),
+                                    const SizedBox(height: 24),
 
                                     // Login Button
                                     SizedBox(
                                       width: double.infinity,
-                                      height: 52.h,
+                                      height: isTablet ? 60 : 52,
                                       child: ElevatedButton(
                                         onPressed: isLoading ? null : _login,
                                         style: ElevatedButton.styleFrom(
@@ -417,13 +427,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                               ColorsManager.mainBlue,
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
-                                                BorderRadius.circular(8.r),
+                                                BorderRadius.circular(8),
                                           ),
                                         ),
                                         child: isLoading
                                             ? SizedBox(
-                                                width: 20.w,
-                                                height: 20.h,
+                                                width: 20,
+                                                height: 20,
                                                 child:
                                                     const CircularProgressIndicator(
                                                   strokeWidth: 2,
@@ -433,7 +443,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             : Text(
                                                 'تسجيل الدخول',
                                                 style: TextStyle(
-                                                  fontSize: 16.sp,
+                                                  fontSize: (baseFontSize * 0.9).clamp(16.0, 20.0),
                                                   color: Colors.white,
                                                   fontFamily: 'Cairo',
                                                   fontWeight: FontWeight.bold,
@@ -441,11 +451,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                               ),
                                       ),
                                     ),
-                                    SizedBox(height: 8.h),
+                                    const SizedBox(height: 12),
                                     Text(
                                       'بالدخول، أنت توافق على الشروط والأحكام.',
                                       style: TextStyle(
-                                        fontSize: 13.sp,
+                                        fontSize: (baseFontSize * 0.75).clamp(12.0, 15.0),
                                         color: isDarkMode
                                             ? Colors.white60
                                             : Colors.grey,
@@ -455,7 +465,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    SizedBox(height: 16.h),
+                                    const SizedBox(height: 16),
                                     // Sign up link
                                     Wrap(
                                       alignment: WrapAlignment.center,
@@ -465,7 +475,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         Text(
                                           'هل ليس لديك حساب بالفعل؟ ',
                                           style: TextStyle(
-                                            fontSize: 13.sp,
+                                            fontSize: (baseFontSize * 0.8).clamp(13.0, 16.0),
                                             color: isDarkMode
                                                 ? Colors.white
                                                 : ColorsManager.darkBlue,
@@ -481,7 +491,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           child: Text(
                                             'إنشاء حساب',
                                             style: TextStyle(
-                                              fontSize: 13.sp,
+                                              fontSize: (baseFontSize * 0.8).clamp(13.0, 16.0),
                                               color: ColorsManager.mainBlue,
                                               fontWeight: FontWeight.bold,
                                               decoration:
@@ -497,22 +507,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 16.h),
+                          const SizedBox(height: 16),
                           // Back button
                           GestureDetector(
                             onTap: () {
                               Navigator.of(context).pushNamedAndRemoveUntil(
-                                // Routes.categoriesScreen,
-                                Routes.welcomeScreen,
+                                Routes.categoriesScreen,
                                 (route) => false,
                               );
                             },
                             child: Container(
-                              width: double.infinity,
                               constraints: BoxConstraints(
-                                maxWidth: 1.sw >= 600 ? 500.w : double.infinity,
+                                maxWidth: isTablet ? 550 : double.infinity,
                               ),
-                              height: 52.h,
+                              height: isTablet ? 60 : 52,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   begin: Alignment.centerLeft,
@@ -522,12 +530,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ColorsManager.layerBlur2,
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(12.r),
+                                borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withAlpha(25),
-                                    blurRadius: 8.r,
-                                    offset: Offset(0, 4.h),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
@@ -535,7 +543,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: Text(
                                   'الرجوع للصفحة الرئيسية',
                                   style: TextStyle(
-                                    fontSize: 14.sp,
+                                    fontSize: (baseFontSize * 0.875).clamp(14.0, 18.0),
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
                                     fontFamily: 'Cairo',
@@ -548,7 +556,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                );
+                ));
               },
             ),
           ),

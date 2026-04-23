@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theming/colors.dart';
 
@@ -30,11 +29,17 @@ class AppTextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double radius = borderRadius ?? 16.0;
+    final double hPadding = horizontalPadding ?? 12.0;
+    final double vPadding = verticalPadding ?? 14.0;
+    final double btnHeight = buttonHeight ?? 50.0;
+    final double? btnWidth = buttonWidth;
+
     return TextButton(
       style: ButtonStyle(
         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius?.r ?? 16.0.r),
+            borderRadius: BorderRadius.circular(radius),
           ),
         ),
         backgroundColor: WidgetStateProperty.resolveWith((states) {
@@ -47,15 +52,15 @@ class AppTextButton extends StatelessWidget {
         }),
         padding: WidgetStateProperty.all<EdgeInsets>(
           EdgeInsets.symmetric(
-            horizontal: horizontalPadding?.w ?? 12.w,
-            vertical: verticalPadding?.h ?? 14.h,
+            horizontal: hPadding,
+            vertical: vPadding,
           ),
         ),
         minimumSize: WidgetStateProperty.all(
-          Size(buttonWidth?.w ?? 0, buttonHeight?.h ?? 50.h),
+          Size(btnWidth?.toDouble() ?? 0, btnHeight.toDouble()),
         ),
         maximumSize: WidgetStateProperty.all(
-          Size(double.infinity, (buttonHeight?.h ?? 50.h) + 8.h),
+          Size(double.infinity, btnHeight + 8),
         ),
       ),
       onPressed: onPressed,

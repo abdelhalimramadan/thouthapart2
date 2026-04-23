@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thoutha_mobile_app/core/theming/colors.dart';
 import 'package:thoutha_mobile_app/features/requests/data/logic/my_requests_cubit.dart';
@@ -8,8 +7,7 @@ import 'package:thoutha_mobile_app/features/requests/data/models/case_request_mo
 import 'package:thoutha_mobile_app/features/requests/data/logic/my_requests_state.dart';
 
 import 'package:thoutha_mobile_app/features/requests/ui/edit_request_screen.dart';
-
-import '../../doctor/ui/doctor_home_screen.dart';
+import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
 
 class MyRequestsScreen extends StatelessWidget {
   const MyRequestsScreen({super.key});
@@ -23,38 +21,58 @@ class MyRequestsScreen extends StatelessWidget {
   }
 }
 
-class MyRequestsView extends StatelessWidget {
+class MyRequestsView extends StatefulWidget {
   const MyRequestsView({super.key});
+
+  @override
+  State<MyRequestsView> createState() => _MyRequestsViewState();
+}
+
+class _MyRequestsViewState extends State<MyRequestsView> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF121212) : const Color(0xFFF8FAFC),
+      key: _scaffoldKey,
+      drawer: const DoctorDrawer(),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          'طلباتي',
-          style: TextStyle(
-            fontFamily: 'Cairo',
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        toolbarHeight: 70,
+        elevation: 0,
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
+        automaticallyImplyLeading: false,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu, size: 24),
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ),
-        centerTitle: true,
-        backgroundColor: ColorsManager.mainBlue,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: Colors.white, size: 24.r),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const DoctorHomeScreen()),
-            );
-          },
+        titleSpacing: 0,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/splash-logo.png',
+              width: 36,
+              height: 36,
+              fit: BoxFit.contain,
+            ),
+            SizedBox(width: 8),
+            Text(
+              'طلباتي',
+              style: textTheme.titleLarge?.copyWith(
+                fontFamily: 'Cairo',
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       ),
       body: BlocConsumer<MyRequestsCubit, MyRequestsState>(
@@ -115,57 +133,85 @@ class MyRequestsView extends StatelessWidget {
       return _buildEmptyState(context);
     }
 
-    return RefreshIndicator(
-      onRefresh: () => context.read<MyRequestsCubit>().loadRequests(),
-      color: ColorsManager.mainBlue,
-      child: ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
-        itemCount: requests.length,
-        itemBuilder: (context, index) =>
-            _RequestCard(request: requests![index]),
+    final theme = Theme.of(context);
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Text(
+              'طلباتي',
+              textAlign: TextAlign.right,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.w700,
+                fontSize: 24,
+                height: 1.5,
+              ),
+            ),
+          ),
+          SizedBox(height: 12),
+          RefreshIndicator(
+            onRefresh: () => context.read<MyRequestsCubit>().loadRequests(),
+            color: ColorsManager.mainBlue,
+            child: ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              itemCount: requests.length,
+              itemBuilder: (context, index) =>
+                  _RequestCard(request: requests![index]),
+            ),
+          ),
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+        ],
       ),
     );
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.assignment_late_outlined,
-              size: 80.r, color: Colors.grey.withValues(alpha: 0.5)),
-          SizedBox(height: 16.h),
+              size: 80, color: Colors.grey.withValues(alpha: 0.5)),
+          SizedBox(height: 16),
           Text(
             'لا توجد طلبات حالياً',
-            style: TextStyle(
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontFamily: 'Cairo',
-              fontSize: 18.sp,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.grey.shade600,
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 8),
           Text(
             'ابدأ بإضافة طلباتك لتظهر هنا',
-            style: TextStyle(
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontFamily: 'Cairo',
-              fontSize: 14.sp,
+              fontSize: 14,
               color: Colors.grey.shade500,
             ),
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: 24),
           ElevatedButton(
             onPressed: () => context.read<MyRequestsCubit>().loadRequests(),
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorsManager.mainBlue,
-              padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r)),
+                  borderRadius: BorderRadius.circular(10)),
             ),
             child: Text(
               'تحديث الصفحة',
               style: TextStyle(
-                  fontFamily: 'Cairo', fontSize: 14.sp, color: Colors.white),
+                  fontFamily: 'Cairo', fontSize: 14, color: Colors.white),
             ),
           ),
         ],
@@ -174,40 +220,42 @@ class MyRequestsView extends StatelessWidget {
   }
 
   Widget _buildErrorState(BuildContext context, String message) {
+    final theme = Theme.of(context);
     return Center(
       child: Padding(
-        padding: EdgeInsets.all(24.w),
+        padding: EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.error_outline_rounded,
-                size: 60.r, color: Colors.red.shade400),
-            SizedBox(height: 16.h),
+                size: 60, color: Colors.red.shade400),
+            SizedBox(height: 16),
             Text(
               'حدث خطأ ما',
-              style: TextStyle(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontFamily: 'Cairo',
-                fontSize: 18.sp,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.red.shade700,
               ),
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: 8),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 14.sp,
-                  color: Colors.grey.shade600),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontFamily: 'Cairo',
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 24),
             ElevatedButton(
               onPressed: () => context.read<MyRequestsCubit>().loadRequests(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorsManager.mainBlue,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.r)),
+                    borderRadius: BorderRadius.circular(10)),
               ),
               child: const Text('إعادة المحاولة',
                   style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
@@ -226,28 +274,29 @@ class _RequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
     return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
+      margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
+        color: theme.cardTheme.color ?? theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10.r,
-            offset: Offset(0, 4.h),
+            blurRadius: 10,
+            offset: Offset(0, 4),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Colored Header
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -259,14 +308,14 @@ class _RequestCard extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(Icons.medical_services_outlined,
-                      color: Colors.white, size: 20.r),
-                  SizedBox(width: 8.w),
+                      color: Colors.white, size: 20),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       request.categoryName,
                       style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: 15.sp,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -274,16 +323,16 @@ class _RequestCard extends StatelessWidget {
                   ),
                   Container(
                     padding:
-                        EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                        EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(8.r),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       '#${request.id}',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 12.sp,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -293,7 +342,7 @@ class _RequestCard extends StatelessWidget {
             ),
 
             Padding(
-              padding: EdgeInsets.all(16.w),
+              padding: EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -301,45 +350,48 @@ class _RequestCard extends StatelessWidget {
                   Row(
                     children: [
                       _buildInfoIcon(Icons.location_on_rounded,
-                          request.doctorCityName, isDark),
+                          request.doctorCityName, isDark, theme),
                       const Spacer(),
                       _buildInfoIcon(
-                          Icons.person, request.doctorFullName, isDark),
+                          Icons.person, request.doctorFullName, isDark, theme),
                     ],
                   ),
 
-                  SizedBox(height: 16.h),
-                  const Divider(height: 1, color: Colors.grey, thickness: 0.1),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 16),
+                  Divider(
+                    height: 1,
+                    color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB),
+                  ),
+                  SizedBox(height: 16),
 
                   // Date and Time
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _buildDateTimeItem(Icons.calendar_month_rounded,
-                          'التاريخ', request.formattedDate, isDark),
+                          'التاريخ', request.formattedDate, isDark, theme),
                       _buildDateTimeItem(Icons.access_time_filled_rounded,
-                          'الوقت', request.formattedTime, isDark),
+                          'الوقت', request.formattedTime, isDark, theme),
                     ],
                   ),
 
                   if (request.description.isNotEmpty &&
                       request.description != 'No details') ...[
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 16),
                     Container(
                       width: double.infinity,
-                      padding: EdgeInsets.all(12.w),
+                      padding: EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: isDark
                             ? Colors.white.withValues(alpha: 0.05)
                             : const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(12.r),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         request.description,
-                        style: TextStyle(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontFamily: 'Cairo',
-                          fontSize: 13.sp,
+                          fontSize: 13,
                           color: isDark
                               ? Colors.grey.shade300
                               : Colors.grey.shade800,
@@ -349,7 +401,7 @@ class _RequestCard extends StatelessWidget {
                     ),
                   ],
 
-                  SizedBox(height: 20.h),
+                  SizedBox(height: 20),
 
                   // Buttons
                   Row(
@@ -357,7 +409,7 @@ class _RequestCard extends StatelessWidget {
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () => _navigateToEdit(context, request),
-                          icon: Icon(Icons.edit_note_rounded, size: 20.r),
+                          icon: Icon(Icons.edit_note_rounded, size: 20),
                           label: const Text('تعديل الطلب',
                               style: TextStyle(
                                   fontFamily: 'Cairo',
@@ -366,17 +418,17 @@ class _RequestCard extends StatelessWidget {
                             foregroundColor: Colors.blue.shade700,
                             side: BorderSide(color: Colors.blue.shade200),
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.r)),
-                            padding: EdgeInsets.symmetric(vertical: 10.h),
+                                borderRadius: BorderRadius.circular(10)),
+                            padding: EdgeInsets.symmetric(vertical: 10),
                           ),
                         ),
                       ),
-                      SizedBox(width: 12.w),
+                      SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () => _showDeleteDialog(context, request),
                           icon: Icon(Icons.delete_sweep_rounded,
-                              size: 20.r, color: Colors.white),
+                              size: 20, color: Colors.white),
                           label: const Text('حذف الطلب',
                               style: TextStyle(
                                   fontFamily: 'Cairo',
@@ -385,8 +437,8 @@ class _RequestCard extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red.shade400,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.r)),
-                            padding: EdgeInsets.symmetric(vertical: 10.h),
+                                borderRadius: BorderRadius.circular(10)),
+                            padding: EdgeInsets.symmetric(vertical: 10),
                           ),
                         ),
                       ),
@@ -401,17 +453,17 @@ class _RequestCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoIcon(IconData icon, String text, bool isDark) {
+  Widget _buildInfoIcon(IconData icon, String text, bool isDark, ThemeData theme) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16.r, color: ColorsManager.mainBlue),
-        SizedBox(width: 4.w),
+        Icon(icon, size: 16, color: ColorsManager.mainBlue),
+        SizedBox(width: 4),
         Text(
           text,
           style: TextStyle(
             fontFamily: 'Cairo',
-            fontSize: 13.sp,
+            fontSize: 13,
             color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
           ),
         ),
@@ -420,26 +472,26 @@ class _RequestCard extends StatelessWidget {
   }
 
   Widget _buildDateTimeItem(
-      IconData icon, String label, String value, bool isDark) {
+      IconData icon, String label, String value, bool isDark, ThemeData theme) {
     return Column(
       children: [
         Row(
           children: [
             Icon(icon,
-                size: 14.r,
+                size: 14,
                 color: ColorsManager.mainBlue.withValues(alpha: 0.7)),
-            SizedBox(width: 4.w),
+            SizedBox(width: 4),
             Text(label,
                 style: TextStyle(
-                    fontFamily: 'Cairo', fontSize: 11.sp, color: Colors.grey)),
+                    fontFamily: 'Cairo', fontSize: 11, color: Colors.grey)),
           ],
         ),
-        SizedBox(height: 4.h),
+        SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
             fontFamily: 'Cairo',
-            fontSize: 13.sp,
+            fontSize: 13,
             fontWeight: FontWeight.bold,
             color: isDark ? Colors.white : Colors.black87,
           ),
@@ -469,11 +521,11 @@ class _RequestCard extends StatelessWidget {
         textDirection: TextDirection.rtl,
         child: AlertDialog(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Row(
             children: [
               Icon(Icons.warning_amber_rounded, color: Colors.red.shade600),
-              SizedBox(width: 10.w),
+              SizedBox(width: 10),
               const Text('تأكيد الحذف',
                   style: TextStyle(
                       fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
@@ -506,7 +558,7 @@ class _RequestCard extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.r)),
+                    borderRadius: BorderRadius.circular(8)),
               ),
               child: const Text('حذف الآن',
                   style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),

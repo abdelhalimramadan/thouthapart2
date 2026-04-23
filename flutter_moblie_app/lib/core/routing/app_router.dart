@@ -1,9 +1,7 @@
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:flutter/material.dart';
-
 import '../../features/login/ui/login_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
-import '../../features/welcome/welcome_screen.dart';
 import '../../features/reset_password/ui/otp_verification_screen.dart';
 import '../../features/sign_up/ui/sign_up_screen.dart';
 import '../../features/splash_screen/splash_screen.dart';
@@ -15,7 +13,6 @@ import '../../features/home_screen/ui/home_screen.dart';
 import '../../features/notifications/ui/notifications_screen.dart';
 import '../../features/doctor/ui/account_deletion_screen.dart';
 import '../../features/doctor/ui/doctor_home_screen.dart';
-
 import '../../features/doctor/ui/doctor_booking_records_screen.dart';
 import '../../features/doctor/ui/doctor_confirmed_appointments_screen.dart';
 
@@ -25,10 +22,6 @@ class AppRouter {
       case Routes.splashScreen:
         return MaterialPageRoute(
           builder: (context) => const SplashScreen(),
-        );
-      case Routes.welcomeScreen:
-        return MaterialPageRoute(
-          builder: (context) => const WelcomeScreen(),
         );
       case Routes.onBoardingScreen:
         return MaterialPageRoute(

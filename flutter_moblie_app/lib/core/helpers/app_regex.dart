@@ -33,4 +33,8 @@ class AppRegex {
   static bool hasMinLength(String password) {
     return RegExp(r'^(?=.{8,})').hasMatch(password);
   }
+
+  static bool isArabicName(String name) {
+    return RegExp(r'^[\u0621-\u064A\s]+$').hasMatch(name);
+  }
 }

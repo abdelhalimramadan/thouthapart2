@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theming/colors.dart';
 import '../../core/helpers/notification_permission_helper.dart';
@@ -190,7 +189,7 @@ class _SplashScreenState extends State<SplashScreen>
           style: TextStyle(
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
-            fontSize: 18.sp,
+            fontSize: 18,
           ),
           textAlign: TextAlign.right,
           textDirection: TextDirection.rtl,
@@ -199,7 +198,7 @@ class _SplashScreenState extends State<SplashScreen>
           content,
           style: TextStyle(
             fontFamily: 'Cairo',
-            fontSize: 14.sp,
+            fontSize: 14,
           ),
           textAlign: TextAlign.right,
           textDirection: TextDirection.rtl,
@@ -213,7 +212,7 @@ class _SplashScreenState extends State<SplashScreen>
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.bold,
                 color: ColorsManager.mainBlue,
-                fontSize: 16.sp,
+                fontSize: 16,
               ),
             ),
           ),
@@ -266,16 +265,16 @@ class _SplashScreenState extends State<SplashScreen>
               children: [
                 Image.asset(
                   'assets/images/splash-logo.png',
-                  width: 200.w,
-                  height: 200.h,
+                  width: 200,
+                  height: 200,
                   fit: BoxFit.contain,
                 ),
-                SizedBox(height: 32.h),
+                SizedBox(height: 32),
                 Text(
                   'رعاية ذكية، لمسة طبية',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 28.sp,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: ColorsManager.fontColor,
                     fontFamily: 'Cairo',

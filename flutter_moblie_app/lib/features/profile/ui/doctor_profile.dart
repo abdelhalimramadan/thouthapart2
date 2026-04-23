@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
@@ -11,6 +10,7 @@ import 'package:thoutha_mobile_app/features/profile/data/models/doctor_profile_m
 import 'package:thoutha_mobile_app/features/profile/logic/profile_cubit.dart';
 import 'package:thoutha_mobile_app/features/profile/logic/profile_state.dart';
 import 'package:thoutha_mobile_app/features/requests/ui/my_requests_screen.dart';
+import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
 
 import '../../doctor/ui/doctor_home_screen.dart';
 
@@ -42,6 +42,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
   final _cityCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _categoryCtrl = TextEditingController();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   late final FocusNode _firstNameFocusNode;
   late final FocusNode _lastNameFocusNode;
@@ -211,11 +212,11 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
               textDirection: TextDirection.rtl,
               child: AlertDialog(
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.r)),
+                    borderRadius: BorderRadius.circular(16)),
                 title: Text(title,
                     style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: 18.sp,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold)),
                 content: SizedBox(
                   width: double.maxFinite,
@@ -229,16 +230,16 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                         decoration: InputDecoration(
                           hintText: 'بحث...',
                           hintStyle:
-                              TextStyle(fontFamily: 'Cairo', fontSize: 14.sp),
+                              TextStyle(fontFamily: 'Cairo', fontSize: 14),
                           prefixIcon: const Icon(Icons.search),
                           isDense: true,
                           border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.r)),
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                       ),
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 12),
                       ConstrainedBox(
-                        constraints: BoxConstraints(maxHeight: 300.h),
+                        constraints: BoxConstraints(maxHeight: 300),
                         child: ListView.separated(
                           shrinkWrap: true,
                           itemCount: filteredItems.length,
@@ -249,7 +250,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                               title: Text(
                                 filteredItems[index],
                                 style: TextStyle(
-                                    fontFamily: 'Cairo', fontSize: 16.sp),
+                                    fontFamily: 'Cairo', fontSize: 16),
                                 textAlign: TextAlign.right,
                               ),
                               onTap: () {
@@ -276,30 +277,45 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
+      drawer: const DoctorDrawer(),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 70,
         elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'الملف الشخصي',
-          style: TextStyle(
-            fontFamily: 'Cairo',
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black,
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
+        automaticallyImplyLeading: false,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu, size: 24),
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: isDark ? Colors.white : Colors.black, size: 24.r),
-          onPressed: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const DoctorHomeScreen()),
-            );
-          },
+        titleSpacing: 0,
+        centerTitle: true,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/splash-logo.png',
+              width: 36,
+              height: 36,
+              fit: BoxFit.contain,
+            ),
+            SizedBox(width: 8),
+            Text(
+              'الملف الشخصي',
+              style: textTheme.titleLarge?.copyWith(
+                fontFamily: 'Cairo',
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       ),
       body: Directionality(
@@ -339,7 +355,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: const Text(
-                        'Profile Updated Successfully',
+                        'تم تحديث الملف الشخصي بنجاح',
                         style: TextStyle(fontFamily: 'Cairo'),
                       ),
                       backgroundColor: Colors.green[700],
@@ -381,14 +397,14 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
           color: isDark ? Colors.grey[900] : Colors.white,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-              blurRadius: 10.r,
-              offset: Offset(0, -5.h),
+              blurRadius: 10,
+              offset: Offset(0, -5),
             ),
           ],
         ),
@@ -398,11 +414,11 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
             // ── Save Button ───────────────────────────────────────────────
             InkWell(
               onTap: (_hasChanges && !_isSaving) ? _onSave : null,
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(12),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 width: double.infinity,
-                height: 54.h,
+                height: 54,
                 decoration: BoxDecoration(
                   gradient: (_hasChanges && !_isSaving)
                       ? const LinearGradient(
@@ -411,7 +427,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                       : LinearGradient(
                           colors: [Colors.grey.shade400, Colors.grey.shade400],
                         ),
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
                       color: (_hasChanges && !_isSaving)
@@ -425,8 +441,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 child: Center(
                   child: _isSaving
                       ? SizedBox(
-                          width: 20.w,
-                          height: 20.w,
+                          width: 20,
+                          height: 20,
                           child: const CircularProgressIndicator(
                             strokeWidth: 2.2,
                             color: Colors.white,
@@ -436,7 +452,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                           'حفظ',
                           style: TextStyle(
                             fontFamily: 'Cairo',
-                            fontSize: 18.sp,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -444,16 +460,16 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 ),
               ),
             ),
-            SizedBox(height: 10.h),
+            SizedBox(height: 10),
             // ── Change Password Button ────────────────────────────────────
             SizedBox(
               width: double.infinity,
-              height: 50.h,
+              height: 50,
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFF1D61E7), width: 1.5),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 onPressed: () {
@@ -465,31 +481,31 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                   );
                 },
                 icon: Icon(Icons.lock_reset_rounded,
-                    color: const Color(0xFF1D61E7), size: 24.r),
+                    color: const Color(0xFF1D61E7), size: 24),
                 label: Text(
                   'تغيير كلمة المرور',
                   style: TextStyle(
                     fontFamily: 'Cairo',
-                    fontSize: 16.sp,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF1D61E7),
                   ),
                 ),
               ),
             ),
-            SizedBox(height: 10.h),
+            SizedBox(height: 10),
             // ── Request and Delete Buttons ─────────────────────────────────────
             Row(
               children: [
                 Expanded(
                   child: SizedBox(
-                    height: 50.h,
+                    height: 50,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1D61E7),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         elevation: 0,
                       ),
@@ -501,27 +517,27 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                           ),
                         );
                       },
-                      icon: Icon(Icons.assignment_outlined, size: 24.r),
+                      icon: Icon(Icons.assignment_outlined, size: 24),
                       label: Text(
                         'طلباتي',
                         style: TextStyle(
                           fontFamily: 'Cairo',
-                          fontSize: 16.sp,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(width: 12.w),
+                SizedBox(width: 12),
                 Expanded(
                   child: SizedBox(
-                    height: 50.h,
+                    height: 50,
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.red, width: 1.5),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       onPressed: () {
@@ -533,13 +549,13 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                         );
                       },
                       icon: Icon(Icons.delete_forever_rounded,
-                          color: Colors.red, size: 24.r),
+                          color: Colors.red, size: 24),
                       label: Text(
                         'حذف الحساب',
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize:
-                              14.sp, // Reduced slightly to fit side-by-side
+                              14, // Reduced slightly to fit side-by-side
                           fontWeight: FontWeight.bold,
                           color: Colors.red,
                         ),
@@ -563,7 +579,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     return SingleChildScrollView(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -571,23 +587,23 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
             'معلوماتك الشخصية',
             style: TextStyle(
               fontFamily: 'Cairo',
-              fontSize: 18.sp,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: isDark ? Colors.white : const Color(0xFF4B5563),
             ),
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 20),
           Container(
-            padding: EdgeInsets.all(16.w),
+            padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: theme.cardTheme.color ??
                   (isDark ? Colors.grey[900] : Colors.white),
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                  blurRadius: 10.r,
-                  offset: Offset(0, 4.h),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
                 ),
               ],
             ),
@@ -672,7 +688,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
               ],
             ),
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 20),
         ],
       ),
     );
@@ -687,7 +703,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 12.h),
+      padding: EdgeInsets.symmetric(vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -702,7 +718,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                   ).createShader(bounds),
                   child: Icon(
                     Icons.edit_outlined,
-                    size: 20.r,
+                    size: 20,
                     color: Colors.white,
                   ),
                 ),
@@ -711,13 +727,13 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 label,
                 style: TextStyle(
                   fontFamily: 'Cairo',
-                  fontSize: 14.sp,
+                  fontSize: 14,
                   color: const Color(0xFF9CA3AF),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 4),
           GestureDetector(
             onTap: onTap,
             child: Text(
@@ -726,7 +742,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                   : displayValue,
               style: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: 16.sp,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: isDark ? Colors.white : const Color(0xFF1F2937),
               ),
@@ -749,7 +765,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
   }) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 12.h),
+      padding: EdgeInsets.symmetric(vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -764,7 +780,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                   ).createShader(bounds),
                   child: Icon(
                     Icons.edit_outlined,
-                    size: 20.r,
+                    size: 20,
                     color: Colors.white,
                   ),
                 ),
@@ -773,13 +789,13 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 label,
                 style: TextStyle(
                   fontFamily: 'Cairo',
-                  fontSize: 14.sp,
+                  fontSize: 14,
                   color: const Color(0xFF9CA3AF),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 8),
           TextField(
             focusNode: focusNode,
             controller: controller,
@@ -790,27 +806,27 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
               hintText: hintText,
               hintStyle: TextStyle(
                 fontFamily: 'Cairo',
-                fontSize: 14.sp,
+                fontSize: 14,
                 color: const Color(0xFFD1D5DB),
               ),
               contentPadding:
-                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                  EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(
                   color: Color(0xFFE5E7EB),
                   width: 1.2,
                 ),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(
                   color: Color(0xFFE5E7EB),
                   width: 1.2,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(
                   color: Color(0xFF1D61E7),
                   width: 1.5,
@@ -819,7 +835,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
             ),
             style: TextStyle(
               fontFamily: 'Cairo',
-              fontSize: 16.sp,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF1F2937),
             ),
@@ -842,6 +858,6 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
   }
 
   Widget _divider() {
-    return Divider(height: 1, color: const Color(0xFFF3F4F6), thickness: 1.2.h);
+    return Divider(height: 1, color: const Color(0xFFF3F4F6), thickness: 1.2);
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
 
 class PrivacyPolicyScreen extends StatefulWidget {
   const PrivacyPolicyScreen({super.key});
@@ -12,6 +13,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   static const _darkBlue = Color(0xFF021433);
   static const _gradientEnd = Color(0xFF0A3A7A);
@@ -44,99 +46,65 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF0D1117) : const Color(0xFFF5F6FA),
+      key: _scaffoldKey,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      drawer: const DoctorDrawer(),
       body: Directionality(
         textDirection: TextDirection.rtl,
         child: CustomScrollView(
           slivers: [
             // ─── Custom SliverAppBar ──────────────────────────────────────────
             SliverAppBar(
-              expandedHeight: 200,
+              expandedHeight: 140,
               pinned: true,
               automaticallyImplyLeading: false,
-              backgroundColor: _darkBlue,
+              backgroundColor: theme.colorScheme.surface,
+              foregroundColor: theme.colorScheme.onSurface,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
-                      colors: [_darkBlue, _gradientEnd],
-                    ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
                   ),
                   child: Stack(
                     children: [
-                      // Decorative background circles
-                      Positioned(
-                        top: -40,
-                        left: -40,
-                        child: Container(
-                          width: 160,
-                          height: 160,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.04),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: -20,
-                        right: -20,
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.03),
-                          ),
-                        ),
-                      ),
-                      // Content
                       Positioned.fill(
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Shield icon
-                            Container(
-                              width: 64,
-                              height: 64,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.12),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.25),
-                                  width: 2,
+
+                            // Shield icon with logo and title
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+
+                                  ),
                                 ),
-                              ),
-                              child: const Icon(
-                                Icons.shield_outlined,
-                                color: Colors.white,
-                                size: 32,
-                              ),
+                                SizedBox(width: 12),
+                                Image.asset(
+                                  'assets/images/splash-logo.png',
+                                  width: 36,
+                                  height: 36,
+                                  fit: BoxFit.contain,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'سياسة الخصوصية',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontFamily: 'Cairo',
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'سياسة الخصوصية',
-                              style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 21,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'آخر تحديث: $_lastUpdated',
-                              style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontSize: 12.5,
-                                color: Colors.white.withValues(alpha: 0.65),
-                              ),
-                            ),
-                            const SizedBox(height: 22),
+                            const SizedBox(height: 16),
                           ],
                         ),
                       ),
@@ -146,21 +114,11 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
               ),
               leading: Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: IconButton(
-                  icon: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: Colors.white,
-                      size: 16,
-                    ),
+                child: Builder(
+                  builder: (context) => IconButton(
+                    icon: Icon(Icons.menu, size: 24),
+                    onPressed: () => _scaffoldKey.currentState?.openDrawer(),
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
                 ),
               ),
             ),

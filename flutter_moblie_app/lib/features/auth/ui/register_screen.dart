@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:thoutha_mobile_app/core/helpers/app_regex.dart';
 import 'package:thoutha_mobile_app/core/helpers/spacing.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:thoutha_mobile_app/core/theming/colors.dart';
@@ -213,8 +215,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    validator: (value) =>
-                        _validateRequired(value, 'الاسم الأول'),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'[\u0621-\u064A\s]'),
+                      ),
+                    ],
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'الاسم الأول مطلوب';
+                      }
+                      if (!AppRegex.isArabicName(value.trim())) {
+                        return 'الاسم الأول لازم يكون بالعربي فقط';
+                      }
+                      return null;
+                    },
                   ),
                   verticalSpace(16),
                   TextFormField(
@@ -226,8 +240,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    validator: (value) =>
-                        _validateRequired(value, 'الاسم الأخير'),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'[\u0621-\u064A\s]'),
+                      ),
+                    ],
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'الاسم الأخير مطلوب';
+                      }
+                      if (!AppRegex.isArabicName(value.trim())) {
+                        return 'الاسم الأخير لازم يكون بالعربي فقط';
+                      }
+                      return null;
+                    },
                   ),
                   verticalSpace(16),
                   TextFormField(

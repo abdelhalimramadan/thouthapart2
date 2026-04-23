@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
 
-class AboutAppScreen extends StatelessWidget {
+class AboutAppScreen extends StatefulWidget {
   const AboutAppScreen({super.key});
+
+  @override
+  State<AboutAppScreen> createState() => _AboutAppScreenState();
+}
+
+class _AboutAppScreenState extends State<AboutAppScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -11,19 +19,43 @@ class AboutAppScreen extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
+      drawer: const DoctorDrawer(),
       appBar: AppBar(
+        toolbarHeight: 70,
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
-        title: Text(
-          'حول التطبيق',
-          style: textTheme.titleLarge?.copyWith(
-            fontFamily: 'Cairo',
-            fontWeight: FontWeight.w600,
+        automaticallyImplyLeading: false,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu, size: 24),
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ),
+        titleSpacing: 0,
         centerTitle: true,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/splash-logo.png',
+              width: 36,
+              height: 36,
+              fit: BoxFit.contain,
+            ),
+            SizedBox(width: 8),
+            Text(
+              'الملف الشخصي',
+              style: textTheme.titleLarge?.copyWith(
+                fontFamily: 'Cairo',
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
       ),
       body: Directionality(
         textDirection: TextDirection.rtl,

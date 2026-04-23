@@ -148,8 +148,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     Color? textColor,
     bool isSelected = false,
     VoidCallback? onTap,
-    required double width,
-    required double baseFontSize,
   }) {
     final textTheme = Theme.of(context).textTheme;
     return Container(
@@ -181,7 +179,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     textAlign: TextAlign.right,
                     style: textTheme.bodyLarge?.copyWith(
                       fontFamily: 'Cairo',
-                      fontSize: baseFontSize * 0.9,
+                      fontSize: 15,
                       fontWeight:
                           isSelected ? FontWeight.w600 : FontWeight.w500,
                       color: isSelected
@@ -217,8 +215,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     required ValueChanged<bool> onChanged,
     IconData? icon,
     Color? iconColor,
-    required double width,
-    required double baseFontSize,
   }) {
     final textTheme = Theme.of(context).textTheme;
     return Container(
@@ -244,7 +240,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                   textAlign: TextAlign.right,
                   style: textTheme.bodyLarge?.copyWith(
                     fontFamily: 'Cairo',
-                    fontSize: baseFontSize * 0.9,
+                    fontSize: 15,
                     fontWeight: FontWeight.w500,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
@@ -272,8 +268,15 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
       final cachedLastName = await SharedPrefHelper.getString('last_name');
       final cachedEmail = await SharedPrefHelper.getString('email');
       final cachedImage = await SharedPrefHelper.getString('profile_image');
-      final cachedId = await SharedPrefHelper.getString('doctor_id');
+      
+      // doctor_id is stored as int, so use getInt
+      final cachedId = await SharedPrefHelper.getInt('doctor_id');
+      // getInt returns 0 if not found, convert to null
+      final doctorId = cachedId > 0 ? cachedId : null;
 
+      debugPrint('Drawer - Cached data: firstName=$cachedFirstName, lastName=$cachedLastName, email=$cachedEmail, doctorId=$doctorId');
+
+      // Always load cached data if available
       if (cachedFirstName != null && cachedFirstName.isNotEmpty) {
         setState(() {
           _firstName = cachedFirstName;
@@ -281,22 +284,33 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
           _email = cachedEmail;
           _profileImage =
               (cachedImage?.isNotEmpty ?? false) ? cachedImage : _profileImage;
-          if (cachedId != null && cachedId.isNotEmpty) {
-            _doctorId = int.tryParse(cachedId);
-          }
+          _doctorId = doctorId;
         });
+        debugPrint('Drawer - Loaded cached data into state');
+      } else {
+        debugPrint('Drawer - No cached data found');
       }
 
       // Fetch from API to update info and get doctor ID if missing/changed
       final result = await _apiService.getDoctorById();
+      debugPrint('Drawer - API result: $result');
+      
       if (result['success'] == true && result['data'] != null) {
         final doctorData = result['data'] as DoctorProfileModel;
-        setState(() {
-          _firstName = doctorData.firstName ?? _firstName;
-          _lastName = doctorData.lastName ?? _lastName;
-          _email = doctorData.email ?? _email;
-          _doctorId = doctorData.id ?? _doctorId;
-        });
+        debugPrint('Drawer - Doctor data from API: firstName=${doctorData.firstName}, lastName=${doctorData.lastName}, email=${doctorData.email}');
+        
+        // Only update with non-null values from API to preserve cached data
+        if (doctorData.firstName != null ||
+            doctorData.lastName != null ||
+            doctorData.email != null) {
+          setState(() {
+            _firstName = doctorData.firstName ?? _firstName;
+            _lastName = doctorData.lastName ?? _lastName;
+            _email = doctorData.email ?? _email;
+            _doctorId = doctorData.id ?? _doctorId;
+          });
+          debugPrint('Drawer - Updated state with API data');
+        }
 
         if (doctorData.firstName != null) {
           await SharedPrefHelper.setData('first_name', doctorData.firstName!);
@@ -310,6 +324,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
         if (doctorData.id != null) {
           await SharedPrefHelper.setData('doctor_id', doctorData.id.toString());
         }
+      } else {
+        debugPrint('Drawer - API call failed or returned no data');
       }
     } catch (e) {
       debugPrint('Exception fetching doctor info: $e');
@@ -331,7 +347,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     if (currentRoute.contains('booking-records') ||
         currentRoute.contains('records') ||
         currentRoute.contains('appointment-history')) return 4;
-    if (currentRoute.contains('doctor-requests')) return 5;
+    if (currentRoute.contains('confirmed-appointments')) return 5;
+    if (currentRoute.contains('doctor-requests')) return 6;
     return 0;
   }
 
@@ -339,9 +356,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textTheme = Theme.of(context).textTheme;
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final baseFontSize = width * 0.04;
     final double topPad = MediaQuery.of(context).padding.top;
     final int currentIndex = _getCurrentIndex();
 
@@ -366,13 +380,16 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  SizedBox(
-                    height: 56,
-                    child: Stack(
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Center(
+                        const SizedBox(width: 48),
+                        Expanded(
                           child: Text(
                             'القائمة',
+                            textAlign: TextAlign.center,
                             style: textTheme.titleLarge?.copyWith(
                               fontFamily: 'Cairo',
                               fontWeight: FontWeight.w600,
@@ -380,23 +397,22 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                             ),
                           ),
                         ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.close,
-                              color: Theme.of(context).colorScheme.surface,
-                            ),
-                            onPressed: () => Navigator.of(context).pop(),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(
+                            Icons.close,
+                            color: Theme.of(context).colorScheme.surface,
                           ),
+                          onPressed: () => Navigator.of(context).pop(),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(height: 4),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                     child: Container(
-                      height: 64,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                         color:
                             Theme.of(context).colorScheme.surface.withAlpha(64),
@@ -412,33 +428,25 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                                   horizontal: 16,
                                 ),
                                 child: Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    _isLoadingName
-                                        ? const SizedBox(
-                                            width: 16,
-                                            height: 16,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Colors.white,
-                                            ),
-                                          )
-                                        : Text(
-                                            (_firstName != null &&
-                                                    _firstName!.isNotEmpty)
-                                                ? 'د/ ${_firstName!} ${_lastName ?? ''}'
-                                                : 'دكتور',
-                                            style:
-                                                textTheme.titleMedium?.copyWith(
-                                              fontFamily: 'Cairo',
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .surface,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
+                                    Text(
+                                      (_firstName != null &&
+                                              _firstName!.isNotEmpty)
+                                          ? 'د/ ${_firstName!} ${_lastName ?? ''}'
+                                          : 'دكتور',
+                                      style:
+                                          textTheme.titleMedium?.copyWith(
+                                        fontFamily: 'Cairo',
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surface,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                     const SizedBox(height: 2),
                                     Text(
                                       _email != null && _email!.isNotEmpty
@@ -469,11 +477,9 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                 children: [
                   _menuItem(
                     context,
-                    title: 'الرئيسية',
+                    title: 'الصفحة الرئيسية',
                     icon: Icons.home,
                     isSelected: currentIndex == 0,
-                    width: width,
-                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
@@ -489,8 +495,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     title: 'إضافة حالة جديدة',
                     icon: Icons.add_circle_outline,
                     isSelected: currentIndex == 1,
-                    width: width,
-                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
@@ -509,8 +513,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     title: 'الملف الشخصي',
                     icon: Icons.person_outline,
                     isSelected: currentIndex == 2,
-                    width: width,
-                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
@@ -526,8 +528,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     title: 'الحجوزات القادمة',
                     icon: Icons.event_note_outlined,
                     isSelected: currentIndex == 3,
-                    width: width,
-                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
@@ -544,8 +544,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     title: 'سجل الحجوزات',
                     icon: Icons.history,
                     isSelected: currentIndex == 4,
-                    width: width,
-                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
@@ -563,8 +561,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     title: 'الحجوزات المؤكدة',
                     icon: Icons.check_circle_outline,
                     isSelected: currentIndex == 5,
-                    width: width,
-                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
@@ -582,8 +578,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     title: 'طلباتي',
                     icon: Icons.assignment_outlined,
                     isSelected: currentIndex == 6,
-                    width: width,
-                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
@@ -603,8 +597,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                         value: themeProvider.isDarkMode,
                         onChanged: (value) => themeProvider.toggleTheme(value),
                         icon: Icons.dark_mode_outlined,
-                        width: width,
-                        baseFontSize: baseFontSize,
                       );
                     },
                   ),
@@ -612,8 +604,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     context,
                     title: 'حول التطبيق',
                     icon: Icons.info_outline,
-                    width: width,
-                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -628,8 +618,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     context,
                     title: 'الشروط والأحكام',
                     icon: Icons.description_outlined,
-                    width: width,
-                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -645,8 +633,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     context,
                     title: 'سياسة الخصوصية',
                     icon: Icons.shield_outlined,
-                    width: width,
-                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -661,8 +647,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     context,
                     title: 'المساعدة والدعم',
                     icon: Icons.help_outline,
-                    width: width,
-                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -682,8 +666,6 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     title: 'تسجيل الخروج',
                     icon: Icons.logout_outlined,
                     textColor: Colors.red,
-                    width: width,
-                    baseFontSize: baseFontSize,
                     onTap: () {
                       Navigator.pop(context);
                       _showLogoutConfirmation(context);

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
@@ -189,7 +188,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
             'تعديل الطلب',
             style: TextStyles.font18DarkBlueBold.copyWith(
               fontFamily: 'Cairo',
-              fontSize: 18.sp,
+              fontSize: 18,
               color: isDark ? Colors.white : null,
             ),
           ),
@@ -198,10 +197,10 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
           elevation: 0,
           iconTheme: IconThemeData(
             color: isDark ? Colors.white : ColorsManager.darkBlue,
-            size: 24.r,
+            size: 24,
           ),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 24.r),
+            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 24),
             onPressed: () => Navigator.pop(context, false),
           ),
         ),
@@ -211,13 +210,13 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
           child: Directionality(
             textDirection: ui.TextDirection.rtl,
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(24.r),
+              padding: EdgeInsets.all(24),
               child: Form(
                 key: _formKey,
                 child: Center(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxWidth: 500.w,
+                      maxWidth: 500,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,11 +226,11 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                           'تعديل بيانات الحالة',
                           style: TextStyles.font18DarkBlueBold.copyWith(
                             fontFamily: 'Cairo',
-                            fontSize: 18.sp,
+                            fontSize: 18,
                             color: isDark ? Colors.white : null,
                           ),
                         ),
-                        SizedBox(height: 8.h),
+                        SizedBox(height: 8),
                         Text(
                           'قم بتعديل البيانات التالية للطلب',
                           style: TextStyles.font14GrayRegular.copyWith(
@@ -239,21 +238,21 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                             color: isDark ? Colors.grey[400] : null,
                           ),
                         ),
-                        SizedBox(height: 24.h),
+                        SizedBox(height: 24),
 
                         // ── Request Info Card ────────────────────────────
                         _buildRequestInfoCard(isDark),
-                        SizedBox(height: 24.h),
+                        SizedBox(height: 24),
 
                         // ── DateTime Picker ──────────────────────────────
                         _buildLabel('التاريخ والوقت', isDark),
-                        SizedBox(height: 8.h),
+                        SizedBox(height: 8),
                         _buildDateTimePicker(isDark),
-                        SizedBox(height: 20.h),
+                        SizedBox(height: 20),
 
                         // ── Description ──────────────────────────────────
                         _buildLabel('وصف الحالة (اختياري)', isDark),
-                        SizedBox(height: 8.h),
+                        SizedBox(height: 8),
                         TextFormField(
                           controller: _descriptionController,
                           maxLines: 4,
@@ -262,7 +261,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                           style: TextStyle(
                             fontFamily: 'Cairo',
                             color: isDark ? Colors.white : Colors.black,
-                            fontSize: 14.sp,
+                            fontSize: 14,
                           ),
                           decoration: _buildDecoration(
                             hint: 'أضف وصفاً تفصيلياً للحالة...',
@@ -270,7 +269,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                             isDark: isDark,
                           ),
                         ),
-                        SizedBox(height: 32.h),
+                        SizedBox(height: 32),
 
                         // ── Save Button ──────────────────────────────────
                         _isLoading
@@ -286,19 +285,19 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                                     textStyle:
                                         TextStyles.font16WhiteSemiBold.copyWith(
                                       fontFamily: 'Cairo',
-                                      fontSize: 16.sp,
+                                      fontSize: 16,
                                     ),
                                     backgroundColor: ColorsManager.mainBlue,
                                     onPressed: _saveRequest,
                                   ),
-                                  SizedBox(height: 16.h),
+                                  SizedBox(height: 16),
                                   // ── Cancel Button ────────────────────────────────
                                   AppTextButton(
                                     buttonText: 'إلغاء',
                                     textStyle:
                                         TextStyles.font16WhiteSemiBold.copyWith(
                                       fontFamily: 'Cairo',
-                                      fontSize: 16.sp,
+                                      fontSize: 16,
                                       color: ColorsManager.mainBlue,
                                     ),
                                     backgroundColor: Colors.transparent,
@@ -324,10 +323,10 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
   Widget _buildRequestInfoCard(bool isDark) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF2D2D2D) : Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
         ),
@@ -342,7 +341,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
             value: widget.request.categoryName,
             isDark: isDark,
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 12),
           // Doctor Name
           _buildInfoRow(
             icon: Icons.person_outline,
@@ -350,7 +349,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
             value: widget.request.doctorFullName,
             isDark: isDark,
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 12),
           // Request ID
           _buildInfoRow(
             icon: Icons.tag_outlined,
@@ -374,14 +373,14 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
         Icon(
           icon,
           color: isDark ? Colors.grey[400] : ColorsManager.mainBlue,
-          size: 20.r,
+          size: 20,
         ),
-        SizedBox(width: 10.w),
+        SizedBox(width: 10),
         Text(
           '$label: ',
           style: TextStyle(
             fontFamily: 'Cairo',
-            fontSize: 14.sp,
+            fontSize: 14,
             color: isDark ? Colors.grey[400] : Colors.grey[600],
             fontWeight: FontWeight.w500,
           ),
@@ -391,7 +390,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
             value,
             style: TextStyle(
               fontFamily: 'Cairo',
-              fontSize: 14.sp,
+              fontSize: 14,
               color: isDark ? Colors.white : Colors.black87,
               fontWeight: FontWeight.w600,
             ),
@@ -413,12 +412,12 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
           child: GestureDetector(
             onTap: _pickDate,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: BoxDecoration(
                 color: isDark
                     ? const Color(0xFF2D2D2D)
                     : ColorsManager.moreLighterGray,
-                borderRadius: BorderRadius.circular(16.r),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color:
                       isDark ? Colors.grey.shade700 : ColorsManager.lighterGray,
@@ -429,16 +428,16 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                 children: [
                   Icon(
                     Icons.calendar_today_outlined,
-                    size: 18.r,
+                    size: 18,
                     color: isDark ? Colors.grey[400] : ColorsManager.mainBlue,
                   ),
-                  SizedBox(width: 8.w),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       hasDate ? _formattedDate : 'التاريخ',
                       style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: 13.sp,
+                        fontSize: 13,
                         color: hasDate
                             ? (isDark ? Colors.white : Colors.black87)
                             : Colors.grey,
@@ -450,18 +449,18 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
             ),
           ),
         ),
-        SizedBox(width: 12.w),
+        SizedBox(width: 12),
         // Time
         Expanded(
           child: GestureDetector(
             onTap: _pickTime,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: BoxDecoration(
                 color: isDark
                     ? const Color(0xFF2D2D2D)
                     : ColorsManager.moreLighterGray,
-                borderRadius: BorderRadius.circular(16.r),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color:
                       isDark ? Colors.grey.shade700 : ColorsManager.lighterGray,
@@ -472,16 +471,16 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                 children: [
                   Icon(
                     Icons.access_time_filled_rounded,
-                    size: 18.r,
+                    size: 18,
                     color: isDark ? Colors.grey[400] : ColorsManager.mainBlue,
                   ),
-                  SizedBox(width: 8.w),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       hasTime ? _formattedTime : 'الوقت',
                       style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: 13.sp,
+                        fontSize: 13,
                         color: hasTime
                             ? (isDark ? Colors.white : Colors.black87)
                             : Colors.grey,
@@ -502,7 +501,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
       text,
       style: TextStyle(
         fontFamily: 'Cairo',
-        fontSize: 14.sp,
+        fontSize: 14,
         fontWeight: FontWeight.w600,
         color: isDark ? Colors.white : Colors.black87,
       ),
@@ -519,30 +518,30 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
       hintStyle: TextStyle(
         fontFamily: 'Cairo',
         color: isDark ? Colors.grey[600] : Colors.grey[400],
-        fontSize: 14.sp,
+        fontSize: 14,
       ),
       prefixIcon: Icon(
         icon,
         color: isDark ? Colors.grey[500] : ColorsManager.mainBlue,
-        size: 20.r,
+        size: 20,
       ),
       filled: true,
       fillColor:
           isDark ? const Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(
           color: ColorsManager.mainBlue,
           width: 2,
         ),
       ),
       contentPadding: EdgeInsets.symmetric(
-        horizontal: 16.w,
-        vertical: 16.h,
+        horizontal: 16,
+        vertical: 16,
       ),
     );
   }
