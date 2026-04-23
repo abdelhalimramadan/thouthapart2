@@ -333,24 +333,43 @@ class _DoctorConfirmedAppointmentsScreenState
     }
 
     if (_confirmedAppointments.isEmpty) {
+      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.calendar_today_outlined,
-              size: 48,
-              color: Colors.grey[400],
-            ),
-            SizedBox(height: 16),
-            Text(
-              'لا توجد حجوزات مؤكدة',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontFamily: 'Cairo',
-                color: Colors.grey[600],
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.people_outline,
+                size: 48,
+                color: isDarkMode ? Colors.white30 : Colors.grey[400],
               ),
-            ),
-          ],
+              SizedBox(height: 16),
+              Text(
+                'لا توجد مرضى مكتملين حالياً',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 17,
+                  color: isDarkMode ? Colors.white : const Color(0xFF0C4A6E),
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'سيظهر المرضى هنا عندما تكمل حجوزات من سجل الحجوزات',
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.rtl,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 14,
+                  height: 1.6,
+                  color: isDarkMode ? Colors.white60 : const Color(0xFF475569),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }

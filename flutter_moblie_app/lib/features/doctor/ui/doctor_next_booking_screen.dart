@@ -389,24 +389,66 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
 
     if (_bookings.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.calendar_today_outlined,
-              size: 64,
-              color: Colors.grey[300],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'لا توجد حجوزات قادمة',
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: baseFontSize * 1.125,
-                color: isDark ? Colors.white38 : Colors.grey[600],
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.calendar_today_outlined,
+                size: 48,
+                color: isDark ? Colors.white30 : Colors.grey[400],
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                'لا توجد حجوزات حالياً',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 17,
+                  color: isDark ? Colors.white : const Color(0xFF0C4A6E),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'عند قيام أي مريض بحجز موعد، سيظهر هنا اسمه ورقم هاتفه.',
+                textAlign: TextAlign.right,
+                textDirection: ui.TextDirection.rtl,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 13.5,
+                  height: 1.6,
+                  color: isDark ? Colors.white70 : const Color(0xFF334155),
+                ),
+              ),
+              Text(
+                'يمكنك التواصل معه للتأكيد، ثم:',
+                textAlign: TextAlign.right,
+                textDirection: ui.TextDirection.rtl,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 13.5,
+                  height: 1.6,
+                  color: isDark ? Colors.white70 : const Color(0xFF334155),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildInstructionRow(
+                isDarkMode: isDark,
+                icon: Icons.check_circle_outline,
+                iconColor: const Color(0xFF16A34A),
+                text: 'اضغط "قبول" لإضافة الحجز إلى سجل الحجوزات كـ حالة مؤكدة.',
+              ),
+              const SizedBox(height: 8),
+              _buildInstructionRow(
+                isDarkMode: isDark,
+                icon: Icons.cancel_outlined,
+                iconColor: const Color(0xFFE7000B),
+                text: 'اضغط "حذف" لإلغاء الحجز وإزالته نهائياً.',
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -577,5 +619,37 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
       default:
         return status;
     }
+  }
+
+  Widget _buildInstructionRow({
+    required bool isDarkMode,
+    required IconData icon,
+    required Color iconColor,
+    required String text,
+  }) {
+    return Row(
+      textDirection: ui.TextDirection.rtl,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(top: 2),
+          child: Icon(icon, size: 18, color: iconColor),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            textAlign: TextAlign.right,
+            textDirection: ui.TextDirection.rtl,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 13,
+              height: 1.6,
+              color: isDarkMode ? Colors.white60 : const Color(0xFF475569),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

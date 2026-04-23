@@ -52,7 +52,7 @@ android {
         create("release") {
             keyAlias = keystoreProperties.getProperty("keyAlias", "thoutha")
             keyPassword = keystoreProperties.getProperty("keyPassword", "thoutha_release_2024")
-            storeFile = file(keystoreProperties.getProperty("storeFile", "release-key.jks"))
+            storeFile = file(keystoreProperties.getProperty("storeFile", "C:\\secure\\Thoutha\\Signing\\release-key.jks"))
             storePassword = keystoreProperties.getProperty("storePassword", "thoutha_release_2024")
         }
     }

@@ -17,13 +17,15 @@ class _AboutAppScreenState extends State<AboutAppScreen> {
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isTablet = screenWidth >= 600;
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
       drawer: const DoctorDrawer(),
       appBar: AppBar(
-        toolbarHeight: 70,
+        toolbarHeight: isTablet ? 78 : 68,
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
@@ -38,21 +40,22 @@ class _AboutAppScreenState extends State<AboutAppScreen> {
         centerTitle: true,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              'assets/images/splash-logo.png',
-              width: 36,
-              height: 36,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(width: 8),
             Text(
-              'الملف الشخصي',
+              'عن التطبيق',
               style: textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
-                fontSize: 18,
+                fontSize: isTablet ? 20 : 17,
                 fontWeight: FontWeight.w700,
               ),
+            ),
+            const SizedBox(width: 8),
+            Image.asset(
+              'assets/images/splash-logo.png',
+              width: isTablet ? 40 : 34,
+              height: isTablet ? 40 : 34,
+              fit: BoxFit.contain,
             ),
           ],
         ),
@@ -60,12 +63,15 @@ class _AboutAppScreenState extends State<AboutAppScreen> {
       body: Directionality(
         textDirection: TextDirection.rtl,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.symmetric(
+            horizontal: isTablet ? 28 : 16,
+            vertical: isTablet ? 24 : 16,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(isTablet ? 24 : 16),
                 decoration: BoxDecoration(
                   color: theme.cardTheme.color ?? colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
@@ -77,37 +83,38 @@ class _AboutAppScreenState extends State<AboutAppScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      'ثوثة',
-                      style: textTheme.titleLarge?.copyWith(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w800,
-                        fontSize: 28,
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        'ثوثة',
+                        style: textTheme.titleLarge?.copyWith(
+                          fontFamily: 'Cairo',
+                          fontWeight: FontWeight.w800,
+                          fontSize: isTablet ? 30 : 24,
+                        ),
+                        textAlign: TextAlign.right,
                       ),
-                      textAlign: TextAlign.right,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Text(
-                      'تطبيق ثوثة يهدف إلى تسهيل التواصل بين طلاب طب الأسنان والمرضى،\n'
-                      'ويقدم تجربة استخدام بسيطة وآمنة لتنظيم الحجوزات ومتابعة الحالات.\n'
-                      'يساعد التطبيق على توفير معلومات أوضح عن الخدمات المتاحة، ويُسهّل\n'
-                      'إدارة المواعيد والتواصل السريع، بما يدعم رحلة علاجية أكثر سلاسة.\n'
-                      'نسعى دائمًا لتحسين الجودة وإضافة مزايا تخدم المستخدمين بشكل أفضل.',
+                      'ثوثة هو تطبيق يساعد طلاب طب الأسنان والمرضى على التواصل بسهولة.\n'
+                      'يوفّر طريقة واضحة لحجز المواعيد، متابعة الحالات، ومعرفة الخدمات المتاحة.\n'
+                      'هدفنا تقديم تجربة مريحة وسريعة، مع تطوير مستمر يلبّي احتياجات المستخدمين.',
                       style: textTheme.bodyMedium?.copyWith(
                         fontFamily: 'Cairo',
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        height: 2,
-                        color: colorScheme.onSurface.withValues(alpha: 0.75),
+                        fontSize: isTablet ? 18 : 15,
+                        fontWeight: FontWeight.w600,
+                        height: 1.8,
+                        color: colorScheme.onSurface.withValues(alpha: 0.78),
                       ),
                       textAlign: TextAlign.right,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     Text(
                       'الإصدار 1.0.3',
                       style: textTheme.bodySmall?.copyWith(
                         fontFamily: 'Cairo',
-                        fontSize: 15,
+                        fontSize: isTablet ? 14 : 13,
                         fontWeight: FontWeight.w700,
                         color: colorScheme.onSurface.withValues(alpha: 0.6),
                       ),

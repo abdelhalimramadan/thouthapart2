@@ -497,24 +497,56 @@ class _DoctorBookingRecordsScreenState
     }
 
     if (_approvedAppointments.isEmpty) {
+      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.calendar_today_outlined,
-              size: 48,
-              color: Colors.grey[400],
-            ),
-            SizedBox(height: 16),
-            Text(
-              'لا توجد حجوزات معتمدة',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontFamily: 'Cairo',
-                color: Colors.grey[600],
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.calendar_today_outlined,
+                size: 48,
+                color: isDarkMode ? Colors.white30 : Colors.grey[400],
               ),
-            ),
-          ],
+              SizedBox(height: 16),
+              Text(
+                'لا توجد حجوزات معتمدة حالياً',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 17,
+                  color: isDarkMode ? Colors.white : const Color(0xFF0C4A6E),
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'داخل سجل الحجوزات:',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : const Color(0xFF0C4A6E),
+                ),
+              ),
+              SizedBox(height: 12),
+              _buildInstructionRow(
+                isDarkMode: isDarkMode,
+                icon: Icons.task_alt_outlined,
+                iconColor: const Color(0xFF10B981),
+                text: 'بعد حضور المريض وإتمام الحالة، اضغط "مكتمل" ليتم نقلها إلى صفحة المرضى كحالة مكتملة.',
+              ),
+              SizedBox(height: 10),
+              _buildInstructionRow(
+                isDarkMode: isDarkMode,
+                icon: Icons.event_busy_outlined,
+                iconColor: Colors.orange,
+                text: 'في حال عدم حضور المريض، اضغط "ملغى".',
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -568,6 +600,38 @@ class _DoctorBookingRecordsScreenState
           SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
         ],
       ),
+    );
+  }
+
+  Widget _buildInstructionRow({
+    required bool isDarkMode,
+    required IconData icon,
+    required Color iconColor,
+    required String text,
+  }) {
+    return Row(
+      textDirection: TextDirection.rtl,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(top: 2),
+          child: Icon(icon, size: 18, color: iconColor),
+        ),
+        SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            textAlign: TextAlign.right,
+            textDirection: TextDirection.rtl,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 13,
+              height: 1.6,
+              color: isDarkMode ? Colors.white60 : const Color(0xFF475569),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

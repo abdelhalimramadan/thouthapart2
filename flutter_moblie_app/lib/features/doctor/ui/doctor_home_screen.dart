@@ -645,21 +645,69 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
 
     if (_pendingAppointments.isEmpty) {
       final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 40),
-        child: Center(
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.calendar_today_outlined,
-                  size: 48,
-                  color: isDarkMode ? Colors.white24 : Colors.grey[300]),
-              SizedBox(height: 12),
+              // Icon & Title
+              Icon(
+                Icons.calendar_today_outlined,
+                size: 48,
+                color: isDarkMode ? Colors.white30 : Colors.grey[400],
+              ),
+              SizedBox(height: 16),
               Text(
-                'لا توجد حجوزات قادمة حالياً',
+                'لا توجد حجوزات حالياً',
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontFamily: 'Cairo',
-                    color: isDarkMode ? Colors.white38 : Colors.grey,
-                    fontSize: 15),
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 17,
+                  color: isDarkMode ? Colors.white : const Color(0xFF0C4A6E),
+                ),
+              ),
+              SizedBox(height: 16),
+
+              // Intro text
+              Text(
+                'عند قيام أي مريض بحجز موعد، سيظهر هنا اسمه ورقم هاتفه.',
+                textAlign: TextAlign.right,
+                textDirection: ui.TextDirection.rtl,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 13.5,
+                  height: 1.6,
+                  color: isDarkMode ? Colors.white70 : const Color(0xFF334155),
+                ),
+              ),
+              Text(
+                'يمكنك التواصل معه للتأكيد، ثم:',
+                textAlign: TextAlign.right,
+                textDirection: ui.TextDirection.rtl,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 13.5,
+                  height: 1.6,
+                  color: isDarkMode ? Colors.white70 : const Color(0xFF334155),
+                ),
+              ),
+              SizedBox(height: 12),
+
+              // Section 1: Accept / Delete
+              _buildInstructionItem(
+                isDarkMode: isDarkMode,
+                icon: Icons.check_circle_outline,
+                iconColor: const Color(0xFF16A34A),
+                text: 'اضغط "قبول" لإضافة الحجز إلى سجل الحجوزات كـ حالة مؤكدة.',
+              ),
+              SizedBox(height: 8),
+              _buildInstructionItem(
+                isDarkMode: isDarkMode,
+                icon: Icons.cancel_outlined,
+                iconColor: const Color(0xFFE7000B),
+                text: 'اضغط "حذف" لإلغاء الحجز وإزالته نهائياً.',
               ),
             ],
           ),
@@ -718,6 +766,39 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
           ),
         );
       },
+    );
+  }
+
+  // ── Instruction item helper ────────────────────────────────────
+  Widget _buildInstructionItem({
+    required bool isDarkMode,
+    required IconData icon,
+    required Color iconColor,
+    required String text,
+  }) {
+    return Row(
+      textDirection: ui.TextDirection.rtl,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(top: 2),
+          child: Icon(icon, size: 18, color: iconColor),
+        ),
+        SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            textAlign: TextAlign.right,
+            textDirection: ui.TextDirection.rtl,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 13,
+              height: 1.6,
+              color: isDarkMode ? Colors.white60 : const Color(0xFF475569),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
