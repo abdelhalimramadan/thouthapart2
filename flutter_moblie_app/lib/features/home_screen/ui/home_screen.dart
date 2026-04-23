@@ -181,8 +181,8 @@ class _HomeScreenState extends State<HomeScreen> {
             if (resolvedAssetPath.endsWith('.svg')) ...[
               SvgPicture.asset(
                 resolvedAssetPath,
-                width: 68.w,
-                height: 68.h,
+                width: 68.r,
+                height: 68.r,
                 fit: BoxFit.contain,
                 placeholderBuilder: (BuildContext context) => Container(
                   width: 68.w,
@@ -194,8 +194,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ] else ...[
               Image.asset(
                 resolvedAssetPath,
-                width: 68.w,
-                height: 68.h,
+                width: 68.r,
+                height: 68.r,
                 fit: BoxFit.contain,
               ),
             ],
@@ -660,8 +660,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               isExpanded: true,
                               icon: _isDetecting
                                   ? SizedBox(
-                                      width: 18.w,
-                                      height: 18.h,
+                                      width: 20.r,
+                                      height: 20.r,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                         color: Theme.of(context)

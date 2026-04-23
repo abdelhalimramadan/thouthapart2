@@ -96,32 +96,39 @@ class WelcomeScreen extends StatelessWidget {
                   // Service Cards
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: Column(
-                      children: [
-                        _buildServiceCard(
-                          icon: Icons.favorite,
-                          title: 'جودة عالية',
-                          description:
-                              'أحدث الطرق والتقنيات في علاج الأسنان تحت إشراف أطباء متخصصين',
-                          isDark: isDark,
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width >= 600 ? 520 : double.infinity,
                         ),
-                        SizedBox(height: 16.h),
-                        _buildServiceCard(
-                          icon: Icons.price_check,
-                          title: 'أسعار مناسبة',
-                          description:
-                              'أسعار خاصة للمرضى مع إمكانية العلاج بالمجان في بعض الحالات',
-                          isDark: isDark,
+                        child: Column(
+                          children: [
+                            _buildServiceCard(
+                              icon: Icons.favorite,
+                              title: 'جودة عالية',
+                              description:
+                                  'أحدث الطرق والتقنيات في علاج الأسنان تحت إشراف أطباء متخصصين',
+                              isDark: isDark,
+                            ),
+                            SizedBox(height: 16.h),
+                            _buildServiceCard(
+                              icon: Icons.price_check,
+                              title: 'أسعار مناسبة',
+                              description:
+                                  'أسعار خاصة للمرضى مع إمكانية العلاج بالمجان في بعض الحالات',
+                              isDark: isDark,
+                            ),
+                            SizedBox(height: 16.h),
+                            _buildServiceCard(
+                              icon: Icons.school,
+                              title: 'متدربين محترفين',
+                              description:
+                                  'طلاب دراسات عليا تحت إشراف مباشر من أطباء أسنان متخصصين',
+                              isDark: isDark,
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 16.h),
-                        _buildServiceCard(
-                          icon: Icons.school,
-                          title: 'متدربين محترفين',
-                          description:
-                              'طلاب دراسات عليا تحت إشراف مباشر من أطباء أسنان متخصصين',
-                          isDark: isDark,
-                        ),
-                      ],
+                      ),
                     ),
                   ),
 
@@ -130,41 +137,46 @@ class WelcomeScreen extends StatelessWidget {
                   // Mission Section
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: Container(
-                      padding: EdgeInsets.all(20.r),
-                      decoration: BoxDecoration(
-                        color: Colors.blue[50],
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border(
-                          right: BorderSide(
-                            color: ColorsManager.mainBlue,
-                            width: 5.w,
+                    child: Center(
+                      child: Container(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width >= 600 ? 520 : double.infinity,
+                        ),
+                        padding: EdgeInsets.all(20.r),
+                        decoration: BoxDecoration(
+                          color: Colors.blue[50],
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border(
+                            right: BorderSide(
+                              color: ColorsManager.mainBlue,
+                              width: 5.w,
+                            ),
                           ),
                         ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'رسالتنا',
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'رسالتنا',
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 12.h),
-                          Text(
-                            'توفير خدمات طب أسنان عالية الجودة بأسعار في متناول الجميع، مع توفير فرص تدريبية قيمة لطلاب الدراسات العليا تحت إشراف أطباء متخصصين.',
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontSize: 13.sp,
-                              color: Colors.grey[700],
-                              height: 1.6,
+                            SizedBox(height: 12.h),
+                            Text(
+                              'توفير خدمات طب أسنان عالية الجودة بأسعار في متناول الجميع، مع توفير فرص تدريبية قيمة لطلاب الدراسات العليا تحت إشراف أطباء متخصصين.',
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 13.sp,
+                                color: Colors.grey[700],
+                                height: 1.6,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -191,62 +203,68 @@ class WelcomeScreen extends StatelessWidget {
                   // Register Button
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 54.h,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, Routes.signUpScreen);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ColorsManager.mainBlue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.r),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width >= 600 ? 520 : double.infinity,
+                            ),
+                            height: 60.h,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, Routes.signUpScreen);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: ColorsManager.mainBlue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                                elevation: 4,
+                              ),
+                              child: Text(
+                                'إنشاء حساب',
+                                style: TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
-                          elevation: 4,
-                        ),
-                        child: Text(
-                          'إنشاء حساب',
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                          SizedBox(height: 20.h),
+                          Container(
+                            width: double.infinity,
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width >= 600 ? 520 : double.infinity,
+                            ),
+                            height: 60.h,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, Routes.categoriesScreen);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    ColorsManager.mainBlue.withValues(alpha: 0.7),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                                elevation: 4,
+                              ),
+                              child: Text(
+                                'الذهاب للرئيسية',
+                                style: TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 20.h),
-
-                  // Home Button
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 54.h,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, Routes.categoriesScreen);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              ColorsManager.mainBlue.withValues(alpha: 0.7),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.r),
-                          ),
-                          elevation: 4,
-                        ),
-                        child: Text(
-                          'الذهاب للرئيسية',
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                        ],
                       ),
                     ),
                   ),

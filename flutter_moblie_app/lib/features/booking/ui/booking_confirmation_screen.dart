@@ -2,6 +2,7 @@ import 'package:thoutha_mobile_app/core/networking/api_service.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thoutha_mobile_app/core/theming/colors.dart';
 import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
+import 'package:thoutha_mobile_app/core/helpers/responsive_helper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -111,11 +112,11 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
             child: AlertDialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16.r)),
-              titlePadding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+              titlePadding: EdgeInsets.only(top: 20.h, left: 20.w, right: 20.w),
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
               actionsPadding:
-                  const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                  EdgeInsets.only(bottom: 16.h, left: 16.w, right: 16.w),
               actionsAlignment: MainAxisAlignment.center,
               title: Text(
                 'تم الحجز بنجاح',
@@ -280,7 +281,9 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                   child: Container(
                     width: double.infinity,
                     constraints: BoxConstraints(
-                      maxWidth: 1.sw >= 600 ? 500.w : double.infinity,
+                      maxWidth: ResponsiveHelper.isTablet(context)
+                          ? ResponsiveHelper.maxFormWidth
+                          : double.infinity,
                     ),
                     padding: EdgeInsets.all(24.w),
                     decoration: BoxDecoration(
@@ -314,14 +317,14 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16.h),
                             Card(
                               elevation: 2,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(12.r),
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.all(16),
+                                padding: EdgeInsets.all(16.r),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -334,22 +337,22 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(height: 12),
+                                    SizedBox(height: 12.h),
                                     _buildInfoRow(
                                         'الطبيب:', widget.doctorName, 14.sp),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 8.h),
                                     _buildInfoRow(
                                         'التخصص:', widget.specialty, 14.sp),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 8.h),
                                     _buildInfoRow(
                                         'التاريخ:', widget.date, 14.sp),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 8.h),
                                     _buildInfoRow('الوقت:', widget.time, 14.sp),
                                   ],
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            SizedBox(height: 24.h),
                             Text(
                               'معلومات المريض',
                               style: theme.textTheme.titleLarge?.copyWith(
@@ -358,8 +361,8 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 16),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16.h),
+                            SizedBox(height: 16.h),
                             TextFormField(
                               controller: _firstNameController,
                               style: const TextStyle(fontFamily: 'Cairo'),
@@ -370,7 +373,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                 prefixIcon: Icon(Icons.person_outline,
                                     color: theme.iconTheme.color),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderRadius: BorderRadius.circular(8.0.r),
                                 ),
                               ),
                               textInputAction: TextInputAction.next,
@@ -392,7 +395,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                 prefixIcon: Icon(Icons.person_outline,
                                     color: theme.iconTheme.color),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderRadius: BorderRadius.circular(8.0.r),
                                 ),
                               ),
                               textInputAction: TextInputAction.next,
@@ -421,7 +424,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                 prefixIcon: Icon(Icons.phone_android,
                                     color: theme.iconTheme.color),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderRadius: BorderRadius.circular(8.0.r),
                                 ),
                               ),
                               validator: (value) {
@@ -455,9 +458,9 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 24),
+                            SizedBox(height: 24.h),
                             SizedBox(
-                              height: 48,
+                              height: 48.h,
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed:
@@ -469,10 +472,10 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                   ),
                                 ),
                                 child: _isLoading
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
+                                    ? SizedBox(
+                                        width: 20.w,
+                                        height: 20.h,
+                                        child: const CircularProgressIndicator(
                                           strokeWidth: 2,
                                           color: Colors.white,
                                         ),
@@ -515,7 +518,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
             color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8.w),
         Text(
           value,
           style: theme.textTheme.bodyLarge?.copyWith(

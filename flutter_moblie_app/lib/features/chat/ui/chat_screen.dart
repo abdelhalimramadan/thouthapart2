@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -586,7 +587,7 @@ class _ChatScreenState extends State<ChatScreen> {
       children: [
         Flexible(
           child: Container(
-            constraints: BoxConstraints(maxWidth: 0.75.sw),
+            constraints: BoxConstraints(maxWidth: min(0.75.sw, 400.0)),
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             decoration: BoxDecoration(
               color: theme.brightness == Brightness.dark
@@ -622,7 +623,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
-        constraints: BoxConstraints(maxWidth: 0.75.sw),
+        constraints: BoxConstraints(maxWidth: min(0.75.sw, 400.0)),
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: _color2,
@@ -738,7 +739,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     borderRadius: BorderRadius.circular(16.r)),
               ),
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 0.75.sw),
+                constraints: BoxConstraints(maxWidth: min(0.75.sw, 400.0)),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [

@@ -17,7 +17,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _currentPage = 0;
   final int _numPages = 3;
 
-  // List of onboarding pages data
   final List<Map<String, String>> _pages = [
     {
       'image': 'assets/images/onboarding1.jpg',
@@ -61,71 +60,55 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final isTablet = constraints.maxWidth >= 600;
-            final bottomSpacing = constraints.maxHeight < 700 ? 20.h : 40.h;
+            final isSmallPhone = constraints.maxHeight < 700;
 
             return Stack(
               children: [
-            // Full screen gradient overlay
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: const Alignment(-0.8, -0.5),
-                  radius: 1.2,
-                  colors: [
-                    ColorsManager.layerBlur1.withAlpha(80),
-                    ColorsManager.layerBlur1.withAlpha(30),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.4, 1.0],
-                ),
-              ),
-            ),
-            // Bottom-right gradient overlay
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: const Alignment(0.8, 0.5),
-                  radius: 1.2,
-                  colors: [
-                    ColorsManager.layerBlur2.withAlpha(80),
-                    ColorsManager.layerBlur2.withAlpha(30),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.4, 1.0],
-                ),
-              ),
-            ),
+                // 1. Background Gradients (Kept in Stack for z-index)
+                _buildBackgroundGradients(),
 
-            PageView.builder(
-              controller: _pageController,
-              onPageChanged: _onPageChanged,
-              itemCount: _pages.length,
-              itemBuilder: (context, index) {
-                return DoctorImageAndText(
-                  imagePath: _pages[index]['image']!,
-                  title: _pages[index]['title']!,
-                  description: _pages[index]['description']!,
-                  key: ValueKey('onboarding_$index'),
-                );
-              },
-            ),
+                // 2. Main Content (Structural Column to avoid overlaps)
+                Column(
+                  children: [
+                    // Top Skip Button (Optional, if we want one)
+                    // ... or just leave the bottom skip
 
-                // Action Buttons Container
-                Positioned(
-                  bottom: bottomSpacing,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: isTablet ? 520.w : double.infinity,
+                    // Sliding Content
+                    Expanded(
+                      flex: isSmallPhone ? 4 : 5,
+                      child: PageView.builder(
+                        controller: _pageController,
+                        onPageChanged: _onPageChanged,
+                        itemCount: _pages.length,
+                        itemBuilder: (context, index) {
+                          return DoctorImageAndText(
+                            imagePath: _pages[index]['image']!,
+                            title: _pages[index]['title']!,
+                            description: _pages[index]['description']!,
+                            key: ValueKey('onboarding_$index'),
+                          );
+                        },
                       ),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: isTablet ? 48.w : 32.w),
+                    ),
+
+                    // Page Indicators
+                    PageIndicator(
+                      currentPage: _currentPage,
+                      pageCount: _pages.length,
+                    ),
+
+                    SizedBox(height: isSmallPhone ? 20.h : 30.h),
+
+                    // Action Buttons (CTA)
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 120.w : 32.w,
+                        vertical: 16.h,
+                      ),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxWidth: 520, // Strict px for tablet spread control
+                        ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -138,9 +121,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     curve: Curves.easeInOut,
                                   );
                                 } else {
-                                  if (mounted) {
-                                    _onSkipPressed();
-                                  }
+                                  if (mounted) _onSkipPressed();
                                 }
                               },
                             ),
@@ -151,9 +132,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   'ندخل في الموضوع علي طول',
                                   style: TextStyle(
                                     color: ColorsManager.darkBlue,
-                                    fontSize: isTablet ? 17.sp : 16.sp,
+                                    fontSize: 16.sp,
                                     fontFamily: 'Cairo',
                                     fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
                                   ),
                                 ),
                               ),
@@ -161,13 +143,54 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                       ),
                     ),
-                  ),
+
+                    SizedBox(height: isSmallPhone ? 10.h : 24.h),
+                  ],
                 ),
               ],
             );
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildBackgroundGradients() {
+    return Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: const Alignment(-0.8, -0.6),
+              radius: 1.4,
+              colors: [
+                ColorsManager.mainBlue.withAlpha(140),
+                ColorsManager.mainBlue.withAlpha(40),
+                Colors.transparent,
+              ],
+              stops: const [0.0, 0.45, 1.0],
+            ),
+          ),
+        ),
+        Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: const Alignment(0.9, 0.6),
+              radius: 1.4,
+              colors: [
+                ColorsManager.layerBlur2.withAlpha(140),
+                ColorsManager.layerBlur2.withAlpha(40),
+                Colors.transparent,
+              ],
+              stops: const [0.0, 0.45, 1.0],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -191,13 +214,13 @@ class PageIndicator extends StatelessWidget {
         (index) => AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           margin: EdgeInsets.symmetric(horizontal: 4.w),
-          width: currentPage == index ? 20.w : 8.w,
-          height: 8.h,
+          width: currentPage == index ? 22.r : 10.r,
+          height: 10.r,
           decoration: BoxDecoration(
             color: currentPage == index
                 ? ColorsManager.mainBlue
                 : Colors.grey.withAlpha(76),
-            borderRadius: BorderRadius.circular(4.r),
+            borderRadius: BorderRadius.circular(5.r),
           ),
         ),
       ),
@@ -219,7 +242,7 @@ class GetStartedButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 52.h,
+      height: 60.h, // Fixed professional height for better visibility
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -227,13 +250,13 @@ class GetStartedButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
           ),
-          elevation: 0,
+          elevation: 4,
         ),
         child: Text(
           isLastPage ? 'ابدأ الآن' : 'التالي',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 16.sp,
+            fontSize: 18.sp,
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
           ),
