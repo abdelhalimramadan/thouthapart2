@@ -88,7 +88,9 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
         _cityCtrl.text.trim() != _origCity ||
         _phoneCtrl.text.trim() != _origPhone ||
         _categoryCtrl.text.trim() != _origCategory;
-    if (changed != _hasChanges) setState(() => _hasChanges = changed);
+    
+    // Always call setState to reflect changes in the UI immediately
+    setState(() => _hasChanges = changed);
   }
 
   @override

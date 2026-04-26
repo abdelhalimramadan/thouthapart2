@@ -176,48 +176,135 @@ class _MyRequestsViewState extends State<MyRequestsView> {
 
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
-    return Center(
+    final isDark = theme.brightness == Brightness.dark;
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.assignment_late_outlined,
-              size: 80, color: Colors.grey.withValues(alpha: 0.5)),
-          SizedBox(height: 16),
+          Text(
+            'طلباتي',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontFamily: 'Cairo',
+              fontWeight: FontWeight.w700,
+              fontSize: 24,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 20),
           Text(
             'لا توجد طلبات حالياً',
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade600,
+              color: theme.colorScheme.primary,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
-            'ابدأ بإضافة طلباتك لتظهر هنا',
-            style: theme.textTheme.bodyMedium?.copyWith(
+            'جميع الطلبات الطبية التي تنشئها ستظهر هنا.',
+            style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 14,
-              color: Colors.grey.shade500,
+              color: isDark ? Colors.white70 : Colors.black87,
             ),
           ),
-          SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () => context.read<MyRequestsCubit>().loadRequests(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ColorsManager.mainBlue,
-              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+          Text(
+            'يمكنك إدارة طلباتك بسهولة:',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 14,
+              color: isDark ? Colors.white70 : Colors.black87,
             ),
-            child: Text(
-              'تحديث الصفحة',
-              style: TextStyle(
-                  fontFamily: 'Cairo', fontSize: 14, color: Colors.white),
+          ),
+          const SizedBox(height: 20),
+          _buildInstructionRow(
+            icon: Icons.edit_note_rounded,
+            iconColor: Colors.blue,
+            text: 'اضغط "تعديل" لتحديث تفاصيل الطلب (الوصف والموعد).',
+            isDark: isDark,
+          ),
+          const SizedBox(height: 10),
+          _buildInstructionRow(
+            icon: Icons.delete_sweep_rounded,
+            iconColor: Colors.red.shade400,
+            text: 'اضغط "حذف الطلب" لحذف الطلب نهائياً.',
+            isDark: isDark,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'ملاحظة مهمة:',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildInstructionRow(
+            icon: Icons.info_outline_rounded,
+            iconColor: Colors.orange,
+            text: 'إذا قام مريض بحجز أحد طلباتك وأضيف إلى الحجوزات القادمة، فلن تتمكن من تعديل هذا الطلب.',
+            isDark: isDark,
+          ),
+          const SizedBox(height: 10),
+          _buildInstructionRow(
+            icon: Icons.link_off_rounded,
+            iconColor: Colors.red,
+            text: 'عند حذف طلب، سيتم حذف جميع الحجوزات المعلقة المرتبطة به أيضاً.',
+            isDark: isDark,
+          ),
+          const SizedBox(height: 40),
+          Center(
+            child: ElevatedButton(
+              onPressed: () => context.read<MyRequestsCubit>().loadRequests(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorsManager.mainBlue,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text(
+                'تحديث الصفحة',
+                style: TextStyle(
+                    fontFamily: 'Cairo', fontSize: 15, color: Colors.white, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildInstructionRow({
+    required IconData icon,
+    required Color iconColor,
+    required String text,
+    required bool isDark,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Icon(icon, size: 18, color: iconColor),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 13,
+              height: 1.6,
+              color: isDark ? Colors.white60 : const Color(0xFF475569),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

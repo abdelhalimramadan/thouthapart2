@@ -12,11 +12,13 @@ class NotificationsCubit extends Cubit<NotificationsState> {
 
   /// Fetch all notifications from API
   Future<void> fetchNotifications({bool showLoading = true}) async {
-    if (showLoading) {
+    if (showLoading && !isClosed) {
       emit(const NotificationsState.loading());
     }
     final notifications = await _notificationRepo.getNotifications();
-    emit(NotificationsState.success(notifications));
+    if (!isClosed) {
+      emit(NotificationsState.success(notifications));
+    }
   }
 
   /// Mark a specific notification as read
@@ -32,7 +34,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   /// Mark all notifications as read
   Future<void> markAllAsRead() async {
     final currentState = state;
-    if (currentState is SuccessState) {
+    if (currentState is SuccessState && !isClosed) {
       final updated = currentState.notifications
           .map((notification) => notification.copyWith(readStatus: true))
           .toList();
@@ -40,7 +42,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     }
 
     final success = await _notificationRepo.markAllNotificationsAsRead();
-    if (success) {
+    if (success && !isClosed) {
       // Sync with backend in background without showing loading flicker.
       await fetchNotifications(showLoading: false);
     } else {

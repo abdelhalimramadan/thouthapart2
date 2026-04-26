@@ -13,6 +13,7 @@ class _DoctorHelpAndSupportScreenState extends State<DoctorHelpAndSupportScreen>
   final _messageController = TextEditingController();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isSending = false;
+  static const String _supportEmail = 'support@thoutha.page';
 
   @override
   void dispose() {
@@ -86,6 +87,39 @@ class _DoctorHelpAndSupportScreenState extends State<DoctorHelpAndSupportScreen>
               _buildFaqItem('لماذا لا يظهر رقم هاتفي للمرضى؟', 'يظهر الرقم فقط للمرضى الذين أكدت حجزهم لضمان جديتهم.'),
               const SizedBox(height: 24),
               _buildSectionTitle(theme, 'تواصل مع الدعم'),
+              const Text(
+                'يمكنك التواصل معنا مباشرة عبر البريد الإلكتروني:',
+                style: TextStyle(fontFamily: 'Cairo', fontSize: 13),
+              ),
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: () {
+                  // Optionally: launch mailto
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.email_outlined,
+                        size: 20, color: theme.colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      _supportEmail,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.primary,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'أو يمكنك إرسال مشكلتك عبر النموذج التالي:',
+                style: TextStyle(fontFamily: 'Cairo', fontSize: 13),
+              ),
+              const SizedBox(height: 12),
               Form(
                 key: _formKey,
                 child: Column(

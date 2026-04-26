@@ -15,6 +15,7 @@ import '../../features/doctor/ui/account_deletion_screen.dart';
 import '../../features/doctor/ui/doctor_home_screen.dart';
 import '../../features/doctor/ui/doctor_booking_records_screen.dart';
 import '../../features/doctor/ui/doctor_confirmed_appointments_screen.dart';
+import '../../features/doctor/ui/doctor_next_booking_screen.dart';
 import '../../features/appointments/ui/appointments_screen.dart';
 
 class AppRouter {
@@ -86,6 +87,10 @@ class AppRouter {
       case Routes.doctorHomeScreen:
         return MaterialPageRoute(
           builder: (context) => const DoctorHomeScreen(),
+        );
+      case Routes.doctorNextBookingScreen:
+        return MaterialPageRoute(
+          builder: (context) => const DoctorNextBookingScreen(),
         );
       case Routes.appointmentsScreen:
         return MaterialPageRoute(

@@ -16,7 +16,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isSending = false;
 
-  static const String _supportEmail = 'abdelhalim@thoutha.page';
+  static const String _supportEmail = 'support@thoutha.page';
 
   @override
   void dispose() {
@@ -94,23 +94,25 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
           ],
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width >= 600 ? 650 : double.infinity,
-          ),
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 24,
+      body: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width >= 600 ? 650 : double.infinity,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 24,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 // Intro
                 Text(
                   'لو واجهتك أي مشكلة تقنية أثناء استخدام تطبيق ثوثة، أو عندك استفسار بخصوص التسجيل أو الحساب، فريق الدعم الفني جاهز يساعدك.',
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.start,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontFamily: 'Cairo',
                     fontSize: 14,
@@ -154,7 +156,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'يمكنك التواصل معنا عبر البريد الإلكتروني:',
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.start,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontFamily: 'Cairo',
                     fontSize: 13,
@@ -166,11 +168,11 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                     // Optionally: launch mailto
                   },
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
                         _supportEmail,
-                        textAlign: TextAlign.right,
+                        textAlign: TextAlign.start,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontFamily: 'Cairo',
                           fontSize: 14,
@@ -385,8 +387,9 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildBullet(ThemeData theme, String text) {
     return Padding(
@@ -394,24 +397,24 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Text(
-              text,
-              textAlign: TextAlign.right,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontFamily: 'Cairo',
-                fontSize: 13,
-                height: 1.5,
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
           Text(
             '•',
             style: theme.textTheme.bodyMedium?.copyWith(
               fontFamily: 'Cairo',
               fontSize: 13,
               color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              textAlign: TextAlign.start,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontFamily: 'Cairo',
+                fontSize: 13,
+                height: 1.5,
+              ),
             ),
           ),
         ],

@@ -23,25 +23,26 @@ class PasswordValidations extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        buildValidationRow('حرف صغير واحد على الأقل', hasLowerCase),
+        buildValidationRow(context, 'حرف صغير واحد على الأقل', hasLowerCase),
         verticalSpace(2),
-        buildValidationRow('حرف كبير واحد على الأقل', hasUpperCase),
+        buildValidationRow(context, 'حرف كبير واحد على الأقل', hasUpperCase),
         verticalSpace(2),
-        buildValidationRow('رمز خاص واحد على الأقل', hasSpecialCharacters),
+        buildValidationRow(context, 'رمز خاص واحد على الأقل', hasSpecialCharacters),
         verticalSpace(2),
-        buildValidationRow('رقم واحد على الأقل', hasNumber),
+        buildValidationRow(context, 'رقم واحد على الأقل', hasNumber),
         verticalSpace(2),
-        buildValidationRow('8 أحرف على الأقل', hasMinLength),
+        buildValidationRow(context, '8 أحرف على الأقل', hasMinLength),
       ],
     );
   }
 
-  Widget buildValidationRow(String text, bool hasValidated) {
+  Widget buildValidationRow(BuildContext context, String text, bool hasValidated) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
-        const CircleAvatar(
+        CircleAvatar(
           radius: 2.5,
-          backgroundColor: ColorsManager.gray,
+          backgroundColor: isDarkMode ? Colors.white70 : ColorsManager.gray,
         ),
         horizontalSpace(6),
         Text(
@@ -50,7 +51,9 @@ class PasswordValidations extends StatelessWidget {
             decoration: hasValidated ? TextDecoration.lineThrough : null,
             decorationColor: Colors.green,
             decorationThickness: 2,
-            color: hasValidated ? ColorsManager.gray : ColorsManager.darkBlue,
+            color: hasValidated 
+                ? ColorsManager.gray 
+                : (isDarkMode ? Colors.white : ColorsManager.darkBlue),
             fontWeight: hasValidated ? FontWeight.normal : FontWeight.w500,
           ),
         )

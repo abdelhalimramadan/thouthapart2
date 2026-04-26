@@ -113,7 +113,9 @@ class ApiService {
         if (code == 403) return 'ممنوع الوصول (403)';
         if (code == 404) return 'الرابط غير موجود (404)';
         if (code != null && code >= 500) return 'خطأ في الخادم ($code)';
-        return 'خطأ HTTP $code${serverMsg.isNotEmpty ? ": $serverMsg" : ""}';
+        return serverMsg.toString().isNotEmpty 
+            ? serverMsg.toString() 
+            : 'خطأ HTTP $code';
       default:
         return 'خطأ غير متوقع: ${e.message ?? e.type.name}';
     }
@@ -684,7 +686,27 @@ class ApiService {
       print('Status: ${e.response?.statusCode}');
       print('Data: ${e.response?.data}');
       print('Message: ${e.message}');
-      return _fail(_dioError(e), code: e.response?.statusCode);
+      
+      String errorMsg = _dioError(e);
+      
+      // Specifically handle duplicate booking error
+      final code = e.response?.statusCode;
+      if (code == 400 || code == 409 || code == 404) {
+        final data = e.response?.data;
+        final serverMsg = data is Map 
+            ? (data['messageAr'] ?? data['messageEn'] ?? data['message'] ?? '').toString().toLowerCase()
+            : data?.toString().toLowerCase() ?? '';
+            
+        if (serverMsg.contains('already booked') || 
+            serverMsg.contains('تم الحجز') || 
+            serverMsg.contains('duplicate') ||
+            serverMsg.contains('static resource') ||
+            serverMsg.contains('المورد الثابت')) {
+          errorMsg = 'لقد تم الحجز مسبقا بنفس الرقم';
+        }
+      }
+      
+      return _fail(errorMsg, code: code);
     } catch (e) {
       print('=== Unexpected error in createAppointment ===');
       print('Error: $e');

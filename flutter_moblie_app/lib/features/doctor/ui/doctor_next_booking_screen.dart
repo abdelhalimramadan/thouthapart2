@@ -20,6 +20,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
   List<Map<String, dynamic>> _bookings = [];
   bool _isLoading = true;
   String? _errorMessage;
+  bool _hasCheckedArguments = false;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -41,6 +42,14 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
             _isLoading = false;
             _errorMessage = null;
           });
+
+          // Handle navigation from notification
+          if (!_hasCheckedArguments) {
+            _hasCheckedArguments = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _handleArguments();
+            });
+          }
         } else {
           setState(() {
             _isLoading = false;
@@ -56,6 +65,54 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           _errorMessage = 'حدث خطأ: ${e.toString()}';
           _bookings = [];
         });
+      }
+    }
+  }
+
+  void _handleArguments() {
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null && args.containsKey('appointmentId')) {
+      final String? targetId = args['appointmentId']?.toString();
+      if (targetId != null && targetId.isNotEmpty) {
+        // Try to find the appointment in the list
+        final booking = _bookings.firstWhere(
+          (b) => b['id']?.toString() == targetId,
+          orElse: () => {},
+        );
+
+        if (booking.isNotEmpty) {
+          final width = MediaQuery.of(context).size.width;
+          final baseFontSize = width * 0.04;
+
+          // Parse dateTime for display
+          final String rawDateTime = booking['appointmentDate'] ?? '';
+          String displayDate = booking['date'] ?? 'غير محدد';
+          String displayTime = booking['time'] ?? 'غير محدد';
+
+          if (rawDateTime.isNotEmpty) {
+            try {
+              final dt = DateTime.parse(rawDateTime);
+              displayDate = DateFormat('dd/MM/yyyy').format(dt);
+              displayTime = DateFormat('hh:mm a', 'ar')
+                  .format(dt)
+                  .replaceAll('AM', 'صباحاً')
+                  .replaceAll('PM', 'مساءً');
+            } catch (_) {}
+          }
+
+          _showBookingDetails(
+            context: context,
+            patientName:
+                '${booking['patientFirstName'] ?? 'مريض'} ${booking['patientLastName'] ?? ''}'
+                    .trim(),
+            phone: booking['patientPhoneNumber'] ?? 'غير متوفر',
+            date: displayDate,
+            time: displayTime,
+            service: booking['categoryName'] ?? 'تخصص عام',
+            baseFontSize: baseFontSize,
+          );
+        }
       }
     }
   }

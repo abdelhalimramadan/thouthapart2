@@ -14,6 +14,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   List<Map<String, dynamic>> _allAppointments = [];
   bool _isLoading = true;
   String _selectedFilter = 'الكل';
+  bool _hasCheckedArguments = false;
 
   @override
   void initState() {
@@ -52,6 +53,34 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         _applyFilter();
         _isLoading = false;
       });
+
+      // Handle navigation from notification after loading
+      if (!_hasCheckedArguments) {
+        _hasCheckedArguments = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _handleArguments();
+        });
+      }
+    }
+  }
+
+  void _handleArguments() {
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null && args.containsKey('appointmentId')) {
+      final String? targetId = args['appointmentId']?.toString();
+      if (targetId != null && targetId.isNotEmpty) {
+        // Try to find the appointment in the list
+        // Note: We search in _allAppointments to ignore current filter
+        final appointment = _allAppointments.firstWhere(
+          (appt) => appt['id']?.toString() == targetId || appt['requestId']?.toString() == targetId,
+          orElse: () => {},
+        );
+
+        if (appointment.isNotEmpty) {
+          // If found, show its details
+          _showAppointmentDetails(context, appointment);
+        }
+      }
     }
   }
 

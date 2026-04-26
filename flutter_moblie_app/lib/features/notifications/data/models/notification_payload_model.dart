@@ -22,6 +22,7 @@ class NotificationPayloadModel {
   final String? appointmentTime;
   final String? patientId;
   final String? patientName;
+  final String? notificationId;
   final Map<String, String> rawData;
 
   NotificationPayloadModel({
@@ -37,6 +38,7 @@ class NotificationPayloadModel {
     this.appointmentTime,
     this.patientId,
     this.patientName,
+    this.notificationId,
     Map<String, String>? rawData,
   }) : rawData = rawData ?? {};
 
@@ -65,6 +67,7 @@ class NotificationPayloadModel {
       appointmentTime: _safeStringOrNull(data['appointmentTime']),
       patientId: _safeStringOrNull(data['patientId']),
       patientName: _safeStringOrNull(data['patientName']),
+      notificationId: _safeStringOrNull(data['notificationId'] ?? data['id']),
       rawData: stringMap,
     );
   }
@@ -105,6 +108,7 @@ class NotificationPayloadModel {
       appointmentTime: data['appointmentTime'],
       patientId: data['patientId'],
       patientName: data['patientName'],
+      notificationId: data['notificationId'] ?? data['id'],
       rawData: data,
     );
   }
@@ -148,6 +152,7 @@ class NotificationPayloadModel {
       'appointmentTime': appointmentTime,
       'patientId': patientId,
       'patientName': patientName,
+      'notificationId': notificationId,
       ...rawData,
     };
   }

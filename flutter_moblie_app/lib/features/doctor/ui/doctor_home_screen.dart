@@ -32,6 +32,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   bool _isLoadingName = true;
 
   List<Map<String, dynamic>> _pendingAppointments = [];
+  List<Map<String, dynamic>> _approvedAppointments = [];
   bool _isLoadingAppointments = true;
   String? _appointmentsError;
 
@@ -40,7 +41,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   void initState() {
     super.initState();
     // Run both fetches in parallel — faster startup
-    Future.wait([_fetchDoctorName(), _fetchPendingAppointments()]);
+    Future.wait([_fetchDoctorName(), _fetchAllAppointments()]);
   }
 
   // ── Data Fetching ──────────────────────────────────────────────
@@ -100,7 +101,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     }
   }
 
-  Future<void> _fetchPendingAppointments() async {
+  Future<void> _fetchAllAppointments() async {
     if (!mounted) return;
     setState(() {
       _isLoadingAppointments = true;
@@ -108,31 +109,30 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     });
 
     try {
-      print('=== DEBUG: Calling getPendingAppointments() ===');
-      final result = await _apiService.getPendingAppointments();
+      final results = await Future.wait([
+        _apiService.getPendingAppointments(),
+        _apiService.getApprovedAppointments(),
+      ]);
 
-      print('=== DEBUG: API Response: $result ===');
+      final pendingResult = results[0];
+      final approvedResult = results[1];
 
       if (!mounted) return;
 
-      if (result['success'] == true) {
-        final data = result['data'];
-        print('=== DEBUG: Data received: $data ===');
+      if (pendingResult['success'] == true && approvedResult['success'] == true) {
         setState(() {
-          _pendingAppointments = List<Map<String, dynamic>>.from(data as List);
+          _pendingAppointments = List<Map<String, dynamic>>.from(pendingResult['data'] as List);
+          _approvedAppointments = List<Map<String, dynamic>>.from(approvedResult['data'] as List);
           _isLoadingAppointments = false;
         });
       } else {
-        final error = result['error']?.toString() ?? 'فشل في تحميل الحجوزات';
-        print('=== DEBUG: API Error: $error ===');
+        final error = (pendingResult['error'] ?? approvedResult['error'])?.toString() ?? 'فشل في تحميل الحجوزات';
         setState(() {
           _appointmentsError = error;
           _isLoadingAppointments = false;
         });
       }
-    } catch (e, stack) {
-      print('=== DEBUG: Exception: $e ===');
-      print('=== DEBUG: Stack trace: $stack ===');
+    } catch (e) {
       if (mounted)
         setState(() {
           _isLoadingAppointments = false;
@@ -140,6 +140,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         });
     }
   }
+
+  Future<void> _fetchPendingAppointments() => _fetchAllAppointments();
 
   // ── Actions ────────────────────────────────────────────────────
 
@@ -445,7 +447,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       drawer: const DoctorDrawer(),
       appBar: _buildAppBar(cs, tt, theme),
       body: RefreshIndicator(
-        onRefresh: _fetchPendingAppointments,
+        onRefresh: _fetchAllAppointments,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
@@ -453,8 +455,17 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
             children: [
               _buildGreeting(),
               _buildSectionTitle('حجوزاتي القادمة'),
-              _buildAppointmentsSection(),
-              SizedBox(height: 40),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.38,
+                child: _buildAppointmentsList(_pendingAppointments, isPending: true),
+              ),
+              const SizedBox(height: 10),
+              _buildSectionTitle('الحالات المؤكدة'),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.38,
+                child: _buildAppointmentsList(_approvedAppointments, isPending: false),
+              ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -614,27 +625,27 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     );
   }
 
-  // ── Appointments section ──────────────────────────────────────
-  Widget _buildAppointmentsSection() {
+  // ── Appointments list builder ──────────────────────────────────
+  Widget _buildAppointmentsList(List<Map<String, dynamic>> appointments, {required bool isPending}) {
     if (_isLoadingAppointments) {
-      return Padding(
-        padding: EdgeInsets.symmetric(vertical: 40),
-        child: const Center(child: CircularProgressIndicator()),
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (_appointmentsError != null) {
+    if (_appointmentsError != null && isPending) { // Show error only in the first section
       return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Column(
           children: [
             Text(_appointmentsError!,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     fontFamily: 'Cairo', color: Colors.redAccent)),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             TextButton.icon(
-              onPressed: _fetchPendingAppointments,
+              onPressed: _fetchAllAppointments,
               icon: const Icon(Icons.refresh),
               label: const Text('إعادة المحاولة',
                   style: TextStyle(fontFamily: 'Cairo')),
@@ -644,72 +655,46 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       );
     }
 
-    if (_pendingAppointments.isEmpty) {
+    if (appointments.isEmpty) {
       final isDarkMode = Theme.of(context).brightness == Brightness.dark;
       return Center(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icon & Title
               Icon(
-                Icons.calendar_today_outlined,
-                size: 48,
+                isPending ? Icons.calendar_today_outlined : Icons.check_circle_outline,
+                size: 40,
                 color: isDarkMode ? Colors.white30 : Colors.grey[400],
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 12),
               Text(
-                'لا توجد حجوزات حالياً',
+                isPending ? 'لا توجد حجوزات حالياً' : 'لا توجد حالات مؤكدة',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w700,
-                  fontSize: 17,
+                  fontSize: 15,
                   color: isDarkMode ? Colors.white : const Color(0xFF0C4A6E),
                 ),
               ),
-              SizedBox(height: 16),
-
-              // Intro text
-              Text(
-                'عند قيام أي مريض بحجز موعد، سيظهر هنا اسمه ورقم هاتفه.',
-                textAlign: TextAlign.right,
-                textDirection: ui.TextDirection.rtl,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 13.5,
-                  height: 1.6,
-                  color: isDarkMode ? Colors.white : const Color(0xFF334155),
+              if (isPending) ...[
+                const SizedBox(height: 12),
+                _buildInstructionItem(
+                  isDarkMode: isDarkMode,
+                  icon: Icons.check_circle_outline,
+                  iconColor: const Color(0xFF16A34A),
+                  text: 'قبول الحجز لإضافته للحالات المؤكدة.',
                 ),
-              ),
-              Text(
-                'يمكنك التواصل معه للتأكيد، ثم:',
-                textAlign: TextAlign.right,
-                textDirection: ui.TextDirection.rtl,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 13.5,
-                  height: 1.6,
-                  color: isDarkMode ? Colors.white : const Color(0xFF334155),
+                const SizedBox(height: 6),
+                _buildInstructionItem(
+                  isDarkMode: isDarkMode,
+                  icon: Icons.cancel_outlined,
+                  iconColor: const Color(0xFFE7000B),
+                  text: 'رفض الحجز لإزالته نهائياً.',
                 ),
-              ),
-              SizedBox(height: 12),
-
-              // Section 1: Accept / Delete
-              _buildInstructionItem(
-                isDarkMode: isDarkMode,
-                icon: Icons.check_circle_outline,
-                iconColor: const Color(0xFF16A34A),
-                text: 'اضغط "قبول" لإضافة الحجز إلى سجل الحجوزات كـ حالة مؤكدة.',
-              ),
-              SizedBox(height: 8),
-              _buildInstructionItem(
-                isDarkMode: isDarkMode,
-                icon: Icons.cancel_outlined,
-                iconColor: const Color(0xFFE7000B),
-                text: 'اضغط "حذف" لإلغاء الحجز وإزالته نهائياً.',
-              ),
+              ],
             ],
           ),
         ),
@@ -717,15 +702,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     }
 
     return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.only(top: 10, bottom: 8),
-      itemCount: _pendingAppointments.length,
-      separatorBuilder: (_, __) => SizedBox(height: 16),
+      padding: const EdgeInsets.only(top: 10, bottom: 20, left: 16, right: 16),
+      itemCount: appointments.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (_, i) {
-        final appointment = _pendingAppointments[i];
+        final appointment = appointments[i];
 
-        // Parse dateTime correctly using the correct API key 'appointmentDate'
         final String rawDateTime = appointment['appointmentDate'] ?? '';
         String displayDate = appointment['date'] ?? 'غير محدد';
         String displayTime = appointment['time'] ?? 'غير محدد';
@@ -733,37 +715,137 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         if (rawDateTime.isNotEmpty) {
           try {
             final dt = DateTime.parse(rawDateTime);
-            // Format: 18/03/2026
             displayDate = DateFormat('dd/MM/yyyy').format(dt);
-            // Format: 04:00 مساءً
             displayTime = DateFormat('hh:mm a', 'ar')
                 .format(dt)
                 .replaceAll('AM', 'صباحاً')
                 .replaceAll('PM', 'مساءً');
-          } catch (e) {
-            // Fallback to raw if parsing fails
-            if (rawDateTime.contains('T')) {
-              final parts = rawDateTime.split('T');
-              displayDate = parts[0];
-              displayTime = parts[1].substring(0, 5);
-            }
-          }
+          } catch (_) {}
         }
 
         return _AppointmentCard(
           appointment: appointment,
           displayDate: displayDate,
           displayTime: displayTime,
-          onTap: () => _showAppointmentDetails(
-            context: context,
-            appointmentId: appointment['id'] ?? 0,
-            patientName:
-                '${appointment['patientFirstName'] ?? 'مريض'} ${appointment['patientLastName'] ?? ''}'
-                    .trim(),
-            phone: appointment['patientPhoneNumber'] ?? 'غير متوفر',
-            date: displayDate,
-            time: displayTime,
-            service: appointment['categoryName'] ?? 'تخصص عام',
+          onTap: () {
+             if (isPending) {
+                _showAppointmentDetails(
+                  context: context,
+                  appointmentId: appointment['id'] ?? 0,
+                  patientName: '${appointment['patientFirstName'] ?? 'مريض'} ${appointment['patientLastName'] ?? ''}'.trim(),
+                  phone: appointment['patientPhoneNumber'] ?? 'غير متوفر',
+                  date: displayDate,
+                  time: displayTime,
+                  service: appointment['categoryName'] ?? 'تخصص عام',
+                );
+             } else {
+                // For confirmed cases, maybe just show details without accept/reject?
+                _showConfirmedDetails(
+                  context: context,
+                  appointment: appointment,
+                  date: displayDate,
+                  time: displayTime,
+                );
+             }
+          },
+        );
+      },
+    );
+  }
+
+  void _showConfirmedDetails({
+    required BuildContext context,
+    required Map<String, dynamic> appointment,
+    required String date,
+    required String time,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final patientName = '${appointment['patientFirstName'] ?? 'مريض'} ${appointment['patientLastName'] ?? ''}'.trim();
+    final phone = appointment['patientPhoneNumber'] ?? 'غير متوفر';
+    final service = appointment['categoryName'] ?? 'تخصص عام';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          decoration: BoxDecoration(
+            color: theme.cardTheme.color ?? theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.only(
+            top: 20,
+            left: 20,
+            right: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 28,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[600] : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                patientName,
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Divider(color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
+              const SizedBox(height: 12),
+              _buildDetailRow(
+                context: context,
+                icon: Icons.phone_outlined,
+                label: 'رقم الهاتف',
+                value: phone,
+              ),
+              const SizedBox(height: 14),
+              _buildDetailRow(
+                context: context,
+                icon: Icons.calendar_month_outlined,
+                label: 'التاريخ',
+                value: date,
+              ),
+              const SizedBox(height: 14),
+              _buildDetailRow(
+                context: context,
+                icon: Icons.access_time_outlined,
+                label: 'الوقت',
+                value: time,
+              ),
+              const SizedBox(height: 14),
+              _buildDetailRow(
+                context: context,
+                icon: Icons.medical_services_outlined,
+                label: 'التخصص',
+                value: service,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Text('إغلاق', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -834,8 +916,8 @@ class _AppointmentCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 16),
-        padding: EdgeInsets.all(14),
+        margin: const EdgeInsets.only(bottom: 0), // Removed horizontal margin
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: isDark ? Colors.grey[900]?.withAlpha(200) : Colors.white,
           borderRadius: BorderRadius.circular(14),

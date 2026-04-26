@@ -3,7 +3,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/features/notifications/logic/notifications_cubit.dart';
+import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:intl/intl.dart' as intl;
 
 /// Notifications Screen - Displays push notifications
@@ -364,16 +366,27 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {
+          onTap: () async {
+            // 1. Mark as read if not already read
             if (!notification.readStatus) {
               _cubit.markAsRead(notification.id);
             }
-            _showNotificationDetailsSheet(
-              context,
-              notification,
-              createdDate,
-              timeStr,
-            );
+
+            // 2. Navigate to Upcoming Appointments (Hujoozat al-Qadima)
+            final appointmentId = notification.appointmentId;
+            final doctorId = await SharedPrefHelper.getInt('doctor_id');
+            
+            if (context.mounted) {
+              Navigator.pushNamed(
+                context,
+                doctorId != 0 
+                  ? Routes.doctorNextBookingScreen 
+                  : Routes.appointmentsScreen,
+                arguments: appointmentId != null && appointmentId.isNotEmpty 
+                  ? {'appointmentId': appointmentId} 
+                  : null,
+              );
+            }
           },
           child: Stack(
         children: [
@@ -461,69 +474,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       fontFamily: 'Cairo',
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.schedule_rounded,
-                        size: 12,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
-                      ),
-                      SizedBox(width: 4),
-                       Text(
-                         timeStr.isNotEmpty ? timeStr : 'وقت غير معروف',
-                         style: TextStyle(
-                           fontSize: 10,
-                           color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                           fontFamily: 'Cairo',
-                         ),
-                       ),
-                    ],
-                  ),
                 ],
-              ),
-            ),
-            trailing: PopupMenuButton(
-              onSelected: (value) {
-                if (value == 'mark_read') {
-                  _cubit.markAsRead(notification.id);
-                } else if (value == 'delete') {
-                  _cubit.deleteNotification(notification.id);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                     const SnackBar(
-                       content: Text('تم حذف الإشعار'),
-                       duration: Duration(seconds: 2),
-                     ),
-                   );
-                }
-              },
-              itemBuilder: (context) => [
-                  if (!notification.readStatus)
-                   const PopupMenuItem(
-                     value: 'mark_read',
-                     child: Text('وضع علامة كمقروء'),
-                   ),
-                 const PopupMenuItem(
-                   value: 'delete',
-                   child: Text('حذف'),
-                 ),
-              ],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              icon: Icon(
-                Icons.more_horiz_rounded,
-                size: 20,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
           ),
         ],
-          ),
-        ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 
   void _showNotificationDetailsSheet(
     BuildContext context,
@@ -582,41 +542,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       color: isDark ? Colors.white : theme.colorScheme.onSurface.withValues(alpha: 0.85),
                     ),
                   ),
-                  SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: theme.dividerColor.withValues(alpha: 0.35),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                           'الوقت: $shownRelativeTime',
-                           style: TextStyle(
-                             fontFamily: 'Cairo',
-                             fontSize: 12,
-                             color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
-                           ),
-                         ),
-                         SizedBox(height: 4),
-                         Text(
-                           'التاريخ: $fullDate',
-                           style: TextStyle(
-                             fontFamily: 'Cairo',
-                             fontSize: 12,
-                             color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
-                           ),
-                         ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                 ],
               ),
             ),
@@ -625,7 +551,4 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       },
     );
   }
-
-
-
 }

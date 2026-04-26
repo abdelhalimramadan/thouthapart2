@@ -201,7 +201,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              result['message'] ?? 'فشل في إنشاء الموعد',
+              result['error'] ?? 'فشل في إنشاء الموعد',
               style: const TextStyle(fontFamily: 'Cairo'),
             ),
             backgroundColor: Colors.red,

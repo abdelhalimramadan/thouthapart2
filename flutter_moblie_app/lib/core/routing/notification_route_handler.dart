@@ -1,4 +1,7 @@
 import 'dart:developer';
+import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thoutha_mobile_app/features/notifications/logic/notifications_cubit.dart';
+import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:thoutha_mobile_app/core/routing/navigator_service.dart';
 import 'package:thoutha_mobile_app/features/notifications/data/models/notification_payload_model.dart';
@@ -26,12 +29,26 @@ class NotificationRouteHandler {
       // Map payload fields to routes
       // Only navigate if we have confident data to pass
 
+      // Mark notification as read if we have an ID
+      if (payload.notificationId != null) {
+        final notificationId = int.tryParse(payload.notificationId!);
+        if (notificationId != null) {
+          try {
+            getIt<NotificationsCubit>().markAsRead(notificationId);
+            log('NotificationRouteHandler: Marked notification $notificationId as read');
+          } catch (e) {
+            log('NotificationRouteHandler: Could not mark as read: $e');
+          }
+        }
+      }
+
       if (payload.appointmentId?.isNotEmpty == true) {
         // Navigate to appointments if appointmentId is present
-        targetRoute = Routes.appointmentsScreen;
-        arguments = {
-          'appointmentId': payload.appointmentId,
-        };
+        final doctorId = await SharedPrefHelper.getInt('doctor_id');
+        targetRoute = doctorId != 0 
+          ? Routes.doctorNextBookingScreen 
+          : Routes.appointmentsScreen;
+        arguments = {'appointmentId': payload.appointmentId};
         log('NotificationRouteHandler: routing to appointments with ID: ${payload.appointmentId}');
       }
 

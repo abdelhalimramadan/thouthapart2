@@ -22,5 +22,6 @@ class Routes {
   static const String doctorBookingRecordsScreen = '/doctor-booking-records';
   static const String doctorConfirmedAppointmentsScreen =
       '/doctor-confirmed-appointments';
+  static const String doctorNextBookingScreen = '/doctor-next-booking';
 }
 
