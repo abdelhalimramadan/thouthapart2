@@ -217,7 +217,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                     style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 18,
-                        fontWeight: FontWeight.bold)),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87)),
                 content: SizedBox(
                   width: double.maxFinite,
                   child: Column(
@@ -250,7 +251,9 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                               title: Text(
                                 filteredItems[index],
                                 style: TextStyle(
-                                    fontFamily: 'Cairo', fontSize: 16),
+                                    fontFamily: 'Cairo', 
+                                    fontSize: 16,
+                                    color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
                                 textAlign: TextAlign.right,
                               ),
                               onTap: () {
@@ -299,14 +302,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
         centerTitle: true,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              'assets/images/splash-logo.png',
-              width: 36,
-              height: 36,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(width: 8),
             Text(
               'الملف الشخصي',
               style: textTheme.titleLarge?.copyWith(
@@ -314,6 +311,13 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
+            ),
+            const SizedBox(width: 8),
+            Image.asset(
+              'assets/images/splash-logo.png',
+              width: 36,
+              height: 36,
+              fit: BoxFit.contain,
             ),
           ],
         ),
@@ -428,6 +432,9 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                           colors: [Colors.grey.shade400, Colors.grey.shade400],
                         ),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFF021433).withValues(alpha: 0.18),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: (_hasChanges && !_isSaving)
@@ -592,6 +599,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
               color: isDark ? Colors.white : const Color(0xFF4B5563),
             ),
           ),
+
           SizedBox(height: 20),
           Container(
             padding: EdgeInsets.all(16),
@@ -728,7 +736,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 14,
-                  color: const Color(0xFF9CA3AF),
+                  color: isDark ? Colors.white : const Color(0xFF9CA3AF),
                 ),
               ),
             ],
@@ -763,6 +771,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     TextAlign textAlign = TextAlign.right,
     String hintText = '',
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 12),
@@ -790,7 +799,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 14,
-                  color: const Color(0xFF9CA3AF),
+                  color: isDark ? Colors.white : const Color(0xFF9CA3AF),
                 ),
               ),
             ],
@@ -807,7 +816,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
               hintStyle: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 14,
-                color: const Color(0xFFD1D5DB),
+                color: isDark ? Colors.white54 : const Color(0xFFD1D5DB),
               ),
               contentPadding:
                   EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -837,7 +846,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
               fontFamily: 'Cairo',
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF1F2937),
+              color: isDark ? Colors.white : const Color(0xFF1F2937),
             ),
           ),
         ],
@@ -858,6 +867,11 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
   }
 
   Widget _divider() {
-    return Divider(height: 1, color: const Color(0xFFF3F4F6), thickness: 1.2);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Divider(
+      height: 1,
+      color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
+      thickness: 1.2,
+    );
   }
 }

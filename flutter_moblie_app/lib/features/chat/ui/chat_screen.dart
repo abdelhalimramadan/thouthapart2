@@ -40,6 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _chatMode = false;
   String? _sessionId;
   String? _activeQuestionId;
+  bool _isEnglish = false;
   List<Map<String, dynamic>> _categories = []; // قائمة الكاتيجوريات من API
 
   final List<_FlowItem> _flowItems = <_FlowItem>[];
@@ -55,14 +56,17 @@ class _ChatScreenState extends State<ChatScreen> {
       if (mounted) setState(() {});
     });
     _loadCategories(); // جلب الكاتيجوريات عند البداية
-    _startSessionOnce();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startSessionOnce();
+    });
   }
 
   Future<void> _startSessionOnce() async {
     if (_isLoading || _sessionId != null || _flowItems.isNotEmpty) return;
-    setState(() => _isLoading = true);
+    final locale = Localizations.localeOf(context).languageCode;
+    _isEnglish = (locale == 'en');
     try {
-      final res = await _dio.post('/session/start', data: {'language': 'ar'});
+      final res = await _dio.post('/session/start', data: {'language': _isEnglish ? 'en' : 'ar'});
       final data = res.data;
       if (data is Map && data['session_id'] != null) {
         _sessionId = data['session_id'].toString();
@@ -114,12 +118,15 @@ class _ChatScreenState extends State<ChatScreen> {
       final result = data['result'];
       String? category;
       if (result is Map) {
-        category = (result['category'] ?? result['category_en'])?.toString();
+        category = (_isEnglish 
+            ? (result['category_en'] ?? result['category'])
+            : (result['category'] ?? result['category_en']))?.toString();
       }
       if (category != null && category.trim().isNotEmpty) {
         setState(() {
           _flowItems.add(_FlowItem.result(
-              text: '✅ تم تحديد الفئة: $category', category: category));
+              text: _isEnglish ? '✅ Category selected: $category' : '✅ تم تحديد الفئة: $category', 
+              category: category));
         });
         return true;
       }
@@ -175,6 +182,12 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _submitAnswer(_FlowQuestion q, _FlowAnswer a) async {
     if (_sessionId == null || _sessionId!.isEmpty) return;
 
+    if (a.text.toLowerCase().contains('english')) {
+      _isEnglish = true;
+    } else if (a.text.contains('عربي') || a.text.contains('العربية')) {
+      _isEnglish = false;
+    }
+
     setState(() {
       _isLoading = true;
       _activeQuestionId = null;
@@ -187,7 +200,9 @@ class _ChatScreenState extends State<ChatScreen> {
     if (isOther) {
       setState(() {
         _flowItems.add(_FlowItem.result(
-            text: 'من فضلك اكتب رسالتك بالتفصيل عشان أقدر أساعدك بشكل أفضل:'));
+            text: _isEnglish 
+                ? 'Please write your message in detail so I can help you better:' 
+                : 'من فضلك اكتب رسالتك بالتفصيل عشان أقدر أساعدك بشكل أفضل:'));
         _chatMode = true;
         _isLoading = false;
       });
@@ -205,8 +220,9 @@ class _ChatScreenState extends State<ChatScreen> {
       if (!_processResponse(data)) {
         setState(() {
           _flowItems.add(_FlowItem.result(
-            text:
-                'عذراً، أحتاج المزيد من المعلومات. من فضلك اكتب رسالة بالتفصيل عشان أقدر أفهم احتياجك بشكل أفضل:',
+            text: _isEnglish
+                ? 'Sorry, I need more information. Please write a detailed message so I can better understand your needs:'
+                : 'عذراً، أحتاج المزيد من المعلومات. من فضلك اكتب رسالة بالتفصيل عشان أقدر أفهم احتياجك بشكل أفضل:',
           ));
           _chatMode = true;
         });
@@ -232,7 +248,9 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     _scrollToBottom();
 
-    const errorMsg = 'عذراً، حدث خطأ في الاتصال. حاول مرة أخرى.';
+    final errorMsg = _isEnglish 
+        ? 'Sorry, a connection error occurred. Please try again.'
+        : 'عذراً، حدث خطأ في الاتصال. حاول مرة أخرى.';
     try {
       final res = await _dio
           .post('/chat', data: {'message': msg, 'session_id': _sessionId});
@@ -264,6 +282,7 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       final res = await _dio.get('/category/getCategories');
       final data = res.data;
+      debugPrint('ChatBot: Categories API raw data: $data');
 
       final List? raw = data is List
           ? data
@@ -295,11 +314,13 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       }
     } catch (_) {}
+    
+    debugPrint('ChatBot: No match found for $categoryName. Available: ${_categories.map((e) => "${e['name']}/${e['name_ar']}").toList()}');
     return null;
   }
 
   String _normalize(String s) {
-    return s
+    String res = s
         .replaceAll('أ', 'ا')
         .replaceAll('إ', 'ا')
         .replaceAll('آ', 'ا')
@@ -307,51 +328,143 @@ class _ChatScreenState extends State<ChatScreen> {
         .replaceAll('ى', 'ي')
         .replaceAll(RegExp(r'[^\u0621-\u064A0-9a-zA-Z]'), '')
         .toLowerCase();
+    
+    // Remove "ال" (definite article) at start or after "و" (and)
+    if (res.startsWith('ال')) {
+      res = res.substring(2);
+    }
+    res = res.replaceAll('وال', 'و');
+    
+    return res;
   }
 
   String _mapToAppCategory(String raw) {
-    const map = <String, String>{
-      'تبييض الأسنان': 'تنظيف وتبييض الأسنان',
-      'Teeth Whitening': 'تنظيف وتبييض الأسنان',
-      'زراعة الأسنان': 'زراعة الأسنان',
-      'Dental Implants': 'زراعة الأسنان',
-      'حشوات الأسنان': 'حشو تجميلي',
+    // This is now used only for UI display if needed elsewhere, 
+    // but we'll mainly use the logic in _openCategory.
+    final ar = _getArabicCanonical(raw);
+    return _isEnglish ? _getEnglishName(ar) : ar;
+  }
+
+  String _getArabicCanonical(String raw) {
+    final clean = raw.trim();
+    final Map<String, String> synonyms = {
+      'Cosmetic Filling': 'حشو تجميلي',
+      'Composite Filling': 'حشو تجميلي',
       'Dental Fillings': 'حشو تجميلي',
-      'خلع الأسنان': 'الجراحة والخلع',
+      'Dental Filling': 'حشو تجميلي',
+      'Filling': 'حشو تجميلي',
+      'Dental Fillings / Composite': 'حشو تجميلي',
+      'Composite': 'حشو تجميلي',
+      'حشوات الأسنان': 'حشو تجميلي',
+      
+      'Teeth Whitening': 'تنظيف وتبييض الأسنان',
+      'Bleaching': 'تنظيف وتبييض الأسنان',
+      'Teeth Cleaning': 'تنظيف وتبييض الأسنان',
+      'Cleaning and Whitening': 'تنظيف وتبييض الأسنان',
+      'Whitening': 'تنظيف وتبييض الأسنان',
+      'تبييض الأسنان': 'تنظيف وتبييض الأسنان',
+      'تنظيف وتبيض الأسنان': 'تنظيف وتبييض الأسنان',
+      
+      'Dental Implants': 'زراعة الأسنان',
+      'Implants': 'زراعة الأسنان',
+      'زراعة الأسنان': 'زراعة الأسنان',
+      
+      'Surgery and Extraction': 'الجراحة والخلع',
+      'Surgery': 'الجراحة والخلع',
+      'Extraction': 'الجراحة والخلع',
       'Tooth Extraction': 'الجراحة والخلع',
-      'تيجان الأسنان / التركيبات': 'تيجان وجسور',
-      'Dental Crowns / Prosthodontics': 'تيجان وجسور',
-      'تقويم الأسنان': 'تقويم الأسنان',
+      'خلع الأسنان': 'الجراحة والخلع',
+      'الجراحة والخلع ': 'الجراحة والخلع',
+      
       'Braces': 'تقويم الأسنان',
-      'فحص شامل للأسنان': 'فحص شامل',
-      'Comprehensive Dental Examination': 'فحص شامل',
+      'Orthodontics': 'تقويم الأسنان',
+      'تقويم الأسنان': 'تقويم الأسنان',
+      
+      'Crowns and Bridges': 'التيجان والجسور',
+      'Fixed Prosthetics (Crowns and Bridges)': 'التيجان والجسور',
+      'Fixed Prosthetics': 'التيجان والجسور',
+      'Prosthodontics': 'التيجان والجسور',
+      'Crowns': 'التيجان والجسور',
+      'Bridges': 'التيجان والجسور',
+      'التيجان والجسور': 'التيجان والجسور',
+      'تيجان وجسور': 'التيجان والجسور',
+      'تيجان والجسور': 'التيجان والجسور',
+      'التيجان وجسور': 'التيجان والجسور',
+      'جسور وتيجان': 'التيجان والجسور',
+      'التيجان والتركيبات': 'التيجان والجسور',
+      'تيجان الأسنان / التركيبات': 'التيجان والجسور',
+      
+      'Amalgam Filling': 'حشو املجم',
       'حشو املجم': 'حشو املجم',
+      
+      'Root Canal': 'حشو عصب',
+      'Root Canal Treatment': 'حشو عصب',
+      'Endodontic Fillings (Root Canal)': 'حشو عصب',
+      'Endodontic Fillings': 'حشو عصب',
+      'Endodontics': 'حشو عصب',
       'حشو عصب': 'حشو عصب',
-      'تيجان وجسور': 'تيجان وجسور',
-      'تركيبات متحركة': 'تركيبات متحركة',
-      'تنظيف وتبييض': 'تنظيف وتبييض الأسنان',
-      'الاطفال': 'طب أسنان الأطفال',
-      'الجراحة والخلع': 'الجراحة والخلع',
-      'Pediatric': 'طب أسنان الأطفال',
+      
       'Pediatric Dentistry': 'طب أسنان الأطفال',
-      'طب الأسنان للأطفال': 'طب أسنان الأطفال',
+      'Kids Dentistry': 'طب أسنان الأطفال',
+      'Pediatric': 'طب أسنان الأطفال',
       'طب أسنان الأطفال': 'طب أسنان الأطفال',
-      'تركيبات ثابتة (تيجان وجسور)': 'تيجان وجسور',
-      'Crowns and Bridges': 'تيجان وجسور',
+      'الاطفال': 'طب أسنان الأطفال',
+      'طب الأسنان للأطفال': 'طب أسنان الأطفال',
+
+      'Comprehensive Dental Examination': 'فحص شامل',
+      'Comprehensive Examination': 'فحص شامل',
+      'Examination': 'فحص شامل',
+      'Checkup': 'فحص شامل',
+      'فحص شامل للأسنان': 'فحص شامل',
+      'فحص شامل': 'فحص شامل',
+
+      'Dental Prosthetics': 'تركيبات الأسنان',
+      'Prosthetics': 'تركيبات الأسنان',
+      'تركيبات الأسنان': 'تركيبات الأسنان',
+
+      'Removable Prosthetics': 'تركيبات متحركة',
+      'Removable': 'تركيبات متحركة',
+      'تركيبات متحركة': 'تركيبات متحركة',
     };
-    return map[raw] ?? map[raw.trim()] ?? raw;
+    
+    return synonyms[clean] ?? synonyms[raw] ?? clean;
+  }
+
+  String _getEnglishName(String arabic) {
+     final Map<String, String> arToEn = {
+        'حشو تجميلي': 'Cosmetic Filling',
+        'تنظيف وتبييض الأسنان': 'Teeth Whitening',
+        'زراعة الأسنان': 'Dental Implants',
+        'الجراحة والخلع': 'Surgery and Extraction',
+        'تقويم الأسنان': 'Orthodontics',
+        'التيجان والجسور': 'Fixed Prosthetics (Crowns and Bridges)',
+        'حشو املجم': 'Amalgam Filling',
+        'حشو عصب': 'Endodontic Fillings (Root Canal)',
+        'طب أسنان الأطفال': 'Pediatric Dentistry',
+        'فحص شامل': 'Comprehensive Examination',
+        'تركيبات الأسنان': 'Dental Prosthetics',
+        'تركيبات متحركة': 'Removable Prosthetics',
+     };
+     return arToEn[arabic] ?? arabic;
   }
 
   void _openCategory(String rawCategory) {
-    final mapped = _mapToAppCategory(rawCategory);
-    final categoryId = _getCategoryIdByName(mapped);
+    final arabicCanonical = _getArabicCanonical(rawCategory);
+    final uiName = _isEnglish ? _getEnglishName(arabicCanonical) : arabicCanonical;
+    
+    debugPrint('ChatBot: rawCategory=$rawCategory');
+    debugPrint('ChatBot: arabicCanonical=$arabicCanonical');
+    
+    // Search for the ID using the Arabic canonical name (more reliable)
+    final categoryId = _getCategoryIdByName(arabicCanonical);
+    debugPrint('ChatBot: categoryId=$categoryId');
 
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => CategoryDoctorsScreen(
-          categoryName: mapped,
-          categoryId: categoryId, // تمرير ID الصحيح
+          categoryName: uiName,
+          categoryId: categoryId,
         ),
       ),
     );
@@ -407,7 +520,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   width: 32, height: 32),
               const SizedBox(width: 8),
               Text(
-                'ثوثة الطبيب الذكي',
+                _isEnglish ? 'Thoutha Smart Doctor' : 'ثوثة الطبيب الذكي',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,
@@ -457,10 +570,10 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _botMessage('👋🏻 اهلا بك\nازاى اقدر اساعدك؟'),
+          _botMessage(_isEnglish ? '👋🏻 Welcome\nHow can I help you?' : '👋🏻 اهلا بك\nازاى اقدر اساعدك؟'),
           if (_isLoading && _flowItems.isEmpty) ...[
             const SizedBox(height: 16),
-            _botMessage('...جاري تجهيز الأسئلة'),
+            _botMessage(_isEnglish ? '...Preparing questions' : '...جاري تجهيز الأسئلة'),
           ],
           for (final item in _flowItems) ...[
             const SizedBox(height: 16),
@@ -534,7 +647,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     color: theme.colorScheme.onSurface,
                     fontSize: 16),
                 decoration: InputDecoration(
-                  hintText: 'اكتب رسالتك..............................',
+                  hintText: _isEnglish ? 'Type your message...' : 'اكتب رسالتك..............................',
                   hintStyle: const TextStyle(
                       fontFamily: 'Cairo',
                       color: Color(0xFF6B8090),
@@ -661,15 +774,19 @@ class _ChatScreenState extends State<ChatScreen> {
               onPressed: _isLoading ? null : () => _submitAnswer(q, a),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.brightness == Brightness.dark
-                    ? theme.cardColor
-                    : _color3,
-                foregroundColor: theme.colorScheme.onSurface,
-                side: theme.brightness == Brightness.dark
-                    ? BorderSide(color: theme.dividerColor)
-                    : null,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    ? const Color(0xFF1E1E2D)
+                    : Colors.white,
+                foregroundColor: theme.brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
+                side: BorderSide(
+                  color: _color2,
+                  width: 1.5,
+                ),
+                elevation: theme.brightness == Brightness.dark ? 2 : 1,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
               child: Text(
@@ -700,7 +817,8 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _chatMode = false;
         _activeQuestionId = null;
-        _flowItems.add(_FlowItem.result(text: '— بدء محادثة جديدة —'));
+        _flowItems.add(_FlowItem.result(
+            text: _isEnglish ? '— Starting new conversation —' : '— بدء محادثة جديدة —'));
       });
       _processResponse(data);
     } catch (_) {
@@ -745,7 +863,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        'عرض حالات $category',
+                        _isEnglish ? 'View $category cases' : 'عرض حالات $category',
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -770,15 +888,15 @@ class _ChatScreenState extends State<ChatScreen> {
           child: OutlinedButton.icon(
             onPressed: _isLoading ? null : _restartSession,
             icon: const Icon(Icons.refresh_rounded, size: 18, color: _color2),
-            label: const Text(
-              'إعادة المحادثة من البداية',
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: _color2,
+              label: Text(
+                _isEnglish ? 'Restart conversation' : 'إعادة المحادثة من البداية',
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: _color2,
+                ),
               ),
-            ),
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: _color2, width: 1.5),
               shape: RoundedRectangleBorder(

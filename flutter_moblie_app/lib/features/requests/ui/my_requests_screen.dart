@@ -54,16 +54,11 @@ class _MyRequestsViewState extends State<MyRequestsView> {
           ),
         ),
         titleSpacing: 0,
+        centerTitle: true,
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/images/splash-logo.png',
-              width: 36,
-              height: 36,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(width: 8),
             Text(
               'طلباتي',
               style: textTheme.titleLarge?.copyWith(
@@ -71,6 +66,13 @@ class _MyRequestsViewState extends State<MyRequestsView> {
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
+            ),
+            SizedBox(width: 8),
+            Image.asset(
+              'assets/images/splash-logo.png',
+              width: 36,
+              height: 36,
+              fit: BoxFit.contain,
             ),
           ],
         ),

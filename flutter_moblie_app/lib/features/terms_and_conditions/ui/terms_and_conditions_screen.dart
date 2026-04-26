@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
+import 'package:thoutha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
 
 class TermsAndConditionsScreen extends StatefulWidget {
   const TermsAndConditionsScreen({super.key});
@@ -15,11 +15,12 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const DoctorDrawer(),
+      drawer: const HomeDrawer(),
       appBar: AppBar(
         toolbarHeight: 70,
         elevation: 0,
@@ -36,14 +37,8 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
         centerTitle: true,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              'assets/images/splash-logo.png',
-              width: 36,
-              height: 36,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(width: 8),
             Text(
               'الشروط والاحكام',
               style: textTheme.titleLarge?.copyWith(
@@ -52,14 +47,23 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                 fontWeight: FontWeight.w700,
               ),
             ),
+            const SizedBox(width: 8),
+            Image.asset(
+              'assets/images/splash-logo.png',
+              width: 36,
+              height: 36,
+              fit: BoxFit.contain,
+            ),
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
+      body: Directionality(
+        textDirection: TextDirection.rtl,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             _buildSection(
               context,
               'أولاً: تعريف التطبيق',
@@ -107,12 +111,13 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 12,
-                  color: Colors.grey,
+                  color: isDark ? Colors.white54 : Colors.grey,
                 ),
               ),
             ),
             SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
           ],
+        ),
         ),
       ),
     );
@@ -124,11 +129,12 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            textAlign: TextAlign.right,
+            textAlign: TextAlign.start,
+            textDirection: TextDirection.rtl,
             style: theme.textTheme.titleMedium?.copyWith(
               fontFamily: 'Cairo',
               fontSize: 16,
@@ -141,7 +147,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                 padding: const EdgeInsets.only(bottom: 2, right: 0),
                 child: Text(
                   line,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.start,
                   textDirection: TextDirection.rtl,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontFamily: 'Cairo',

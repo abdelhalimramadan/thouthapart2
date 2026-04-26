@@ -101,15 +101,16 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
       var all = List<CaseRequestModel>.from(result['data'] as List);
       print('Total requests loaded (raw): ${all.length}');
 
-      // إذا كان دكتور مسجّل دخولًا، ما زلنا نلتزم بالتخصص/المدينة المختارة في الشاشة
-      if (widget.categoryName.isNotEmpty) {
-        print('Filtering by category name: ${widget.categoryName}');
+      // Apply name filter only if categoryId is NOT provided (fallback)
+      // If categoryId is provided, the API result is already category-specific.
+      if (widget.categoryId == null && widget.categoryName.isNotEmpty) {
+        print('Filtering by category name (fallback): ${widget.categoryName}');
         all = all
             .where((r) =>
                 r.categoryName.toLowerCase() ==
                 widget.categoryName.toLowerCase())
             .toList();
-        print('Requests after category filter: ${all.length}');
+        print('Requests after name filter: ${all.length}');
       }
 
       if (widget.cityName != null && widget.cityName!.isNotEmpty) {
@@ -455,22 +456,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                           ),
                         ),
                       ),
-                    if (isLoggedIn) ...[
-                      const SizedBox(width: 8),
-                      Material(
-                        color: Colors.red.withValues(alpha: 0.08),
-                        shape: const CircleBorder(),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.delete_outline_rounded,
-                            color: Colors.red,
-                            size: 20,
-                          ),
-                          tooltip: 'حذف الطلب',
-                          onPressed: () => _deleteRequest(req),
-                        ),
-                      ),
-                    ],
+
                   ],
                 ),
               ],
@@ -489,7 +475,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                       fontFamily: 'Cairo',
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.grey[200] : Colors.grey[800],
+                      color: isDark ? Colors.white : Colors.grey[800],
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -514,7 +500,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 13,
-                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        color: isDark ? Colors.white.withOpacity(0.9) : Colors.grey[600],
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -539,7 +525,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 14,
-                    color: isDark ? Colors.grey[200] : Colors.grey[800],
+                    color: isDark ? Colors.white : Colors.grey[800],
                     height: 1.5,
                   ),
                 ),
@@ -637,7 +623,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
             style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 12,
-              color: isDark ? Colors.grey[200] : Colors.grey[800],
+              color: isDark ? Colors.white : Colors.grey[800],
             ),
           ),
         ],
@@ -646,6 +632,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
   }
 
   Widget _buildEmpty() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -653,7 +640,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
           Icon(
             Icons.assignment_outlined,
             size: 70,
-            color: Colors.grey[400],
+            color: isDark ? Colors.white30 : Colors.grey[400],
           ),
           const SizedBox(height: 16),
           Text(
@@ -662,17 +649,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
             style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'كن أول من ينشر حالة!',
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 14,
-              color: ColorsManager.mainBlue,
-              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white70 : Colors.grey[600],
             ),
           ),
         ],
@@ -822,7 +799,7 @@ class _CaseDetailsSheet extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 14,
-                      color: isDark ? Colors.grey[200] : Colors.grey[800],
+                      color: isDark ? Colors.white : Colors.grey[800],
                       height: 1.6,
                     ),
                   ),
@@ -897,7 +874,7 @@ class _DetailRow extends StatelessWidget {
               fontFamily: 'Cairo',
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: isDark ? Colors.grey[300] : Colors.grey[700],
+              color: isDark ? Colors.white.withOpacity(0.9) : Colors.grey[700],
             ),
           ),
           Expanded(
@@ -906,7 +883,7 @@ class _DetailRow extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 14,
-                color: isDark ? Colors.grey[100] : Colors.grey[900],
+                color: isDark ? Colors.white : Colors.grey[900],
               ),
             ),
           ),

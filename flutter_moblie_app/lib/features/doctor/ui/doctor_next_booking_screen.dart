@@ -89,16 +89,11 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           ),
         ),
         titleSpacing: 0,
+        centerTitle: true,
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/images/splash-logo.png',
-              width: 36,
-              height: 36,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(width: 8),
             Text(
               'الحجوزات القادمة',
               style: textTheme.titleLarge?.copyWith(
@@ -106,6 +101,13 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
+            ),
+            const SizedBox(width: 8),
+            Image.asset(
+              'assets/images/splash-logo.png',
+              width: 36,
+              height: 36,
+              fit: BoxFit.contain,
             ),
           ],
         ),

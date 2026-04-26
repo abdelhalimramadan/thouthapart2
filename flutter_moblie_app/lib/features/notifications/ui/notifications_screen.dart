@@ -115,57 +115,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               return const SizedBox.shrink();
             },
           ),
-          BlocBuilder<NotificationsCubit, NotificationsState>(
-            bloc: _cubit,
-            builder: (context, state) {
-              if (state is SuccessState && state.notifications.isNotEmpty) {
-                 return Padding(
-                   padding: EdgeInsetsDirectional.only(end: 10),
-                   child: Center(
-                     child: DecoratedBox(
-                       decoration: BoxDecoration(
-                         color: isDark
-                             ? Colors.white.withValues(alpha: 0.08)
-                             : Colors.black.withValues(alpha: 0.04),
-                         borderRadius: BorderRadius.circular(12),
-                       ),
-                       child: PopupMenuButton(
-                       onSelected: (value) {
-                         if (value == 'mark_all_read') {
-                           _cubit.markAllAsRead();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('تم وضع علامة على كل الإشعارات كمقروءة'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                         } else if (value == 'delete_all') {
-                           _showDeleteAllDialog();
-                         }
-                       },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: 'mark_all_read',
-                            child: Text('وضع علامة على الكل كمقروء'),
-                          ),
-                          const PopupMenuItem(
-                            value: 'delete_all',
-                            child: Text('حذف الكل'),
-                          ),
-                        ],
-                       icon: const Icon(Icons.more_vert_rounded),
-                       shape: RoundedRectangleBorder(
-                         borderRadius: BorderRadius.circular(14),
-                       ),
-                     ),
-                     ),
-                   ),
-                 );
-              }
-              return const SizedBox.shrink();
-            },
-          )
+          const SizedBox.shrink(),
         ],
       ),
       body: Container(
@@ -175,6 +125,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         child: BlocBuilder<NotificationsCubit, NotificationsState>(
           bloc: _cubit,
           builder: (context, state) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
           if (state is LoadingState) {
             return const Center(
               child: CircularProgressIndicator(),
@@ -242,7 +193,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        color: isDark ? Colors.white70 : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         fontFamily: 'Cairo',
                       ),
                     ),
@@ -294,7 +245,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
              style: TextStyle(
                fontSize: 20,
                fontWeight: FontWeight.bold,
-               color: theme.colorScheme.onSurface,
+               color: isDark ? Colors.white : theme.colorScheme.onSurface,
                fontFamily: 'Cairo',
              ),
            ),
@@ -324,6 +275,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildNoUnreadState() {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Center(
       child: Column(
@@ -340,7 +292,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
              style: TextStyle(
                fontSize: 18,
                fontWeight: FontWeight.w700,
-               color: theme.colorScheme.onSurface,
+               color: isDark ? Colors.white : theme.colorScheme.onSurface,
                fontFamily: 'Cairo',
              ),
            ),
@@ -349,7 +301,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
              'اضغط على الايقونة لعرض كل الاشعارات',
              style: TextStyle(
                fontSize: 13,
-               color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+               color: isDark ? Colors.white.withOpacity(0.9) : theme.colorScheme.onSurface.withValues(alpha: 0.65),
                fontFamily: 'Cairo',
              ),
            ),
@@ -505,7 +457,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       height: 1.45,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+                      color: isDark ? Colors.white.withOpacity(0.9) : theme.colorScheme.onSurface.withValues(alpha: 0.72),
                       fontFamily: 'Cairo',
                     ),
                   ),
@@ -580,6 +532,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     String relativeTime,
   ) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
      final title = (notification.title?.toString().trim().isNotEmpty ?? false)
          ? notification.title.toString().trim()
          : 'بدون عنوان';
@@ -626,7 +579,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       fontFamily: 'Cairo',
                       fontSize: 14,
                       height: 1.5,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                      color: isDark ? Colors.white : theme.colorScheme.onSurface.withValues(alpha: 0.85),
                     ),
                   ),
                   SizedBox(height: 16),
@@ -674,50 +627,5 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
 
-  void _showDeleteAllDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(
-           'حذف جميع الإشعارات',
-          style: TextStyle(fontFamily: 'Cairo'),
-        ),
-        content: const Text(
-          'هل أنت متأكد من رغبتك في حذف جميع الإشعارات؟',
-          style: TextStyle(fontFamily: 'Cairo'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'إلغاء',
-              style: TextStyle(fontFamily: 'Cairo'),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _cubit.deleteAllNotifications();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('تم حذف جميع الإشعارات'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text(
-              'حذف',
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 }

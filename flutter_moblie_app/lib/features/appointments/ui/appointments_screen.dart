@@ -36,6 +36,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         statusColor = Colors.green;
       } else if (appt['status'] == 'قيد الانتظار') {
         statusColor = Colors.orange;
+      } else if (appt['status'] == 'تم الرفض' || appt['status'] == 'ملغى') {
+        statusColor = Colors.red;
       }
 
       return {

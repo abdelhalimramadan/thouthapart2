@@ -87,16 +87,11 @@ class _DoctorBookingRecordsScreenState
           ),
         ),
         titleSpacing: 0,
+        centerTitle: true,
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/images/splash-logo.png',
-              width: 36,
-              height: 36,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(width: 8),
             Text(
               'سجل الحجوزات',
               style: textTheme.titleLarge?.copyWith(
@@ -104,6 +99,13 @@ class _DoctorBookingRecordsScreenState
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
+            ),
+            SizedBox(width: 8),
+            Image.asset(
+              'assets/images/splash-logo.png',
+              width: 36,
+              height: 36,
+              fit: BoxFit.contain,
             ),
           ],
         ),
@@ -425,7 +427,7 @@ class _DoctorBookingRecordsScreenState
               'تم إلغاء الحجز بنجاح',
               style: TextStyle(fontFamily: 'Cairo'),
             ),
-            backgroundColor: Colors.orange,
+            backgroundColor: Colors.red,
             duration: Duration(seconds: 2),
           ),
         );

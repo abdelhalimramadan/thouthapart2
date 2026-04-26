@@ -306,7 +306,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
             color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, size: 18, color: const Color(0xFF021433)),
+          child: Icon(icon, size: 18, color: isDark ? Colors.white : const Color(0xFF021433)),
         ),
         SizedBox(width: 12),
         Expanded(
@@ -320,7 +320,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 12,
-                  color: Colors.grey,
+                  color: isDark ? Colors.white70 : Colors.grey,
                 ),
               ),
               Text(
@@ -480,17 +480,11 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         icon: Icon(Icons.menu, size: 24),
         onPressed: () => _scaffoldKey.currentState?.openDrawer(),
       ),
-      titleSpacing: 0,
+      centerTitle: true,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(
-            'assets/images/splash-logo.png',
-            width: 36,
-            height: 36,
-            fit: BoxFit.contain,
-          ),
-          SizedBox(width: 8),
           Text(
             'الصفحة الرئيسية',
             style: tt.titleLarge?.copyWith(
@@ -498,6 +492,13 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               fontSize: 18,
               fontWeight: FontWeight.w700,
             ),
+          ),
+          const SizedBox(width: 8),
+          Image.asset(
+            'assets/images/splash-logo.png',
+            width: 36,
+            height: 36,
+            fit: BoxFit.contain,
           ),
         ],
       ),
@@ -606,7 +607,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
             fontFamily: 'Cairo',
             fontWeight: FontWeight.w700,
             fontSize: 16,
-            color: isDarkMode ? Colors.white70 : const Color(0xFF111827),
+            color: isDarkMode ? Colors.white : const Color(0xFF111827),
           ),
         ),
       ),
@@ -679,7 +680,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                   fontFamily: 'Cairo',
                   fontSize: 13.5,
                   height: 1.6,
-                  color: isDarkMode ? Colors.white70 : const Color(0xFF334155),
+                  color: isDarkMode ? Colors.white : const Color(0xFF334155),
                 ),
               ),
               Text(
@@ -690,7 +691,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                   fontFamily: 'Cairo',
                   fontSize: 13.5,
                   height: 1.6,
-                  color: isDarkMode ? Colors.white70 : const Color(0xFF334155),
+                  color: isDarkMode ? Colors.white : const Color(0xFF334155),
                 ),
               ),
               SizedBox(height: 12),
@@ -794,7 +795,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               fontFamily: 'Cairo',
               fontSize: 13,
               height: 1.6,
-              color: isDarkMode ? Colors.white60 : const Color(0xFF475569),
+              color: isDarkMode ? Colors.white : const Color(0xFF475569),
             ),
           ),
         ),
@@ -908,7 +909,7 @@ class _AppointmentCard extends StatelessWidget {
                     style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 13,
-                        color: Colors.grey[600]),
+                        color: isDark ? Colors.white : Colors.grey[600]),
                   ),
                 ),
               ],
@@ -968,7 +969,7 @@ class _InfoChip extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 11,
-              color: isDark ? Colors.white70 : Colors.grey[800],
+              color: isDark ? Colors.white : Colors.grey[800],
             ),
           ),
         ),

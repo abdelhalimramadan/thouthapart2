@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
+import 'package:thoutha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
 
 class HelpAndSupportScreen extends StatefulWidget {
   const HelpAndSupportScreen({super.key});
@@ -58,7 +58,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const DoctorDrawer(),
+      drawer: const HomeDrawer(),
       appBar: AppBar(
         toolbarHeight: 70,
         elevation: 0,
@@ -76,13 +76,6 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/images/splash-logo.png',
-              width: 36,
-              height: 36,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(width: 8),
             Text(
               'الدعم الفني',
               style: textTheme.titleLarge?.copyWith(
@@ -90,6 +83,13 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
+            ),
+            SizedBox(width: 8),
+            Image.asset(
+              'assets/images/splash-logo.png',
+              width: 36,
+              height: 36,
+              fit: BoxFit.contain,
             ),
           ],
         ),

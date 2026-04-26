@@ -25,9 +25,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _searchFocusNode = FocusNode();
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int? _selectedCityId;
@@ -232,15 +230,35 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
-    _searchFocusNode.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _checkLoginStatus();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Re-detect city when app comes back to foreground
+      _resetAndDetectCity();
+    }
+  }
+
+  void _resetAndDetectCity() {
+    if (!mounted) return;
+    setState(() {
+      _autoSelectApplied = false;
+      _gpsFinished = false;
+      _gpsNameCandidates = [];
+      _gpsFailureMessage = null;
+      _selectedCityId = null;
+    });
+    _autoDetectCity();
   }
 
   Future<void> _checkLoginStatus() async {
@@ -249,6 +267,12 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) {
       setState(() {
         _isLoggedIn = token.isNotEmpty && token != 'null';
+        // Reset auto-detect flags every time so GPS detection runs fresh
+        _autoSelectApplied = false;
+        _gpsFinished = false;
+        _gpsNameCandidates = [];
+        _gpsFailureMessage = null;
+        _selectedCityId = null;
       });
       // Auto-detect city for all users (logged in or not)
       _autoDetectCity();
@@ -455,75 +479,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 final categories = state.categories;
                 final cities = state.cities;
 
-                final filteredCategories = (_searchController.text.isEmpty ||
-                        categories.isEmpty)
-                    ? categories
-                    : categories
-                        .where((c) => c.name.contains(_searchController.text))
-                        .toList();
-
-                final visibleCategories = filteredCategories.toList();
+                final visibleCategories = categories;
 
                 return SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Search Bar
-                      Container(
-                        height: 48,
-                        margin: EdgeInsets.symmetric(
-                            horizontal: ResponsiveUtils.screenWidth(context) * 0.05,
-                            vertical: 10),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.grey[800]?.withValues(alpha: 0.5)
-                              : const Color(0xFFD9D9D9).withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              child: Icon(Icons.search,
-                                  color: Colors.grey, size: 22),
-                            ),
-                            Expanded(
-                              child: TextField(
-                                controller: _searchController,
-                                focusNode: _searchFocusNode,
-                                onChanged: (val) {
-                                  setState(() {});
-                                },
-                                textAlign: TextAlign.right,
-                                textDirection: TextDirection.rtl,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(fontFamily: 'Cairo'),
-                                decoration: InputDecoration(
-                                  hintText: 'ابحث عن قسم...',
-                                  hintStyle: TextStyle(
-                                    fontFamily: 'Cairo',
-                                    color: Colors.grey[600],
-                                    fontSize: 14,
-                                  ),
-                                  border: InputBorder.none,
-                                  contentPadding:
-                                      EdgeInsets.symmetric(vertical: 14),
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.mic,
-                                  color: Colors.grey, size: 22),
-                              onPressed: () {},
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
-                            SizedBox(width: 8),
-                          ],
-                        ),
-                      ),
+
 
                       // Promotional Card — Row layout is fully responsive
                       Builder(builder: (context) {
@@ -654,7 +616,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     size: 16,
                                     color: _isDetecting
                                         ? Theme.of(context).colorScheme.primary
-                                        : Colors.grey[500],
+                                        : (isDark ? Colors.white70 : Colors.grey[500]),
                                   ),
                                   SizedBox(width: 6),
                                   Expanded(
@@ -753,7 +715,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     fontFamily: 'Cairo',
                                     fontSize: 13,
                                     color: isDark
-                                        ? Colors.orange[100]
+                                        ? Colors.white.withOpacity(0.9)
                                         : Colors.orange.shade800,
                                   ),
                                   textDirection: TextDirection.rtl,

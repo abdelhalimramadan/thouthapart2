@@ -10,7 +10,9 @@ import 'package:thoutha_mobile_app/features/about_app/ui/about_app_screen.dart'
 import 'package:thoutha_mobile_app/features/doctor/ui/doctor_booking_records_screen.dart';
 import 'package:thoutha_mobile_app/features/doctor/ui/doctor_confirmed_appointments_screen.dart';
 import 'package:thoutha_mobile_app/features/doctor/ui/doctor_next_booking_screen.dart';
-import 'package:thoutha_mobile_app/features/help_and_support/ui/help_and_support_screen.dart';
+import 'package:thoutha_mobile_app/features/doctor/ui/info_pages/doctor_help_and_support_screen.dart';
+import 'package:thoutha_mobile_app/features/doctor/ui/info_pages/doctor_privacy_policy_screen.dart';
+import 'package:thoutha_mobile_app/features/doctor/ui/info_pages/doctor_terms_and_conditions_screen.dart';
 import 'package:thoutha_mobile_app/features/profile/ui/doctor_profile.dart';
 import 'package:thoutha_mobile_app/features/requests/ui/my_requests_screen.dart';
 import 'package:thoutha_mobile_app/features/doctor/ui/secondary_home_screen.dart'
@@ -624,7 +626,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              const TermsAndConditionsScreen(),
+                              const DoctorTermsAndConditionsScreen(),
                         ),
                       );
                     },
@@ -638,7 +640,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const PrivacyPolicyScreen(),
+                          builder: (context) => const DoctorPrivacyPolicyScreen(),
                         ),
                       );
                     },
@@ -652,7 +654,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const HelpAndSupportScreen(),
+                          builder: (context) => const DoctorHelpAndSupportScreen(),
                         ),
                       );
                     },

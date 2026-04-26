@@ -235,6 +235,13 @@ class PasswordResetService {
       serverMsg = data;
     }
 
+    // If server returns a generic internal error, we ignore it and use our Arabic message
+    if (serverMsg != null &&
+        (serverMsg.toLowerCase().contains('internal error') ||
+            serverMsg.toLowerCase().contains('server error'))) {
+      serverMsg = null;
+    }
+
     // Only use hardcoded Arabic if the server returned nothing useful
     final bool hasServerMsg = serverMsg != null && serverMsg.isNotEmpty;
     String msg = hasServerMsg ? serverMsg : fallback;
@@ -242,7 +249,7 @@ class PasswordResetService {
     if (!hasServerMsg) {
       switch (res.statusCode) {
         case 400:
-          msg = '$fallback (تحقق من تنسيق رقم الهاتف)';
+          msg = 'بيانات غير صحيحة، يرجى التحقق من المدخلات';
           break;
         case 404:
           msg = 'لا يوجد حساب مرتبط بهذا الرقم';
@@ -255,6 +262,9 @@ class PasswordResetService {
           break;
         case 403:
           msg = 'يجب التحقق من رمز OTP أولاً';
+          break;
+        case 500:
+          msg = 'لا يوجد حساب مرتبط بهذا الرقم';
           break;
         default:
           break;

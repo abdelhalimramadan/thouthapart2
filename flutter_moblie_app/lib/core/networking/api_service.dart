@@ -422,14 +422,12 @@ class ApiService {
       debugPrint('=== deleteRequest Debug ===');
       debugPrint('Request ID to delete: $id');
       debugPrint('Doctor ID: $doctorId');
-      debugPrint('API Endpoint: ${ApiConstants.deleteRequest}/$id');
+      debugPrint('API Endpoint: ${ApiConstants.deleteRequest}?id=$id');
 
-      // Build the URL with the request ID in the path
-      final url = '${ApiConstants.deleteRequest}/$id';
-
-      debugPrint('Full URL: $url');
-
-      final res = await _dio.delete(url);
+      final res = await _dio.delete(
+        ApiConstants.deleteRequest,
+        queryParameters: {'id': id},
+      );
 
       debugPrint('Delete Response Status: ${res.statusCode}');
       debugPrint('Delete Response Data: ${res.data}');

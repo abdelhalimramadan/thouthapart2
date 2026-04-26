@@ -22,8 +22,7 @@ class DoctorImageAndText extends StatelessWidget {
         ? (maxWidth * 0.48).clamp(260.0, 420.0)
         : (maxWidth * 0.72).clamp(220.0, 340.0);
 
-    return Align(
-      alignment: isTablet ? Alignment.center : const Alignment(0, 0.4),
+    return Center(
       child: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(
@@ -86,7 +85,7 @@ class DoctorImageAndText extends StatelessWidget {
                   softWrap: true,
                   style: TextStyle(
                     fontFamily: 'Cairo',
-                    fontSize: isTablet ? 34 : 28,
+                    fontSize: isTablet ? 36 : 24,
                     fontWeight: FontWeight.bold,
                     color: ColorsManager.mainBlue,
                   ),
@@ -107,7 +106,7 @@ class DoctorImageAndText extends StatelessWidget {
                   softWrap: true,
                   style: TextStyle(
                     fontFamily: 'Cairo',
-                    fontSize: isTablet ? 22 : 18,
+                    fontSize: isTablet ? 22 : 16,
                     color: Colors.grey[600],
                     height: isTablet ? 1.7 : 1.6,
                   ),

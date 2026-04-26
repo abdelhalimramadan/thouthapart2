@@ -279,29 +279,11 @@ class FirebaseMessagingService {
         return;
       }
 
-      String? targetRoute;
-      Map<String, dynamic>? arguments;
-
-      // Route based on notification type
-      if (payload.isAppointmentNotification && payload.appointmentId != null) {
-        targetRoute = Routes.appointmentsScreen;
-        arguments = {'appointmentId': payload.appointmentId};
-        log('🗓️ Routing to appointments: ${payload.appointmentId}');
-      } else if (payload.isTreatmentPlanNotification &&
-          payload.treatmentPlanId != null) {
-        // TODO: Add treatment plan screen route when available
-        targetRoute = Routes.notificationsScreen;
-        arguments = payload.toMap();
-        log('💊 Treatment plan notification: ${payload.treatmentPlanId}');
-      } else if (payload.requestId != null) {
-        targetRoute = Routes.doctorHomeScreen;
-        arguments = {'requestId': payload.requestId};
-        log('📋 Routing to requests: ${payload.requestId}');
-      }
-
-      // Default fallback
-      targetRoute ??= Routes.notificationsScreen;
-      arguments ??= payload.toMap();
+      // Target notifications screen as requested by user
+      final targetRoute = Routes.notificationsScreen;
+      final arguments = payload.toMap();
+      
+      log('🔔 Routing to notifications screen as requested');
 
       navigator.pushNamed(targetRoute, arguments: arguments);
     } catch (e) {

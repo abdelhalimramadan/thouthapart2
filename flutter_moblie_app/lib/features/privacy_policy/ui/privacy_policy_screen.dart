@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
+import 'package:thoutha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
 
 class PrivacyPolicyScreen extends StatefulWidget {
   const PrivacyPolicyScreen({super.key});
@@ -51,7 +51,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const DoctorDrawer(),
+      drawer: const HomeDrawer(),
       body: Directionality(
         textDirection: TextDirection.rtl,
         child: CustomScrollView(
@@ -75,25 +75,9 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
 
-                            // Shield icon with logo and title
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Container(
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-
-                                  ),
-                                ),
-                                SizedBox(width: 12),
-                                Image.asset(
-                                  'assets/images/splash-logo.png',
-                                  width: 36,
-                                  height: 36,
-                                  fit: BoxFit.contain,
-                                ),
-                                SizedBox(width: 8),
                                 Text(
                                   'سياسة الخصوصية',
                                   style: theme.textTheme.titleLarge?.copyWith(
@@ -101,6 +85,13 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
                                     fontWeight: FontWeight.w700,
                                     fontSize: 18,
                                   ),
+                                ),
+                                const SizedBox(width: 8),
+                                Image.asset(
+                                  'assets/images/splash-logo.png',
+                                  width: 36,
+                                  height: 36,
+                                  fit: BoxFit.contain,
                                 ),
                               ],
                             ),
@@ -292,9 +283,9 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
               color: const Color(0xFF021433).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.shield_outlined,
-              color: Color(0xFF021433),
+              color: isDark ? Colors.white : const Color(0xFF021433),
               size: 22,
             ),
           ),
@@ -303,13 +294,13 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'تطبيق ثوثة',
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
-                    color: Color(0xFF021433),
+                    color: isDark ? Colors.white : const Color(0xFF021433),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -383,7 +374,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(icon, size: 16, color: const Color(0xFF021433)),
+                Icon(icon, size: 16, color: isDark ? Colors.white70 : const Color(0xFF021433)),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -437,8 +428,8 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
             margin: const EdgeInsets.only(top: 7),
             width: 7,
             height: 7,
-            decoration: const BoxDecoration(
-              color: Color(0xFF021433),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white70 : const Color(0xFF021433),
               shape: BoxShape.circle,
             ),
           ),
@@ -503,9 +494,9 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          const Icon(
+          Icon(
             Icons.verified_user_outlined,
-            color: Color(0xFF021433),
+            color: isDark ? Colors.white70 : const Color(0xFF021433),
             size: 28,
           ),
           const SizedBox(height: 8),
@@ -517,6 +508,16 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
               fontSize: 13,
               height: 1.65,
               color: isDark ? Colors.white60 : const Color(0xFF374151),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'تم تحديث السياسة في: 15 مارس 2026',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white70 : const Color(0xFF021433),
             ),
           ),
           const SizedBox(height: 8),

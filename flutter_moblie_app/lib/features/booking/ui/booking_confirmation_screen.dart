@@ -105,83 +105,95 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => Directionality(
-            textDirection: TextDirection.rtl,
-            child: AlertDialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              titlePadding: const EdgeInsets.only(top: 20, left: 20, right: 20),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              actionsPadding:
-                  const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-              actionsAlignment: MainAxisAlignment.center,
-              title: Text(
-                'تم الحجز بنجاح',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: ColorsManager.mainBlue,
-                ),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      color: ColorsManager.mainBlue.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.check_rounded,
-                        color: ColorsManager.mainBlue, size: 42),
+          builder: (context) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return Directionality(
+              textDirection: TextDirection.rtl,
+              child: AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                titlePadding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                actionsPadding:
+                    const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                actionsAlignment: MainAxisAlignment.center,
+                title: Text(
+                  'تم الحجز بنجاح',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: ColorsManager.mainBlue,
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'تم حجز موعدك بنجاح مع ${widget.doctorName}\nفي يوم ${widget.date} الساعة ${widget.time}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 14,
-                      color: const Color(0xFF1F2937),
-                      height: 1.6,
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: ColorsManager.mainBlue.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.check_rounded,
+                          color: ColorsManager.mainBlue, size: 42),
                     ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'تم حجز موعدك بنجاح مع ${widget.doctorName}\nفي يوم ${widget.date} الساعة ${widget.time}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 14,
+                        color: isDark ? Colors.white : const Color(0xFF1F2937),
+                        height: 1.6,
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  Builder(
+                    builder: (context) {
+                      final screenWidth = MediaQuery.of(context).size.width;
+                      final isTablet = screenWidth >= 600;
+
+                      return Center(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorsManager.mainBlue,
+                            minimumSize: Size(isTablet ? 220 : screenWidth * 0.6, isTablet ? 56 : 50),
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'حسناً',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: isTablet ? 19 : 17,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              height: 1.1, // Improved line height for Cairo
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
-              actions: [
-                Center(
-                  child: SizedBox(
-                    width: 140,
-                    height: 40,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: ColorsManager.mainBlue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        'حسناً',
-                        style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 14,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+            );
+          },
         );
       } else {
         // Error

@@ -31,8 +31,6 @@ class SecondaryHomeScreen extends StatefulWidget {
 }
 
 class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _searchFocusNode = FocusNode();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int? _selectedCityId;
@@ -414,8 +412,6 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
-    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -455,15 +451,9 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
             },
           ),
           title: Row(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                'assets/images/splash-logo.png',
-                width: 36,
-                height: 36,
-                fit: BoxFit.contain,
-              ),
-              SizedBox(width: 8),
               Text(
                 'نشر حالة جديدة',
                 style: TextStyle(
@@ -471,6 +461,13 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                   fontWeight: FontWeight.bold,
                   fontSize: (baseFontSize * 1.1).clamp(18.0, 24.0),
                 ),
+              ),
+              SizedBox(width: 8),
+              Image.asset(
+                'assets/images/splash-logo.png',
+                width: 36,
+                height: 36,
+                fit: BoxFit.contain,
               ),
             ],
           ),
@@ -498,14 +495,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                 final categories = state.categories;
                 final cities = state.cities;
 
-                final filteredCategories = (_searchController.text.isEmpty ||
-                        categories.isEmpty)
-                    ? categories
-                    : categories
-                        .where((c) => c.name.contains(_searchController.text))
-                        .toList();
-
-                final visibleCategories = filteredCategories;
+                final visibleCategories = categories;
 
                 return SingleChildScrollView(
                   child: Padding(
@@ -513,64 +503,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Search Bar
-                        Container(
-                          constraints: const BoxConstraints(minHeight: 48),
-                          margin: EdgeInsets.symmetric(
-                              horizontal: width * 0.05, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.grey[800]?.withAlpha(128)
-                                : const Color(0xFFD9D9D9).withAlpha(77),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 12),
-                                child: Icon(Icons.search,
-                                    color: Colors.grey, size: 22),
-                              ),
-                              Expanded(
-                                child: TextField(
-                                  controller: _searchController,
-                                  focusNode: _searchFocusNode,
-                                  onChanged: (val) {
-                                    setState(() {});
-                                  },
-                                  textAlign: TextAlign.right,
-                                  textDirection: TextDirection.rtl,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        fontFamily: 'Cairo',
-                                        fontSize: (baseFontSize * 0.9).clamp(14.0, 16.0),
-                                      ),
-                                  decoration: InputDecoration(
-                                    hintText: 'ابحث عن قسم...',
-                                    hintStyle: TextStyle(
-                                      fontFamily: 'Cairo',
-                                      color: Colors.grey[600],
-                                      fontSize: (baseFontSize * 0.9).clamp(14.0, 16.0),
-                                    ),
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.mic,
-                                    color: Colors.grey, size: 22),
-                                onPressed: () {},
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                              ),
-                              const SizedBox(width: 8),
-                            ],
-                          ),
-                        ),
+
 
                         // City Dropdown — only visible when NOT logged in
                         if (!_isLoggedIn) ...[
@@ -632,7 +565,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                                 ? Theme.of(context)
                                                     .colorScheme
                                                     .primary
-                                                : Colors.grey[500],
+                                                : (isDark ? Colors.white70 : Colors.grey[500]),
                                           ),
                                           const SizedBox(width: 6),
                                           Expanded(
@@ -728,7 +661,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                       style: TextStyle(
                                         fontFamily: 'Cairo',
                                         fontSize: baseFontSize * 0.8,
-                                        color: Colors.orange.shade800,
+                                        color: isDark ? Colors.white.withOpacity(0.9) : Colors.orange.shade800,
                                       ),
                                       textDirection: TextDirection.rtl,
                                     ),

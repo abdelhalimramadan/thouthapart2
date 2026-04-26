@@ -314,11 +314,11 @@ class AppTheme {
         titleMedium: TextStyle(color: Colors.white, fontFamily: 'Cairo'),
         titleSmall: TextStyle(color: Colors.white, fontFamily: 'Cairo'),
         bodyLarge: TextStyle(color: Colors.white, fontFamily: 'Cairo'),
-        bodyMedium: TextStyle(color: Colors.white70, fontFamily: 'Cairo'),
-        bodySmall: TextStyle(color: Colors.white60, fontFamily: 'Cairo'),
+        bodyMedium: TextStyle(color: Colors.white, fontFamily: 'Cairo'),
+        bodySmall: TextStyle(color: Colors.white, fontFamily: 'Cairo'),
         labelLarge: TextStyle(color: Colors.white, fontFamily: 'Cairo'),
-        labelMedium: TextStyle(color: Colors.white70, fontFamily: 'Cairo'),
-        labelSmall: TextStyle(color: Colors.white60, fontFamily: 'Cairo'),
+        labelMedium: TextStyle(color: Colors.white, fontFamily: 'Cairo'),
+        labelSmall: TextStyle(color: Colors.white, fontFamily: 'Cairo'),
       ),
 
       // Card Theme
@@ -356,8 +356,8 @@ class AppTheme {
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        hintStyle: TextStyle(color: Colors.grey[500], fontFamily: 'Cairo'),
-        labelStyle: const TextStyle(color: Colors.white70, fontFamily: 'Cairo'),
+        hintStyle: TextStyle(color: Colors.grey[400], fontFamily: 'Cairo'),
+        labelStyle: const TextStyle(color: Colors.white, fontFamily: 'Cairo'),
       ),
 
       // Elevated Button Theme
@@ -446,7 +446,7 @@ class AppTheme {
           fontFamily: 'Cairo',
         ),
         contentTextStyle: const TextStyle(
-          color: Colors.white70,
+          color: Colors.white,
           fontSize: 16,
           fontFamily: 'Cairo',
         ),

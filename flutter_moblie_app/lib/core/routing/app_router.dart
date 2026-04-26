@@ -15,6 +15,7 @@ import '../../features/doctor/ui/account_deletion_screen.dart';
 import '../../features/doctor/ui/doctor_home_screen.dart';
 import '../../features/doctor/ui/doctor_booking_records_screen.dart';
 import '../../features/doctor/ui/doctor_confirmed_appointments_screen.dart';
+import '../../features/appointments/ui/appointments_screen.dart';
 
 class AppRouter {
   Route generateRoute(RouteSettings settings) {
@@ -85,6 +86,10 @@ class AppRouter {
       case Routes.doctorHomeScreen:
         return MaterialPageRoute(
           builder: (context) => const DoctorHomeScreen(),
+        );
+      case Routes.appointmentsScreen:
+        return MaterialPageRoute(
+          builder: (context) => const AppointmentsScreen(),
         );
 
       default:
