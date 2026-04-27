@@ -123,7 +123,7 @@ class AuthService {
             if (id != null) {
               doctorId = int.tryParse(id.toString());
               log('✅ doctorId resolved to: $doctorId', name: 'AuthService');
-              await SharedPrefHelper.setData('doctor_id', doctorId ?? id);
+              await SharedPrefHelper.setData('doctor_id', doctorId ?? (id is int ? id : int.tryParse(id.toString()) ?? 0));
             } else {
               log('❌ No id field found in userMap! FCM token will be registered WITHOUT user_id.',
                   name: 'AuthService');
@@ -289,7 +289,10 @@ class AuthService {
               userMap['id'] ?? userMap['doctor_id'] ?? userMap['doctorId'];
 
           if (id != null) {
-            await SharedPrefHelper.setData('doctor_id', id);
+            final intId = id is int ? id : int.tryParse(id.toString());
+            if (intId != null) {
+              await SharedPrefHelper.setData('doctor_id', intId);
+            }
           }
 
           if (first_name != null && first_name.isNotEmpty) {

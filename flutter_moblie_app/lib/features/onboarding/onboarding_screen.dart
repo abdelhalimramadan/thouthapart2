@@ -17,6 +17,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _currentPage = 0;
   final int _numPages = 3;
 
+  @override
+  void initState() {
+    super.initState();
+    // بمجرد دخول الشاشة، نعتبر أن المستخدم "رأى" الاونبوردينج
+    // لكي لا تظهر له مرة أخرى إذا أغلق التطبيق وفتحه
+    _markOnboardingAsSeen();
+  }
+
+  Future<void> _markOnboardingAsSeen() async {
+    await SharedPrefHelper.setData('has_seen_onboarding', true);
+  }
+
   // List of onboarding pages data
   final List<Map<String, String>> _pages = [
     {

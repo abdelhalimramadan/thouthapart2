@@ -33,188 +33,228 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF1F1F1),
-       appBar: AppBar(
-         title: Text(
-           'الإشعارات',
-           style: TextStyle(
-             fontFamily: 'Cairo',
-             fontWeight: FontWeight.w700,
-             fontSize: 20,
-           ),
-         ),
-        centerTitle: true,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: Colors.transparent,
-        actions: [
-          BlocBuilder<NotificationsCubit, NotificationsState>(
-            bloc: _cubit,
-            builder: (context, state) {
-              if (state is SuccessState && state.notifications.isNotEmpty) {
-                final unreadCount =
-                    state.notifications.where((n) => n.readStatus == false).length;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
 
-                return IconButton(
-                  tooltip: _showUnreadOnly
-                      ? 'عرض كل الإشعارات'
-                      : 'عرض غير المقروء فقط',
-                  onPressed: () {
-                    setState(() {
-                      _showUnreadOnly = !_showUnreadOnly;
-                    });
-                  },
-                  icon: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Icon(
-                        _showUnreadOnly
-                            ? Icons.mark_email_unread_rounded
-                            : Icons.mark_email_read_outlined,
-                        color: _showUnreadOnly
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface.withValues(alpha: 0.75),
-                      ),
-                       if (unreadCount > 0)
-                         PositionedDirectional(
-                           top: -4,
-                           end: -6,
-                           child: Container(
-                             padding: EdgeInsets.symmetric(
-                               horizontal: unreadCount > 9 ? 4 : 5,
-                               vertical: 1,
-                             ),
-                             constraints: BoxConstraints(
-                               minWidth: 16,
-                               minHeight: 16,
-                             ),
-                             decoration: BoxDecoration(
-                               color: Colors.red,
-                               borderRadius: BorderRadius.circular(12),
-                               border: Border.all(
-                                 color: theme.scaffoldBackgroundColor,
-                                 width: 1,
+        final navigator = Navigator.of(context);
+        final doctorId = await SharedPrefHelper.getInt('doctor_id');
+
+        if (navigator.canPop()) {
+          navigator.pop();
+        } else {
+          if (context.mounted) {
+            navigator.pushNamedAndRemoveUntil(
+              doctorId != 0 ? Routes.doctorHomeScreen : Routes.categoriesScreen,
+              (route) => false,
+            );
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF1F1F1),
+        appBar: AppBar(
+          title: Text(
+            'الإشعارات',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontWeight: FontWeight.w700,
+              fontSize: 20,
+            ),
+          ),
+          centerTitle: true,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          backgroundColor: Colors.transparent,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              if (navigator.canPop()) {
+                navigator.pop();
+              } else {
+                final doctorId = await SharedPrefHelper.getInt('doctor_id');
+                if (context.mounted) {
+                  navigator.pushNamedAndRemoveUntil(
+                    doctorId != 0
+                        ? Routes.doctorHomeScreen
+                        : Routes.categoriesScreen,
+                    (route) => false,
+                  );
+                }
+              }
+            },
+          ),
+          actions: [
+            BlocBuilder<NotificationsCubit, NotificationsState>(
+              bloc: _cubit,
+              builder: (context, state) {
+                if (state is SuccessState && state.notifications.isNotEmpty) {
+                  final unreadCount =
+                      state.notifications.where((n) => n.readStatus == false).length;
+  
+                  return IconButton(
+                    tooltip: _showUnreadOnly
+                        ? 'عرض كل الإشعارات'
+                        : 'عرض غير المقروء فقط',
+                    onPressed: () {
+                      setState(() {
+                        _showUnreadOnly = !_showUnreadOnly;
+                      });
+                    },
+                    icon: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Icon(
+                          _showUnreadOnly
+                              ? Icons.mark_email_unread_rounded
+                              : Icons.mark_email_read_outlined,
+                          color: _showUnreadOnly
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                        ),
+                         if (unreadCount > 0)
+                           PositionedDirectional(
+                             top: -4,
+                             end: -6,
+                             child: Container(
+                               padding: EdgeInsets.symmetric(
+                                 horizontal: unreadCount > 9 ? 4 : 5,
+                                 vertical: 1,
                                ),
-                             ),
-                             child: Text(
-                               unreadCount > 99 ? '99+' : '$unreadCount',
-                               textAlign: TextAlign.center,
-                               style: TextStyle(
-                                 color: Colors.white,
-                                 fontFamily: 'Cairo',
-                                 fontSize: 9,
-                                 fontWeight: FontWeight.w700,
-                                 height: 1.1,
+                               constraints: BoxConstraints(
+                                 minWidth: 16,
+                                 minHeight: 16,
+                               ),
+                               decoration: BoxDecoration(
+                                 color: Colors.red,
+                                 borderRadius: BorderRadius.circular(12),
+                                 border: Border.all(
+                                   color: theme.scaffoldBackgroundColor,
+                                   width: 1,
+                                 ),
+                               ),
+                               child: Text(
+                                 unreadCount > 99 ? '99+' : '$unreadCount',
+                                 textAlign: TextAlign.center,
+                                 style: TextStyle(
+                                   color: Colors.white,
+                                   fontFamily: 'Cairo',
+                                   fontSize: 9,
+                                   fontWeight: FontWeight.w700,
+                                   height: 1.1,
+                                 ),
                                ),
                              ),
                            ),
-                         ),
+                      ],
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+            const SizedBox.shrink(),
+          ],
+        ),
+        body: Container(
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF1F1F1),
+          ),
+          child: BlocBuilder<NotificationsCubit, NotificationsState>(
+            bloc: _cubit,
+            builder: (context, state) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+            if (state is LoadingState) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (state is SuccessState) {
+              final visibleNotifications = _showUnreadOnly
+                  ? state.notifications.where((n) => n.readStatus == false).toList()
+                  : state.notifications;
+  
+              if (state.notifications.isEmpty) {
+                return _buildEmptyState();
+              }
+  
+              if (visibleNotifications.isEmpty) {
+                return _buildNoUnreadState();
+              }
+  
+              return RefreshIndicator(
+                onRefresh: () async {
+                  await _cubit.fetchNotifications();
+                },
+                color: theme.colorScheme.primary,
+                child: ListView.builder(
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
+                  ),
+                  padding: EdgeInsets.fromLTRB(14, 8, 14, 20),
+                  itemCount: visibleNotifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = visibleNotifications[index];
+                    return _buildNotificationCard(context, notification);
+                  },
+                ),
+              );
+            } else if (state is FailureState) {
+              return Center(
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.red.withValues(alpha: 0.28)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        size: 54,
+                        color: Colors.red,
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'تعذر تحميل الإشعارات',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        state.message,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark ? Colors.white70 : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                          fontFamily: 'Cairo',
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      FilledButton.icon(
+                        onPressed: _cubit.fetchNotifications,
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('إعادة المحاولة'),
+                      ),
                     ],
                   ),
-                );
-              }
-              return const SizedBox.shrink();
+                ),
+              );
+            }
+            return _buildEmptyState();
             },
           ),
-          const SizedBox.shrink(),
-        ],
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF1F1F1),
-        ),
-        child: BlocBuilder<NotificationsCubit, NotificationsState>(
-          bloc: _cubit,
-          builder: (context, state) {
-            final isDark = Theme.of(context).brightness == Brightness.dark;
-          if (state is LoadingState) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else if (state is SuccessState) {
-            final visibleNotifications = _showUnreadOnly
-                ? state.notifications.where((n) => n.readStatus == false).toList()
-                : state.notifications;
-
-            if (state.notifications.isEmpty) {
-              return _buildEmptyState();
-            }
-
-            if (visibleNotifications.isEmpty) {
-              return _buildNoUnreadState();
-            }
-
-            return RefreshIndicator(
-              onRefresh: () async {
-                await _cubit.fetchNotifications();
-              },
-              color: theme.colorScheme.primary,
-              child: ListView.builder(
-                physics: const BouncingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics(),
-                ),
-                padding: EdgeInsets.fromLTRB(14, 8, 14, 20),
-                itemCount: visibleNotifications.length,
-                itemBuilder: (context, index) {
-                  final notification = visibleNotifications[index];
-                  return _buildNotificationCard(context, notification);
-                },
-              ),
-            );
-          } else if (state is FailureState) {
-            return Center(
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                decoration: BoxDecoration(
-                  color: theme.cardColor,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: Colors.red.withValues(alpha: 0.28)),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.error_outline_rounded,
-                      size: 54,
-                      color: Colors.red,
-                    ),
-                    SizedBox(height: 12),
-                    Text(
-                      'تعذر تحميل الإشعارات',
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      state.message,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isDark ? Colors.white70 : theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                        fontFamily: 'Cairo',
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    FilledButton.icon(
-                      onPressed: _cubit.fetchNotifications,
-                      icon: const Icon(Icons.refresh_rounded),
-                      label: const Text('إعادة المحاولة'),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-          return _buildEmptyState();
-          },
         ),
       ),
     );
+
   }
 
 

@@ -177,10 +177,11 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
         Navigator.pop(context, false);
-        return false;
       },
       child: Scaffold(
         appBar: AppBar(

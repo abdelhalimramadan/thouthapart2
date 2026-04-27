@@ -324,7 +324,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
           await SharedPrefHelper.setData('email', doctorData.email!);
         }
         if (doctorData.id != null) {
-          await SharedPrefHelper.setData('doctor_id', doctorData.id.toString());
+          await SharedPrefHelper.setData('doctor_id', doctorData.id);
         }
       } else {
         debugPrint('Drawer - API call failed or returned no data');

@@ -10,7 +10,7 @@ import 'package:thoutha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thoutha_mobile_app/features/doctor/logic/doctor_cubit.dart';
-
+import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:thoutha_mobile_app/features/doctor/logic/doctor_state.dart';
 import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
@@ -433,46 +433,72 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
 
     return BlocProvider(
       create: (context) => getIt<DoctorCubit>()..loadInitialData(),
-      child: Scaffold(
-        key: _scaffoldKey,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(
-              Icons.menu,
-              size: 24,
-              color: Theme.of(context).iconTheme.color,
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) return;
+
+          final navigator = Navigator.of(context);
+          final doctorId = await SharedPrefHelper.getInt('doctor_id');
+
+          if (navigator.canPop()) {
+            navigator.pop();
+          } else {
+            if (context.mounted) {
+              navigator.pushNamedAndRemoveUntil(
+                doctorId != 0 ? Routes.doctorHomeScreen : Routes.categoriesScreen,
+                (route) => false,
+              );
+            }
+          }
+        },
+        child: Scaffold(
+          key: _scaffoldKey,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(
+                Navigator.of(context).canPop()
+                    ? Icons.arrow_back_ios_new_rounded
+                    : Icons.menu,
+                size: 24,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              onPressed: () async {
+                final navigator = Navigator.of(context);
+                if (navigator.canPop()) {
+                  navigator.pop();
+                } else {
+                  _scaffoldKey.currentState?.openDrawer();
+                }
+              },
             ),
-            onPressed: () {
-              _scaffoldKey.currentState?.openDrawer();
-            },
-          ),
-          title: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'نشر حالة جديدة',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.bold,
-                  fontSize: (baseFontSize * 1.1).clamp(18.0, 24.0),
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'نشر حالة جديدة',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontWeight: FontWeight.bold,
+                    fontSize: (baseFontSize * 1.1).clamp(18.0, 24.0),
+                  ),
                 ),
-              ),
-              SizedBox(width: 8),
-              Image.asset(
-                'assets/images/splash-logo.png',
-                width: 36,
-                height: 36,
-                fit: BoxFit.contain,
-              ),
-            ],
+                SizedBox(width: 8),
+                Image.asset(
+                  'assets/images/splash-logo.png',
+                  width: 36,
+                  height: 36,
+                  fit: BoxFit.contain,
+                ),
+              ],
+            ),
+            centerTitle: true,
           ),
-          centerTitle: true,
-        ),
         drawer: widget.drawer,
         body: SafeArea(
           child: BlocConsumer<DoctorCubit, DoctorState>(
@@ -752,6 +778,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
