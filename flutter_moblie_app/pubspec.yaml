@@ -9,7 +9,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # followed by an optional build number separated by a +.
 # Both the version and the builder number may be overridden in flutter
 # In Android, build-name is used as versionName while build-number used as versionCode.
-version: 1.0.16+17
+version: 1.0.18+19
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -33,36 +33,27 @@ dependencies:
   google_fonts: ^6.3.3
   # state management
   flutter_bloc: ^9.1.1
-  # code generator mainly used cubit & retrofit
-  freezed: ^3.2.3
-  #Annotations for the freezed code-generator. This package does nothing without freezed too.
+  #Annotations for the freezed code-generator.
   freezed_annotation: ^3.1.0
   #for dependency injection
   get_it: ^8.2.0
-  get: ^4.6.5
   provider: ^6.1.2
   pinput: ^5.0.0
   bloc: ^9.2.0
   meta: ^1.11.0
-  #Automatically generate code for converting to and from JSON by annotating Dart classes.
-  json_serializable: ^6.11.1
+  #Annotations for JSON conversion.
   json_annotation: ^4.9.0
   #Networking
   dio: ^5.9.0
   cookie_jar: ^4.0.8
   dio_cookie_manager: ^3.1.1
   retrofit: ^4.7.3
-  retrofit_generator: ^10.0.6
   pretty_dio_logger: ^1.4.0
   intl: ^0.20.2
-  easy_localization: ^3.0.8
-  fl_chart: ^0.70.0
   image_picker: ^1.0.7
 
-
   cached_network_image: ^3.3.1
-  sign_in_button: ^4.0.1
-  #An SVG rendering and widget library for Flutter, which allows painting
+  #An SVG rendering and widget library for Flutter
   flutter_svg: ^2.2.1
   firebase_core: ^4.4.0
   # reading and writing simple key-value pairs
@@ -71,30 +62,24 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   # easy way to add shimmer effect
   shimmer: ^3.0.0
-  speech_to_text: ^7.3.0
-  otp_phone_verify: ^1.0.4
   geolocator: ^14.0.2
   permission_handler: ^12.0.1
   flutter_local_notifications: ^20.1.0
   firebase_messaging: ^16.1.1
-  googleapis: ^16.0.0
-  googleapis_auth: ^2.0.0
-  http: ^1.6.0
   connectivity_plus: ^7.0.0
   url_launcher: ^6.3.2
   package_info_plus: ^8.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.13.1
   build_runner: ^2.10.5
+  freezed: ^3.2.3
+  retrofit_generator: ^10.0.6
+  json_serializable: ^6.11.1
 
 flutter_icons:
   android: true

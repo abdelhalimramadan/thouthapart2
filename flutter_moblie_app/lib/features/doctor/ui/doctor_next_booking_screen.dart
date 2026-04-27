@@ -415,7 +415,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           Expanded(
             child: ElevatedButton.icon(
               onPressed: () =>
-                  _handleAppointmentStatus(context, appointmentId, 'REJECTED'),
+                  _handleAppointmentStatus(context, appointmentId, 'CANCELLED'),
               icon: const Icon(Icons.thumb_down_outlined),
               label: Text(
                 'رفض',
@@ -575,8 +575,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                     service: booking['categoryName'] ?? 'تخصص عام',
                     time: displayTime,
                     date: displayDate,
-                    status: booking['status'] ?? 'قادم',
-                    statusColor: const Color(0xFF84E5F3),
+                    status: 'قيد الانتظار',
+                    statusColor: Colors.orange,
                     width: width,
                     baseFontSize: baseFontSize,
                   ),
@@ -611,11 +611,12 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'تم ${status == 'APPROVED' ? 'قبول' : 'رفض'} الحجز بنجاح',
+              status == 'APPROVED' ? 'تم قبول الحجز بنجاح' : 'تم رفض الحجز بنجاح',
               style: const TextStyle(fontFamily: 'Cairo'),
             ),
-            backgroundColor:
-                status == 'APPROVED' ? Colors.green : Colors.orange,
+            backgroundColor: status == 'APPROVED' || status == 'DONE'
+                ? Colors.green
+                : Colors.red,
             duration: const Duration(seconds: 2),
           ),
         );

@@ -3,6 +3,7 @@ import 'package:thoutha_mobile_app/features/onboarding/widgets/doctor_image_and_
 
 import '../../core/routing/routes.dart';
 import '../../core/theming/colors.dart';
+import '../../core/helpers/shared_pref_helper.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -38,12 +39,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     },
   ];
 
-  void _onSkipPressed() {
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      Routes.categoriesScreen,
-      (route) => false,
-    );
+  void _onSkipPressed() async {
+    // حفظ أن المستخدم رأى الاونبوردينج
+    await SharedPrefHelper.setData('has_seen_onboarding', true);
+    
+    if (mounted) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        Routes.categoriesScreen,
+        (route) => false,
+      );
+    }
   }
 
   void _onPageChanged(int index) {

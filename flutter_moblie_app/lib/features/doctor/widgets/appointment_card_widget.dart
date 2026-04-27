@@ -11,6 +11,7 @@ class AppointmentCardWidget extends StatelessWidget {
   final Color? statusColor;
   final VoidCallback? onTap;
   final Widget? actionButtons;
+  final bool showDetails;
 
   const AppointmentCardWidget({
     super.key,
@@ -24,6 +25,7 @@ class AppointmentCardWidget extends StatelessWidget {
     this.statusColor,
     this.onTap,
     this.actionButtons,
+    this.showDetails = true,
   });
 
   @override
@@ -100,89 +102,91 @@ class AppointmentCardWidget extends StatelessWidget {
                 ],
               ],
             ),
-            const SizedBox(height: 12),
-            // Phone
-            Row(
-              textDirection: TextDirection.rtl,
-              children: [
-                Icon(Icons.phone_outlined, size: 14, color: Colors.grey[600]),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    phone,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 14,
-                      color: isDark ? Colors.white70 : Colors.grey[700],
+            if (showDetails) ...[
+              const SizedBox(height: 12),
+              // Phone
+              Row(
+                textDirection: TextDirection.rtl,
+                children: [
+                  Icon(Icons.phone_outlined, size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      phone,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 14,
+                        color: isDark ? Colors.white70 : Colors.grey[700],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            // Date
-            Row(
-              textDirection: TextDirection.rtl,
-              children: [
-                Icon(Icons.calendar_today_outlined,
-                    size: 14, color: Colors.grey[600]),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    date,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 14,
-                      color: isDark ? Colors.white70 : Colors.grey[700],
+                ],
+              ),
+              const SizedBox(height: 10),
+              // Date
+              Row(
+                textDirection: TextDirection.rtl,
+                children: [
+                  Icon(Icons.calendar_today_outlined,
+                      size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      date,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 14,
+                        color: isDark ? Colors.white70 : Colors.grey[700],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            // Time
-            Row(
-              textDirection: TextDirection.rtl,
-              children: [
-                Icon(Icons.access_time_outlined,
-                    size: 14, color: Colors.grey[600]),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    time,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 14,
-                      color: isDark ? Colors.white70 : Colors.grey[700],
+                ],
+              ),
+              const SizedBox(height: 10),
+              // Time
+              Row(
+                textDirection: TextDirection.rtl,
+                children: [
+                  Icon(Icons.access_time_outlined,
+                      size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      time,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 14,
+                        color: isDark ? Colors.white70 : Colors.grey[700],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            // Service
-            Row(
-              textDirection: TextDirection.rtl,
-              children: [
-                Icon(Icons.medical_services_outlined,
-                    size: 14, color: Colors.grey[600]),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    service,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 14,
-                      color: isDark ? Colors.white70 : Colors.grey[700],
+                ],
+              ),
+              const SizedBox(height: 10),
+              // Service
+              Row(
+                textDirection: TextDirection.rtl,
+                children: [
+                  Icon(Icons.medical_services_outlined,
+                      size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      service,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 14,
+                        color: isDark ? Colors.white70 : Colors.grey[700],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
             // Action Buttons (Optional)
             if (actionButtons != null) ...[
               const SizedBox(height: 12),

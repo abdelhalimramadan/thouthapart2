@@ -12,6 +12,7 @@ import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/networking/api_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../notifications/logic/notifications_cubit.dart';
+import '../widgets/appointment_card_widget.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DoctorHomeScreen
@@ -112,21 +113,28 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       final results = await Future.wait([
         _apiService.getPendingAppointments(),
         _apiService.getApprovedAppointments(),
+        _apiService.getDoneAppointments(),
       ]);
 
       final pendingResult = results[0];
       final approvedResult = results[1];
+      final doneResult = results[2];
 
       if (!mounted) return;
 
-      if (pendingResult['success'] == true && approvedResult['success'] == true) {
+      if (pendingResult['success'] == true && 
+          approvedResult['success'] == true && 
+          doneResult['success'] == true) {
         setState(() {
           _pendingAppointments = List<Map<String, dynamic>>.from(pendingResult['data'] as List);
-          _approvedAppointments = List<Map<String, dynamic>>.from(approvedResult['data'] as List);
+          _approvedAppointments = [
+            ...List<Map<String, dynamic>>.from(approvedResult['data'] as List),
+            ...List<Map<String, dynamic>>.from(doneResult['data'] as List),
+          ];
           _isLoadingAppointments = false;
         });
       } else {
-        final error = (pendingResult['error'] ?? approvedResult['error'])?.toString() ?? 'فشل في تحميل الحجوزات';
+        final error = (pendingResult['error'] ?? approvedResult['error'] ?? doneResult['error'])?.toString() ?? 'فشل في تحميل الحجوزات';
         setState(() {
           _appointmentsError = error;
           _isLoadingAppointments = false;
@@ -375,11 +383,16 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'تم ${status == 'APPROVED' ? 'قبول' : 'رفض'} الحجز بنجاح',
+              status == 'APPROVED'
+                  ? 'تم قبول الحجز بنجاح'
+                  : status == 'DONE'
+                      ? 'تم تأكيد الحجز بنجاح'
+                      : 'تم إلغاء الحجز بنجاح',
               style: const TextStyle(fontFamily: 'Cairo'),
             ),
-            backgroundColor:
-                status == 'APPROVED' ? Colors.green : Colors.orange,
+            backgroundColor: status == 'APPROVED' || status == 'DONE'
+                ? Colors.green
+                : Colors.red,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -723,23 +736,24 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
           } catch (_) {}
         }
 
-        return _AppointmentCard(
-          appointment: appointment,
-          displayDate: displayDate,
-          displayTime: displayTime,
+        return AppointmentCardWidget(
+          context: context,
+          patientName: '${appointment['patientFirstName'] ?? 'مريض'} ${appointment['patientLastName'] ?? ''}'.trim(),
+          phone: appointment['patientPhoneNumber'] ?? 'غير متوفر',
+          service: appointment['categoryName'] ?? 'تخصص عام',
+          date: displayDate,
+          time: displayTime,
+          statusLabel: isPending ? 'قيد الانتظار' : 'مؤكدة',
+          statusColor: isPending ? Colors.orange : Colors.greenAccent,
+          showDetails: isPending,
           onTap: () {
              if (isPending) {
-                _showAppointmentDetails(
-                  context: context,
-                  appointmentId: appointment['id'] ?? 0,
-                  patientName: '${appointment['patientFirstName'] ?? 'مريض'} ${appointment['patientLastName'] ?? ''}'.trim(),
-                  phone: appointment['patientPhoneNumber'] ?? 'غير متوفر',
-                  date: displayDate,
-                  time: displayTime,
-                  service: appointment['categoryName'] ?? 'تخصص عام',
+                Navigator.pushNamed(
+                  context,
+                  Routes.doctorNextBookingScreen,
+                  arguments: {'appointmentId': appointment['id']},
                 );
              } else {
-                // For confirmed cases, maybe just show details without accept/reject?
                 _showConfirmedDetails(
                   context: context,
                   appointment: appointment,
@@ -889,173 +903,3 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
 // ─────────────────────────────────────────────────────────────────────────────
 // _AppointmentCard — stateless, const-safe
 // ─────────────────────────────────────────────────────────────────────────────
-class _AppointmentCard extends StatelessWidget {
-  final Map<String, dynamic> appointment;
-  final String displayDate;
-  final String displayTime;
-  final VoidCallback onTap;
-
-  const _AppointmentCard({
-    required this.appointment,
-    required this.displayDate,
-    required this.displayTime,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final patientName =
-        '${appointment['patientFirstName'] ?? 'مريض'} ${appointment['patientLastName'] ?? ''}'
-            .trim();
-    final phone = appointment['patientPhoneNumber'] ?? 'غير متوفر';
-    final service = appointment['categoryName'] ?? 'تخصص عام';
-    final status = appointment['status'] ?? 'قادم';
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final statusColor = const Color(0xFF84E5F3);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 0), // Removed horizontal margin
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: isDark ? Colors.grey[900]?.withAlpha(200) : Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-              color: isDark ? Colors.grey[800]! : const Color(0xFFE5E7EB)),
-          boxShadow: [
-            BoxShadow(
-                color: isDark
-                    ? Colors.black.withValues(alpha: 0.3)
-                    : Colors.black.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: Offset(0, 3)),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            // Header: Patient Name | Status Badge
-            Row(
-              textDirection: ui.TextDirection.rtl,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    status,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    patientName,
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color:
-                          isDark ? Colors.blue[300] : const Color(0xFF1D61E7),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 6),
-            // Service/Category
-            Row(
-              textDirection: ui.TextDirection.rtl,
-              children: [
-                Icon(Icons.medical_services_outlined,
-                    size: 14, color: Colors.grey[500]),
-                SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    service,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 13,
-                        color: isDark ? Colors.white : Colors.grey[600]),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            // Phone + Date/Time chips
-            Row(
-              textDirection: ui.TextDirection.rtl,
-              children: [
-                _InfoChip(icon: Icons.phone_outlined, text: phone),
-              ],
-            ),
-            SizedBox(height: 8),
-            Wrap(
-              textDirection: ui.TextDirection.rtl,
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _InfoChip(
-                    icon: Icons.calendar_today_outlined, text: displayDate),
-                _InfoChip(icon: Icons.access_time_outlined, text: displayTime),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoChip extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  const _InfoChip({required this.icon, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final maxChipTextWidth = MediaQuery.of(context).size.width * 0.34;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-          color: isDark ? Colors.grey[800]?.withAlpha(150) : Colors.grey[100],
-          borderRadius: BorderRadius.circular(8)),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon,
-            size: 13,
-            color: isDark ? Colors.blue[300] : const Color(0xFF1D61E7)),
-        SizedBox(width: 4),
-        ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxChipTextWidth),
-          child: Text(
-            text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            softWrap: false,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 11,
-              color: isDark ? Colors.white : Colors.grey[800],
-            ),
-          ),
-        ),
-      ]),
-    );
-  }
-}

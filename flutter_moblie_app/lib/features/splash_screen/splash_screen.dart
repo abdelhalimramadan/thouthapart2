@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theming/colors.dart';
+import '../../core/helpers/shared_pref_helper.dart';
+import '../../core/helpers/constants.dart';
 import '../../core/helpers/notification_permission_helper.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -126,7 +128,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional) {
       if (mounted) {
-        Navigator.pushReplacementNamed(context, Routes.onBoardingScreen);
+        _navigateToNext(context);
       }
       return;
     }
@@ -140,8 +142,6 @@ class _SplashScreenState extends State<SplashScreen>
             await Geolocator.openAppSettings();
           },
         );
-        // Remove immediate recursive check to avoid double-dialog.
-        // The check will be triggered by didChangeAppLifecycleState when resuming.
       }
       return;
     }
@@ -159,19 +159,48 @@ class _SplashScreenState extends State<SplashScreen>
             sound: true,
           );
           if (!mounted) return;
-          // After first-time system prompt, always proceed to avoid immediate "Go to Settings" dialog.
-          Navigator.pushReplacementNamed(context, Routes.onBoardingScreen);
+          _navigateToNext(context);
         } else {
-          // If user chose "Not Now" (false) or dismissed the dialog (null),
-          // proceed to onboarding.
-          Navigator.pushReplacementNamed(context, Routes.onBoardingScreen);
+          _navigateToNext(context);
         }
       }
       return;
     }
 
     if (mounted) {
+      _navigateToNext(context);
+    }
+  }
+
+  /// Logic to decide where to go after Splash
+  Future<void> _navigateToNext(BuildContext context) async {
+    final hasSeenOnboarding =
+        await SharedPrefHelper.getBool('has_seen_onboarding') ?? false;
+    final token =
+        await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+
+    if (!mounted) return;
+
+    if (!hasSeenOnboarding) {
+      // إذا لم يرى الاونبوردينج ابداً
       Navigator.pushReplacementNamed(context, Routes.onBoardingScreen);
+    } else {
+      // إذا رآها من قبل، نرى هل هو مسجل دخول أم لا
+      if (token != null && token.isNotEmpty) {
+        // إذا كان مسجل دخول، نذهب للهوم (الهوم سيتعرف تلقائياً إذا كان دكتور أم مريض)
+        // ملاحظة: الصفحة الرئيسية للمريض هي CategoriesScreen وللدكتور هي DoctorHomeScreen
+        // سنفحص هنا بشكل بسيط إذا كان هناك داتا دكتور مخزنة لنعرف الوجهة
+        final isDoctor = await SharedPrefHelper.getString('first_name') != null;
+        if (mounted) {
+          Navigator.pushReplacementNamed(
+            context,
+            isDoctor ? Routes.doctorHomeScreen : Routes.categoriesScreen,
+          );
+        }
+      } else {
+        // إذا لم يكن مسجل دخول، نذهب لصفحة الأقسام (الهوم العامة)
+        Navigator.pushReplacementNamed(context, Routes.categoriesScreen);
+      }
     }
   }
 
