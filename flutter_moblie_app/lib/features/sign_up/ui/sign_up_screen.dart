@@ -452,6 +452,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               isExpanded: true,
                                               decoration: const InputDecoration(
                                                 labelText: 'اختر المحافظة',
+                                                helperText: 'اختر المحافظة التابعة لها الكلية',
                                               ),
                                               items: _cities
                                                    .map((city) {

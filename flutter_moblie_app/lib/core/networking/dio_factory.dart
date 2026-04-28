@@ -20,8 +20,11 @@ class DioFactory {
         ..options.connectTimeout = timeOut
         ..options.receiveTimeout = timeOut
         ..options.sendTimeout = timeOut
-        ..options.baseUrl = ApiConstants.baseUrl;
-      addDioHeaders();
+        ..options.baseUrl = ApiConstants.baseUrl
+        ..options.headers = {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        };
       addDioInterceptor();
       return dio!;
     } else {
@@ -45,15 +48,25 @@ class DioFactory {
   static void setTokenIntoHeaderAfterLogin(String token) {
     final existing = dio?.options.headers ?? {};
     dio?.options.headers = {
-      // حافظ على Accept لو كان متضبط قبل كده
       'Accept': existing['Accept'] ?? 'application/json',
+      'Content-Type': existing['Content-Type'] ?? 'application/json',
       ...existing,
-      // وحط التوكن
       'Authorization': 'Bearer $token',
     };
   }
 
   static void addDioInterceptor() {
+    dio?.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          return handler.next(options);
+        },
+      ),
+    );
     dio?.interceptors.add(
       PrettyDioLogger(
         requestBody: true,

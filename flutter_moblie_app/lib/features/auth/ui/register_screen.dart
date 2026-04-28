@@ -313,6 +313,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _governorateController,
                     decoration: InputDecoration(
                       labelText: 'المحافظة',
+                      helperText: 'اختر المحافظة التابعة لها الكلية',
                       prefixIcon: const Icon(Icons.location_city_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),

@@ -187,14 +187,10 @@ class _SplashScreenState extends State<SplashScreen>
     } else {
       // إذا رآها من قبل، نرى هل هو مسجل دخول أم لا
       if (token != null && token.isNotEmpty) {
-        // إذا كان مسجل دخول، نذهب للهوم (الهوم سيتعرف تلقائياً إذا كان دكتور أم مريض)
-        // ملاحظة: الصفحة الرئيسية للمريض هي CategoriesScreen وللدكتور هي DoctorHomeScreen
-        // سنفحص هنا بشكل بسيط إذا كان هناك داتا دكتور مخزنة لنعرف الوجهة
-        final isDoctor = await SharedPrefHelper.getString('first_name') != null;
         if (mounted) {
           Navigator.pushReplacementNamed(
             context,
-            isDoctor ? Routes.doctorHomeScreen : Routes.categoriesScreen,
+            Routes.loginScreen,
           );
         }
       } else {

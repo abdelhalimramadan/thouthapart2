@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thoutha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
 import 'package:thoutha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
@@ -725,10 +726,52 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           ),
                         ),
 
+                      // Chatbot Banner
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, Routes.chatScreen);
+                        },
+                        child: Container(
+                          margin: EdgeInsets.symmetric(
+                              horizontal: ResponsiveUtils.screenWidth(context) * 0.05,
+                              vertical: 4),
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 46,
+                                height: 46,
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: const Color(0xFF54CAF7), width: 1.5),
+                                ),
+                                child: SvgPicture.asset(
+                                  'assets/svg/ثوثه الدكتور 1.svg',
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Flexible(
+                                child: Text(
+                                  'لو مش عارف تحدد عندك إيه، روح اتكلم مع الطبيب الذكي',
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontFamily: 'Cairo',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                  textAlign: TextAlign.start,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
                       // Services Header
                       Container(
                         width: double.infinity,
-                        margin: EdgeInsets.symmetric(
+                        margin: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 12),
                         child: Text(

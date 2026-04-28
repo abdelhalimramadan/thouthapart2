@@ -130,6 +130,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
           final code = res['statusCode'];
           final errorStr = res['error']?.toString() ?? '';
           if (code == 401 || 
+              code == 403 || 
               code == 400 || 
               errorStr.contains('غير مصرح') || 
               errorStr.contains('static resource') || 
@@ -515,13 +516,29 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildGreeting(),
-                _buildSectionTitle('حجوزاتي القادمة'),
+                _buildSectionTitle(
+                  'حجوزاتي القادمة',
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      Routes.doctorNextBookingScreen,
+                    );
+                  },
+                ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.38,
                   child: _buildAppointmentsList(_pendingAppointments, isPending: true),
                 ),
                 const SizedBox(height: 10),
-                _buildSectionTitle('الحالات المؤكدة'),
+                _buildSectionTitle(
+                  'الحالات المؤكدة',
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      Routes.doctorConfirmedAppointmentsScreen,
+                    );
+                  },
+                ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.38,
                   child: _buildAppointmentsList(_approvedAppointments, isPending: false),
@@ -576,66 +593,16 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         ],
       ),
       actions: [
-        BlocProvider(
-          create: (_) => getIt<NotificationsCubit>()..fetchNotifications(),
-          child: BlocBuilder<NotificationsCubit, NotificationsState>(
-            builder: (context, state) {
-              int reactiveUnreadCount = 0;
-              if (state is SuccessState) {
-                reactiveUnreadCount = state.notifications
-                    .where((n) => !n.readStatus)
-                    .length;
-              }
-
-              return Stack(children: [
-                IconButton(
-                  icon: Icon(Icons.notifications_none, size: 24),
-                  onPressed: () {
-                    NotificationHelper.hasUnreadNotifications = false;
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const NotificationsScreen()),
-                    ).then((_) {
-                      // Refresh when coming back
-                      if (context.mounted) {
-                        context.read<NotificationsCubit>().fetchNotifications();
-                      }
-                    });
-                  },
-                ),
-                if (reactiveUnreadCount > 0)
-                  Positioned(
-                    right: 8,
-                    top: 10,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: reactiveUnreadCount > 9 ? 4 : 5,
-                        vertical: 1,
-                      ),
-                      constraints: BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.error,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '$reactiveUnreadCount',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onError,
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ]);
-            },
-          ),
+        IconButton(
+          icon: Icon(Icons.notifications_none, size: 24),
+          onPressed: () {
+            NotificationHelper.hasUnreadNotifications = false;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => const NotificationsScreen()),
+            );
+          },
         ),
         SizedBox(width: 8),
       ],
@@ -668,19 +635,22 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   }
 
   // ── Section title ──────────────────────────────────────────────
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(String title, {VoidCallback? onTap}) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 18, 16, 6),
       child: Align(
         alignment: Alignment.centerRight,
-        child: Text(
-          title,
-          style: TextStyle(
-            fontFamily: 'Cairo',
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
-            color: isDarkMode ? Colors.white : const Color(0xFF111827),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Text(
+            title,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
+              color: isDarkMode ? Colors.white : const Color(0xFF111827),
+            ),
           ),
         ),
       ),

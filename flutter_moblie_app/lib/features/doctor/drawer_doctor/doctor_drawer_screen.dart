@@ -345,11 +345,13 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     if (currentRoute.contains('add-case')) return 1;
     if (currentRoute.contains('doctor-profile') ||
         currentRoute.contains('profile')) return 2;
-    if (currentRoute.contains('upcoming-bookings')) return 3;
+    if (currentRoute.contains('upcoming-bookings') ||
+        currentRoute.contains('doctor-next-booking')) return 3;
     if (currentRoute.contains('booking-records') ||
         currentRoute.contains('records') ||
         currentRoute.contains('appointment-history')) return 4;
-    if (currentRoute.contains('confirmed-appointments')) return 5;
+    if (currentRoute.contains('confirmed-appointments') ||
+        currentRoute.contains('doctor-confirmed-appointments')) return 5;
     if (currentRoute.contains('doctor-requests')) return 6;
     return 0;
   }
