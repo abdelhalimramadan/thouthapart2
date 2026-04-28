@@ -122,6 +122,47 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
 
       if (!mounted) return;
 
+      // Check for unauthorized errors (401 or specific bad responses indicating dead session/deleted account)
+      bool isUnauthorized = false;
+      for (final res in results) {
+        if (res['success'] == false) {
+          final code = res['statusCode'];
+          final errorStr = res['error']?.toString() ?? '';
+          if (code == 401 || 
+              code == 400 || 
+              errorStr.contains('غير مصرح') || 
+              errorStr.contains('static resource') || 
+              errorStr.contains('المورد الثابت')) {
+            isUnauthorized = true;
+            break;
+          }
+        }
+      }
+
+      if (isUnauthorized) {
+        // Wipe all dead data
+        await SharedPrefHelper.clearAllData();
+        await SharedPrefHelper.clearAllSecuredData();
+        await SharedPrefHelper.setData('has_seen_onboarding', true);
+        
+        if (!mounted) return;
+        
+        // Show alert to user
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تم تسجيل الخروج لانتهاء الجلسة أو حذف الحساب', style: TextStyle(fontFamily: 'Cairo')),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        
+        // Redirect to Patient Home
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          Routes.categoriesScreen,
+          (route) => false,
+        );
+        return;
+      }
+
       if (pendingResult['success'] == true && 
           approvedResult['success'] == true && 
           doneResult['success'] == true) {
