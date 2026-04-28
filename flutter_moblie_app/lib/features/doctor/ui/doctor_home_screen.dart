@@ -576,66 +576,16 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         ],
       ),
       actions: [
-        BlocProvider(
-          create: (_) => getIt<NotificationsCubit>()..fetchNotifications(),
-          child: BlocBuilder<NotificationsCubit, NotificationsState>(
-            builder: (context, state) {
-              int reactiveUnreadCount = 0;
-              if (state is SuccessState) {
-                reactiveUnreadCount = state.notifications
-                    .where((n) => !n.readStatus)
-                    .length;
-              }
-
-              return Stack(children: [
-                IconButton(
-                  icon: Icon(Icons.notifications_none, size: 24),
-                  onPressed: () {
-                    NotificationHelper.hasUnreadNotifications = false;
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const NotificationsScreen()),
-                    ).then((_) {
-                      // Refresh when coming back
-                      if (context.mounted) {
-                        context.read<NotificationsCubit>().fetchNotifications();
-                      }
-                    });
-                  },
-                ),
-                if (reactiveUnreadCount > 0)
-                  Positioned(
-                    right: 8,
-                    top: 10,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: reactiveUnreadCount > 9 ? 4 : 5,
-                        vertical: 1,
-                      ),
-                      constraints: BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.error,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '$reactiveUnreadCount',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onError,
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ]);
-            },
-          ),
+        IconButton(
+          icon: Icon(Icons.notifications_none, size: 24),
+          onPressed: () {
+            NotificationHelper.hasUnreadNotifications = false;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => const NotificationsScreen()),
+            );
+          },
         ),
         SizedBox(width: 8),
       ],

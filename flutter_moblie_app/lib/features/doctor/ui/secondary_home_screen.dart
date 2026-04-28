@@ -438,22 +438,10 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
         onPopInvokedWithResult: (didPop, result) async {
           if (didPop) return;
 
-          final navigator = Navigator.of(context);
-
-          if (navigator.canPop()) {
-            navigator.pop();
+          if (widget.drawer is DoctorDrawer || widget.showAddCaseCategory) {
+            Navigator.of(context).pushReplacementNamed(Routes.doctorHomeScreen);
           } else {
-            if (widget.drawer is DoctorDrawer) {
-              navigator.pushReplacementNamed(Routes.doctorHomeScreen);
-            } else {
-              if (context.mounted) {
-                final doctorId = await SharedPrefHelper.getInt('doctor_id');
-                navigator.pushNamedAndRemoveUntil(
-                  doctorId != 0 ? Routes.doctorHomeScreen : Routes.categoriesScreen,
-                  (route) => false,
-                );
-              }
-            }
+            Navigator.of(context).pushReplacementNamed(Routes.categoriesScreen);
           }
         },
         child: Scaffold(
@@ -465,19 +453,12 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
             elevation: 0,
             leading: IconButton(
               icon: Icon(
-                Navigator.of(context).canPop()
-                    ? Icons.arrow_back_ios_new_rounded
-                    : Icons.menu,
+                Icons.menu,
                 size: 24,
                 color: Theme.of(context).iconTheme.color,
               ),
-              onPressed: () async {
-                final navigator = Navigator.of(context);
-                if (navigator.canPop()) {
-                  navigator.pop();
-                } else {
-                  _scaffoldKey.currentState?.openDrawer();
-                }
+              onPressed: () {
+                _scaffoldKey.currentState?.openDrawer();
               },
             ),
             title: Row(
