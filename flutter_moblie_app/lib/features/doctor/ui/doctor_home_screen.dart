@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/helpers/constants.dart';
 import '../../../../core/helpers/shared_pref_helper.dart';
@@ -495,32 +496,39 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     final cs = theme.colorScheme;
     final tt = theme.textTheme;
 
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const DoctorDrawer(),
-      appBar: _buildAppBar(cs, tt, theme),
-      body: RefreshIndicator(
-        onRefresh: _fetchAllAppointments,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildGreeting(),
-              _buildSectionTitle('حجوزاتي القادمة'),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.38,
-                child: _buildAppointmentsList(_pendingAppointments, isPending: true),
-              ),
-              const SizedBox(height: 10),
-              _buildSectionTitle('الحالات المؤكدة'),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.38,
-                child: _buildAppointmentsList(_approvedAppointments, isPending: false),
-              ),
-              const SizedBox(height: 40),
-            ],
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        SystemNavigator.pop();
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: theme.scaffoldBackgroundColor,
+        drawer: const DoctorDrawer(),
+        appBar: _buildAppBar(cs, tt, theme),
+        body: RefreshIndicator(
+          onRefresh: _fetchAllAppointments,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildGreeting(),
+                _buildSectionTitle('حجوزاتي القادمة'),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.38,
+                  child: _buildAppointmentsList(_pendingAppointments, isPending: true),
+                ),
+                const SizedBox(height: 10),
+                _buildSectionTitle('الحالات المؤكدة'),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.38,
+                  child: _buildAppointmentsList(_approvedAppointments, isPending: false),
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ),

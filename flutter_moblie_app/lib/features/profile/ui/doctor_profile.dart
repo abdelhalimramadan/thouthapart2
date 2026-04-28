@@ -11,6 +11,7 @@ import 'package:thoutha_mobile_app/features/profile/logic/profile_cubit.dart';
 import 'package:thoutha_mobile_app/features/profile/logic/profile_state.dart';
 import 'package:thoutha_mobile_app/features/requests/ui/my_requests_screen.dart';
 import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
+import 'package:thoutha_mobile_app/core/routing/routes.dart';
 
 import '../../doctor/ui/doctor_home_screen.dart';
 
@@ -284,300 +285,306 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const DoctorDrawer(),
-      appBar: AppBar(
-        toolbarHeight: 70,
-        elevation: 0,
-        backgroundColor: theme.colorScheme.surface,
-        foregroundColor: theme.colorScheme.onSurface,
-        automaticallyImplyLeading: false,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu, size: 24),
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        Navigator.of(context).pushReplacementNamed(Routes.doctorHomeScreen);
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: theme.scaffoldBackgroundColor,
+        drawer: const DoctorDrawer(),
+        appBar: AppBar(
+          toolbarHeight: 70,
+          elevation: 0,
+          backgroundColor: theme.colorScheme.surface,
+          foregroundColor: theme.colorScheme.onSurface,
+          automaticallyImplyLeading: false,
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: Icon(Icons.menu, size: 24),
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+            ),
+          ),
+          titleSpacing: 0,
+          centerTitle: true,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'الملف الشخصي',
+                style: textTheme.titleLarge?.copyWith(
+                  fontFamily: 'Cairo',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Image.asset(
+                'assets/images/splash-logo.png',
+                width: 36,
+                height: 36,
+                fit: BoxFit.contain,
+              ),
+            ],
           ),
         ),
-        titleSpacing: 0,
-        centerTitle: true,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'الملف الشخصي',
-              style: textTheme.titleLarge?.copyWith(
-                fontFamily: 'Cairo',
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Image.asset(
-              'assets/images/splash-logo.png',
-              width: 36,
-              height: 36,
-              fit: BoxFit.contain,
-            ),
-          ],
-        ),
-      ),
-      body: Directionality(
-        textDirection: TextDirection.rtl,
-        child: BlocConsumer<ProfileCubit, ProfileState<DoctorProfileModel>>(
-          listener: (context, state) {
-            state.whenOrNull(
-              success: (p, universities, cities, categories) {
-                final firstName = p.firstName ?? '';
-                final lastName = p.lastName ?? '';
-                final email = p.email ?? '';
-                final uni = p.faculty ?? '';
-                final yr = p.year ?? '';
-                final city = p.governorate ?? '';
-                final phone = p.phone ?? '';
-                final category = p.category ?? '';
-                _firstNameCtrl.text = firstName;
-                _lastNameCtrl.text = lastName;
-                _emailCtrl.text = email;
-                _universityCtrl.text = uni;
-                _yearCtrl.text = yr;
-                _cityCtrl.text = city;
-                _phoneCtrl.text = phone;
-                _categoryCtrl.text = category;
-                _origFirstName = firstName;
-                _origLastName = lastName;
-                _origEmail = email;
-                _origUniversity = uni;
-                _origYear = yr;
-                _origCity = city;
-                _origPhone = phone;
-                _origCategory = category;
-                if (_hasChanges) setState(() => _hasChanges = false);
-                // Show success snackbar only after a save, not on first load
-                if (_isSaving) {
+        body: Directionality(
+          textDirection: TextDirection.rtl,
+          child: BlocConsumer<ProfileCubit, ProfileState<DoctorProfileModel>>(
+            listener: (context, state) {
+              state.whenOrNull(
+                success: (p, universities, cities, categories) {
+                  final firstName = p.firstName ?? '';
+                  final lastName = p.lastName ?? '';
+                  final email = p.email ?? '';
+                  final uni = p.faculty ?? '';
+                  final yr = p.year ?? '';
+                  final city = p.governorate ?? '';
+                  final phone = p.phone ?? '';
+                  final category = p.category ?? '';
+                  _firstNameCtrl.text = firstName;
+                  _lastNameCtrl.text = lastName;
+                  _emailCtrl.text = email;
+                  _universityCtrl.text = uni;
+                  _yearCtrl.text = yr;
+                  _cityCtrl.text = city;
+                  _phoneCtrl.text = phone;
+                  _categoryCtrl.text = category;
+                  _origFirstName = firstName;
+                  _origLastName = lastName;
+                  _origEmail = email;
+                  _origUniversity = uni;
+                  _origYear = yr;
+                  _origCity = city;
+                  _origPhone = phone;
+                  _origCategory = category;
+                  if (_hasChanges) setState(() => _hasChanges = false);
+                  // Show success snackbar only after a save, not on first load
+                  if (_isSaving) {
+                    _isSaving = false;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                          'تم تحديث الملف الشخصي بنجاح',
+                          style: TextStyle(fontFamily: 'Cairo'),
+                        ),
+                        backgroundColor: Colors.green[700],
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                    );
+                  }
+                },
+                error: (msg, type) {
                   _isSaving = false;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: const Text(
-                        'تم تحديث الملف الشخصي بنجاح',
-                        style: TextStyle(fontFamily: 'Cairo'),
-                      ),
-                      backgroundColor: Colors.green[700],
+                      content:
+                          Text(msg, style: const TextStyle(fontFamily: 'Cairo')),
+                      backgroundColor: Colors.red[700],
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                     ),
                   );
-                }
-              },
-              error: (msg, type) {
-                _isSaving = false;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content:
-                        Text(msg, style: const TextStyle(fontFamily: 'Cairo')),
-                    backgroundColor: Colors.red[700],
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                  ),
-                );
-              },
-            );
-          },
-          builder: (context, state) {
-            final loadingWidget = state.mapOrNull(
-              loading: (s) => s.cachedData != null
-                  ? _buildContent(
-                      s.cachedData!, s.universities, s.cities, s.categories)
-                  : null,
-              success: (s) =>
-                  _buildContent(s.data, s.universities, s.cities, s.categories),
-              error: (s) => Center(child: Text(s.error)),
-            );
-            return loadingWidget ??
-                const Center(child: CircularProgressIndicator());
-          },
+                },
+              );
+            },
+            builder: (context, state) {
+              final loadingWidget = state.mapOrNull(
+                loading: (s) => s.cachedData != null
+                    ? _buildContent(
+                        s.cachedData!, s.universities, s.cities, s.categories)
+                    : null,
+                success: (s) =>
+                    _buildContent(s.data, s.universities, s.cities, s.categories),
+                error: (s) => Center(child: Text(s.error)),
+              );
+              return loadingWidget ??
+                  const Center(child: CircularProgressIndicator());
+            },
+          ),
         ),
-      ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: BoxDecoration(
-          color: isDark ? Colors.grey[900] : Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-              blurRadius: 10,
-              offset: Offset(0, -5),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // ── Save Button ───────────────────────────────────────────────
-            InkWell(
-              onTap: (_hasChanges && !_isSaving) ? _onSave : null,
-              borderRadius: BorderRadius.circular(12),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                width: double.infinity,
-                height: 54,
-                decoration: BoxDecoration(
-                  gradient: (_hasChanges && !_isSaving)
-                      ? const LinearGradient(
-                          colors: [Color(0xFF1D61E7), Color(0xFF0B8FAC)],
-                        )
-                      : LinearGradient(
-                          colors: [Colors.grey.shade400, Colors.grey.shade400],
-                        ),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFF021433).withValues(alpha: 0.18),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: (_hasChanges && !_isSaving)
-                          ? const Color(0xFF1D61E7).withValues(alpha: 0.2)
-                          : Colors.transparent,
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: _isSaving
-                      ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 2.2,
-                            color: Colors.white,
+        bottomNavigationBar: Container(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.grey[900] : Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                blurRadius: 10,
+                offset: Offset(0, -5),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ── Save Button ───────────────────────────────────────────────
+              InkWell(
+                onTap: (_hasChanges && !_isSaving) ? _onSave : null,
+                borderRadius: BorderRadius.circular(12),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  width: double.infinity,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    gradient: (_hasChanges && !_isSaving)
+                        ? const LinearGradient(
+                            colors: [Color(0xFF1D61E7), Color(0xFF0B8FAC)],
+                          )
+                        : LinearGradient(
+                            colors: [Colors.grey.shade400, Colors.grey.shade400],
                           ),
-                        )
-                      : Text(
-                          'حفظ',
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF021433).withValues(alpha: 0.18),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (_hasChanges && !_isSaving)
+                            ? const Color(0xFF1D61E7).withValues(alpha: 0.2)
+                            : Colors.transparent,
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: _isSaving
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2.2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            'حفظ',
+                            style: TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              // ── Change Password Button ────────────────────────────────────
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFF1D61E7), width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ChangePasswordScreen(),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.lock_reset_rounded,
+                      color: const Color(0xFF1D61E7), size: 24),
+                  label: Text(
+                    'تغيير كلمة المرور',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1D61E7),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              // ── Request and Delete Buttons ─────────────────────────────────────
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1D61E7),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MyRequestsScreen(),
+                            ),
+                          );
+                        },
+                        icon: Icon(Icons.assignment_outlined, size: 24),
+                        label: Text(
+                          'طلباتي',
                           style: TextStyle(
                             fontFamily: 'Cairo',
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
                           ),
                         ),
-                ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: SizedBox(
+                      height: 50,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.red, width: 1.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AccountDeletionScreen(),
+                            ),
+                          );
+                        },
+                        icon: Icon(Icons.delete_forever_rounded,
+                            color: Colors.red, size: 24),
+                        label: Text(
+                          'حذف الحساب',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize:
+                                14, // Reduced slightly to fit side-by-side
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: 10),
-            // ── Change Password Button ────────────────────────────────────
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF1D61E7), width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ChangePasswordScreen(),
-                    ),
-                  );
-                },
-                icon: Icon(Icons.lock_reset_rounded,
-                    color: const Color(0xFF1D61E7), size: 24),
-                label: Text(
-                  'تغيير كلمة المرور',
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1D61E7),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 10),
-            // ── Request and Delete Buttons ─────────────────────────────────────
-            Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1D61E7),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const MyRequestsScreen(),
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.assignment_outlined, size: 24),
-                      label: Text(
-                        'طلباتي',
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: SizedBox(
-                    height: 50,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.red, width: 1.5),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AccountDeletionScreen(),
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.delete_forever_rounded,
-                          color: Colors.red, size: 24),
-                      label: Text(
-                        'حذف الحساب',
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize:
-                              14, // Reduced slightly to fit side-by-side
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      ));
   }
 
   Widget _buildContent(

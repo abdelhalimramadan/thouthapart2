@@ -439,16 +439,20 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
           if (didPop) return;
 
           final navigator = Navigator.of(context);
-          final doctorId = await SharedPrefHelper.getInt('doctor_id');
 
           if (navigator.canPop()) {
             navigator.pop();
           } else {
-            if (context.mounted) {
-              navigator.pushNamedAndRemoveUntil(
-                doctorId != 0 ? Routes.doctorHomeScreen : Routes.categoriesScreen,
-                (route) => false,
-              );
+            if (widget.drawer is DoctorDrawer) {
+              navigator.pushReplacementNamed(Routes.doctorHomeScreen);
+            } else {
+              if (context.mounted) {
+                final doctorId = await SharedPrefHelper.getInt('doctor_id');
+                navigator.pushNamedAndRemoveUntil(
+                  doctorId != 0 ? Routes.doctorHomeScreen : Routes.categoriesScreen,
+                  (route) => false,
+                );
+              }
             }
           }
         },
@@ -780,5 +784,4 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
       ),
     ),
   );
-}
-}
+}}

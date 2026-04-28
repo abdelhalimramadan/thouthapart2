@@ -8,6 +8,7 @@ import 'package:thoutha_mobile_app/features/requests/data/logic/my_requests_stat
 
 import 'package:thoutha_mobile_app/features/requests/ui/edit_request_screen.dart';
 import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
+import 'package:thoutha_mobile_app/core/routing/routes.dart';
 
 class MyRequestsScreen extends StatelessWidget {
   const MyRequestsScreen({super.key});
@@ -33,81 +34,87 @@ class _MyRequestsViewState extends State<MyRequestsView> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    return Scaffold(
-      key: _scaffoldKey,
-      drawer: const DoctorDrawer(),
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        toolbarHeight: 70,
-        elevation: 0,
-        backgroundColor: theme.colorScheme.surface,
-        foregroundColor: theme.colorScheme.onSurface,
-        automaticallyImplyLeading: false,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu, size: 24),
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        Navigator.of(context).pushReplacementNamed(Routes.doctorHomeScreen);
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        drawer: const DoctorDrawer(),
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+          toolbarHeight: 70,
+          elevation: 0,
+          backgroundColor: theme.colorScheme.surface,
+          foregroundColor: theme.colorScheme.onSurface,
+          automaticallyImplyLeading: false,
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: Icon(Icons.menu, size: 24),
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+            ),
+          ),
+          titleSpacing: 0,
+          centerTitle: true,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'طلباتي',
+                style: textTheme.titleLarge?.copyWith(
+                  fontFamily: 'Cairo',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(width: 8),
+              Image.asset(
+                'assets/images/splash-logo.png',
+                width: 36,
+                height: 36,
+                fit: BoxFit.contain,
+              ),
+            ],
           ),
         ),
-        titleSpacing: 0,
-        centerTitle: true,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'طلباتي',
-              style: textTheme.titleLarge?.copyWith(
-                fontFamily: 'Cairo',
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            SizedBox(width: 8),
-            Image.asset(
-              'assets/images/splash-logo.png',
-              width: 36,
-              height: 36,
-              fit: BoxFit.contain,
-            ),
-          ],
+        body: BlocConsumer<MyRequestsCubit, MyRequestsState>(
+          listenWhen: (previous, current) =>
+              current is MyRequestsDeleteSuccess ||
+              current is MyRequestsDeleteError,
+          listener: (context, state) {
+            if (state is MyRequestsDeleteSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('تم حذف الطلب بنجاح',
+                      style: TextStyle(fontFamily: 'Cairo')),
+                  backgroundColor: Colors.green.shade600,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            } else if (state is MyRequestsDeleteError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message,
+                      style: const TextStyle(fontFamily: 'Cairo')),
+                  backgroundColor: Colors.red.shade600,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          },
+          builder: (context, state) {
+            return Directionality(
+              textDirection: TextDirection.rtl,
+              child: _buildBody(context, state),
+            );
+          },
         ),
-      ),
-      body: BlocConsumer<MyRequestsCubit, MyRequestsState>(
-        listenWhen: (previous, current) =>
-            current is MyRequestsDeleteSuccess ||
-            current is MyRequestsDeleteError,
-        listener: (context, state) {
-          if (state is MyRequestsDeleteSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('تم حذف الطلب بنجاح',
-                    style: TextStyle(fontFamily: 'Cairo')),
-                backgroundColor: Colors.green.shade600,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          } else if (state is MyRequestsDeleteError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message,
-                    style: const TextStyle(fontFamily: 'Cairo')),
-                backgroundColor: Colors.red.shade600,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          return Directionality(
-            textDirection: TextDirection.rtl,
-            child: _buildBody(context, state),
-          );
-        },
       ),
     );
   }
