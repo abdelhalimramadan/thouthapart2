@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:thoutha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
 
 class HelpAndSupportScreen extends StatefulWidget {
@@ -10,18 +11,41 @@ class HelpAndSupportScreen extends StatefulWidget {
 
 class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
   final _messageController = TextEditingController();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isSending = false;
 
   static const String _supportEmail = 'support@thoutha.page';
 
+  Future<void> _launchEmail(String userMessage) async {
+    final emailUri = Uri(
+      scheme: 'mailto',
+      path: _supportEmail,
+      queryParameters: {
+        'subject': 'Support Request',
+        'body': userMessage,
+      },
+    );
+
+    try {
+      await launchUrl(emailUri);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'لا يمكن فتح تطبيق البريد الإلكتروني.',
+            style: TextStyle(fontFamily: 'Cairo'),
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
     _messageController.dispose();
     super.dispose();
   }
@@ -31,23 +55,10 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
 
     setState(() => _isSending = true);
 
-    await Future.delayed(const Duration(milliseconds: 800));
+    await _launchEmail(_messageController.text.trim());
 
     if (!mounted) return;
     setState(() => _isSending = false);
-
-    _nameController.clear();
-    _emailController.clear();
-    _messageController.clear();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('تم إرسال رسالتك بنجاح. سنتواصل معك في أقرب وقت.',
-            style: TextStyle(fontFamily: 'Cairo')),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 
   @override
@@ -164,9 +175,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                 ),
                 const SizedBox(height: 8),
                 InkWell(
-                  onTap: () {
-                    // Optionally: launch mailto
-                  },
+                  onTap: () => _launchEmail('Please describe your issue here.'),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
@@ -208,97 +217,6 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      TextFormField(
-                        controller: _nameController,
-                        textAlign: TextAlign.right,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontFamily: 'Cairo',
-                          fontSize: 14,
-                        ),
-                        decoration: InputDecoration(
-                          labelText: 'الاسم',
-                          labelStyle: theme.textTheme.bodySmall?.copyWith(
-                            fontFamily: 'Cairo',
-                            fontSize: 13,
-                          ),
-                          hintText: 'الاسم',
-                          hintStyle: theme.textTheme.bodySmall?.copyWith(
-                            fontFamily: 'Cairo',
-                            fontSize: 13,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                                color: theme.colorScheme.outline, width: 1.5),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                                color: theme.colorScheme.outline, width: 1.5),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                                color: theme.colorScheme.primary, width: 2),
-                          ),
-                          filled: true,
-                          fillColor: theme.cardColor,
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                        ),
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty)
-                            return 'يرجى إدخال الاسم';
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _emailController,
-                        textAlign: TextAlign.right,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontFamily: 'Cairo',
-                          fontSize: 14,
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: 'البريد الإلكتروني',
-                          labelStyle: theme.textTheme.bodySmall?.copyWith(
-                            fontFamily: 'Cairo',
-                            fontSize: 13,
-                          ),
-                          hintText: 'البريد الإلكتروني',
-                          hintStyle: theme.textTheme.bodySmall?.copyWith(
-                            fontFamily: 'Cairo',
-                            fontSize: 13,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                                color: theme.colorScheme.outline, width: 1.5),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                                color: theme.colorScheme.outline, width: 1.5),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                                color: theme.colorScheme.primary, width: 2),
-                          ),
-                          filled: true,
-                          fillColor: theme.cardColor,
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                        ),
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty)
-                            return 'يرجى إدخال البريد الإلكتروني';
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
                       TextFormField(
                         controller: _messageController,
                         textAlign: TextAlign.right,

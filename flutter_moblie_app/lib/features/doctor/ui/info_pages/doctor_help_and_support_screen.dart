@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
 
 class DoctorHelpAndSupportScreen extends StatefulWidget {
@@ -21,16 +22,38 @@ class _DoctorHelpAndSupportScreenState extends State<DoctorHelpAndSupportScreen>
     super.dispose();
   }
 
+  Future<void> _launchEmail(String userMessage) async {
+    final emailUri = Uri(
+      scheme: 'mailto',
+      path: _supportEmail,
+      queryParameters: {
+        'subject': 'Support Request',
+        'body': userMessage,
+      },
+    );
+
+    try {
+      await launchUrl(emailUri);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('لا يمكن فتح تطبيق البريد الإلكتروني.', style: TextStyle(fontFamily: 'Cairo')),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   Future<void> _sendMessage() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSending = true);
-    await Future.delayed(const Duration(milliseconds: 1000));
+
+    await _launchEmail(_messageController.text.trim());
+
     if (!mounted) return;
     setState(() => _isSending = false);
-    _messageController.clear();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('تم استلام طلب الدعم، سنرد عليك قريباً.', style: TextStyle(fontFamily: 'Cairo')), backgroundColor: Colors.green),
-    );
   }
 
   @override
@@ -93,9 +116,7 @@ class _DoctorHelpAndSupportScreenState extends State<DoctorHelpAndSupportScreen>
               ),
               const SizedBox(height: 8),
               InkWell(
-                onTap: () {
-                  // Optionally: launch mailto
-                },
+                onTap: () => _launchEmail('Please describe your issue here.'),
                 child: Row(
                   children: [
                     Icon(Icons.email_outlined,
