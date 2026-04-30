@@ -18,13 +18,10 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
   static const String _supportEmail = 'support@thoutha.page';
 
   Future<void> _launchEmail(String userMessage) async {
-    final emailUri = Uri(
-      scheme: 'mailto',
-      path: _supportEmail,
-      queryParameters: {
-        'subject': 'Support Request',
-        'body': userMessage,
-      },
+    final emailUri = Uri.parse(
+      'mailto:$_supportEmail'
+      '?subject=${Uri.encodeComponent('Support Request')}'
+      '&body=${Uri.encodeComponent(userMessage)}',
     );
 
     try {
