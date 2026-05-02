@@ -379,7 +379,7 @@ class _RequestCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: Offset(0, 4),
           ),
@@ -397,7 +397,7 @@ class _RequestCard extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [
                     ColorsManager.mainBlue,
-                    ColorsManager.mainBlue.withValues(alpha: 0.8),
+                    ColorsManager.mainBlue.withOpacity(0.8),
                   ],
                 ),
               ),
@@ -421,7 +421,7 @@ class _RequestCard extends StatelessWidget {
                     padding:
                         EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -479,7 +479,7 @@ class _RequestCard extends StatelessWidget {
                       padding: EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? Colors.white.withValues(alpha: 0.05)
+                            ? Colors.white.withOpacity(0.05)
                             : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -575,7 +575,7 @@ class _RequestCard extends StatelessWidget {
           children: [
             Icon(icon,
                 size: 14,
-                color: ColorsManager.mainBlue.withValues(alpha: 0.7)),
+                color: ColorsManager.mainBlue.withOpacity(0.7)),
             SizedBox(width: 4),
             Text(label,
                 style: TextStyle(

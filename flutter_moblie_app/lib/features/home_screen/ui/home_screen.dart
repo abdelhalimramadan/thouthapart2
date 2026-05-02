@@ -98,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       MaterialPageRoute(
         builder: (context) => CategoryDoctorsScreen(
           categoryName: categoryName,
+          categorySvg: _getAssetForCategory(categoryName),
           categoryId: categoryId,
           cityId: _selectedCityId,
           cityName: cityName,
@@ -175,8 +176,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
            boxShadow: [
              BoxShadow(
                color: isDark
-                   ? Colors.black.withValues(alpha: 0.3)
-                   : Colors.grey.withValues(alpha: 0.1),
+                   ? Colors.black.withOpacity(0.3)
+                   : Colors.grey.withOpacity(0.1),
                blurRadius: blurRadius,
                offset: Offset(0, 2),
              ),
@@ -599,7 +600,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 color: Theme.of(context)
                                     .colorScheme
                                     .primary
-                                    .withValues(alpha: 0.3),
+                                    .withOpacity(0.3),
                                 blurRadius: 4,
                                 offset: Offset(0, 1),
                               ),
@@ -692,8 +693,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               vertical: 10),
                           decoration: BoxDecoration(
                             color: isDark
-                                ? Colors.orange.withValues(alpha: 0.15)
-                                : Colors.orange.withValues(alpha: 0.1),
+                                ? Colors.orange.withOpacity(0.15)
+                                : Colors.orange.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                                 color: isDark
