@@ -363,22 +363,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       createdDate = null;
     }
 
-    String timeStr = '';
-    if (createdDate != null) {
-      final difference = DateTime.now().difference(createdDate);
-      if (difference.inMinutes < 1) {
-      timeStr = 'الآن';
-                       } else if (difference.inMinutes < 60) {
-                         timeStr = 'منذ ${difference.inMinutes} دقيقة';
-                       } else if (difference.inHours < 24) {
-                         timeStr = 'منذ ${difference.inHours} ساعة';
-                       } else if (difference.inDays < 7) {
-                         timeStr = 'منذ ${difference.inDays} يوم';
-                       } else {
-        timeStr = intl.DateFormat('dd/MM/yyyy HH:mm', 'ar').format(createdDate);
-      }
-    }
-
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       margin: EdgeInsets.symmetric(vertical: 6),

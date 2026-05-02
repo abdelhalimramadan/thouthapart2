@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../../core/utils/notification_helper.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/networking/api_service.dart';
 import '../../../../core/routing/routes.dart';
 import '../drawer_doctor/doctor_drawer_screen.dart';
+import '../../notifications/ui/notifications_screen.dart';
 import '../widgets/appointment_card_widget.dart';
 
 class DoctorConfirmedAppointmentsScreen extends StatefulWidget {
@@ -64,7 +66,9 @@ class _DoctorConfirmedAppointmentsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
     return PopScope(
