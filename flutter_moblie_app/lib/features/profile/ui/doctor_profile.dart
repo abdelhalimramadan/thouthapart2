@@ -442,12 +442,12 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                           ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFF021433).withValues(alpha: 0.18),
+                      color: const Color(0xFF021433).withOpacity(0.18),
                     ),
                     boxShadow: [
                       BoxShadow(
                         color: (_hasChanges && !_isSaving)
-                            ? const Color(0xFF1D61E7).withValues(alpha: 0.2)
+                            ? const Color(0xFF1D61E7).withOpacity(0.2)
                             : Colors.transparent,
                         blurRadius: 8,
                         offset: const Offset(0, 4),

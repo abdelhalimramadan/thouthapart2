@@ -373,226 +373,307 @@ class _RequestCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      margin: EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: theme.cardTheme.color ?? theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: Offset(0, 4),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Colored Header
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    ColorsManager.mainBlue,
-                    ColorsManager.mainBlue.withOpacity(0.8),
+      child: Column(
+        children: [
+          // Upper section with colored background and doctor info
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  ColorsManager.layerBlur2.withOpacity(0.3),
+                  ColorsManager.layerBlur1.withOpacity(0.2),
+                ],
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+              ),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Doctor Name and Category (Right side)
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            request.doctorFullName,
+                            style: const TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: ColorsManager.fontColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.circle, size: 6, color: ColorsManager.mainBlue),
+                            const SizedBox(width: 4),
+                            Text(
+                              request.categoryName,
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 12,
+                                color: ColorsManager.mainBlue,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Request ID Badge (Left side)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '#${request.id}',
+                    style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: ColorsManager.mainBlue,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Main Content Section
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // Info Grid (2x2)
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoBox(
+                        label: 'الجامعة',
+                        value: request.doctorUniversityName,
+                        icon: Icons.home_work_outlined,
+                        isDark: isDark,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildInfoBox(
+                        label: 'المحافظة',
+                        value: request.doctorCityName,
+                        icon: Icons.location_on,
+                        isDark: isDark,
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.medical_services_outlined,
-                      color: Colors.white, size: 20),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      request.categoryName,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoBox(
+                        label: 'اليوم',
+                        value: request.formattedDate,
+                        icon: Icons.calendar_today,
+                        isDark: isDark,
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildInfoBox(
+                        label: 'الساعة',
+                        value: request.formattedTime,
+                        icon: Icons.access_time_filled,
+                        isDark: isDark,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Description Box
+                if (request.description.isNotEmpty && request.description != 'No details') ...[
+                  const SizedBox(height: 16),
                   Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '#${request.id}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.grey[900] : ColorsManager.moreLighterGray,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.blue.withOpacity(0.2),
+                        width: 1,
                       ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.info_outline, size: 18, color: Colors.blue),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'تفاصيل الحالة',
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          request.description,
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 13,
+                            height: 1.5,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              ),
-            ),
 
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // City and Doctor
-                  Row(
-                    children: [
-                      _buildInfoIcon(Icons.location_on_rounded,
-                          request.doctorCityName, isDark, theme),
-                      const Spacer(),
-                      _buildInfoIcon(
-                          Icons.person, request.doctorFullName, isDark, theme),
-                    ],
-                  ),
+                const SizedBox(height: 20),
 
-                  SizedBox(height: 16),
-                  Divider(
-                    height: 1,
-                    color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB),
-                  ),
-                  SizedBox(height: 16),
-
-                  // Date and Time
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildDateTimeItem(Icons.calendar_month_rounded,
-                          'التاريخ', request.formattedDate, isDark, theme),
-                      _buildDateTimeItem(Icons.access_time_filled_rounded,
-                          'الوقت', request.formattedTime, isDark, theme),
-                    ],
-                  ),
-
-                  if (request.description.isNotEmpty &&
-                      request.description != 'No details') ...[
-                    SizedBox(height: 16),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.white.withOpacity(0.05)
-                            : const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(12),
+                // Buttons Section
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _navigateToEdit(context, request),
+                        icon: const Icon(Icons.edit_note_rounded, size: 20),
+                        label: const Text('تعديل الطلب',
+                            style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.bold)),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.blue.shade700,
+                          side: BorderSide(color: Colors.blue.shade200),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
                       ),
-                      child: Text(
-                        request.description,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontFamily: 'Cairo',
-                          fontSize: 13,
-                          color: isDark
-                              ? Colors.grey.shade300
-                              : Colors.grey.shade800,
-                          height: 1.5,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showDeleteDialog(context, request),
+                        icon: const Icon(Icons.delete_sweep_rounded,
+                            size: 20, color: Colors.white),
+                        label: const Text('حذف الطلب',
+                            style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red.shade400,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                       ),
                     ),
                   ],
-
-                  SizedBox(height: 20),
-
-                  // Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _navigateToEdit(context, request),
-                          icon: Icon(Icons.edit_note_rounded, size: 20),
-                          label: const Text('تعديل الطلب',
-                              style: TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontWeight: FontWeight.bold)),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.blue.shade700,
-                            side: BorderSide(color: Colors.blue.shade200),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            padding: EdgeInsets.symmetric(vertical: 10),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () => _showDeleteDialog(context, request),
-                          icon: Icon(Icons.delete_sweep_rounded,
-                              size: 20, color: Colors.white),
-                          label: const Text('حذف الطلب',
-                              style: TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red.shade400,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            padding: EdgeInsets.symmetric(vertical: 10),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildInfoIcon(IconData icon, String text, bool isDark, ThemeData theme) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 16, color: ColorsManager.mainBlue),
-        SizedBox(width: 4),
-        Text(
-          text,
-          style: TextStyle(
-            fontFamily: 'Cairo',
-            fontSize: 13,
-            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+  Widget _buildInfoBox({
+    required String label,
+    required String value,
+    required IconData icon,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[850] : ColorsManager.offWhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.1),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: ColorsManager.mainBlue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 18, color: ColorsManager.mainBlue),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDateTimeItem(
-      IconData icon, String label, String value, bool isDark, ThemeData theme) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Icon(icon,
-                size: 14,
-                color: ColorsManager.mainBlue.withOpacity(0.7)),
-            SizedBox(width: 4),
-            Text(label,
-                style: TextStyle(
-                    fontFamily: 'Cairo', fontSize: 11, color: Colors.grey)),
-          ],
-        ),
-        SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontFamily: 'Cairo',
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black87,
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 11,
+                    color: isDark ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  value.isEmpty ? 'غير محدد' : value,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 11,
+                    color: isDark ? Colors.white : ColorsManager.fontColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.start,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
