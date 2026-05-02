@@ -18,10 +18,6 @@ import 'package:thoutha_mobile_app/features/requests/ui/my_requests_screen.dart'
 import 'package:thoutha_mobile_app/features/doctor/ui/secondary_home_screen.dart'
     show SecondaryHomeScreen;
 import 'package:thoutha_mobile_app/features/login/ui/login_screen.dart';
-import 'package:thoutha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart'
-    show PrivacyPolicyScreen;
-import 'package:thoutha_mobile_app/features/terms_and_conditions/ui/terms_and_conditions_screen.dart'
-    show TermsAndConditionsScreen;
 
 import '../ui/doctor_home_screen.dart';
 import '../../profile/data/models/doctor_profile_model.dart';
