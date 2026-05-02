@@ -448,6 +448,41 @@ class _ChatScreenState extends State<ChatScreen> {
      return arToEn[arabic] ?? arabic;
   }
 
+  String _getAssetForCategory(String categoryName) {
+    final Map<String, String> categoryAssets = {
+      'حشو املجم': 'assets/svg/املغم.svg',
+      'حشو عصب': 'assets/svg/حشو اسنان.svg',
+      'حشو تجميلي': 'assets/svg/تجميلي.svg',
+      'زراعة الأسنان': 'assets/svg/زراعه اسنان.svg',
+      'الجراحة والخلع': 'assets/svg/خلع اسنان.svg',
+      'تنظيف وتبيض الأسنان': 'assets/svg/تبيض اسنان.svg',
+      'تبييض الأسنان': 'assets/svg/تبيض اسنان.svg',
+      'تقويم الأسنان': 'assets/svg/تقويم اسنان.svg',
+      'تركيبات الأسنان': 'assets/svg/تركيبات اسنان.svg',
+      'التيجان والجسور': 'assets/images/تيجان وجسور.webp',
+      'طب أسنان الأطفال': 'assets/svg/اطفال2.svg',
+      'تركيبات متحركة': 'assets/svg/تركيبات اسنان.svg',
+    };
+
+    if (categoryAssets.containsKey(categoryName)) {
+      return categoryAssets[categoryName]!;
+    }
+
+    if (categoryName.contains('فحص')) return 'assets/svg/فحص شامل.svg';
+    if (categoryName.contains('املجم') || categoryName.contains('amalgam')) return 'assets/svg/املغم.svg';
+    if (categoryName.contains('عصب')) return 'assets/svg/حشو اسنان.svg';
+    if (categoryName.contains('تجميلي')) return 'assets/svg/تجميلي.svg';
+    if (categoryName.contains('زراعة')) return 'assets/svg/زراعه اسنان.svg';
+    if (categoryName.contains('خلع') || categoryName.contains('جراحة')) return 'assets/svg/خلع اسنان.svg';
+    if (categoryName.contains('تنظيف') || categoryName.contains('تبييض')) return 'assets/svg/تبيض اسنان.svg';
+    if (categoryName.contains('تقويم')) return 'assets/svg/تقويم اسنان.svg';
+    if (categoryName.contains('تركيبات')) return 'assets/svg/تركيبات اسنان.svg';
+    if (categoryName.contains('تيجان') || categoryName.contains('جسور')) return 'assets/images/تيجان وجسور.webp';
+    if (categoryName.contains('اطفال')) return 'assets/svg/اطفال2.svg';
+
+    return 'assets/svg/فحص شامل.svg';
+  }
+
   void _openCategory(String rawCategory) {
     final arabicCanonical = _getArabicCanonical(rawCategory);
     final uiName = _isEnglish ? _getEnglishName(arabicCanonical) : arabicCanonical;
@@ -464,6 +499,7 @@ class _ChatScreenState extends State<ChatScreen> {
       MaterialPageRoute(
         builder: (context) => CategoryDoctorsScreen(
           categoryName: uiName,
+          categorySvg: _getAssetForCategory(arabicCanonical),
           categoryId: categoryId,
         ),
       ),
@@ -703,7 +739,7 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: theme.brightness == Brightness.dark
-                  ? theme.colorScheme.surfaceVariant.withValues(alpha: 0.5)
+                  ? theme.colorScheme.surfaceVariant.withOpacity(0.5)
                   : _color3,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(13),
@@ -840,7 +876,7 @@ class _ChatScreenState extends State<ChatScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: _color2.withValues(alpha: 0.3),
+                  color: _color2.withOpacity(0.3),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),

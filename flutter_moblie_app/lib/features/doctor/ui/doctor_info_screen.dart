@@ -113,7 +113,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                               fontSize: 18,
                               height: 1.5,
                               color: theme.textTheme.bodyLarge?.color
-                                  ?.withValues(alpha: 0.7),
+                                  ?.withOpacity(0.7),
                             ),
                           ),
                           SizedBox(height: 16),
@@ -212,7 +212,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                               borderRadius: BorderRadius.circular(8),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.05),
+                                  color: Colors.black.withOpacity(0.05),
                                   blurRadius: 4,
                                   offset: Offset(0, 2),
                                 ),
@@ -489,7 +489,7 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                           color: _isBookingEnabled
                                               ? Colors.white
                                               : Colors.white
-                                                  .withValues(alpha: 0.7),
+                                                  .withOpacity(0.7),
                                         ),
                                       ),
                                     ),
@@ -533,7 +533,7 @@ class _InfoTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 6,
             offset: Offset(0, 2),
           ),
@@ -677,7 +677,7 @@ class _TimeListTile extends StatelessWidget {
           border: Border.all(color: borderColor),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
+              color: Colors.black.withOpacity(0.02),
               blurRadius: 4,
               offset: Offset(0, 2),
             ),
