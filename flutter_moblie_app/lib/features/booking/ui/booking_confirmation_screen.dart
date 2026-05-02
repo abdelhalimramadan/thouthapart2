@@ -135,7 +135,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                       width: 72,
                       height: 72,
                       decoration: BoxDecoration(
-                        color: ColorsManager.mainBlue.withValues(alpha: 0.1),
+                        color: ColorsManager.mainBlue.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(Icons.check_rounded,
@@ -249,8 +249,8 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                     center: const Alignment(-0.7, -0.7),
                     radius: 1.5,
                     colors: [
-                      const Color(0xFF84E5F3).withValues(alpha: 0.4),
-                      const Color(0xFF84E5F3).withValues(alpha: 0.1),
+                      const Color(0xFF84E5F3).withOpacity(0.4),
+                      const Color(0xFF84E5F3).withOpacity(0.1),
                       Colors.transparent,
                     ],
                     stops: const [0.0, 0.3, 0.8],
@@ -300,8 +300,8 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                       boxShadow: [
                         BoxShadow(
                           color: isDark
-                              ? Colors.black.withValues(alpha: 0.3)
-                              : Colors.grey.withValues(alpha: 0.1),
+                              ? Colors.black.withOpacity(0.3)
+                              : Colors.grey.withOpacity(0.1),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -523,7 +523,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
           style: theme.textTheme.bodyMedium?.copyWith(
             fontFamily: 'Cairo',
             fontSize: fontSize,
-            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
           ),
         ),
         const SizedBox(width: 8),
