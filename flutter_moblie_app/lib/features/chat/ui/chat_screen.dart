@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
 import 'package:thoutha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
@@ -46,6 +49,8 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<_FlowItem> _flowItems = <_FlowItem>[];
   final List<_ChatItem> _chatHistory = <_ChatItem>[];
 
+  static const String _chatStorageKey = 'chat_screen_state';
+
   @override
   void initState() {
     super.initState();
@@ -56,9 +61,66 @@ class _ChatScreenState extends State<ChatScreen> {
       if (mounted) setState(() {});
     });
     _loadCategories(); // جلب الكاتيجوريات عند البداية
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startSessionOnce();
+    _loadChatState().then((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _startSessionOnce();
+      });
     });
+  }
+
+  /// حفظ حالة الشات في الذاكرة المحلية
+  Future<void> _saveChatState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final state = {
+        'sessionId': _sessionId,
+        'chatMode': _chatMode,
+        'isEnglish': _isEnglish,
+        'activeQuestionId': _activeQuestionId,
+        'flowItems': _flowItems.map((e) => e.toJson()).toList(),
+        'chatHistory': _chatHistory.map((e) => e.toJson()).toList(),
+      };
+      await prefs.setString(_chatStorageKey, jsonEncode(state));
+    } catch (e) {
+      debugPrint('ChatBot: Error saving chat state: $e');
+    }
+  }
+
+  /// استعادة حالة الشات من الذاكرة المحلية
+  Future<void> _loadChatState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_chatStorageKey);
+      if (raw == null || raw.isEmpty) return;
+
+      final state = jsonDecode(raw) as Map<String, dynamic>;
+      setState(() {
+        _sessionId = state['sessionId'] as String?;
+        _chatMode = state['chatMode'] as bool? ?? false;
+        _isEnglish = state['isEnglish'] as bool? ?? false;
+        _activeQuestionId = state['activeQuestionId'] as String?;
+
+        final flowList = state['flowItems'] as List<dynamic>?;
+        if (flowList != null) {
+          _flowItems.clear();
+          for (final item in flowList) {
+            final parsed = _FlowItem.fromJson(item as Map<String, dynamic>);
+            if (parsed != null) _flowItems.add(parsed);
+          }
+        }
+
+        final chatList = state['chatHistory'] as List<dynamic>?;
+        if (chatList != null) {
+          _chatHistory.clear();
+          for (final item in chatList) {
+            _chatHistory.add(_ChatItem.fromJson(item as Map<String, dynamic>));
+          }
+        }
+      });
+      _scrollToBottom();
+    } catch (e) {
+      debugPrint('ChatBot: Error loading chat state: $e');
+    }
   }
 
   Future<void> _startSessionOnce() async {
@@ -77,6 +139,7 @@ class _ChatScreenState extends State<ChatScreen> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
       _scrollToBottom();
+      _saveChatState();
     }
   }
 
@@ -207,6 +270,7 @@ class _ChatScreenState extends State<ChatScreen> {
         _isLoading = false;
       });
       _scrollToBottom();
+      _saveChatState();
       return;
     }
 
@@ -232,6 +296,7 @@ class _ChatScreenState extends State<ChatScreen> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
       _scrollToBottom();
+      _saveChatState();
     }
   }
 
@@ -274,6 +339,7 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     } finally {
       _scrollToBottom();
+      _saveChatState();
     }
   }
 
@@ -855,6 +921,7 @@ class _ChatScreenState extends State<ChatScreen> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
       _scrollToBottom();
+      _saveChatState();
     }
   }
 
@@ -956,6 +1023,29 @@ class _FlowItem {
       _FlowItem._(type: _FlowType.answer, text: text);
   factory _FlowItem.result({required String text, String? category}) =>
       _FlowItem._(type: _FlowType.result, text: text, category: category);
+
+  Map<String, dynamic> toJson() => {
+        'type': type.name,
+        'text': text,
+        'category': category,
+        'question': question?.toJson(),
+      };
+
+  static _FlowItem? fromJson(Map<String, dynamic> json) {
+    final typeName = json['type'] as String?;
+    if (typeName == null) return null;
+    final type = _FlowType.values.firstWhere(
+      (e) => e.name == typeName,
+      orElse: () => _FlowType.result,
+    );
+    final questionJson = json['question'] as Map<String, dynamic>?;
+    return _FlowItem._(
+      type: type,
+      text: json['text'] as String? ?? '',
+      category: json['category'] as String?,
+      question: questionJson != null ? _FlowQuestion.fromJson(questionJson) : null,
+    );
+  }
 }
 
 class _FlowQuestion {
@@ -963,12 +1053,34 @@ class _FlowQuestion {
   final String text;
   final List<_FlowAnswer> answers;
   _FlowQuestion({required this.id, required this.text, required this.answers});
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'text': text,
+        'answers': answers.map((a) => a.toJson()).toList(),
+      };
+
+  factory _FlowQuestion.fromJson(Map<String, dynamic> json) => _FlowQuestion(
+        id: json['id'] as String? ?? '',
+        text: json['text'] as String? ?? '',
+        answers: (json['answers'] as List<dynamic>?)
+                ?.map((a) => _FlowAnswer.fromJson(a as Map<String, dynamic>))
+                .toList() ??
+            [],
+      );
 }
 
 class _FlowAnswer {
   final String id;
   final String text;
   _FlowAnswer({required this.id, required this.text});
+
+  Map<String, dynamic> toJson() => {'id': id, 'text': text};
+
+  factory _FlowAnswer.fromJson(Map<String, dynamic> json) => _FlowAnswer(
+        id: json['id'] as String? ?? '',
+        text: json['text'] as String? ?? '',
+      );
 }
 
 enum _ChatRole { user, bot }
@@ -980,4 +1092,14 @@ class _ChatItem {
 
   factory _ChatItem.user(String text) => _ChatItem._(_ChatRole.user, text);
   factory _ChatItem.bot(String text) => _ChatItem._(_ChatRole.bot, text);
+
+  Map<String, dynamic> toJson() => {
+        'role': role.name,
+        'text': text,
+      };
+
+  factory _ChatItem.fromJson(Map<String, dynamic> json) {
+    final role = (json['role'] as String?) == 'user' ? _ChatRole.user : _ChatRole.bot;
+    return _ChatItem._(role, json['text'] as String? ?? '');
+  }
 }
