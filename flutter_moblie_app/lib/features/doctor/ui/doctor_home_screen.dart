@@ -11,8 +11,6 @@ import '../drawer_doctor/doctor_drawer_screen.dart';
 import '../../notifications/ui/notifications_screen.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/networking/api_service.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../notifications/logic/notifications_cubit.dart';
 import '../widgets/appointment_card_widget.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
