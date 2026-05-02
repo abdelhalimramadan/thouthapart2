@@ -191,7 +191,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                           height: 140,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.04),
+                            color: Colors.white.withOpacity(0.04),
                           ),
                         ),
                       ),
@@ -203,7 +203,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                           height: 80,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.03),
+                            color: Colors.white.withOpacity(0.03),
                           ),
                         ),
                       ),
@@ -217,10 +217,10 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                               width: 60,
                               height: 60,
                               decoration: BoxDecoration(
-                                color: Colors.red.withValues(alpha: 0.2),
+                                color: Colors.red.withOpacity(0.2),
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                    color: Colors.red.withValues(alpha: 0.4),
+                                    color: Colors.red.withOpacity(0.4),
                                     width: 2),
                               ),
                               child: Icon(
@@ -245,7 +245,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                               style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 13,
-                                color: Colors.white.withValues(alpha: 0.65),
+                                color: Colors.white.withOpacity(0.65),
                               ),
                             ),
                             SizedBox(height: 20),
@@ -263,7 +263,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.12),
+                      color: Colors.white.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(Icons.arrow_back_ios_new_rounded,
@@ -346,7 +346,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.red.withValues(alpha: 0.25)),
+        border: Border.all(color: Colors.red.withOpacity(0.25)),
       ),
       padding: EdgeInsets.all(16),
       child: Row(
@@ -356,7 +356,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.15),
+              color: Colors.red.withOpacity(0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(Icons.warning_amber_rounded,
@@ -418,7 +418,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: Colors.red.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(item.$1, size: 16, color: Colors.red[400]),
@@ -453,7 +453,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.red.withValues(alpha: 0.35),
+              color: Colors.red.withOpacity(0.35),
               blurRadius: 12,
               offset: Offset(0, 4),
             ),
@@ -538,8 +538,8 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withValues(alpha: 0.2)
-                : Colors.grey.withValues(alpha: 0.07),
+                ? Colors.black.withOpacity(0.2)
+                : Colors.grey.withOpacity(0.07),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
