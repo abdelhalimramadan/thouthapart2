@@ -204,7 +204,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                         decoration: BoxDecoration(
                                           color: (appointment['statusColor']
                                                   as Color)
-                                              .withValues(alpha: 0.2),
+                                              .withOpacity(0.2),
                                           borderRadius:
                                               BorderRadius.circular(12),
                                         ),
@@ -272,7 +272,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: selected
-              ? const Color(0xFF0B8FAC).withValues(alpha: 0.1)
+              ? const Color(0xFF0B8FAC).withOpacity(0.1)
               : (isDark ? Colors.grey[800] : Colors.grey[100]),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
@@ -438,7 +438,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: (color ?? const Color(0xFF0B8FAC)).withValues(alpha: 0.1),
+            color: (color ?? const Color(0xFF0B8FAC)).withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: color ?? const Color(0xFF0B8FAC), size: 20),
