@@ -341,13 +341,13 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
               widget.categorySvg!.endsWith('.svg')
                   ? SvgPicture.asset(
                       widget.categorySvg!,
-                      width: 28,
-                      height: 28,
+                      width: 40,
+                      height: 40,
                     )
                   : Image.asset(
                       widget.categorySvg!,
-                      width: 28,
-                      height: 28,
+                      width: 40,
+                      height: 40,
                     ),
             ],
           ],
