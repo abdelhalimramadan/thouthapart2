@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
@@ -11,6 +12,7 @@ import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 
 class CategoryDoctorsScreen extends StatefulWidget {
   final String categoryName;
+  final String? categorySvg;
   final int? categoryId;
   final int? cityId;
   final String? cityName;
@@ -19,6 +21,7 @@ class CategoryDoctorsScreen extends StatefulWidget {
   const CategoryDoctorsScreen({
     super.key,
     required this.categoryName,
+    this.categorySvg,
     this.categoryId,
     this.cityId,
     this.cityName,
@@ -41,7 +44,11 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
   @override
   void initState() {
     super.initState();
-    _checkLoginStatus();
+    _init();
+  }
+
+  Future<void> _init() async {
+    await _checkLoginStatus();
     _loadRequests();
   }
 
@@ -318,13 +325,32 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.categoryName,
-          style: const TextStyle(
-            fontFamily: 'Cairo',
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              widget.categoryName,
+              style: const TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
+            ),
+            if (widget.categorySvg != null) ...[
+              const SizedBox(width: 10),
+              widget.categorySvg!.endsWith('.svg')
+                  ? SvgPicture.asset(
+                      widget.categorySvg!,
+                      width: 28,
+                      height: 28,
+                    )
+                  : Image.asset(
+                      widget.categorySvg!,
+                      width: 28,
+                      height: 28,
+                    ),
+            ],
+          ],
         ),
         centerTitle: true,
       ),
@@ -400,167 +426,210 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     bool isLoggedIn,
   ) {
     final theme = Theme.of(context);
+    final String initial = req.doctorFullName.replaceFirst(RegExp(r'^د\.\s*'), '').isNotEmpty 
+        ? req.doctorFullName.replaceFirst(RegExp(r'^د\.\s*'), '')[0] 
+        : '';
+
     return Container(
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
-        border: Border.all(
-          color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
-        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header row: categoryName + id badge + delete (when logged in)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    req.categoryName,
-                    style: const TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: ColorsManager.mainBlue,
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (req.id != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: ColorsManager.mainBlue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '#${req.id}',
-                          style: const TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: ColorsManager.mainBlue,
-                          ),
-                        ),
-                      ),
-
-                  ],
-                ),
-              ],
-            ),
-
-            // Doctor name
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.person_outline, size: 15, color: Colors.grey[500]),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    req.doctorFullName,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white : Colors.grey[800],
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-
-            // City · University
-            if (req.doctorCityName.isNotEmpty ||
-                req.doctorUniversityName.isNotEmpty) ...[
-              const SizedBox(height: 5),
-              Row(
-                children: [
-                  Icon(Icons.location_on_outlined,
-                      size: 15, color: Colors.grey[500]),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      [req.doctorCityName, req.doctorUniversityName]
-                          .where((s) => s.isNotEmpty)
-                          .join(' · '),
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 13,
-                        color: isDark ? Colors.white.withOpacity(0.9) : Colors.grey[600],
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+      child: Column(
+        children: [
+          // Upper section with colored background and doctor info
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  ColorsManager.layerBlur2.withValues(alpha: 0.3),
+                  ColorsManager.layerBlur1.withValues(alpha: 0.2),
                 ],
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
               ),
-            ],
-
-            // Description
-            if (req.description.isNotEmpty &&
-                req.description != 'No details') ...[
-              const SizedBox(height: 10),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[850] : const Color(0xFFF9FAFB),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  req.description,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 14,
-                    color: isDark ? Colors.white : Colors.grey[800],
-                    height: 1.5,
-                  ),
-                ),
-              ),
-            ],
-
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
-
-            // Date and time chips + Book Now (for Guest)
-            Row(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Doctor Name and Category (Now on the Right in RTL)
                 Expanded(
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildChip(
-                        icon: Icons.calendar_today_outlined,
-                        text: req.formattedDate,
-                        isDark: isDark,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            req.doctorFullName,
+                            style: const TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: ColorsManager.fontColor,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                      if (req.formattedTime.isNotEmpty)
-                        _buildChip(
-                          icon: Icons.access_time_outlined,
-                          text: req.formattedTime,
-                          isDark: isDark,
-                        ),
                     ],
                   ),
                 ),
+                // Available Now Badge (Now on the Left in RTL)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      PulsingDot(color: Colors.green),
+                      const SizedBox(width: 6),
+                      Text(
+                        'متاح الآن',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Main Content Section
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // Info Grid (2x2)
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoBox(
+                        label: 'الجامعة',
+                        value: req.doctorUniversityName,
+                        icon: Icons.home_work_outlined,
+                        isDark: isDark,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildInfoBox(
+                        label: 'المحافظة',
+                        value: req.doctorCityName,
+                        icon: Icons.location_on,
+                        isDark: isDark,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoBox(
+                        label: 'اليوم',
+                        value: req.formattedDate,
+                        icon: Icons.calendar_today,
+                        isDark: isDark,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildInfoBox(
+                        label: 'الساعة',
+                        value: req.formattedTime,
+                        icon: Icons.access_time_filled,
+                        isDark: isDark,
+                      ),
+                    ),
+                  ],
+                ),
+
+                if (req.description.isNotEmpty && req.description != 'No details') ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[900] : ColorsManager.moreLighterGray,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark ? Colors.white24 : Colors.black.withOpacity(0.1),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.info_outline, size: 18, color: Colors.blue),
+                            const SizedBox(width: 8),
+                            Text(
+                              'تفاصيل الحالة',
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.blue[300] : Colors.blue[800],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          req.description,
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 13,
+                            height: 1.5,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 16),
+
+                // Book Now Button
                 if (!isLoggedIn)
-                  SizedBox(
-                    height: 36,
-                    child: ElevatedButton(
+                  Container(
+                    width: double.infinity,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [ColorsManager.mainBlue, Color(0xFF42A5F5)],
+                        begin: Alignment.centerRight,
+                        end: Alignment.centerLeft,
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: ColorsManager.mainBlue.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton.icon(
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -575,32 +644,90 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                           ),
                         );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: ColorsManager.mainBlue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'احجز الآن',
+                      icon: const Icon(Icons.calendar_month, color: Colors.white, size: 20),
+                      label: const Text(
+                        'حجز موعد',
                         style: TextStyle(
                           fontFamily: 'Cairo',
-                          fontSize: 13,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
                     ),
                   ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+
+  Widget _buildInfoBox({
+    required String label,
+    required String value,
+    required IconData icon,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[850] : ColorsManager.offWhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: ColorsManager.mainBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 18, color: ColorsManager.mainBlue),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 11,
+                    color: isDark ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  value.isEmpty ? 'غير محدد' : value,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 11,
+                    color: isDark ? Colors.white : ColorsManager.fontColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.end,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Widget _buildChip({
     required IconData icon,
@@ -787,7 +914,7 @@ class _CaseDetailsSheet extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[850] : const Color(0xFFF9FAFB),
+                    color: isDark ? Colors.grey[900] : ColorsManager.moreLighterGray,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                         color: isDark
@@ -889,6 +1016,60 @@ class _DetailRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+class PulsingDot extends StatefulWidget {
+  final Color color;
+  const PulsingDot({super.key, required this.color});
+
+  @override
+  State<PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<PulsingDot> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+    _animation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: widget.color.withValues(alpha: _animation.value),
+            boxShadow: [
+              BoxShadow(
+                color: widget.color.withValues(alpha: _animation.value * 0.5),
+                blurRadius: 4,
+                spreadRadius: 2 * _animation.value,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

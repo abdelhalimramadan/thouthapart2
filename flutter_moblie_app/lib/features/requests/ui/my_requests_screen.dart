@@ -531,7 +531,7 @@ class _RequestCard extends StatelessWidget {
                       color: isDark ? Colors.grey[900] : ColorsManager.moreLighterGray,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: Colors.blue.withOpacity(0.2),
+                        color: isDark ? Colors.white24 : Colors.black.withOpacity(0.1),
                         width: 1,
                       ),
                     ),
