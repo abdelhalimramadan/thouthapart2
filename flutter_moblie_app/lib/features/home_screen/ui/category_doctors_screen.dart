@@ -108,16 +108,16 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
       var all = List<CaseRequestModel>.from(result['data'] as List);
       print('Total requests loaded (raw): ${all.length}');
 
-      // Apply name filter only if categoryId is NOT provided (fallback)
-      // If categoryId is provided, the API result is already category-specific.
-      if (widget.categoryId == null && widget.categoryName.isNotEmpty) {
-        print('Filtering by category name (fallback): ${widget.categoryName}');
+      // Always filter by category name to ensure each category screen
+      // only shows requests belonging to that specific category.
+      if (widget.categoryName.isNotEmpty) {
+        print('Filtering by category name: ${widget.categoryName}');
         all = all
             .where((r) =>
                 r.categoryName.toLowerCase() ==
                 widget.categoryName.toLowerCase())
             .toList();
-        print('Requests after name filter: ${all.length}');
+        print('Requests after category filter: ${all.length}');
       }
 
       if (widget.cityName != null && widget.cityName!.isNotEmpty) {
