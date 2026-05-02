@@ -269,7 +269,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF021433).withValues(alpha: 0.18),
+          color: const Color(0xFF021433).withOpacity(0.18),
         ),
       ),
       padding: const EdgeInsets.all(16),
@@ -280,7 +280,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: const Color(0xFF021433).withValues(alpha: 0.12),
+              color: const Color(0xFF021433).withOpacity(0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -339,8 +339,8 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withValues(alpha: 0.2)
-                : Colors.grey.withValues(alpha: 0.07),
+                ? Colors.black.withOpacity(0.2)
+                : Colors.grey.withOpacity(0.07),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -457,7 +457,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
         color: const Color(0xFF021433).withValues(alpha: isDark ? 0.20 : 0.06),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: const Color(0xFF021433).withValues(alpha: 0.15),
+          color: const Color(0xFF021433).withOpacity(0.15),
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -488,7 +488,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF021433).withValues(alpha: 0.15),
+          color: const Color(0xFF021433).withOpacity(0.15),
         ),
       ),
       padding: const EdgeInsets.all(16),
