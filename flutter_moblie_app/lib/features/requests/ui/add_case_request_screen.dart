@@ -201,7 +201,37 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         );
       },
     );
-    if (picked != null) setState(() => _selectedTime = picked);
+    if (picked != null) {
+      // If selected date is today, don't allow a time before now
+      final now = DateTime.now();
+      final isToday = _selectedDate != null &&
+          _selectedDate!.year == now.year &&
+          _selectedDate!.month == now.month &&
+          _selectedDate!.day == now.day;
+
+      if (isToday) {
+        final pickedMinutes = picked.hour * 60 + picked.minute;
+        final nowMinutes = now.hour * 60 + now.minute;
+
+        if (pickedMinutes <= nowMinutes) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'لا يمكن اختيار وقت في الماضي. يرجى اختيار وقت بعد الآن.',
+                  style: TextStyle(fontFamily: 'Cairo'),
+                ),
+                backgroundColor: Colors.orange,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+          return;
+        }
+      }
+
+      setState(() => _selectedTime = picked);
+    }
   }
 
   // ── Publish ───────────────────────────────────────────────────────────────
