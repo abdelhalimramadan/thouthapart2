@@ -260,8 +260,8 @@ class _SplashScreenState extends State<SplashScreen>
                 center: const Alignment(-0.7, -0.7),
                 radius: 1.5,
                 colors: [
-                  ColorsManager.layerBlur1.withValues(alpha: 0.4),
-                  ColorsManager.layerBlur1.withValues(alpha: 0.1),
+                  ColorsManager.layerBlur1.withOpacity(0.4),
+                  ColorsManager.layerBlur1.withOpacity(0.1),
                   Colors.transparent,
                 ],
                 stops: const [0.1, 0.5, 0.8],
@@ -276,8 +276,8 @@ class _SplashScreenState extends State<SplashScreen>
                 center: const Alignment(0.7, 0.7),
                 radius: 1.5,
                 colors: [
-                  ColorsManager.layerBlur2.withValues(alpha: 0.4),
-                  ColorsManager.layerBlur2.withValues(alpha: 0.1),
+                  ColorsManager.layerBlur2.withOpacity(0.4),
+                  ColorsManager.layerBlur2.withOpacity(0.1),
                   Colors.transparent,
                 ],
                 stops: const [0.1, 0.5, 0.8],
