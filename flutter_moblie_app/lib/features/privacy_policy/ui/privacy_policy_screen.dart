@@ -15,9 +15,6 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
   late Animation<Offset> _slideAnim;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  static const _darkBlue = Color(0xFF021433);
-  static const _gradientEnd = Color(0xFF0A3A7A);
-
   // Last update date
   static const _lastUpdated = '٢ مارس ٢٠٢٦';
 
