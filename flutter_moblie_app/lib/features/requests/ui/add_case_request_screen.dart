@@ -96,14 +96,23 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
       ? DateFormat('yyyy-MM-dd').format(_selectedDate!)
       : '';
 
-  String get _formattedTime => _selectedTime != null
+  String get _formattedTime {
+    if (_selectedTime == null) return '';
+    final hour = _selectedTime!.hourOfPeriod == 0 ? 12 : _selectedTime!.hourOfPeriod;
+    final minute = _selectedTime!.minute.toString().padLeft(2, '0');
+    final period = _selectedTime!.period == DayPeriod.am ? 'صباحاً' : 'مساءً';
+    return '$hour:$minute $period';
+  }
+
+  /// 24-hour format for API submission
+  String get _formattedTime24 => _selectedTime != null
       ? '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}'
       : '';
 
   /// Builds "2026-03-10T15:30:00" format
   String get _dateTimeIso {
     if (_selectedDate == null || _selectedTime == null) return '';
-    return '${_formattedDate}T${_formattedTime}:00';
+    return '${_formattedDate}T${_formattedTime24}:00';
   }
 
   Future<void> _pickDate() async {
@@ -194,9 +203,14 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
               ),
             ),
           ),
-          child: Directionality(
-            textDirection: ui.TextDirection.rtl,
-            child: child!,
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              alwaysUse24HourFormat: false,
+            ),
+            child: Directionality(
+              textDirection: ui.TextDirection.rtl,
+              child: child!,
+            ),
           ),
         );
       },
