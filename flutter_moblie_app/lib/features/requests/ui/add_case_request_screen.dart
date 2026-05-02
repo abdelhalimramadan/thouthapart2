@@ -108,25 +108,98 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final picked = await showDatePicker(
       context: context,
       initialDate: now,
       firstDate: now,
       lastDate: DateTime(2101),
       locale: const Locale('ar', 'EG'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: isDark
+                ? const ColorScheme.dark(
+                    primary: ColorsManager.mainBlue,
+                    onPrimary: Colors.white,
+                    surface: Color(0xFF2D2D2D),
+                    onSurface: Colors.white,
+                  )
+                : const ColorScheme.light(
+                    primary: ColorsManager.mainBlue,
+                    onPrimary: Colors.white,
+                    surface: Colors.white,
+                    onSurface: Colors.black,
+                  ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                textStyle: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
   Future<void> _pickTime() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
-      builder: (ctx, child) => Localizations.override(
-        context: ctx,
-        locale: const Locale('ar', 'EG'),
-        child: child,
-      ),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: isDark
+                ? const ColorScheme.dark(
+                    primary: ColorsManager.mainBlue,
+                    onPrimary: Colors.white,
+                    surface: Color(0xFF2D2D2D),
+                    onSurface: Colors.white,
+                  )
+                : const ColorScheme.light(
+                    primary: ColorsManager.mainBlue,
+                    onPrimary: Colors.white,
+                    surface: Colors.white,
+                    onSurface: Colors.black,
+                  ),
+            timePickerTheme: TimePickerThemeData(
+              helpTextStyle: const TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+              hourMinuteTextStyle: const TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+              ),
+              dayPeriodTextStyle: const TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                textStyle: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          child: Directionality(
+            textDirection: ui.TextDirection.rtl,
+            child: child!,
+          ),
+        );
+      },
     );
     if (picked != null) setState(() => _selectedTime = picked);
   }
