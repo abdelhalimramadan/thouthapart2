@@ -173,8 +173,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     boxShadow: [
                       BoxShadow(
                           color: isDark
-                              ? Colors.black.withValues(alpha: 0.3)
-                              : Colors.black.withValues(alpha: 0.1),
+                              ? Colors.black.withOpacity(0.3)
+                              : Colors.black.withOpacity(0.1),
                           blurRadius: 10,
                           offset: const Offset(0, 4))
                     ],
@@ -309,8 +309,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             center: center,
             radius: 1.5,
             colors: [
-              color.withValues(alpha: 0.4),
-              color.withValues(alpha: 0.1),
+              color.withOpacity(0.4),
+              color.withOpacity(0.1),
               Colors.transparent
             ],
             stops: const [0.0, 0.3, 0.8],

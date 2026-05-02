@@ -285,6 +285,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
       MaterialPageRoute(
         builder: (context) => CategoryDoctorsScreen(
           categoryName: categoryName,
+          categorySvg: _categoryAssets[categoryName] ?? 'assets/svg/فحص شامل.svg',
           categoryId: categoryId,
           cityId: _selectedCityId,
           cityName: cityName,
@@ -353,8 +354,8 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
           boxShadow: [
             BoxShadow(
               color: isDark
-                  ? Colors.black.withValues(alpha: 0.3)
-                  : Colors.grey.withValues(alpha: 0.1),
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.grey.withOpacity(0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
