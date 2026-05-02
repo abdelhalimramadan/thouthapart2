@@ -13,7 +13,6 @@ import 'package:thoutha_mobile_app/features/requests/ui/my_requests_screen.dart'
 import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
 
-import '../../doctor/ui/doctor_home_screen.dart';
 
 class DoctorProfileScreen extends StatelessWidget {
   const DoctorProfileScreen({super.key});
