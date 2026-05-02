@@ -112,7 +112,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               : Icons.mark_email_read_outlined,
                           color: _showUnreadOnly
                               ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                              : theme.colorScheme.onSurface.withOpacity(0.75),
                         ),
                          if (unreadCount > 0)
                            PositionedDirectional(
@@ -208,7 +208,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   decoration: BoxDecoration(
                     color: theme.cardColor,
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: Colors.red.withValues(alpha: 0.28)),
+                    border: Border.all(color: Colors.red.withOpacity(0.28)),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -233,7 +233,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 13,
-                          color: isDark ? Colors.white70 : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                          color: isDark ? Colors.white70 : theme.colorScheme.onSurface.withOpacity(0.7),
                           fontFamily: 'Cairo',
                         ),
                       ),
@@ -271,8 +271,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             height: 94,
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.06)
-                  : theme.colorScheme.primary.withValues(alpha: 0.08),
+                  ? Colors.white.withOpacity(0.06)
+                  : theme.colorScheme.primary.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -296,7 +296,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
              'سيتم عرض الاشعارات هنا عند وصولها',
              style: TextStyle(
                fontSize: 14,
-               color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+               color: theme.colorScheme.onSurface.withOpacity(0.65),
                fontFamily: 'Cairo',
              ),
              textAlign: TextAlign.center,
@@ -343,7 +343,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
              'اضغط على الايقونة لعرض كل الاشعارات',
              style: TextStyle(
                fontSize: 13,
-               color: isDark ? Colors.white.withOpacity(0.9) : theme.colorScheme.onSurface.withValues(alpha: 0.65),
+               color: isDark ? Colors.white.withOpacity(0.9) : theme.colorScheme.onSurface.withOpacity(0.65),
                fontFamily: 'Cairo',
              ),
            ),
@@ -386,13 +386,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         color: notification.readStatus
             ? theme.cardColor
             : (isDark
-                ? theme.colorScheme.primary.withValues(alpha: 0.12)
-                : theme.colorScheme.primary.withValues(alpha: 0.08)),
+                ? theme.colorScheme.primary.withOpacity(0.12)
+                : theme.colorScheme.primary.withOpacity(0.08)),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: notification.readStatus
-              ? theme.dividerColor.withValues(alpha: 0.25)
-              : theme.colorScheme.primary.withValues(alpha: 0.35),
+              ? theme.dividerColor.withOpacity(0.25)
+              : theme.colorScheme.primary.withOpacity(0.35),
         ),
         boxShadow: [
           BoxShadow(
@@ -456,7 +456,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               decoration: BoxDecoration(
                 color: notification.readStatus
                     ? theme.colorScheme.surface
-                    : theme.colorScheme.primary.withValues(alpha: 0.16),
+                    : theme.colorScheme.primary.withOpacity(0.16),
                 shape: BoxShape.circle,
               ),
               child: Padding(
@@ -510,7 +510,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       height: 1.45,
-                      color: isDark ? Colors.white.withOpacity(0.9) : theme.colorScheme.onSurface.withValues(alpha: 0.72),
+                      color: isDark ? Colors.white.withOpacity(0.9) : theme.colorScheme.onSurface.withOpacity(0.72),
                       fontFamily: 'Cairo',
                     ),
                   ),
@@ -579,7 +579,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       fontFamily: 'Cairo',
                       fontSize: 14,
                       height: 1.5,
-                      color: isDark ? Colors.white : theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                      color: isDark ? Colors.white : theme.colorScheme.onSurface.withOpacity(0.85),
                     ),
                   ),
                   const SizedBox(height: 12),
