@@ -338,13 +338,6 @@ class _ChatScreenState extends State<ChatScreen> {
     return res;
   }
 
-  String _mapToAppCategory(String raw) {
-    // This is now used only for UI display if needed elsewhere, 
-    // but we'll mainly use the logic in _openCategory.
-    final ar = _getArabicCanonical(raw);
-    return _isEnglish ? _getEnglishName(ar) : ar;
-  }
-
   String _getArabicCanonical(String raw) {
     final clean = raw.trim();
     final Map<String, String> synonyms = {
