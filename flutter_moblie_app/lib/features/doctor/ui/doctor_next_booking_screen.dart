@@ -458,20 +458,28 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.calendar_today_outlined,
-                size: 48,
-                color: isDark ? Colors.white30 : Colors.grey[400],
-              ),
-              SizedBox(height: 16),
-              Text(
-                'doctor.there_are_no_reservations_1'.tr(),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 17,
-                  color: isDark ? Colors.white : Color(0xFF0C4A6E),
+              Transform.translate(
+                offset: const Offset(0, -40),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 48,
+                      color: isDark ? Colors.white30 : Colors.grey[400],
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'doctor.there_are_no_reservations_1'.tr(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 17,
+                        color: isDark ? Colors.white : Color(0xFF0C4A6E),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               SizedBox(height: 16),

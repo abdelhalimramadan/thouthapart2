@@ -20,7 +20,7 @@ class DocApp extends StatelessWidget {
         builder: (context, themeProvider, _) {
           return MaterialApp(
             navigatorKey: NavigatorService.navigatorKey,
-            title: 'doc_app.thutha'.tr(),
+            title: 'ثوثة'.tr(),
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,

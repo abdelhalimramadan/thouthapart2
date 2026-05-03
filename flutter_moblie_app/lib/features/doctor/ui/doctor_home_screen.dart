@@ -693,20 +693,28 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                isPending ? Icons.calendar_today_outlined : Icons.check_circle_outline,
-                size: 40,
-                color: isDarkMode ? Colors.white30 : Colors.grey[400],
-              ),
-              SizedBox(height: 12),
-              Text(
-                isPending ? 'doctor.there_are_no_reservations_1'.tr() : 'doctor.there_are_no_confirmed'.tr(),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                  color: isDarkMode ? Colors.white : Color(0xFF0C4A6E),
+              Transform.translate(
+                offset: const Offset(0, -30),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isPending ? Icons.calendar_today_outlined : Icons.check_circle_outline,
+                      size: 40,
+                      color: isDarkMode ? Colors.white30 : Colors.grey[400],
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      isPending ? 'doctor.there_are_no_reservations_1'.tr() : 'doctor.there_are_no_confirmed'.tr(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: isDarkMode ? Colors.white : Color(0xFF0C4A6E),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               if (isPending) ...[
