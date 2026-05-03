@@ -8,6 +8,7 @@ import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
 import 'package:thoutha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thoutha_mobile_app/core/services/firebase_messaging_service.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class AuthService {
   final Dio _dio = DioFactory.getDio();
@@ -21,7 +22,7 @@ class AuthService {
       if (email.isEmpty || password.isEmpty) {
         return {
           'success': false,
-          'error': 'البريد الإلكتروني وكلمة المرور مطلوبان',
+          'error': 'auth.email_and_password_are'.tr(),
           'statusCode': 400,
         };
       }
@@ -132,18 +133,24 @@ class AuthService {
             if (f != null && f.isNotEmpty) {
               await SharedPrefHelper.setData('first_name', f);
               await SharedPrefHelper.setData('last_name', l ?? '');
-              if (e != null && e.isNotEmpty)
+              if (e != null && e.isNotEmpty) {
                 await SharedPrefHelper.setData('email', e);
-              if (p != null && p.isNotEmpty)
+              }
+              if (p != null && p.isNotEmpty) {
                 await SharedPrefHelper.setData('phone', p);
-              if (y != null && y.isNotEmpty)
+              }
+              if (y != null && y.isNotEmpty) {
                 await SharedPrefHelper.setData('year', y);
-              if (g != null && g.isNotEmpty)
+              }
+              if (g != null && g.isNotEmpty) {
                 await SharedPrefHelper.setData('governorate', g);
-              if (fa != null && fa.isNotEmpty)
+              }
+              if (fa != null && fa.isNotEmpty) {
                 await SharedPrefHelper.setData('faculty', fa);
-              if (c != null && c.isNotEmpty)
+              }
+              if (c != null && c.isNotEmpty) {
                 await SharedPrefHelper.setData('category', c);
+              }
             }
           } else {
             log('⚠️ Login response.data is NOT a Map! Type: ${data.runtimeType}',
@@ -183,7 +190,7 @@ class AuthService {
       // Handle any other errors
       return {
         'success': false,
-        'error': 'حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى',
+        'error': 'auth.an_unexpected_error_occurred'.tr(),
         'statusCode': 500,
       };
     }
@@ -192,21 +199,21 @@ class AuthService {
   String _getErrorMessage(int? statusCode, dynamic responseData) {
     switch (statusCode) {
       case 400:
-        return 'بيانات الدخول غير صحيحة';
+        return 'auth.login_data_is_incorrect'.tr();
       case 401:
-        return 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+        return 'auth.incorrect_email_or_password'.tr();
       case 403:
-        return 'غير مصرح لك بالدخول';
+        return 'auth.you_are_not_authorized'.tr();
       case 404:
-        return 'الحساب غير موجود';
+        return 'auth.the_account_does_not'.tr();
       case 422:
         // Handle validation errors from the server
         if (responseData is Map && responseData['errors'] != null) {
-          return responseData['errors'].values.first[0] ?? 'بيانات غير صالحة';
+          return responseData['errors'].values.first[0] ?? 'auth.invalid_data'.tr();
         }
-        return 'بيانات غير صالحة';
+        return 'auth.invalid_data'.tr();
       default:
-        return 'حدث خطأ في الخادم. الرجاء المحاولة مرة أخرى';
+        return 'auth.a_server_error_has'.tr();
     }
   }
 
@@ -220,13 +227,13 @@ class AuthService {
 
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
-      return 'انتهت مهلة الاتصال بالخادم. الرجاء التحقق من اتصالك بالإنترنت';
+      return 'auth.the_connection_to_the'.tr();
     } else if (e.type == DioExceptionType.connectionError) {
-      return 'تعذر الاتصال بالخادم. الرجاء التحقق من اتصالك بالإنترنت';
+      return 'auth.unable_to_connect_to'.tr();
     } else if (e.response != null) {
       return _getErrorMessage(e.response?.statusCode, e.response?.data);
     } else {
-      return 'حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى';
+      return 'auth.an_unexpected_error_occurred'.tr();
     }
   }
 
@@ -245,7 +252,7 @@ class AuthService {
       if (email.isEmpty || password.isEmpty) {
         return {
           'success': false,
-          'error': 'البريد الإلكتروني وكلمة المرور مطلوبان',
+          'error': 'auth.email_and_password_are'.tr(),
           'statusCode': 400,
         };
       }
@@ -253,7 +260,7 @@ class AuthService {
       if (password.length < 6) {
         return {
           'success': false,
-          'error': 'يجب أن تكون كلمة المرور 6 أحرف على الأقل',
+          'error': 'auth.password_must_be_at'.tr(),
           'statusCode': 400,
         };
       }
@@ -297,30 +304,33 @@ class AuthService {
 
           if (first_name != null && first_name.isNotEmpty) {
             await SharedPrefHelper.setData('first_name', first_name);
-            if (last_name != null)
+            if (last_name != null) {
               await SharedPrefHelper.setData('last_name', last_name);
+            }
             await SharedPrefHelper.setData('email', email.trim());
             if (phone != null) await SharedPrefHelper.setData('phone', phone);
-            if (faculty != null)
+            if (faculty != null) {
               await SharedPrefHelper.setData('faculty', faculty);
+            }
             if (year != null) await SharedPrefHelper.setData('year', year);
-            if (governorate != null)
+            if (governorate != null) {
               await SharedPrefHelper.setData('governorate', governorate);
+            }
           }
         } catch (_) {}
 
         return {
           'success': true,
           'data': response.data,
-          'message': 'تم إنشاء الحساب بنجاح',
+          'message': 'auth.the_account_has_been'.tr(),
         };
       } else {
         // Handle different error status codes
-        String errorMessage = 'حدث خطأ في التسجيل';
+        String errorMessage = 'auth.an_error_occurred_in'.tr();
         if (response.statusCode == 400) {
-          errorMessage = response.data?['message'] ?? 'بيانات غير صالحة';
+          errorMessage = response.data?['message'] ?? 'auth.invalid_data'.tr();
         } else if (response.statusCode == 409) {
-          errorMessage = 'هذا البريد الإلكتروني مسجل مسبقاً';
+          errorMessage = 'auth.this_email_is_already'.tr();
         }
 
         return {
@@ -333,13 +343,13 @@ class AuthService {
       return {
         'success': false,
         'error': e.response?.data?['message'] ??
-            'تعذر الاتصال بالخادم. يرجى المحاولة مرة أخرى',
+            'auth.unable_to_connect_to_1'.tr(),
         'statusCode': e.response?.statusCode,
       };
     } catch (e) {
       return {
         'success': false,
-        'error': 'حدث خطأ غير متوقع: ${e.toString()}',
+        'error': 'auth.an_unexpected_error_occurred_1'.tr(namedArgs: {'var_0': e.toString().toString()}),
       };
     }
   }
