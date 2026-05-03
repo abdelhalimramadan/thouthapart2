@@ -13,13 +13,14 @@ import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thoutha_mobile_app/core/helpers/responsive_utils.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen(
+  HomeScreen(
       {super.key,
-      this.drawer = const HomeDrawer(),
+      this.drawer,
       this.showAddCaseCategory = false});
-  final Widget drawer;
+  final Widget? drawer;
   final bool showAddCaseCategory;
 
   @override
@@ -40,50 +41,104 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? _gpsFailureMessage; // non-null → show failure banner
   List<CityModel> _loadedCities = [];
 
-  // Asset mapping for categories
+  // Asset mapping for categories (keys are Arabic names from server)
   final Map<String, String> _categoryAssets = {
+    'املغم': 'assets/svg/املغم.svg',
     'حشو املجم': 'assets/svg/املغم.svg',
     'حشو عصب': 'assets/svg/حشو اسنان.svg',
-    'حشو تجميلي': 'assets/svg/تجميلي.svg',
+    'تجميلي': 'assets/svg/تجميلي.svg',
+    'زراعه اسنان': 'assets/svg/زراعه اسنان.svg',
     'زراعة الأسنان': 'assets/svg/زراعه اسنان.svg',
-    'الجراحة والخلع': 'assets/svg/خلع اسنان.svg',
-    'تنظيف وتبيض الأسنان': 'assets/svg/تبيض اسنان.svg',
-    'تبييض الأسنان': 'assets/svg/تبيض اسنان.svg',
+    'خلع اسنان': 'assets/svg/خلع اسنان.svg',
+    'الجراحة وخلع': 'assets/svg/خلع اسنان.svg',
+    'تبيض اسنان': 'assets/svg/تبيض اسنان.svg',
+    'تنظيف وتبييض الأسنان': 'assets/svg/تبيض اسنان.svg',
+    'تقويم اسنان': 'assets/svg/تقويم اسنان.svg',
     'تقويم الأسنان': 'assets/svg/تقويم اسنان.svg',
-    'تركيبات الأسنان': 'assets/svg/تركيبات اسنان.svg',
-    'التيجان والجسور': 'assets/images/تيجان وجسور.webp',
+    'تركيبات اسنان': 'assets/svg/تركيبات اسنان.svg',
+    'تيجان وجسور': 'assets/images/تيجان وجسور.webp',
     'طب أسنان الأطفال': 'assets/svg/اطفال2.svg',
     'تركيبات متحركة': 'assets/svg/تركيبات اسنان.svg',
+    'فحص شامل': 'assets/svg/فحص شامل.svg',
+  };
+
+  final Map<String, String> _categoryTranslations = {
+    'فحص شامل': 'chat.comprehensive_examination',
+    'حشو اسنان': 'doctor.dental_filling',
+    'تجميلي': 'chat.cosmetic_filler',
+    'املغم': 'chat.amalgam_filling',
+    'حشو املجم': 'chat.amalgam_filling',
+    'حشو عصب': 'chat.nerve_filling',
+    'زراعه اسنان': 'chat.dental_implants',
+    'زراعة الأسنان': 'chat.dental_implants',
+    'خلع اسنان': 'chat.tooth_extraction',
+    'الجراحة وخلع': 'chat.surgery_and_extraction',
+    'تبيض اسنان': 'chat.teeth_whitening',
+    'تنظيف وتبييض الأسنان': 'chat.teeth_cleaning_and_whitening',
+    'تقويم اسنان': 'chat.orthodontics',
+    'تقويم الأسنان': 'chat.orthodontics',
+    'تيجان وجسور': 'chat.crowns_and_bridges',
+    'تركيبات اسنان': 'chat.dental_prosthetics',
+    'تركيبات متحركة': 'chat.moving_installations',
+    'طب أسنان الأطفال': 'chat.pediatric_dentistry',
   };
 
   String _getAssetForCategory(String categoryName) {
-    // Check for exact match
-    if (_categoryAssets.containsKey(categoryName)) {
-      return _categoryAssets[categoryName]!;
+    String name = categoryName.trim();
+    if (_categoryAssets.containsKey(name)) {
+      return _categoryAssets[name]!;
     }
 
-    // Check for partial matches
-    if (categoryName.contains('فحص')) return 'assets/svg/فحص شامل.svg';
-    if (categoryName.contains('املجم') || categoryName.contains('amalgam'))
-      return 'assets/svg/املغم.svg';
-    if (categoryName.contains('عصب')) return 'assets/svg/حشو اسنان.svg';
-    if (categoryName.contains('تجميلي')) return 'assets/svg/تجميلي.svg';
-    if (categoryName.contains('زراعة')) return 'assets/svg/زراعه اسنان.svg';
-    if (categoryName.contains('خلع') || categoryName.contains('جراحة'))
-      return 'assets/svg/خلع اسنان.svg';
-    if (categoryName.contains('تنظيف') || categoryName.contains('تبييض'))
-      return 'assets/svg/تبيض اسنان.svg';
-    if (categoryName.contains('تقويم')) return 'assets/svg/تقويم اسنان.svg';
-    if (categoryName.contains('تركيبات') && categoryName.contains('متحركة'))
-      return 'assets/svg/تركيبات اسنان.svg';
-    if (categoryName.contains('تركيبات')) return 'assets/svg/تركيبات اسنان.svg';
-    if (categoryName.contains('تيجان') || categoryName.contains('جسور'))
-      return 'assets/images/تيجان وجسور.webp';
-    if (categoryName.contains('اطفال') || categoryName.contains('pediatric'))
-      return 'assets/svg/اطفال2.svg';
+    // Normalization to handle variations in Arabic characters
+    String normalized = name
+        .replaceAll('ة', 'ه')
+        .replaceAll('أ', 'ا')
+        .replaceAll('إ', 'ا')
+        .replaceAll('آ', 'ا')
+        .replaceAll('ى', 'ي');
 
-    // Default fallback
+    if (normalized.contains('فحص') || normalized.toLowerCase().contains('examination') || normalized.toLowerCase().contains('checkup')) return 'assets/svg/فحص شامل.svg';
+    if (normalized.contains('املغم') || normalized.contains('املجم') || normalized.toLowerCase().contains('amalgam')) return 'assets/svg/املغم.svg';
+    if (normalized.contains('عصب') || normalized.toLowerCase().contains('nerve') || normalized.toLowerCase().contains('root canal')) return 'assets/svg/حشو اسنان.svg';
+    if (normalized.contains('تجميلي') || normalized.contains('تحميلي') || normalized.toLowerCase().contains('cosmetic') || normalized.toLowerCase().contains('composite')) return 'assets/svg/تجميلي.svg';
+    if (normalized.contains('زراعه') || normalized.contains('زراعة') || normalized.toLowerCase().contains('implant')) return 'assets/svg/زراعه اسنان.svg';
+    if (normalized.contains('خلع') || normalized.contains('جراحه') || normalized.contains('جراحة') || normalized.toLowerCase().contains('extraction') || normalized.toLowerCase().contains('surgery')) return 'assets/svg/خلع اسنان.svg';
+    if (normalized.contains('تبيض') || normalized.contains('تنظيف') || normalized.toLowerCase().contains('whitening') || normalized.toLowerCase().contains('cleaning')) return 'assets/svg/تبيض اسنان.svg';
+    if (normalized.contains('تقويم') || normalized.toLowerCase().contains('orthodontic') || normalized.toLowerCase().contains('brace')) return 'assets/svg/تقويم اسنان.svg';
+    if (normalized.contains('تركيبات') || normalized.toLowerCase().contains('prosthetic') || normalized.toLowerCase().contains('installation')) return 'assets/svg/تركيبات اسنان.svg';
+    if (normalized.contains('تيجان') || normalized.contains('جسور') || normalized.toLowerCase().contains('crown') || normalized.toLowerCase().contains('bridge')) return 'assets/images/تيجان وجسور.webp';
+    if (normalized.contains('اطفال') || normalized.contains('أطفال') || normalized.toLowerCase().contains('pediatric') || normalized.toLowerCase().contains('child')) return 'assets/svg/اطفال2.svg';
+
     return 'assets/svg/فحص شامل.svg';
+  }
+
+  String localizedCategoryName(String category) {
+    final name = category.trim();
+    if (_categoryTranslations.containsKey(name)) {
+      return _categoryTranslations[name]!.tr();
+    }
+    
+    // Check for variations if exact match fails
+    String normalized = name
+        .replaceAll('ة', 'ه')
+        .replaceAll('أ', 'ا')
+        .replaceAll('إ', 'ا')
+        .replaceAll('آ', 'ا')
+        .replaceAll('ى', 'ي');
+
+    if (normalized.contains('فحص') || normalized.toLowerCase().contains('examination') || normalized.toLowerCase().contains('checkup')) return 'chat.comprehensive_examination'.tr();
+    if (normalized.contains('املغم') || normalized.contains('املجم') || normalized.toLowerCase().contains('amalgam')) return 'chat.amalgam_filling'.tr();
+    if (normalized.contains('عصب') || normalized.toLowerCase().contains('nerve') || normalized.toLowerCase().contains('root canal')) return 'chat.nerve_filling'.tr();
+    if (normalized.contains('تجميلي') || normalized.contains('تحميلي') || normalized.toLowerCase().contains('cosmetic') || normalized.toLowerCase().contains('composite')) return 'chat.cosmetic_filler'.tr();
+    if (normalized.contains('زراعه') || normalized.contains('زراعة') || normalized.toLowerCase().contains('implant')) return 'chat.dental_implants'.tr();
+    if (normalized.contains('خلع') || normalized.contains('جراحه') || normalized.toLowerCase().contains('extraction') || normalized.toLowerCase().contains('surgery')) return 'chat.surgery_and_extraction'.tr();
+    if (normalized.contains('تبيض') || normalized.contains('تنظيف') || normalized.toLowerCase().contains('whitening') || normalized.toLowerCase().contains('cleaning')) return 'chat.teeth_cleaning_and_whitening'.tr();
+    if (normalized.contains('تقويم') || normalized.toLowerCase().contains('orthodontic') || normalized.toLowerCase().contains('brace')) return 'chat.orthodontics'.tr();
+    if (normalized.contains('تيجان') || normalized.contains('جسور') || normalized.toLowerCase().contains('crown') || normalized.toLowerCase().contains('bridge')) return 'chat.crowns_and_bridges'.tr();
+    if (normalized.contains('تركيبات') || normalized.toLowerCase().contains('prosthetic') || normalized.toLowerCase().contains('installation')) return 'chat.dental_prosthetics'.tr();
+    if (normalized.contains('اطفال') || normalized.toLowerCase().contains('pediatric') || normalized.toLowerCase().contains('child')) return 'chat.pediatric_dentistry'.tr();
+
+    return category;
   }
 
   Future<void> _handleCategoryTap({
@@ -120,114 +175,113 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
      final double labelPadding = 6;
      final double fontSize = (screenW * 0.033).clamp(11.0, 15.0);
 
-     final svgFiles = [
-       'املغم.svg',
-       'حشو اسنان.svg',
-       'تجميلي.svg',
-       'زراعه اسنان.svg',
-       'خلع اسنان.svg',
-       'تبيض اسنان.svg',
-       'تقويم اسنان.svg',
-       'تركيبات اسنان.svg',
-       'تيجان وجسور.webp',
-       'اطفال.svg',
-       'تركيبات اسنان.svg',
+     final defaultAssetPaths = [
+       'assets/svg/املغم.svg',
+       'assets/svg/حشو اسنان.svg',
+       'assets/svg/تجميلي.svg',
+       'assets/svg/زراعه اسنان.svg',
+       'assets/svg/خلع اسنان.svg',
+       'assets/svg/تبيض اسنان.svg',
+       'assets/svg/تقويم اسنان.svg',
+       'assets/svg/تركيبات اسنان.svg',
+       'assets/images/تيجان وجسور.webp',
+       'assets/svg/اطفال2.svg',
+       'assets/svg/تركيبات اسنان.svg',
      ];
 
-     final categoryNames = [
-       'حشو املجم',
-       'حشو عصب',
-       'حشو تجميلي',
-       'زراعة الأسنان',
-       'الجراحة والخلع',
-       'تنظيف وتبيض الأسنان',
-       'تقويم الأسنان',
-       'تركيبات الأسنان',
-       'التيجان والجسور',
-       'طب أسنان الأطفال',
-       'تركيبات متحركة',
-     ];
+    final defaultCategoryNames = [
+      'املغم',
+      'حشو عصب',
+      'تجميلي',
+      'زراعة الأسنان',
+      'الجراحة وخلع',
+      'تنظيف وتبييض الأسنان',
+      'تقويم الأسنان',
+      'تركيبات اسنان',
+      'تيجان وجسور',
+      'طب أسنان الأطفال',
+      'تركيبات متحركة',
+    ];
 
-     final fileName =
-         index < svgFiles.length ? svgFiles[index] : 'placeholder.svg';
-     final resolvedAssetPath =
-         assetPath.isNotEmpty ? assetPath : 'assets/svg/$fileName';
-     final resolvedCategoryName = categoryName.isNotEmpty
-         ? categoryName
-         : (index < categoryNames.length ? categoryNames[index] : '');
+    final resolvedAssetPath = assetPath.isNotEmpty 
+        ? assetPath 
+        : (index < defaultAssetPaths.length ? defaultAssetPaths[index] : 'assets/svg/فحص شامل.svg');
+    
+    final rawCategoryName = categoryName.isNotEmpty
+        ? categoryName
+        : (index < defaultCategoryNames.length ? defaultCategoryNames[index] : '');
 
-     return GestureDetector(
-       onTap: () {
-         _handleCategoryTap(
-           categoryName: resolvedCategoryName,
-           categoryId: categoryId,
-           cityName: cityName,
-         );
-       },
-       child: Container(
-         margin: EdgeInsets.all(categoryMargin),
-         decoration: BoxDecoration(
-           color: Theme.of(context).cardTheme.color,
-           borderRadius: BorderRadius.circular(borderRadius),
-           border: Border.all(
-             color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
-             width: borderWidth,
-           ),
-           boxShadow: [
-             BoxShadow(
-               color: isDark
-                   ? Colors.black.withOpacity(0.3)
-                   : Colors.grey.withOpacity(0.1),
-               blurRadius: blurRadius,
-               offset: Offset(0, 2),
-             ),
-           ],
-         ),
-         child: Column(
-           mainAxisAlignment: MainAxisAlignment.center,
-           children: [
-             // Handle both SVG and regular images
-             if (resolvedAssetPath.endsWith('.svg')) ...[
-               SvgPicture.asset(
-                 resolvedAssetPath,
-                 width: iconSize,
-                 height: iconSize,
-                 fit: BoxFit.contain,
-                 placeholderBuilder: (BuildContext context) => Container(
-                   width: iconSize,
-                   height: iconSize,
-                   color: isDark ? Colors.grey[800] : Colors.grey[200],
-                   child: Icon(Icons.image, size: 24, color: Colors.grey),
-                 ),
-               ),
-             ] else ...[
-               Image.asset(
-                 resolvedAssetPath,
-                 width: iconSize,
-                 height: iconSize,
-                 fit: BoxFit.contain,
-               ),
-             ],
-             SizedBox(height: iconLabelSpacing),
-             Padding(
-               padding: EdgeInsets.symmetric(horizontal: labelPadding),
-               child: Text(
-                 resolvedCategoryName,
-                 textAlign: TextAlign.center,
-                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                       fontFamily: 'Cairo',
-                       fontWeight: FontWeight.w600,
-                       fontSize: fontSize,
-                       height: 1.2,
-                     ),
-                 maxLines: 2,
-                 overflow: TextOverflow.ellipsis,
-               ),
-             ),
-           ],
-         ),
-       ),
-     );
+    return GestureDetector(
+      onTap: () {
+        _handleCategoryTap(
+          categoryName: rawCategoryName,
+          categoryId: categoryId,
+          cityName: cityName,
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.all(categoryMargin),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: BorderRadius.circular(borderRadius),
+          border: Border.all(
+            color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+            width: borderWidth,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isDark
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.grey.withOpacity(0.1),
+              blurRadius: blurRadius,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Handle both SVG and regular images
+            if (resolvedAssetPath.endsWith('.svg')) ...[
+              SvgPicture.asset(
+                resolvedAssetPath,
+                width: iconSize,
+                height: iconSize,
+                fit: BoxFit.contain,
+                placeholderBuilder: (BuildContext context) => Container(
+                  width: iconSize,
+                  height: iconSize,
+                  color: isDark ? Colors.grey[800] : Colors.grey[200],
+                  child: Icon(Icons.image, size: 24, color: Colors.grey),
+                ),
+              ),
+            ] else ...[
+              Image.asset(
+                resolvedAssetPath,
+                width: iconSize,
+                height: iconSize,
+                fit: BoxFit.contain,
+              ),
+            ],
+            SizedBox(height: iconLabelSpacing),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: labelPadding),
+              child: Text(
+                localizedCategoryName(rawCategoryName),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: fontSize,
+                      height: 1.2,
+                    ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
    }
 
   @override
@@ -331,7 +385,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     } else {
       setState(() {
         _gpsFailureMessage =
-            'لم يتمكن التطبيق من تحديد المحافظة تلقائيًا،\nيرجى الاختيار يدويًا';
+            'doctor.the_application_was_unable'.tr();
       });
     }
   }
@@ -348,7 +402,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           setState(() {
             _gpsFinished = true;
             _gpsFailureMessage =
-                'تم رفض إذن الموقع بشكل دائم، يرجى تفعيله من إعدادات التطبيق';
+                'doctor.location_permission_has_been'.tr();
           });
         }
         return;
@@ -357,7 +411,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         if (mounted) {
           setState(() {
             _gpsFinished = true;
-            _gpsFailureMessage = 'لا يمكن تحديد الموقع دون منح إذن الوصول';
+            _gpsFailureMessage = 'doctor.the_location_cannot_be'.tr();
           });
         }
         return;
@@ -369,14 +423,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           setState(() {
             _gpsFinished = true;
             _gpsFailureMessage =
-                'خدمة الموقع معطّلة، يرجى تفعيلها لتحديد المحافظة تلقائيًا';
+                'doctor.the_location_service_is'.tr();
           });
         }
         return;
       }
 
       final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
+        locationSettings: LocationSettings(
           accuracy: LocationAccuracy.high,
           timeLimit: Duration(seconds: 10),
         ),
@@ -393,7 +447,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         },
         options: Options(
           headers: {'User-Agent': 'ThothaApp/1.0'},
-          receiveTimeout: const Duration(seconds: 10),
+          receiveTimeout: Duration(seconds: 10),
         ),
       );
 
@@ -459,7 +513,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
              },
            ),
         ),
-        drawer: widget.drawer,
+        drawer: widget.drawer ?? const HomeDrawer(),
         body: SafeArea(
           child: BlocConsumer<DoctorCubit, DoctorState>(
             listener: (context, state) {
@@ -472,11 +526,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             },
             builder: (context, state) {
               if (state is DoctorLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return Center(child: CircularProgressIndicator());
               } else if (state is DoctorError) {
                 return Center(
                     child: Text(state.error,
-                        style: const TextStyle(fontFamily: 'Cairo')));
+                        style: TextStyle(fontFamily: 'Cairo')));
               } else if (state is DoctorSuccess) {
                 final categories = state.categories;
                 final cities = state.cities;
@@ -501,7 +555,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               vertical: 12),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            gradient: const LinearGradient(
+                            gradient: LinearGradient(
                               begin: Alignment.centerLeft,
                               end: Alignment.centerRight,
                               colors: [Color(0xFF95F8C9), Color(0xFF54CAF7)],
@@ -530,27 +584,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        'احجز و سجل',
+                                        'home_screen.book_and_register'.tr(),
                                         style: TextStyle(
                                           fontFamily: 'Cairo',
                                           color: Colors.white,
                                           fontSize: (cardW * 0.04).clamp(13.0, 18.0),
                                           fontWeight: FontWeight.bold,
                                         ),
-                                        textAlign: TextAlign.right,
+                                        textAlign: TextAlign.start,
                                       ),
-                                      const SizedBox(height: 6),
+                                      SizedBox(height: 6),
                                       Text(
-                                        'مع افضل الاطباء في نطاقك',
+                                        'home_screen.with_the_best_doctors'.tr(),
                                         style: TextStyle(
                                           fontFamily: 'Cairo',
                                           color: Colors.white,
                                           fontSize: (cardW * 0.033).clamp(11.0, 15.0),
                                           fontWeight: FontWeight.w500,
                                         ),
-                                        textAlign: TextAlign.right,
+                                        textAlign: TextAlign.start,
                                       ),
-                                      const SizedBox(height: 10),
+                                      SizedBox(height: 10),
                                       Container(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 14, vertical: 5),
@@ -559,7 +613,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: Text(
-                                          'احجز الان',
+                                          'home_screen.book_now_1'.tr(),
                                           style: TextStyle(
                                             fontFamily: 'Cairo',
                                             color: Colors.black,
@@ -592,7 +646,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             border: Border.all(
                               color: isDark
                                   ? Colors.grey[700]!
-                                  : const Color(0xFFD1D5DC),
+                                  : Color(0xFFD1D5DC),
                               width: 1.1,
                             ),
                             boxShadow: [
@@ -624,8 +678,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   Expanded(
                                     child: Text(
                                       _isDetecting
-                                          ? 'جارٍ تحديد موقعك...'
-                                          : 'اختر المدينة',
+                                          ? 'doctor.locating_your_location'.tr()
+                                          : 'doctor.select_city'.tr(),
                                       style: Theme.of(context)
                                           .textTheme
                                           .titleMedium
@@ -665,7 +719,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                           fontFamily: 'Cairo',
                                           fontSize: 14,
                                         ),
-                                    textAlign: TextAlign.right,
+                                    textAlign: TextAlign.start,
                                   ),
                                 );
                               }).toList(),
@@ -746,16 +800,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: const Color(0xFF54CAF7), width: 1.5),
+                                  border: Border.all(color: Color(0xFF54CAF7), width: 1.5),
                                 ),
                                 child: SvgPicture.asset(
                                   'assets/svg/ثوثه الدكتور 1.svg',
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12),
                               Flexible(
                                 child: Text(
-                                  'لو مش عارف تحدد عندك إيه، روح اتكلم مع الطبيب الذكي',
+                                  'home_screen.if_you_dont_know'.tr(),
                                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontFamily: 'Cairo',
                                     fontWeight: FontWeight.bold,
@@ -776,7 +830,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             horizontal: 16,
                             vertical: 12),
                         child: Text(
-                          'الخدمات المتوفرة',
+                          'home_screen.available_services'.tr(),
                           style:
                               Theme.of(context).textTheme.titleLarge?.copyWith(
                                     fontFamily: 'Cairo',
@@ -798,7 +852,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               final crossAxisCount = ResponsiveUtils.screenWidth(context) > 600 ? 4 : 2;
                               return GridView.builder(
                                 shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
+                                physics: NeverScrollableScrollPhysics(),
                                 gridDelegate:
                                     SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: crossAxisCount,

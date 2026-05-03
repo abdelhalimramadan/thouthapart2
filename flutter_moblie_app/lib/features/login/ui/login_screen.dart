@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
 import '../../auth/data/auth_service.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 
 class LoginScreen extends StatefulWidget {
@@ -95,12 +96,12 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } else {
         String errorMsg =
-            result['error'] ?? 'فشل تسجيل الدخول. الرجاء المحاولة مرة أخرى.';
+            result['error'] ?? 'login.login_failed_please_try'.tr();
         if (result['statusCode'] == 401) {
-          errorMsg = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+          errorMsg = 'login.incorrect_email_or_password'.tr();
         } else if (result['statusCode'] == 404) {
           errorMsg =
-              'لا يوجد حساب مسجل بهذا البريد الإلكتروني. الرجاء إنشاء حساب أولاً';
+              'login.there_is_no_account'.tr();
         }
         setState(() {
           errorMessage = errorMsg;
@@ -136,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
             height: double.infinity,
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: const Alignment(-0.7, -0.7),
+                center: Alignment(-0.7, -0.7),
                 radius: 1.5,
                 colors: [
                   isDarkMode
@@ -158,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
             height: double.infinity,
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: const Alignment(0.7, 0.7),
+                center: Alignment(0.7, 0.7),
                 radius: 1.5,
                 colors: [
                   isDarkMode
@@ -211,7 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ? Colors.black.withAlpha(102)
                                       : Colors.black.withAlpha(25),
                                   blurRadius: 10,
-                                  offset: const Offset(0, 4),
+                                  offset: Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -232,9 +233,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                         fit: BoxFit.contain,
                                       ),
                                     ),
-                                    const SizedBox(height: 16),
+                                    SizedBox(height: 16),
                                     Text(
-                                      'تسجيل الدخول',
+                                      'home_screen.login'.tr(),
                                       style: TextStyle(
                                         fontSize: (baseFontSize * 1.5).clamp(20.0, 28.0),
                                         fontWeight: FontWeight.bold,
@@ -245,9 +246,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 8),
                                     Text(
-                                      'ادخل البريد الإلكتروني وكلمة المرور',
+                                      'login.enter_your_email_and'.tr(),
                                       style: TextStyle(
                                         fontSize: (baseFontSize * 0.875).clamp(14.0, 18.0),
                                         color: isDarkMode
@@ -259,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 24),
+                                    SizedBox(height: 24),
 
                                     if (errorMessage != null)
                                       Container(
@@ -284,7 +285,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                     ? Colors.red[300]
                                                     : Colors.red,
                                                 size: 20),
-                                            const SizedBox(width: 8),
+                                            SizedBox(width: 8),
                                             Expanded(
                                               child: Text(
                                                 errorMessage!,
@@ -307,32 +308,32 @@ class _LoginScreenState extends State<LoginScreen> {
                                       controller: emailController,
                                       keyboardType: TextInputType.emailAddress,
                                       decoration: InputDecoration(
-                                        labelText: 'البريد الإلكتروني',
-                                        prefixIcon: const Icon(Icons.email_outlined),
+                                        labelText: 'doctor.email'.tr(),
+                                        prefixIcon: Icon(Icons.email_outlined),
                                         labelStyle: TextStyle(
                                             fontSize: (baseFontSize * 0.8).clamp(14.0, 16.0)),
                                       ),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
-                                          return 'الرجاء إدخال البريد الإلكتروني';
+                                          return 'login.please_enter_your_email'.tr();
                                         }
                                         if (!RegExp(r'^[^@]+@[^\s]+\.[^\s]+$')
                                             .hasMatch(value)) {
-                                          return 'الرجاء إدخال بريد إلكتروني صالح';
+                                          return 'login.please_enter_a_valid'.tr();
                                         }
                                         return null;
                                       },
                                     ),
-                                    const SizedBox(height: 16),
+                                    SizedBox(height: 16),
 
                                     // Password Field
                                     TextFormField(
                                       controller: passwordController,
                                       obscureText: isObscureText,
                                       decoration: InputDecoration(
-                                        labelText: 'كلمة المرور',
+                                        labelText: 'login.password'.tr(),
                                         prefixIcon:
-                                            const Icon(Icons.lock_outline),
+                                            Icon(Icons.lock_outline),
                                         labelStyle: TextStyle(
                                             fontSize: (baseFontSize * 0.8).clamp(14.0, 16.0)),
                                         suffixIcon: IconButton(
@@ -350,15 +351,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
-                                          return 'الرجاء إدخال كلمة المرور';
+                                          return 'login.please_enter_your_password'.tr();
                                         }
                                         if (value.length < 6) {
-                                          return 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
+                                          return 'login.password_must_be_at'.tr();
                                         }
                                         return null;
                                       },
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 8),
 
                                     // Forgot Password & Remember Me
                                     Row(
@@ -372,7 +373,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   Routes.forgotPasswordScreen);
                                             },
                                             child: Text(
-                                              'نسيت كلمة المرور؟',
+                                              'login.forgot_your_password'.tr(),
                                               style: TextStyle(
                                                 fontSize: (baseFontSize * 0.8).clamp(13.0, 16.0),
                                                 color: ColorsManager.mainBlue,
@@ -400,7 +401,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               ),
                                             ),
                                             Text(
-                                              'تذكرني',
+                                              'login.remember_me'.tr(),
                                               style: TextStyle(
                                                 fontSize: (baseFontSize * 0.8).clamp(13.0, 16.0),
                                                 color: isDarkMode
@@ -414,7 +415,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 24),
+                                    SizedBox(height: 24),
 
                                     // Login Button
                                     SizedBox(
@@ -435,13 +436,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 width: 20,
                                                 height: 20,
                                                 child:
-                                                    const CircularProgressIndicator(
+                                                    CircularProgressIndicator(
                                                   strokeWidth: 2,
                                                   color: Colors.white,
                                                 ),
                                               )
                                             : Text(
-                                                'تسجيل الدخول',
+                                                'home_screen.login'.tr(),
                                                 style: TextStyle(
                                                   fontSize: (baseFontSize * 0.9).clamp(16.0, 20.0),
                                                   color: Colors.white,
@@ -451,9 +452,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                               ),
                                       ),
                                     ),
-                                    const SizedBox(height: 12),
+                                    SizedBox(height: 12),
                                     Text(
-                                      'بالدخول، أنت توافق على الشروط والأحكام.',
+                                      'login.by_entering_you_agree'.tr(),
                                       style: TextStyle(
                                         fontSize: (baseFontSize * 0.75).clamp(12.0, 15.0),
                                         color: isDarkMode
@@ -465,7 +466,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 16),
+                                    SizedBox(height: 16),
                                     // Sign up link
                                     Wrap(
                                       alignment: WrapAlignment.center,
@@ -473,7 +474,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           WrapCrossAlignment.center,
                                       children: [
                                         Text(
-                                          'هل ليس لديك حساب بالفعل؟ ',
+                                          'login.dont_already_have_an'.tr(),
                                           style: TextStyle(
                                             fontSize: (baseFontSize * 0.8).clamp(13.0, 16.0),
                                             color: isDarkMode
@@ -489,7 +490,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 context, Routes.signUpScreen);
                                           },
                                           child: Text(
-                                            'إنشاء حساب',
+                                            'login.create_an_account'.tr(),
                                             style: TextStyle(
                                               fontSize: (baseFontSize * 0.8).clamp(13.0, 16.0),
                                               color: ColorsManager.mainBlue,
@@ -507,7 +508,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           // Back button
                           GestureDetector(
                             onTap: () {
@@ -522,7 +523,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               height: isTablet ? 60 : 52,
                               decoration: BoxDecoration(
-                                gradient: const LinearGradient(
+                                gradient: LinearGradient(
                                   begin: Alignment.centerLeft,
                                   end: Alignment.centerRight,
                                   colors: [
@@ -535,13 +536,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                   BoxShadow(
                                     color: Colors.black.withAlpha(25),
                                     blurRadius: 8,
-                                    offset: const Offset(0, 4),
+                                    offset: Offset(0, 4),
                                   ),
                                 ],
                               ),
                               child: Center(
                                 child: Text(
-                                  'الرجوع للصفحة الرئيسية',
+                                  'login.return_to_the_home'.tr(),
                                   style: TextStyle(
                                     fontSize: (baseFontSize * 0.875).clamp(14.0, 18.0),
                                     color: Colors.white,

@@ -9,6 +9,7 @@ import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:thoutha_mobile_app/core/routing/navigator_service.dart';
 import 'package:thoutha_mobile_app/features/notifications/data/models/notification_payload_model.dart';
 import 'package:thoutha_mobile_app/features/notifications/data/repos/notification_repo.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 /// Firebase Cloud Messaging service for handling push notifications.
 ///
@@ -130,7 +131,7 @@ class FirebaseMessagingService {
               AndroidFlutterLocalNotificationsPlugin>()!;
 
       await androidPlugin.createNotificationChannel(
-        const AndroidNotificationChannel(
+        AndroidNotificationChannel(
           'high_importance_channel',
           'High Importance Notifications',
           description: 'Channel for high priority notifications',
@@ -202,8 +203,8 @@ class FirebaseMessagingService {
       final notification = message.notification;
       if (notification == null) return;
 
-      final title = notification.title ?? 'إشعار جديد';
-      final body = notification.body ?? 'لديك إشعار جديد';
+      final title = notification.title ?? 'core.new_notification'.tr();
+      final body = notification.body ?? 'core.you_have_a_new'.tr();
       final payload = _encodePayload(message.data);
 
       const AndroidNotificationDetails androidDetails =

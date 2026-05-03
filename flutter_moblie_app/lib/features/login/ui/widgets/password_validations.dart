@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/helpers/spacing.dart';
 import '../../../../core/theming/colors.dart';
 import '../../../../core/theming/styles.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class PasswordValidations extends StatelessWidget {
   final bool hasLowerCase;
@@ -23,15 +24,15 @@ class PasswordValidations extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        buildValidationRow(context, 'حرف صغير واحد على الأقل', hasLowerCase),
+        buildValidationRow(context, 'login.at_least_one_lowercase'.tr(), hasLowerCase),
         verticalSpace(2),
-        buildValidationRow(context, 'حرف كبير واحد على الأقل', hasUpperCase),
+        buildValidationRow(context, 'login.at_least_one_uppercase'.tr(), hasUpperCase),
         verticalSpace(2),
-        buildValidationRow(context, 'رمز خاص واحد على الأقل', hasSpecialCharacters),
+        buildValidationRow(context, 'login.at_least_one_special'.tr(), hasSpecialCharacters),
         verticalSpace(2),
-        buildValidationRow(context, 'رقم واحد على الأقل', hasNumber),
+        buildValidationRow(context, 'login.at_least_one_number'.tr(), hasNumber),
         verticalSpace(2),
-        buildValidationRow(context, '8 أحرف على الأقل', hasMinLength),
+        buildValidationRow(context, 'login.at_least_8_characters'.tr(), hasMinLength),
       ],
     );
   }

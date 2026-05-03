@@ -7,6 +7,7 @@ import '../../core/helpers/shared_pref_helper.dart';
 import '../../core/helpers/constants.dart';
 import '../../core/helpers/notification_permission_helper.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -70,8 +71,8 @@ class _SplashScreenState extends State<SplashScreen>
     if (!serviceEnabled) {
       if (mounted) {
         _showLocationDialog(
-          title: 'خدمات الموقع مطلوبة',
-          content: 'يرجى تفعيل خدمات الموقع للمتابعة.',
+          title: 'splash_screen.location_services_are_required'.tr(),
+          content: 'splash_screen.please_activate_location_services'.tr(),
           onPressed: () async {
             Navigator.of(context).pop();
             await Geolocator.openLocationSettings();
@@ -87,9 +88,9 @@ class _SplashScreenState extends State<SplashScreen>
       if (permission == LocationPermission.denied) {
         if (mounted) {
           _showLocationDialog(
-            title: 'إذن الموقع مطلوب',
+            title: 'splash_screen.location_permission_required'.tr(),
             content:
-                'يحتاج التطبيق إلى إذن الموقع ليعمل بشكل صحيح. يرجى منح الإذن.',
+                'splash_screen.the_app_needs_location'.tr(),
             onPressed: () async {
               Navigator.of(context).pop();
               await Geolocator.requestPermission();
@@ -104,9 +105,9 @@ class _SplashScreenState extends State<SplashScreen>
     if (permission == LocationPermission.deniedForever) {
       if (mounted) {
         _showLocationDialog(
-          title: 'إذن الموقع مطلوب',
+          title: 'splash_screen.location_permission_required'.tr(),
           content:
-              'تم رفض إذن الموقع بشكل دائم. يرجى تفعيله من إعدادات التطبيق للمتابعة.',
+              'splash_screen.location_permission_has_been'.tr(),
           onPressed: () async {
             Navigator.of(context).pop();
             await Geolocator.openAppSettings();
@@ -232,7 +233,7 @@ class _SplashScreenState extends State<SplashScreen>
           TextButton(
             onPressed: onPressed,
             child: Text(
-              'موافق',
+              'splash_screen.ok'.tr(),
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.bold,
@@ -257,7 +258,7 @@ class _SplashScreenState extends State<SplashScreen>
             height: double.infinity,
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: const Alignment(-0.7, -0.7),
+                center: Alignment(-0.7, -0.7),
                 radius: 1.5,
                 colors: [
                   ColorsManager.layerBlur1.withOpacity(0.4),
@@ -273,7 +274,7 @@ class _SplashScreenState extends State<SplashScreen>
             height: double.infinity,
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: const Alignment(0.7, 0.7),
+                center: Alignment(0.7, 0.7),
                 radius: 1.5,
                 colors: [
                   ColorsManager.layerBlur2.withOpacity(0.4),
@@ -296,7 +297,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 SizedBox(height: 32),
                 Text(
-                  'رعاية ذكية، لمسة طبية',
+                  'home_screen.smart_care_medical_touch'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 28,

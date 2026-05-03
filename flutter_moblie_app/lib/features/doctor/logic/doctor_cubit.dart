@@ -3,6 +3,7 @@ import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thoutha_mobile_app/features/doctor/data/repos/doctor_repository.dart';
 import 'package:thoutha_mobile_app/features/doctor/logic/doctor_state.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class DoctorCubit extends Cubit<DoctorState> {
   final DoctorRepository _repository;
@@ -93,7 +94,7 @@ class DoctorCubit extends Cubit<DoctorState> {
         // Note: filterByCategory emits Loading again, which is fine.
         await filterByCategory(category.id);
       } else {
-        emit(DoctorError('عفواً، هذا التخصص غير متوفر حالياً'));
+        emit(DoctorError('doctor.sorry_this_specialty_is'.tr()));
       }
     } catch (e) {
       print('=== DoctorCubit Error ===');
@@ -141,7 +142,7 @@ class DoctorCubit extends Cubit<DoctorState> {
       if (category.id != -1) {
         await filterByCategoryAndCity(category.id, cityName);
       } else {
-        emit(DoctorError('عفواً، هذا التخصص غير متوفر حالياً'));
+        emit(DoctorError('doctor.sorry_this_specialty_is'.tr()));
       }
     } catch (e) {
       print('=== DoctorCubit Error ===');

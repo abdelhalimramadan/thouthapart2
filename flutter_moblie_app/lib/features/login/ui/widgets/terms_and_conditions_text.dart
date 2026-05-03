@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theming/styles.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class TermsAndConditionsText extends StatelessWidget {
   const TermsAndConditionsText({super.key});
@@ -13,19 +14,19 @@ class TermsAndConditionsText extends StatelessWidget {
         children: [
           TextSpan(
             text:
-                'من خلال تسجيل الدخول، فإنك توافق على شروط الاستخدام الخاصة بنا',
+                'login.by_logging_in_you'.tr(),
             style: TextStyles.font13GrayRegular,
           ),
           TextSpan(
-            text: ' الشروط والأحكام',
+            text: 'login.terms_and_conditions'.tr(),
             style: TextStyles.font13DarkBlueMedium,
           ),
           TextSpan(
-            text: ' و',
+            text: 'login.and'.tr(),
             style: TextStyles.font13GrayRegular.copyWith(height: 1.5),
           ),
           TextSpan(
-            text: ' سياسة الخصوصية',
+            text: 'login.privacy_policy'.tr(),
             style: TextStyles.font13DarkBlueMedium,
           ),
         ],

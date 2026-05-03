@@ -21,9 +21,11 @@ import 'package:thoutha_mobile_app/features/login/ui/login_screen.dart';
 
 import '../ui/doctor_home_screen.dart';
 import '../../profile/data/models/doctor_profile_model.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class DoctorDrawer extends StatefulWidget {
-  const DoctorDrawer({super.key});
+  final int? selectedIndex;
+  const DoctorDrawer({super.key, this.selectedIndex});
 
   static final ValueNotifier<String?> profileImageNotifier =
       ValueNotifier(null);
@@ -89,24 +91,22 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
       context: context,
       builder: (BuildContext context) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            title: Text(
-              'تأكيد تسجيل الخروج',
-              textAlign: TextAlign.right,
-              style:
-                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            content: Text(
-              'هل أنت متأكد من رغبتك في تسجيل الخروج؟',
-              textAlign: TextAlign.right,
-              style: textTheme.bodyMedium,
-            ),
+        return AlertDialog(
+          title: Text(
+            'doctor.confirm_logout'.tr(),
+            textAlign: TextAlign.start,
+            style:
+                textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'doctor.are_you_sure_you'.tr(),
+            textAlign: TextAlign.start,
+            style: textTheme.bodyMedium,
+          ),
             actions: <Widget>[
               TextButton(
                 child: Text(
-                  'إلغاء',
+                  'booking.cancellation'.tr(),
                   style: textTheme.bodyLarge?.copyWith(
                     color: isDark ? Colors.grey[400] : Colors.grey[700],
                   ),
@@ -115,7 +115,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
               ),
               TextButton(
                 child: Text(
-                  'تسجيل خروج',
+                  'doctor.log_out'.tr(),
                   style: textTheme.bodyLarge?.copyWith(
                     color: Colors.red,
                   ),
@@ -125,18 +125,17 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
+                      builder: (context) => LoginScreen(),
                     ),
                     (Route<dynamic> route) => false,
                   );
                 },
               ),
             ],
-          ),
-        );
-      },
-    );
-  }
+          );
+        },
+      );
+    }
 
   Widget _menuItem(
     BuildContext context, {
@@ -159,9 +158,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Row(
+          child: Row(
               children: [
                 Icon(
                   icon,
@@ -170,11 +167,11 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       : (iconColor ?? Theme.of(context).iconTheme.color),
                   size: 24,
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     title,
-                    textAlign: TextAlign.right,
+                    textAlign: TextAlign.start,
                     style: textTheme.bodyLarge?.copyWith(
                       fontFamily: 'Cairo',
                       fontSize: 15,
@@ -201,9 +198,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
               ],
             ),
           ),
-        ),
-      ),
-    );
+        ),  
+    );  
   }
 
   Widget _toggleMenuItem(
@@ -222,20 +218,18 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: Row(
+        child: Row(
             children: [
               Icon(
                 icon,
                 color: iconColor ?? Theme.of(context).iconTheme.color,
                 size: 24,
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.start,
                   style: textTheme.bodyLarge?.copyWith(
                     fontFamily: 'Cairo',
                     fontSize: 15,
@@ -247,14 +241,13 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
               Switch.adaptive(
                 value: value,
                 onChanged: onChanged,
-                activeTrackColor: const Color(0xFF10B981),
+                activeTrackColor: Color(0xFF10B981),
                 inactiveThumbColor: Colors.white,
                 inactiveTrackColor: Theme.of(context).dividerColor,
               ),
             ],
           ),
         ),
-      ),
     );
   }
 
@@ -335,19 +328,30 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
   }
 
   int _getCurrentIndex() {
+    if (widget.selectedIndex != null) {
+      return widget.selectedIndex!;
+    }
     final currentRoute =
         ModalRoute.of(context)?.settings.name?.toLowerCase() ?? '';
     if (currentRoute.contains('doctor-home')) return 0;
     if (currentRoute.contains('add-case')) return 1;
     if (currentRoute.contains('doctor-profile') ||
-        currentRoute.contains('profile')) return 2;
+        currentRoute.contains('profile')) {
+      return 2;
+    }
     if (currentRoute.contains('upcoming-bookings') ||
-        currentRoute.contains('doctor-next-booking')) return 3;
+        currentRoute.contains('doctor-next-booking')) {
+      return 3;
+    }
     if (currentRoute.contains('booking-records') ||
         currentRoute.contains('records') ||
-        currentRoute.contains('appointment-history')) return 4;
+        currentRoute.contains('appointment-history')) {
+      return 4;
+    }
     if (currentRoute.contains('confirmed-appointments') ||
-        currentRoute.contains('doctor-confirmed-appointments')) return 5;
+        currentRoute.contains('doctor-confirmed-appointments')) {
+      return 5;
+    }
     if (currentRoute.contains('doctor-requests')) return 6;
     return 0;
   }
@@ -385,10 +389,10 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const SizedBox(width: 48),
+                        SizedBox(width: 48),
                         Expanded(
                           child: Text(
-                            'القائمة',
+                            'doctor.list'.tr(),
                             textAlign: TextAlign.center,
                             style: textTheme.titleLarge?.copyWith(
                               fontFamily: 'Cairo',
@@ -408,7 +412,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                     child: Container(
@@ -418,53 +422,48 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                             Theme.of(context).colorScheme.surface.withAlpha(64),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      (_firstName != null &&
-                                              _firstName!.isNotEmpty)
-                                          ? 'د/ ${_firstName!} ${_lastName ?? ''}'
-                                          : 'دكتور',
-                                      style:
-                                          textTheme.titleMedium?.copyWith(
-                                        fontFamily: 'Cairo',
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .surface,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    (_firstName != null &&
+                                            _firstName!.isNotEmpty)
+                                        ? 'doctor.hello_dr_firstname'.tr(namedArgs: {
+                                            '_firstName':
+                                                _firstName! + ' ${_lastName ?? ""}'
+                                          })
+                                        : 'doctor.doctor'.tr(),
+                                    style: textTheme.titleMedium?.copyWith(
+                                      fontFamily: 'Cairo',
+                                      color: Theme.of(context).colorScheme.surface,
                                     ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      _email != null && _email!.isNotEmpty
-                                          ? _email!
-                                          : '********',
-                                      style: textTheme.bodySmall?.copyWith(
-                                        fontFamily: 'Cairo',
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .surface,
-                                      ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    _email != null && _email!.isNotEmpty
+                                        ? _email!
+                                        : '********',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      fontFamily: 'Cairo',
+                                      color: Theme.of(context).colorScheme.surface,
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -477,30 +476,30 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                 children: [
                   _menuItem(
                     context,
-                    title: 'الصفحة الرئيسية',
+                    title: 'doctor.home'.tr(),
                     icon: Icons.home,
                     isSelected: currentIndex == 0,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          settings: const RouteSettings(name: 'doctor-home'),
-                          builder: (context) => const DoctorHomeScreen(),
+                          settings: RouteSettings(name: 'doctor-home'),
+                          builder: (context) => DoctorHomeScreen(),
                         ),
                       );
                     },
                   ),
                   _menuItem(
                     context,
-                    title: 'إضافة حالة جديدة',
+                    title: 'doctor.add_a_new_case'.tr(),
                     icon: Icons.add_circle_outline,
                     isSelected: currentIndex == 1,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          settings: const RouteSettings(name: 'add-case'),
-                          builder: (context) => const SecondaryHomeScreen(
+                          settings: RouteSettings(name: 'add-case'),
+                          builder: (context) => SecondaryHomeScreen(
                             drawer: DoctorDrawer(),
                             showAddCaseCategory: true,
                           ),
@@ -510,22 +509,22 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                   ),
                   _menuItem(
                     context,
-                    title: 'الملف الشخصي',
+                    title: 'doctor.profile'.tr(),
                     icon: Icons.person_outline,
                     isSelected: currentIndex == 2,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          settings: const RouteSettings(name: 'doctor-profile'),
-                          builder: (context) => const DoctorProfileScreen(),
+                          settings: RouteSettings(name: 'doctor-profile'),
+                          builder: (context) => DoctorProfileScreen(),
                         ),
                       );
                     },
                   ),
                   _menuItem(
                     context,
-                    title: 'الحجوزات القادمة',
+                    title: 'doctor.upcoming_reservations'.tr(),
                     icon: Icons.event_note_outlined,
                     isSelected: currentIndex == 3,
                     onTap: () {
@@ -533,7 +532,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           settings:
-                              const RouteSettings(name: 'upcoming-bookings'),
+                              RouteSettings(name: 'upcoming-bookings'),
                           builder: (context) => DoctorNextBookingScreen(),
                         ),
                       );
@@ -541,7 +540,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                   ),
                   _menuItem(
                     context,
-                    title: 'سجل الحجوزات',
+                    title: 'doctor.booking_history'.tr(),
                     icon: Icons.history,
                     isSelected: currentIndex == 4,
                     onTap: () {
@@ -549,33 +548,33 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           settings:
-                              const RouteSettings(name: 'booking-records'),
+                              RouteSettings(name: 'booking-records'),
                           builder: (context) =>
-                              const DoctorBookingRecordsScreen(),
+                              DoctorBookingRecordsScreen(),
                         ),
                       );
                     },
                   ),
                   _menuItem(
                     context,
-                    title: 'الحجوزات المؤكدة',
+                    title: 'doctor.confirmed_reservations'.tr(),
                     icon: Icons.check_circle_outline,
                     isSelected: currentIndex == 5,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          settings: const RouteSettings(
+                          settings: RouteSettings(
                               name: 'confirmed-appointments'),
                           builder: (context) =>
-                              const DoctorConfirmedAppointmentsScreen(),
+                              DoctorConfirmedAppointmentsScreen(),
                         ),
                       );
                     },
                   ),
                   _menuItem(
                     context,
-                    title: 'طلباتي',
+                    title: 'doctor.my_requests'.tr(),
                     icon: Icons.assignment_outlined,
                     isSelected: currentIndex == 6,
                     onTap: () {
@@ -583,8 +582,8 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           settings:
-                              const RouteSettings(name: 'doctor-requests'),
-                          builder: (context) => const MyRequestsScreen(),
+                              RouteSettings(name: 'doctor-requests'),
+                          builder: (context) => MyRequestsScreen(),
                         ),
                       );
                     },
@@ -593,7 +592,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                     builder: (context, themeProvider, _) {
                       return _toggleMenuItem(
                         context,
-                        title: 'الوضع الداكن',
+                        title: 'doctor.dark_mode'.tr(),
                         value: themeProvider.isDarkMode,
                         onChanged: (value) => themeProvider.toggleTheme(value),
                         icon: Icons.dark_mode_outlined,
@@ -602,21 +601,34 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                   ),
                   _menuItem(
                     context,
-                    title: 'حول التطبيق',
+                    title: 'doctor.change_language'.tr(),
+                    icon: Icons.language,
+                    onTap: () {
+                      final currentLocale = context.locale;
+                      if (currentLocale.languageCode == 'ar') {
+                        context.setLocale(Locale('en'));
+                      } else {
+                        context.setLocale(Locale('ar'));
+                      }
+                    },
+                  ),
+                  _menuItem(
+                    context,
+                    title: 'doctor.about_the_application'.tr(),
                     icon: Icons.info_outline,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const AboutAppScreen(),
+                          builder: (context) => AboutAppScreen(),
                         ),
                       );
                     },
                   ),
                   _menuItem(
                     context,
-                    title: 'الشروط والأحكام',
+                    title: 'doctor.terms_and_conditions'.tr(),
                     icon: Icons.description_outlined,
                     onTap: () {
                       Navigator.pop(context);
@@ -624,35 +636,35 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              const DoctorTermsAndConditionsScreen(),
+                              DoctorTermsAndConditionsScreen(),
                         ),
                       );
                     },
                   ),
                   _menuItem(
                     context,
-                    title: 'سياسة الخصوصية',
+                    title: 'doctor.privacy_policy'.tr(),
                     icon: Icons.shield_outlined,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const DoctorPrivacyPolicyScreen(),
+                          builder: (context) => DoctorPrivacyPolicyScreen(),
                         ),
                       );
                     },
                   ),
                   _menuItem(
                     context,
-                    title: 'المساعدة والدعم',
+                    title: 'doctor.help_and_support'.tr(),
                     icon: Icons.help_outline,
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const DoctorHelpAndSupportScreen(),
+                          builder: (context) => DoctorHelpAndSupportScreen(),
                         ),
                       );
                     },
@@ -663,7 +675,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                   ),
                   _menuItem(
                     context,
-                    title: 'تسجيل الخروج',
+                    title: 'doctor.log_out_1'.tr(),
                     icon: Icons.logout_outlined,
                     textColor: Colors.red,
                     onTap: () {
@@ -678,7 +690,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
                 child: Text(
-                  'الإصدار $_appVersion',
+                  'doctor.version'.tr(namedArgs: {'version': _appVersion}),
                   style: textTheme.bodySmall?.copyWith(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.bold,

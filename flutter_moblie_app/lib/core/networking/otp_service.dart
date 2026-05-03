@@ -4,6 +4,7 @@ import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
 import 'package:thoutha_mobile_app/core/networking/dio_factory.dart';
 import 'package:thoutha_mobile_app/core/networking/connectivity_service.dart';
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class OtpService {
   final Dio _dio = DioFactory.getDio();
@@ -43,7 +44,7 @@ class OtpService {
           return {
             'success': false,
             'error':
-                'لا يوجد اتصال بالإنترنت. يرجى التحقق من الاتصال والمحاولة مرة أخرى.',
+                'core.no_internet_connection_please'.tr(),
             'retryable': true,
           };
         }
@@ -88,11 +89,11 @@ class OtpService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {
           'success': true,
-          'message': response.data['message'] ?? 'تم إرسال رمز التحقق بنجاح',
+          'message': response.data['message'] ?? 'core.verification_code_sent_successfully'.tr(),
           'retryable': false,
         };
       } else {
-        String errorMessage = 'فشل إرسال رمز التحقق';
+        String errorMessage = 'core.failed_to_send_verification'.tr();
         bool retryable = true;
 
         if (response.data != null) {
@@ -145,7 +146,7 @@ class OtpService {
       print('Exception in sendOtp: ${e.toString()}');
       return {
         'success': false,
-        'error': 'حدث خطأ غير متوقع',
+        'error': 'core.an_unexpected_error_occurred'.tr(),
         'retryable': false,
       };
     }
@@ -174,7 +175,7 @@ class OtpService {
           return {
             'success': false,
             'error':
-                'لا يوجد اتصال بالإنترنت. يرجى التحقق من الاتصال والمحاولة مرة أخرى.',
+                'core.no_internet_connection_please'.tr(),
             'retryable': true,
           };
         }
@@ -219,12 +220,12 @@ class OtpService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {
           'success': true,
-          'message': response.data['message'] ?? 'تم التحقق بنجاح',
+          'message': response.data['message'] ?? 'core.verified_successfully'.tr(),
           'data': response.data,
           'retryable': false,
         };
       } else {
-        String errorMessage = 'رمز التحقق غير صحيح';
+        String errorMessage = 'core.the_verification_code_is'.tr();
         bool retryable = false;
 
         if (response.data != null) {
@@ -239,13 +240,13 @@ class OtpService {
 
         // More specific error messages
         if (response.statusCode == 400) {
-          errorMessage = 'رمز التحقق غير صحيح';
+          errorMessage = 'core.the_verification_code_is'.tr();
           retryable = false;
         } else if (response.statusCode == 404) {
-          errorMessage = 'لم يتم العثور على رمز التحقق';
+          errorMessage = 'core.verification_code_not_found'.tr();
           retryable = false;
         } else if (response.statusCode == 410 || response.statusCode == 408) {
-          errorMessage = 'انتهت صلاحية رمز التحقق. يرجى طلب رمز جديد';
+          errorMessage = 'core.the_verification_code_has'.tr();
           retryable = false;
         }
 
@@ -283,7 +284,7 @@ class OtpService {
       print('Exception in verifyOtp: ${e.toString()}');
       return {
         'success': false,
-        'error': 'حدث خطأ غير متوقع',
+        'error': 'core.an_unexpected_error_occurred'.tr(),
         'retryable': false,
       };
     }
@@ -294,7 +295,7 @@ class OtpService {
     if (phoneNumber.isEmpty) {
       return {
         'valid': false,
-        'error': 'رقم الهاتف مطلوب',
+        'error': 'core.phone_number_required'.tr(),
       };
     }
 
@@ -310,7 +311,7 @@ class OtpService {
       if (!phoneRegex.hasMatch(formattedPhone)) {
         return {
           'valid': false,
-          'error': 'رقم الهاتف المصري غير صحيح.',
+          'error': 'core.the_egyptian_phone_number'.tr(),
         };
       }
     } else {
@@ -319,7 +320,7 @@ class OtpService {
       if (!phoneRegex.hasMatch(formattedPhone)) {
         return {
           'valid': false,
-          'error': 'رقم الهاتف غير صحيح. يجب أن يحتوي على 10-15 رقم',
+          'error': 'core.invalid_phone_number_it'.tr(),
         };
       }
     }
@@ -332,28 +333,28 @@ class OtpService {
     if (phoneNumber.isEmpty) {
       return {
         'valid': false,
-        'error': 'رقم الهاتف مطلوب',
+        'error': 'core.phone_number_required'.tr(),
       };
     }
 
     if (otp.isEmpty) {
       return {
         'valid': false,
-        'error': 'رمز التحقق مطلوب',
+        'error': 'core.verification_code_required'.tr(),
       };
     }
 
     if (otp.length != 6) {
       return {
         'valid': false,
-        'error': 'رمز التحقق يجب أن يكون 6 أرقام',
+        'error': 'core.verification_code_must_be'.tr(),
       };
     }
 
     if (!RegExp(r'^\d{6}$').hasMatch(otp)) {
       return {
         'valid': false,
-        'error': 'رمز التحقق يجب أن يحتوي على أرقام فقط',
+        'error': 'core.the_verification_code_must'.tr(),
       };
     }
 
@@ -377,18 +378,18 @@ class OtpService {
   String _handleDioError(DioException e) {
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
-      return 'انتهت مهلة الاتصال. تحقق من الإنترنت.';
+      return 'core.the_connection_timed_out_1'.tr();
     } else if (e.type == DioExceptionType.connectionError) {
-      return 'فشل الاتصال بالخادم. تحقق من الإنترنت.';
+      return 'core.failed_to_connect_to'.tr();
     } else if (e.response?.statusCode == 400) {
-      return e.response?.data?['message'] ?? 'بيانات غير صحيحة';
+      return e.response?.data?['message'] ?? 'core.incorrect_data'.tr();
     } else if (e.response?.statusCode == 401) {
-      return 'غير مصرح';
+      return 'core.unauthorized'.tr();
     } else if (e.response?.statusCode == 404) {
-      return 'الخدمة غير متوفرة';
+      return 'core.the_service_is_not'.tr();
     } else if (e.response?.statusCode == 500) {
-      return 'خطأ في الخادم';
+      return 'core.server_error'.tr();
     }
-    return 'حدث خطأ غير متوقع';
+    return 'core.an_unexpected_error_occurred'.tr();
   }
 }

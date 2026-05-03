@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class DoctorTermsAndConditionsScreen extends StatefulWidget {
   const DoctorTermsAndConditionsScreen({super.key});
@@ -19,7 +20,7 @@ class _DoctorTermsAndConditionsScreenState extends State<DoctorTermsAndCondition
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const DoctorDrawer(),
+      drawer: DoctorDrawer(),
       appBar: AppBar(
         toolbarHeight: 70,
         elevation: 0,
@@ -28,7 +29,7 @@ class _DoctorTermsAndConditionsScreenState extends State<DoctorTermsAndCondition
         automaticallyImplyLeading: false,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, size: 24),
+            icon: Icon(Icons.menu, size: 24),
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ),
@@ -39,14 +40,14 @@ class _DoctorTermsAndConditionsScreenState extends State<DoctorTermsAndCondition
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'الشروط والأحكام',
+              'doctor.terms_and_conditions'.tr(),
               style: textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Image.asset(
               'assets/images/splash-logo.png',
               width: 36,
@@ -57,7 +58,9 @@ class _DoctorTermsAndConditionsScreenState extends State<DoctorTermsAndCondition
         ),
       ),
       body: Directionality(
-        textDirection: TextDirection.rtl,
+        textDirection: context.locale.languageCode == 'ar'
+            ? TextDirection.rtl
+            : TextDirection.ltr,
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           child: Column(
@@ -65,45 +68,40 @@ class _DoctorTermsAndConditionsScreenState extends State<DoctorTermsAndCondition
             children: [
               _buildSection(
                 context,
-                'مقدمة للطلاب',
-                'بصفتك مستخدماً للتطبيق كطالب طب أسنان، فإنك تقر وتوافق على الالتزام بالقواعد المهنية والأخلاقية المعمول بها في كليتك وتحت إشراف أعضاء هيئة التدريس.',
+                'doctor.introduction_for_students'.tr(),
+                'doctor.str_300'.tr(),
               ),
               _buildSection(
                 context,
-                'أولاً: المسؤولية الطبية',
-                '• الطالب هو المسؤول الوحيد عن الإجراءات الطبية التي يقوم بها.\n'
-                '• التطبيق لا يوفر غطاءً قانونياً أو تأمينياً للطالب.\n'
-                '• يجب إبلاغ المريض بوضوح بأنك "طالب" وأن العلاج يتم في إطار تعليمي.',
+                'doctor.first_medical_liability'.tr(),
+                'doctor.n'.tr(),
               ),
               _buildSection(
                 context,
-                'ثانياً: الالتزام بالمواعيد',
-                '• الالتزام بالحضور في المواعيد المحددة مع المرضى.\n'
-                '• في حالة الإلغاء، يجب إخطار المريض قبل الموعد بوقت كافٍ.\n'
-                '• تكرار الغياب بدون عذر قد يؤدي لإغلاق حسابك.',
+                'doctor.second_commitment_to_appointments'.tr(),
+                'doctor.commitment_to_attending_scheduled'.tr(),
               ),
               _buildSection(
                 context,
-                'ثالثاً: الخصوصية والاحترافية',
-                '• الحفاظ على سرية بيانات المرضى وخصوصيتهم.\n'
-                '• التعامل باحترام واحترافية مع جميع مستخدمي التطبيق.\n'
-                '• يمنع استخدام بيانات المرضى لأي غرض خارج إطار العلاج التعليمي.',
+                'doctor.third_privacy_and_professionalism'.tr(),
+                'doctor.n_1'.tr(),
               ),
               _buildSection(
                 context,
-                'رابعاً: إخلاء مسؤولية التطبيق',
-                'تطبيق ثوثة هو وسيلة ربط تقنية فقط ولا يتدخل في العملية العلاجية أو التقييم الأكاديمي.',
+                'doctor.fourth_application_disclaimer'.tr(),
+                'doctor.the_thoutha_application_is'.tr(),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               Center(
                 child: Text(
-                  'آخر تحديث: أبريل 2026',
+                  'doctor.last_updated_april_2026'.tr(),
                   textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 12,
-                  color: Theme.of(context).brightness == Brightness.dark ? Colors.white54 : Colors.grey,
-                ),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white54
+                        : Colors.grey,
+                  ),
                 ),
               ),
               SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
@@ -124,23 +122,19 @@ class _DoctorTermsAndConditionsScreenState extends State<DoctorTermsAndCondition
           Text(
             title,
             textAlign: TextAlign.start,
-            textDirection: TextDirection.rtl,
             style: theme.textTheme.titleMedium?.copyWith(
-              fontFamily: 'Cairo',
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: theme.colorScheme.primary,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           ...content.split('\n').map((line) => Padding(
                 padding: const EdgeInsets.only(bottom: 2),
                 child: Text(
                   line,
                   textAlign: TextAlign.start,
-                  textDirection: TextDirection.rtl,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontFamily: 'Cairo',
                     fontSize: 13,
                     height: 1.6,
                   ),

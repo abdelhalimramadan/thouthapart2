@@ -21,7 +21,9 @@ Object? readPhone(Map json, String key) {
   for (var k in keys) {
     if (json[k] != null &&
         json[k].toString().isNotEmpty &&
-        !json[k].toString().contains('@')) return json[k];
+        !json[k].toString().contains('@')) {
+      return json[k];
+    }
   }
   return null;
 }

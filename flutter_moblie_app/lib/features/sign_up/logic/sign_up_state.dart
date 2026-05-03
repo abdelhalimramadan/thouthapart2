@@ -11,7 +11,7 @@ class SignUpSuccess extends SignUpState {
   final String token;
   final String message;
 
-  SignUpSuccess(this.token, {this.message = 'تم التسجيل بنجاح'});
+  SignUpSuccess(this.token, {String? message}) : message = message ?? 'sign_up.registration_completed_successfully'.tr();
 }
 
 class SignUpOtpSent extends SignUpState {

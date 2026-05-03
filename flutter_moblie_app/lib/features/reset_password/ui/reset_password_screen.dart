@@ -6,6 +6,7 @@ import '../../../core/theming/colors.dart';
 import '../../../core/theming/styles.dart';
 import '../../../core/widgets/app_text_button.dart';
 import '../../forgot_password/data/forgot_password_service.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class ResetPasswordScreen extends StatefulWidget {
   final String phone;
@@ -37,14 +38,14 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   // ── Validation ──────────────────────────────────────────────────────────
   String? _validateNew(String? v) {
-    if (v == null || v.isEmpty) return 'الرجاء إدخال كلمة المرور الجديدة';
-    if (v.length < 6) return 'يجب أن تكون 6 أحرف على الأقل';
+    if (v == null || v.isEmpty) return 'reset_password.please_enter_your_new'.tr();
+    if (v.length < 6) return 'reset_password.must_be_at_least'.tr();
     return null;
   }
 
   String? _validateConfirm(String? v) {
-    if (v == null || v.isEmpty) return 'الرجاء تأكيد كلمة المرور';
-    if (v != _newPassCtrl.text) return 'كلمتا المرور غير متطابقتين';
+    if (v == null || v.isEmpty) return 'reset_password.please_confirm_your_password'.tr();
+    if (v != _newPassCtrl.text) return 'forgot_password.the_two_passwords_do'.tr();
     return null;
   }
 
@@ -70,10 +71,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         _showSuccessDialog();
       } else {
         setState(
-            () => _errorMessage = result['message'] ?? 'فشل تغيير كلمة المرور');
+            () => _errorMessage = result['message'] ?? 'reset_password.password_change_failed'.tr());
       }
     } catch (_) {
-      if (mounted) setState(() => _errorMessage = 'حدث خطأ غير متوقع');
+      if (mounted) setState(() => _errorMessage = 'booking.an_unexpected_error_occurred'.tr());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -100,31 +101,31 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.check_circle_rounded,
+                Icon(Icons.check_circle_rounded,
                     color: Colors.green, size: 80),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Text(
-                  'تم تغيير كلمة المرور!',
+                  'reset_password.password_has_been_changed'.tr(),
                   style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: fs * 1.4,
                       fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
-                  'يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.',
+                  'reset_password.you_can_now_log'.tr(),
                   style: TextStyle(
                       fontFamily: 'Cairo',
                       color: Colors.grey[600],
                       fontSize: fs * 0.875),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
                   child: AppTextButton(
-                    buttonText: 'تسجيل الدخول',
+                    buttonText: 'home_screen.login'.tr(),
                     textStyle: TextStyles.font16WhiteSemiBold
                         .copyWith(fontFamily: 'Cairo'),
                     onPressed: () {
@@ -151,12 +152,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      backgroundColor: isDark ? Color(0xFF1E1E1E) : Colors.white,
       body: Stack(
         children: [
           // Background gradients
-          _gradient(const Alignment(-0.7, -0.7), ColorsManager.layerBlur1),
-          _gradient(const Alignment(0.7, 0.7), ColorsManager.layerBlur2),
+          _gradient(Alignment(-0.7, -0.7), ColorsManager.layerBlur1),
+          _gradient(Alignment(0.7, 0.7), ColorsManager.layerBlur2),
 
           Center(
             child: SingleChildScrollView(
@@ -168,7 +169,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       maxWidth: width >= 600 ? 500 : double.infinity),
                   padding: EdgeInsets.all(width * 0.06),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF2D2D2D) : Colors.white,
+                    color: isDark ? Color(0xFF2D2D2D) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
@@ -176,7 +177,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               ? Colors.black.withOpacity(0.3)
                               : Colors.black.withOpacity(0.1),
                           blurRadius: 10,
-                          offset: const Offset(0, 4))
+                          offset: Offset(0, 4))
                     ],
                   ),
                   child: Directionality(
@@ -195,10 +196,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               height: 80 * (width / 390),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           Center(
                             child: Text(
-                              'إعادة تعيين كلمة المرور',
+                              'reset_password.reset_password'.tr(),
                               style: TextStyles.font24BlueBold.copyWith(
                                 fontFamily: 'Cairo',
                                 fontSize: fs * 1.5,
@@ -206,10 +207,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Center(
                             child: Text(
-                              'أنشئ كلمة مرور جديدة لا تقل عن 6 أحرف',
+                              'reset_password.create_a_new_password'.tr(),
                               style: TextStyles.font14GrayRegular.copyWith(
                                 fontFamily: 'Cairo',
                                 fontSize: fs * 0.875,
@@ -218,27 +219,27 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               textAlign: TextAlign.center,
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24),
 
                           // New password
-                          _FieldLabel(text: 'كلمة المرور الجديدة', fs: fs),
-                          const SizedBox(height: 6),
+                          _FieldLabel(text: 'reset_password.new_password'.tr(), fs: fs),
+                          SizedBox(height: 6),
                           _PasswordField(
                             controller: _newPassCtrl,
-                            hint: 'أدخل كلمة المرور الجديدة',
+                            hint: 'reset_password.enter_the_new_password'.tr(),
                             obscure: _obscureNew,
                             onToggle: () =>
                                 setState(() => _obscureNew = !_obscureNew),
                             validator: _validateNew,
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
 
                           // Confirm password
-                          _FieldLabel(text: 'تأكيد كلمة المرور', fs: fs),
-                          const SizedBox(height: 6),
+                          _FieldLabel(text: 'reset_password.confirm_password'.tr(), fs: fs),
+                          SizedBox(height: 6),
                           _PasswordField(
                             controller: _confirmPassCtrl,
-                            hint: 'أعد إدخال كلمة المرور',
+                            hint: 'reset_password.reenter_the_password'.tr(),
                             obscure: _obscureConfirm,
                             onToggle: () => setState(
                                 () => _obscureConfirm = !_obscureConfirm),
@@ -247,7 +248,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                           // Error message
                           if (_errorMessage != null) ...[
-                            const SizedBox(height: 14),
+                            SizedBox(height: 14),
                             Container(
                               width: double.infinity,
                               padding: const EdgeInsets.symmetric(
@@ -260,7 +261,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               child: Row(children: [
                                 Icon(Icons.error_outline,
                                     color: Colors.red.shade600, size: 18),
-                                const SizedBox(width: 8),
+                                SizedBox(width: 8),
                                 Expanded(
                                   child: Text(_errorMessage!,
                                       style: TextStyle(
@@ -272,17 +273,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             ),
                           ],
 
-                          const SizedBox(height: 32),
+                          SizedBox(height: 32),
 
                           // Submit
                           SizedBox(
                             width: double.infinity,
                             height: 52,
                             child: _isLoading
-                                ? const Center(
+                                ? Center(
                                     child: CircularProgressIndicator())
                                 : AppTextButton(
-                                    buttonText: 'تغيير كلمة المرور',
+                                    buttonText: 'forgot_password.change_password'.tr(),
                                     textStyle: TextStyles.font16WhiteSemiBold
                                         .copyWith(fontFamily: 'Cairo'),
                                     onPressed: _submit,
@@ -373,7 +374,7 @@ class _PasswordField extends StatelessWidget {
           color: isDark ? Colors.grey[500] : Colors.grey,
         ),
         filled: true,
-        fillColor: isDark ? const Color(0xFF3D3D3D) : Colors.grey[50],
+        fillColor: isDark ? Color(0xFF3D3D3D) : Colors.grey[50],
         suffixIcon: IconButton(
           icon: Icon(
             obscure ? Icons.visibility_off : Icons.visibility,
@@ -395,7 +396,7 @@ class _PasswordField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: ColorsManager.mainBlue, width: 2),
+          borderSide: BorderSide(color: ColorsManager.mainBlue, width: 2),
         ),
       ),
       validator: validator,

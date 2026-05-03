@@ -9,6 +9,7 @@ import 'package:thoutha_mobile_app/features/requests/data/logic/my_requests_stat
 import 'package:thoutha_mobile_app/features/requests/ui/edit_request_screen.dart';
 import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class MyRequestsScreen extends StatelessWidget {
   const MyRequestsScreen({super.key});
@@ -17,7 +18,7 @@ class MyRequestsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<MyRequestsCubit>()..loadRequests(),
-      child: const MyRequestsView(),
+      child: MyRequestsView(),
     );
   }
 }
@@ -45,7 +46,7 @@ class _MyRequestsViewState extends State<MyRequestsView> {
       },
       child: Scaffold(
         key: _scaffoldKey,
-        drawer: const DoctorDrawer(),
+        drawer: DoctorDrawer(),
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           toolbarHeight: 70,
@@ -66,7 +67,7 @@ class _MyRequestsViewState extends State<MyRequestsView> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'طلباتي',
+                'doctor.my_requests'.tr(),
                 style: textTheme.titleLarge?.copyWith(
                   fontFamily: 'Cairo',
                   fontSize: 18,
@@ -91,7 +92,7 @@ class _MyRequestsViewState extends State<MyRequestsView> {
             if (state is MyRequestsDeleteSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Text('تم حذف الطلب بنجاح',
+                  content: Text('home_screen.the_request_has_been'.tr(),
                       style: TextStyle(fontFamily: 'Cairo')),
                   backgroundColor: Colors.green.shade600,
                   behavior: SnackBarBehavior.floating,
@@ -101,7 +102,7 @@ class _MyRequestsViewState extends State<MyRequestsView> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message,
-                      style: const TextStyle(fontFamily: 'Cairo')),
+                      style: TextStyle(fontFamily: 'Cairo')),
                   backgroundColor: Colors.red.shade600,
                   behavior: SnackBarBehavior.floating,
                 ),
@@ -109,10 +110,7 @@ class _MyRequestsViewState extends State<MyRequestsView> {
             }
           },
           builder: (context, state) {
-            return Directionality(
-              textDirection: TextDirection.rtl,
-              child: _buildBody(context, state),
-            );
+            return _buildBody(context, state);
           },
         ),
       ),
@@ -121,7 +119,7 @@ class _MyRequestsViewState extends State<MyRequestsView> {
 
   Widget _buildBody(BuildContext context, MyRequestsState state) {
     if (state is MyRequestsLoading) {
-      return const Center(
+      return Center(
           child: CircularProgressIndicator(color: ColorsManager.mainBlue));
     }
 
@@ -146,14 +144,14 @@ class _MyRequestsViewState extends State<MyRequestsView> {
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: double.infinity,
             padding: EdgeInsets.symmetric(vertical: 10),
             child: Text(
-              'طلباتي',
-              textAlign: TextAlign.right,
+              'doctor.my_requests'.tr(),
+              textAlign: TextAlign.start,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w700,
@@ -191,7 +189,7 @@ class _MyRequestsViewState extends State<MyRequestsView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'طلباتي',
+            'doctor.my_requests'.tr(),
             style: theme.textTheme.titleLarge?.copyWith(
               fontFamily: 'Cairo',
               fontWeight: FontWeight.w700,
@@ -199,9 +197,9 @@ class _MyRequestsViewState extends State<MyRequestsView> {
               height: 1.5,
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           Text(
-            'لا توجد طلبات حالياً',
+            'requests.there_are_no_requests'.tr(),
             style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 18,
@@ -209,9 +207,9 @@ class _MyRequestsViewState extends State<MyRequestsView> {
               color: theme.colorScheme.primary,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
-            'جميع الطلبات الطبية التي تنشئها ستظهر هنا.',
+            'requests.all_medical_orders_you'.tr(),
             style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 14,
@@ -219,30 +217,30 @@ class _MyRequestsViewState extends State<MyRequestsView> {
             ),
           ),
           Text(
-            'يمكنك إدارة طلباتك بسهولة:',
+            'requests.you_can_manage_your'.tr(),
             style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 14,
               color: isDark ? Colors.white70 : Colors.black87,
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           _buildInstructionRow(
             icon: Icons.edit_note_rounded,
             iconColor: Colors.blue,
-            text: 'اضغط "تعديل" لتحديث تفاصيل الطلب (الوصف والموعد).',
+            text: 'requests.click_edit_to_update'.tr(),
             isDark: isDark,
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           _buildInstructionRow(
             icon: Icons.delete_sweep_rounded,
             iconColor: Colors.red.shade400,
-            text: 'اضغط "حذف الطلب" لحذف الطلب نهائياً.',
+            text: 'requests.click_delete_order_to'.tr(),
             isDark: isDark,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           Text(
-            'ملاحظة مهمة:',
+            'requests.important_note'.tr(),
             style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 15,
@@ -250,21 +248,21 @@ class _MyRequestsViewState extends State<MyRequestsView> {
               color: isDark ? Colors.white : Colors.black87,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           _buildInstructionRow(
             icon: Icons.info_outline_rounded,
             iconColor: Colors.orange,
-            text: 'إذا قام مريض بحجز أحد طلباتك وأضيف إلى الحجوزات القادمة، فلن تتمكن من تعديل هذا الطلب.',
+            text: 'requests.if_a_patient_books'.tr(),
             isDark: isDark,
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           _buildInstructionRow(
             icon: Icons.link_off_rounded,
             iconColor: Colors.red,
-            text: 'عند حذف طلب، سيتم حذف جميع الحجوزات المعلقة المرتبطة به أيضاً.',
+            text: 'requests.when_you_delete_an'.tr(),
             isDark: isDark,
           ),
-          const SizedBox(height: 40),
+          SizedBox(height: 40),
           Center(
             child: ElevatedButton(
               onPressed: () => context.read<MyRequestsCubit>().loadRequests(),
@@ -274,8 +272,8 @@ class _MyRequestsViewState extends State<MyRequestsView> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text(
-                'تحديث الصفحة',
+              child: Text(
+                'requests.refresh_the_page'.tr(),
                 style: TextStyle(
                     fontFamily: 'Cairo', fontSize: 15, color: Colors.white, fontWeight: FontWeight.bold),
               ),
@@ -299,7 +297,7 @@ class _MyRequestsViewState extends State<MyRequestsView> {
           padding: const EdgeInsets.only(top: 2),
           child: Icon(icon, size: 18, color: iconColor),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10),
         Expanded(
           child: Text(
             text,
@@ -307,7 +305,7 @@ class _MyRequestsViewState extends State<MyRequestsView> {
               fontFamily: 'Cairo',
               fontSize: 13,
               height: 1.6,
-              color: isDark ? Colors.white60 : const Color(0xFF475569),
+              color: isDark ? Colors.white60 : Color(0xFF475569),
             ),
           ),
         ),
@@ -327,7 +325,7 @@ class _MyRequestsViewState extends State<MyRequestsView> {
                 size: 60, color: Colors.red.shade400),
             SizedBox(height: 16),
             Text(
-              'حدث خطأ ما',
+              'requests.something_went_wrong'.tr(),
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontFamily: 'Cairo',
                 fontSize: 18,
@@ -353,7 +351,7 @@ class _MyRequestsViewState extends State<MyRequestsView> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
               ),
-              child: const Text('إعادة المحاولة',
+              child: Text('doctor.retry'.tr(),
                   style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
             ),
           ],
@@ -381,7 +379,7 @@ class _RequestCard extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
             blurRadius: 15,
-            offset: const Offset(0, 5),
+            offset: Offset(0, 5),
           ),
         ],
       ),
@@ -414,7 +412,7 @@ class _RequestCard extends StatelessWidget {
                         children: [
                           Text(
                             request.doctorFullName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Cairo',
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -423,7 +421,7 @@ class _RequestCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                         decoration: BoxDecoration(
@@ -433,11 +431,11 @@ class _RequestCard extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.circle, size: 6, color: ColorsManager.mainBlue),
-                            const SizedBox(width: 4),
+                            Icon(Icons.circle, size: 6, color: ColorsManager.mainBlue),
+                            SizedBox(width: 4),
                             Text(
                               request.categoryName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 12,
                                 color: ColorsManager.mainBlue,
@@ -459,7 +457,7 @@ class _RequestCard extends StatelessWidget {
                   ),
                   child: Text(
                     '#${request.id}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
@@ -481,16 +479,16 @@ class _RequestCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _buildInfoBox(
-                        label: 'الجامعة',
+                        label: 'doctor.the_university'.tr(),
                         value: request.doctorUniversityName,
                         icon: Icons.home_work_outlined,
                         isDark: isDark,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: _buildInfoBox(
-                        label: 'المحافظة',
+                        label: 'home_screen.governorate'.tr(),
                         value: request.doctorCityName,
                         icon: Icons.location_on,
                         isDark: isDark,
@@ -498,21 +496,21 @@ class _RequestCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
                       child: _buildInfoBox(
-                        label: 'اليوم',
+                        label: 'home_screen.today'.tr(),
                         value: request.formattedDate,
                         icon: Icons.calendar_today,
                         isDark: isDark,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: _buildInfoBox(
-                        label: 'الساعة',
+                        label: 'home_screen.the_hour'.tr(),
                         value: request.formattedTime,
                         icon: Icons.access_time_filled,
                         isDark: isDark,
@@ -523,7 +521,7 @@ class _RequestCard extends StatelessWidget {
 
                 // Description Box
                 if (request.description.isNotEmpty && request.description != 'No details') ...[
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -540,10 +538,10 @@ class _RequestCard extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.info_outline, size: 18, color: Colors.blue),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'تفاصيل الحالة',
+                            Icon(Icons.info_outline, size: 18, color: Colors.blue),
+                            SizedBox(width: 8),
+                            Text(
+                              'home_screen.case_details'.tr(),
                               style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 12,
@@ -553,7 +551,7 @@ class _RequestCard extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         Text(
                           request.description,
                           style: TextStyle(
@@ -568,7 +566,7 @@ class _RequestCard extends StatelessWidget {
                   ),
                 ],
 
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
                 // Buttons Section
                 Row(
@@ -576,8 +574,8 @@ class _RequestCard extends StatelessWidget {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () => _navigateToEdit(context, request),
-                        icon: const Icon(Icons.edit_note_rounded, size: 20),
-                        label: const Text('تعديل الطلب',
+                        icon: Icon(Icons.edit_note_rounded, size: 20),
+                        label: Text('requests.modify_the_request'.tr(),
                             style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontWeight: FontWeight.bold)),
@@ -590,13 +588,13 @@ class _RequestCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () => _showDeleteDialog(context, request),
-                        icon: const Icon(Icons.delete_sweep_rounded,
+                        icon: Icon(Icons.delete_sweep_rounded,
                             size: 20, color: Colors.white),
-                        label: const Text('حذف الطلب',
+                        label: Text('home_screen.delete_the_request'.tr(),
                             style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontWeight: FontWeight.bold,
@@ -645,7 +643,7 @@ class _RequestCard extends StatelessWidget {
             ),
             child: Icon(icon, size: 18, color: ColorsManager.mainBlue),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -660,7 +658,7 @@ class _RequestCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  value.isEmpty ? 'غير محدد' : value,
+                  value.isEmpty ? 'doctor.undefined'.tr() : value,
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 11,
@@ -694,28 +692,26 @@ class _RequestCard extends StatelessWidget {
   void _showDeleteDialog(BuildContext context, CaseRequestModel request) {
     showDialog(
       context: context,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
+      builder: (ctx) => AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Row(
             children: [
               Icon(Icons.warning_amber_rounded, color: Colors.red.shade600),
               SizedBox(width: 10),
-              const Text('تأكيد الحذف',
+              Text('requests.confirm_deletion'.tr(),
                   style: TextStyle(
                       fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
             ],
           ),
-          content: const Text(
-            'هل أنت متأكد من رغبتك في حذف هذا الطلب نهائياً؟ لا يمكن التراجع عن هذا الإجراء.',
+          content: Text(
+            'requests.are_you_sure_you'.tr(),
             style: TextStyle(fontFamily: 'Cairo'),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text('إلغاء',
+              child: Text('booking.cancellation'.tr(),
                   style: TextStyle(
                       fontFamily: 'Cairo', color: Colors.grey.shade600)),
             ),
@@ -725,7 +721,7 @@ class _RequestCard extends StatelessWidget {
                 showDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (_) => const Center(
+                  builder: (_) => Center(
                       child: CircularProgressIndicator(
                           color: ColorsManager.mainBlue)),
                 );
@@ -737,12 +733,11 @@ class _RequestCard extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text('حذف الآن',
+              child: Text('requests.delete_now'.tr(),
                   style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
             ),
           ],
         ),
-      ),
     );
   }
 }

@@ -8,12 +8,12 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   final INotificationRepo _notificationRepo;
 
   NotificationsCubit(this._notificationRepo)
-      : super(const NotificationsState.initial());
+      : super(NotificationsState.initial());
 
   /// Fetch all notifications from API
   Future<void> fetchNotifications({bool showLoading = true}) async {
     if (showLoading && !isClosed) {
-      emit(const NotificationsState.loading());
+      emit(NotificationsState.loading());
     }
     final notifications = await _notificationRepo.getNotifications();
     if (!isClosed) {

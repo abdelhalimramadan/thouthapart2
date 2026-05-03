@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thoutha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class TermsAndConditionsScreen extends StatefulWidget {
   const TermsAndConditionsScreen({super.key});
@@ -20,7 +21,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const HomeDrawer(),
+      drawer: HomeDrawer(),
       appBar: AppBar(
         toolbarHeight: 70,
         elevation: 0,
@@ -40,14 +41,14 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'الشروط والاحكام',
+              'terms_and_conditions.terms_and_conditions'.tr(),
               style: textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Image.asset(
               'assets/images/splash-logo.png',
               width: 36,
@@ -57,56 +58,45 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
           ],
         ),
       ),
-      body: Directionality(
-        textDirection: TextDirection.rtl,
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
             _buildSection(
               context,
-              'أولاً: تعريف التطبيق',
-              'تطبيق ثوثة هو تطبيق إلكتروني مجاني هدفه الربط فقط بين طلاب كليات طب الأسنان والمرضى الراغبين في تلقي خدمات علاجية تعليمية.\n\nالتطبيق لا يقدم خدمات طبية، ولا يشرف على العلاج، ولا يتحمل أي مسؤولية طبية أو قانونية ناتجة عن التعامل بين الطالب والمريض.',
+              'terms_and_conditions.first_definition_of_the'.tr(),
+              'terms_and_conditions.the_thoutha_application_is'.tr(),
             ),
             _buildSection(
               context,
-              'ثانياً: دور تطبيق ثوثة',
-              '• التطبيق وسيلة ربط فقط بين الطالب والمريض.\n'
-                  '• لا نضمن حضور أي طرف للموعد.\n'
-                  '• لا نتحكم في جودة العلاج أو نتائجه.\n'
-                  '• أي اتفاق يتم هو اتفاق مباشر بين الطرفين.',
+              'terms_and_conditions.second_the_role_of'.tr(),
+              'terms_and_conditions.the_application_is_only'.tr() + 'terms_and_conditions.we_do_not_guarantee'.tr() + 'terms_and_conditions.we_do_not_control'.tr() + 'terms_and_conditions.any_agreement_concluded_is'.tr(),
             ),
             _buildSection(
               context,
-              'شروط وأحكام المرضى',
-              '• التطبيق لا يضمن التزام الطالب بالحضور.\n'
-                  '• المريض مسؤول عن التأكد أنه يتعامل مع طالب وليس طبيباً مرخصاً.\n'
-                  '• التطبيق غير مسؤول عن أي أضرار طبية أو مادية.\n'
-                  '• عدم الحضور أو إلغاء الموعد لا يحمل التطبيق أي مسؤولية.',
+              'terms_and_conditions.patient_terms_and_conditions'.tr(),
+              'terms_and_conditions.the_application_does_not'.tr() + 'terms_and_conditions.the_patient_is_responsible'.tr() + 'terms_and_conditions.the_application_is_not'.tr() + 'terms_and_conditions.failure_to_attend_or'.tr(),
             ),
             _buildSection(
               context,
-              'شروط وأحكام الطلاب',
-              '• الطالب يقر بأنه طالب طب أسنان وليس طبيباً.\n'
-                  '• الطالب يتحمل المسؤولية الكاملة عن أي إجراء طبي.\n'
-                  '• الالتزام بالمواعيد والتواصل الواضح مع المرضى.\n'
-                  '• يحق للتطبيق حذف الحساب في حالة إساءة الاستخدام.',
+              'terms_and_conditions.terms_and_conditions_for'.tr(),
+              'terms_and_conditions.the_student_acknowledges_that'.tr() + 'terms_and_conditions.the_student_bears_full'.tr() + 'terms_and_conditions.adherence_to_appointments_and'.tr() + 'terms_and_conditions.the_application_has_the'.tr(),
             ),
             _buildSection(
               context,
-              'إخلاء المسؤولية',
-              'تطبيق ثوثة غير مسؤول عن أي تشخيص طبي أو نتائج علاجية أو نزاعات تحدث بين الطالب والمريض.',
+              'terms_and_conditions.disclaimer'.tr(),
+              'terms_and_conditions.thoutha_application_is_not'.tr(),
             ),
             _buildSection(
               context,
-              'الموافقة',
-              'استخدامك للتطبيق يعني موافقتك الكاملة على هذه الشروط.',
+              'terms_and_conditions.approval'.tr(),
+              'terms_and_conditions.your_use_of_the'.tr(),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Center(
               child: Text(
-                'آخر تحديث: فبراير 2026',
+                'terms_and_conditions.last_updated_february_2026'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Cairo',
@@ -117,7 +107,6 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
             ),
             SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
           ],
-        ),
         ),
       ),
     );
@@ -134,7 +123,6 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
           Text(
             title,
             textAlign: TextAlign.start,
-            textDirection: TextDirection.rtl,
             style: theme.textTheme.titleMedium?.copyWith(
               fontFamily: 'Cairo',
               fontSize: 16,
@@ -142,13 +130,12 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
               color: theme.colorScheme.primary,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           ...content.split('\n').map((line) => Padding(
                 padding: const EdgeInsets.only(bottom: 2, right: 0),
                 child: Text(
                   line,
                   textAlign: TextAlign.start,
-                  textDirection: TextDirection.rtl,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontFamily: 'Cairo',
                     fontSize: 13,

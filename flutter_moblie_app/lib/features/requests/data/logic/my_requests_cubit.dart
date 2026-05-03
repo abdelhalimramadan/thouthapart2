@@ -5,6 +5,7 @@ import '../../../../core/helpers/shared_pref_helper.dart' show SharedPrefHelper;
 import '../../../../core/helpers/constants.dart' show SharedPrefKeys;
 import '../logic/my_requests_state.dart';
 import '../models/case_request_model.dart' show CaseRequestModel;
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 /// Manages fetching and deleting the authenticated doctor's requests.
 ///
@@ -33,7 +34,7 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
         await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
     if (token == null || token.isEmpty) {
       emit(MyRequestsError(
-        'يرجى تسجيل الدخول أولاً للاستمرار',
+        'requests.please_log_in_first'.tr(),
         isAuthError: true,
       ));
       return;
@@ -52,12 +53,12 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
         emit(MyRequestsEmpty());
       } else if (code != null && code >= 500) {
         emit(MyRequestsError(
-          'خطأ في الخادم، يرجى المحاولة لاحقاً',
+          'requests.server_error_please_try'.tr(),
           isServerError: true,
         ));
       } else {
         emit(MyRequestsError(
-          result['error']?.toString() ?? 'فشل في تحميل الطلبات',
+          result['error']?.toString() ?? 'doctor.failed_to_load_requests'.tr(),
         ));
       }
     }
@@ -101,7 +102,7 @@ class MyRequestsCubit extends Cubit<MyRequestsState> {
       }
     } else {
       emit(MyRequestsDeleteError(
-        result['error']?.toString() ?? 'فشل في حذف الطلب',
+        result['error']?.toString() ?? 'home_screen.failed_to_delete_request'.tr(),
         currentList,
       ));
     }

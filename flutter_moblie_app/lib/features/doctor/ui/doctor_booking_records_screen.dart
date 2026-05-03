@@ -4,6 +4,7 @@ import '../../../../core/networking/api_service.dart';
 import '../../../../core/routing/routes.dart';
 import '../drawer_doctor/doctor_drawer_screen.dart';
 import '../widgets/appointment_card_widget.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class DoctorBookingRecordsScreen extends StatefulWidget {
   const DoctorBookingRecordsScreen({super.key});
@@ -47,7 +48,7 @@ class _DoctorBookingRecordsScreenState
         });
       } else {
         setState(() {
-          _error = result['error']?.toString() ?? 'فشل في تحميل الحجوزات';
+          _error = result['error']?.toString() ?? 'doctor.failed_to_load_reservations'.tr();
           _isLoading = false;
         });
       }
@@ -75,7 +76,7 @@ class _DoctorBookingRecordsScreenState
       child: Scaffold(
         key: _scaffoldKey,
         backgroundColor: theme.scaffoldBackgroundColor,
-        drawer: const DoctorDrawer(),
+        drawer: DoctorDrawer(),
         appBar: AppBar(
           toolbarHeight: 70,
           elevation: 0,
@@ -95,7 +96,7 @@ class _DoctorBookingRecordsScreenState
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'سجل الحجوزات',
+                'doctor.booking_history'.tr(),
                 style: textTheme.titleLarge?.copyWith(
                   fontFamily: 'Cairo',
                   fontSize: 18,
@@ -165,7 +166,7 @@ class _DoctorBookingRecordsScreenState
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       image: DecorationImage(
-                        image: const AssetImage('assets/images/dكتور.png'),
+                        image: AssetImage('assets/images/dكتور.png'),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -187,26 +188,26 @@ class _DoctorBookingRecordsScreenState
               ),
               SizedBox(height: 20),
               Divider(
-                  color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
+                  color: isDark ? Colors.grey[700] : Color(0xFFE5E7EB)),
               SizedBox(height: 12),
               _buildDetailRow(
                 context: context,
                 icon: Icons.calendar_month_outlined,
-                label: 'التاريخ',
+                label: 'doctor.the_date'.tr(),
                 value: date,
               ),
               SizedBox(height: 14),
               _buildDetailRow(
                 context: context,
                 icon: Icons.access_time_outlined,
-                label: 'الوقت',
+                label: 'doctor.the_time'.tr(),
                 value: time,
               ),
               SizedBox(height: 14),
               _buildDetailRow(
                 context: context,
                 icon: Icons.medical_services_outlined,
-                label: 'التخصص',
+                label: 'doctor.specialization'.tr(),
                 value: service,
               ),
               SizedBox(height: 24),
@@ -232,12 +233,12 @@ class _DoctorBookingRecordsScreenState
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
+            color: isDark ? Colors.grey[800] : Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon,
               size: 18,
-              color: isDark ? Colors.white : const Color(0xFF021433)),
+              color: isDark ? Colors.white : Color(0xFF021433)),
         ),
         SizedBox(width: 12),
         Expanded(
@@ -304,9 +305,9 @@ class _DoctorBookingRecordsScreenState
           Expanded(
             child: ElevatedButton.icon(
               onPressed: () => _handleConfirmAppointment(context, appointmentId),
-              icon: const Icon(Icons.check_circle_outline),
+              icon: Icon(Icons.check_circle_outline),
               label: Text(
-                'تأكيد',
+                'doctor.to_be_sure'.tr(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -316,7 +317,7 @@ class _DoctorBookingRecordsScreenState
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
+                backgroundColor: Color(0xFF10B981),
                 foregroundColor: Colors.white,
                 elevation: 2,
                 padding: EdgeInsets.symmetric(vertical: 12),
@@ -326,13 +327,13 @@ class _DoctorBookingRecordsScreenState
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Expanded(
             child: ElevatedButton.icon(
               onPressed: () => _handleCancelAppointment(context, appointmentId),
-              icon: const Icon(Icons.close_outlined),
+              icon: Icon(Icons.close_outlined),
               label: Text(
-                'إلغاء',
+                'booking.cancellation'.tr(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -342,7 +343,7 @@ class _DoctorBookingRecordsScreenState
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444),
+                backgroundColor: Color(0xFFEF4444),
                 foregroundColor: Colors.white,
                 elevation: 2,
                 padding: EdgeInsets.symmetric(vertical: 12),
@@ -368,9 +369,9 @@ class _DoctorBookingRecordsScreenState
 
       if (result['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'تم تأكيد الحجز بنجاح',
+              'doctor.your_reservation_has_been'.tr(),
               style: TextStyle(fontFamily: 'Cairo'),
             ),
             backgroundColor: Colors.green,
@@ -379,7 +380,7 @@ class _DoctorBookingRecordsScreenState
         );
 
         // Navigate to confirmed appointments screen
-        Future.delayed(const Duration(milliseconds: 600), () {
+        Future.delayed(Duration(milliseconds: 600), () {
           if (mounted) {
             Navigator.pushNamedAndRemoveUntil(
               context,
@@ -392,8 +393,8 @@ class _DoctorBookingRecordsScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              result['error'] ?? 'فشل في تحديث الحجز',
-              style: const TextStyle(fontFamily: 'Cairo'),
+              result['error'] ?? 'doctor.failed_to_update_reservation'.tr(),
+              style: TextStyle(fontFamily: 'Cairo'),
             ),
             backgroundColor: Colors.red,
           ),
@@ -405,7 +406,7 @@ class _DoctorBookingRecordsScreenState
           SnackBar(
             content: Text(
               'حدث خطأ: ${e.toString()}',
-              style: const TextStyle(fontFamily: 'Cairo'),
+              style: TextStyle(fontFamily: 'Cairo'),
             ),
             backgroundColor: Colors.red,
           ),
@@ -425,9 +426,9 @@ class _DoctorBookingRecordsScreenState
 
       if (result['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'تم إلغاء الحجز بنجاح',
+              'doctor.your_reservation_has_been_1'.tr(),
               style: TextStyle(fontFamily: 'Cairo'),
             ),
             backgroundColor: Colors.red,
@@ -439,8 +440,8 @@ class _DoctorBookingRecordsScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              result['error'] ?? 'فشل في إلغاء الحجز',
-              style: const TextStyle(fontFamily: 'Cairo'),
+              result['error'] ?? 'doctor.failed_to_cancel_your'.tr(),
+              style: TextStyle(fontFamily: 'Cairo'),
             ),
             backgroundColor: Colors.red,
           ),
@@ -452,7 +453,7 @@ class _DoctorBookingRecordsScreenState
           SnackBar(
             content: Text(
               'حدث خطأ: ${e.toString()}',
-              style: const TextStyle(fontFamily: 'Cairo'),
+              style: TextStyle(fontFamily: 'Cairo'),
             ),
             backgroundColor: Colors.red,
           ),
@@ -492,8 +493,8 @@ class _DoctorBookingRecordsScreenState
             ElevatedButton(
               onPressed: _fetchApprovedAppointments,
               child: Text(
-                'إعادة المحاولة',
-                style: const TextStyle(fontFamily: 'Cairo'),
+                'doctor.retry'.tr(),
+                style: TextStyle(fontFamily: 'Cairo'),
               ),
             ),
           ],
@@ -516,39 +517,39 @@ class _DoctorBookingRecordsScreenState
               ),
               SizedBox(height: 16),
               Text(
-                'لا توجد حجوزات معتمدة حالياً',
+                'doctor.there_are_no_reservations'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w700,
                   fontSize: 17,
-                  color: isDarkMode ? Colors.white : const Color(0xFF0C4A6E),
+                  color: isDarkMode ? Colors.white : Color(0xFF0C4A6E),
                 ),
               ),
               SizedBox(height: 20),
               Text(
-                'داخل سجل الحجوزات:',
+                'doctor.inside_the_booking_history'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: isDarkMode ? Colors.white : const Color(0xFF0C4A6E),
+                  color: isDarkMode ? Colors.white : Color(0xFF0C4A6E),
                 ),
               ),
               SizedBox(height: 12),
               _buildInstructionRow(
                 isDarkMode: isDarkMode,
                 icon: Icons.task_alt_outlined,
-                iconColor: const Color(0xFF10B981),
-                text: 'بعد حضور المريض وإتمام الحالة، اضغط "مكتمل" ليتم نقلها إلى صفحة المرضى كحالة مكتملة.',
+                iconColor: Color(0xFF10B981),
+                text: 'doctor.after_the_patient_attends'.tr(),
               ),
               SizedBox(height: 10),
               _buildInstructionRow(
                 isDarkMode: isDarkMode,
                 icon: Icons.event_busy_outlined,
                 iconColor: Colors.orange,
-                text: 'في حال عدم حضور المريض، اضغط "ملغى".',
+                text: 'doctor.if_the_patient_does'.tr(),
               ),
             ],
           ),
@@ -565,7 +566,7 @@ class _DoctorBookingRecordsScreenState
             width: double.infinity,
             padding: EdgeInsets.symmetric(vertical: 10),
             child: Text(
-              'سجل الحجوزات',
+              'doctor.booking_history'.tr(),
               textAlign: TextAlign.right,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
@@ -597,11 +598,11 @@ class _DoctorBookingRecordsScreenState
                 date: appointment['appointmentDate'] != null
                     ? appointment['appointmentDate'].toString().split('T')[0]
                     : '',
-                status: appointment['status'] ?? 'معتمد',
+                status: appointment['status'] ?? 'doctor.certified'.tr(),
                 statusColor: Colors.greenAccent,
               ),
             );
-          }).toList(),
+          }),
           SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
         ],
       ),
@@ -632,7 +633,7 @@ class _DoctorBookingRecordsScreenState
               fontFamily: 'Cairo',
               fontSize: 13,
               height: 1.6,
-              color: isDarkMode ? Colors.white60 : const Color(0xFF475569),
+              color: isDarkMode ? Colors.white60 : Color(0xFF475569),
             ),
           ),
         ),

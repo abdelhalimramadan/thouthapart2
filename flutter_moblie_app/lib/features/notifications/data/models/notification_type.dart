@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 /// Notification types based on microservice specification
 enum NotificationType {
   // Appointment related
@@ -78,31 +79,31 @@ enum NotificationType {
   String get displayName {
     switch (this) {
       case NotificationType.appointmentConfirmed:
-        return 'تم تأكيد الموعد';
+        return 'notifications.the_appointment_has_been'.tr();
       case NotificationType.appointmentCancelled:
-        return 'تم إلغاء الموعد';
+        return 'notifications.the_appointment_has_been_1'.tr();
       case NotificationType.appointmentReminder:
-        return 'تذكير بالموعد';
+        return 'notifications.appointment_reminder'.tr();
       case NotificationType.bookingRequestApproved:
-        return 'تم قبول طلب الحجز';
+        return 'notifications.your_reservation_request_has'.tr();
       case NotificationType.bookingRequestRejected:
-        return 'تم رفض طلب الحجز';
+        return 'notifications.your_reservation_request_has_1'.tr();
       case NotificationType.treatmentPlanCreated:
-        return 'تم إنشاء خطة العلاج';
+        return 'notifications.a_treatment_plan_has'.tr();
       case NotificationType.treatmentPlanUpdated:
-        return 'تم تحديث خطة العلاج';
+        return 'notifications.the_treatment_plan_has'.tr();
       case NotificationType.paymentSuccessful:
-        return 'نجح الدفع';
+        return 'notifications.payment_succeeded'.tr();
       case NotificationType.paymentFailed:
-        return 'فشل الدفع';
+        return 'notifications.payment_failed'.tr();
       case NotificationType.profileUpdateRequired:
-        return 'يتطلب تحديث الملف الشخصي';
+        return 'notifications.requires_profile_update'.tr();
       case NotificationType.systemAlert:
-        return 'تنبيه النظام';
+        return 'notifications.system_alert'.tr();
       case NotificationType.generalAnnouncement:
-        return 'إعلان عام';
+        return 'notifications.public_announcement'.tr();
       default:
-        return 'إشعار جديد';
+        return 'notifications.new_notification'.tr();
     }
   }
 }

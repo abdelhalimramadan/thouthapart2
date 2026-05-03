@@ -7,6 +7,7 @@ import 'package:thoutha_mobile_app/features/terms_and_conditions/ui/terms_and_co
 import 'package:thoutha_mobile_app/features/privacy_policy/ui/privacy_policy_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thoutha_mobile_app/features/chat/ui/chat_screen.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class HomeDrawer extends StatelessWidget {
   const HomeDrawer({super.key});
@@ -25,30 +26,26 @@ class HomeDrawer extends StatelessWidget {
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: Row(
-            children: [
-              customIcon ??
-                  Icon(icon,
-                      size: 24,
-                      color: iconColor ?? Theme.of(context).iconTheme.color),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.right,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.bold,
-                        fontSize: fontSize ?? 16,
-                        color: textColor ??
-                            Theme.of(context).colorScheme.onSurface,
-                      ),
-                ),
+        child: Row(
+          children: [
+            customIcon ??
+                Icon(icon,
+                    size: 24,
+                    color: iconColor ?? Theme.of(context).iconTheme.color),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                textAlign: TextAlign.start,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: fontSize ?? 16,
+                      color: textColor ??
+                          Theme.of(context).colorScheme.onSurface,
+                    ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -65,35 +62,31 @@ class HomeDrawer extends StatelessWidget {
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Row(
-          children: [
-            Icon(icon,
-                size: 24,
-                color: iconColor ?? Theme.of(context).iconTheme.color),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                textAlign: TextAlign.right,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.bold,
-                      fontSize: fontSize ?? 16,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-              ),
+      child: Row(
+        children: [
+          Icon(icon,
+              size: 24,
+              color: iconColor ?? Theme.of(context).iconTheme.color),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.start,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: fontSize ?? 16,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
             ),
-            Switch.adaptive(
-              value: value,
-              onChanged: onChanged,
-              activeTrackColor: const Color(0xFF8DECB8),
-              inactiveThumbColor: Colors.white,
-              inactiveTrackColor: Theme.of(context).dividerColor,
-            ),
-          ],
-        ),
+          ),
+          Switch.adaptive(
+            value: value,
+            onChanged: onChanged,
+            activeTrackColor: Color(0xFF8DECB8),
+            inactiveThumbColor: Colors.white,
+            inactiveTrackColor: Theme.of(context).dividerColor,
+          ),
+        ],
       ),
     );
   }
@@ -129,7 +122,7 @@ class HomeDrawer extends StatelessWidget {
                       child: Column(
                         children: [
                           Align(
-                            alignment: Alignment.centerLeft,
+                            alignment: AlignmentDirectional.centerStart,
                             child: IconButton(
                               icon: Icon(
                                 Icons.close,
@@ -145,9 +138,9 @@ class HomeDrawer extends StatelessWidget {
                             height: 70,
                             fit: BoxFit.contain,
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           Text(
-                            'رعاية ذكية، لمسة طبية',
+                            'home_screen.smart_care_medical_touch'.tr(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,
@@ -163,7 +156,7 @@ class HomeDrawer extends StatelessWidget {
                     // Menu Items
                     _menuItem(
                       context,
-                      title: 'الصفحة الرئيسية',
+                      title: 'doctor.home'.tr(),
                       icon: Icons.home_outlined,
                       fontSize: 16,
                       onTap: () {
@@ -177,7 +170,7 @@ class HomeDrawer extends StatelessWidget {
                     ),
                     _menuItem(
                       context,
-                      title: 'ثوثه المساعد',
+                      title: 'home_screen.thutha_assistant'.tr(),
                       customIcon: SvgPicture.asset(
                         'assets/svg/ثوثه الدكتور 1.svg',
                         width: 24,
@@ -189,7 +182,7 @@ class HomeDrawer extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ChatScreen(),
+                            builder: (context) => ChatScreen(),
                           ),
                         );
                       },
@@ -198,7 +191,7 @@ class HomeDrawer extends StatelessWidget {
                       builder: (context, themeProvider, _) {
                         return _toggleMenuItem(
                           context,
-                          title: 'الوضع الداكن',
+                          title: 'doctor.dark_mode'.tr(),
                           value: themeProvider.isDarkMode,
                           onChanged: (v) => themeProvider.toggleTheme(v),
                           icon: Icons.dark_mode_outlined,
@@ -208,7 +201,21 @@ class HomeDrawer extends StatelessWidget {
                     ),
                     _menuItem(
                       context,
-                      title: 'الشروط والأحكام',
+                      title: 'doctor.change_language'.tr(),
+                      icon: Icons.language,
+                      fontSize: 16,
+                      onTap: () {
+                        final currentLocale = context.locale;
+                        if (currentLocale.languageCode == 'ar') {
+                          context.setLocale(const Locale('en'));
+                        } else {
+                          context.setLocale(const Locale('ar'));
+                        }
+                      },
+                    ),
+                    _menuItem(
+                      context,
+                      title: 'doctor.terms_and_conditions'.tr(),
                       icon: Icons.description_outlined,
                       fontSize: 16,
                       onTap: () {
@@ -217,14 +224,14 @@ class HomeDrawer extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                const TermsAndConditionsScreen(),
+                                TermsAndConditionsScreen(),
                           ),
                         );
                       },
                     ),
                     _menuItem(
                       context,
-                      title: 'سياسة الخصوصية',
+                      title: 'doctor.privacy_policy'.tr(),
                       icon: Icons.shield_outlined,
                       fontSize: 16,
                       onTap: () {
@@ -232,14 +239,14 @@ class HomeDrawer extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const PrivacyPolicyScreen(),
+                            builder: (context) => PrivacyPolicyScreen(),
                           ),
                         );
                       },
                     ),
                     _menuItem(
                       context,
-                      title: 'المساعدة والدعم',
+                      title: 'doctor.help_and_support'.tr(),
                       icon: Icons.help_outline,
                       fontSize: 16,
                       onTap: () {
@@ -247,14 +254,14 @@ class HomeDrawer extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const HelpAndSupportScreen(),
+                            builder: (context) => HelpAndSupportScreen(),
                           ),
                         );
                       },
                     ),
                     _menuItem(
                       context,
-                      title: 'تسجيل الدخول',
+                      title: 'home_screen.login'.tr(),
                       icon: Icons.login_outlined,
                       fontSize: 16,
                       onTap: () {
@@ -275,10 +282,10 @@ class HomeDrawer extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Column(
                   children: [
-                    const Divider(indent: 32, endIndent: 32),
-                    const SizedBox(height: 8),
+                    Divider(indent: 32, endIndent: 32),
+                    SizedBox(height: 8),
                     Text(
-                      'الإصدار 1.0.0',
+                      'home_screen.version_100'.tr(),
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.bold,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class DoctorPrivacyPolicyScreen extends StatefulWidget {
   const DoctorPrivacyPolicyScreen({super.key});
@@ -20,11 +21,11 @@ class _DoctorPrivacyPolicyScreenState extends State<DoctorPrivacyPolicyScreen>
     super.initState();
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: Duration(milliseconds: 600),
     );
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
     _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.08),
+      begin: Offset(0, 0.08),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
     _animController.forward();
@@ -41,13 +42,15 @@ class _DoctorPrivacyPolicyScreenState extends State<DoctorPrivacyPolicyScreen>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const DoctorDrawer(),
-      body: Directionality(
-        textDirection: TextDirection.rtl,
-        child: CustomScrollView(
+    return Directionality(
+      textDirection: context.locale.languageCode == 'ar'
+          ? TextDirection.rtl
+          : TextDirection.ltr,
+      child: Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: theme.scaffoldBackgroundColor,
+        drawer: DoctorDrawer(),
+        body: CustomScrollView(
           slivers: [
             SliverAppBar(
               expandedHeight: 140,
@@ -63,14 +66,13 @@ class _DoctorPrivacyPolicyScreenState extends State<DoctorPrivacyPolicyScreen>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'خصوصية الطلاب',
+                        'doctor.student_privacy'.tr(),
                         style: theme.textTheme.titleLarge?.copyWith(
-                          fontFamily: 'Cairo',
                           fontWeight: FontWeight.w700,
                           fontSize: 18,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Image.asset(
                         'assets/images/splash-logo.png',
                         width: 36,
@@ -83,7 +85,7 @@ class _DoctorPrivacyPolicyScreenState extends State<DoctorPrivacyPolicyScreen>
               ),
               leading: Builder(
                 builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu, size: 24),
+                  icon: Icon(Icons.menu, size: 24),
                   onPressed: () => _scaffoldKey.currentState?.openDrawer(),
                 ),
               ),
@@ -99,37 +101,42 @@ class _DoctorPrivacyPolicyScreenState extends State<DoctorPrivacyPolicyScreen>
                       children: [
                         _buildSection(
                           isDark: isDark,
-                          title: 'بيانات الطلاب المعالجة',
+                          title: 'doctor.processed_student_data'.tr(),
                           icon: Icons.person_pin_outlined,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildBodyText(isDark, 'نقوم بجمع البيانات التالية لضمان جودة الخدمة:'),
-                              const SizedBox(height: 10),
-                              _buildBullet(isDark, 'الاسم الكامل وصورة الملف الشخصي.'),
-                              _buildBullet(isDark, 'بيانات الجامعة والمستوى الدراسي (إن وجد).'),
-                              _buildBullet(isDark, 'تاريخ سجل الحجوزات والطلبات.'),
-                              _buildBullet(isDark, 'التقييمات المقدمة من المرضى.'),
+                              _buildBodyText(isDark,
+                                  'doctor.we_collect_the_following'.tr()),
+                              SizedBox(height: 10),
+                              _buildBullet(isDark, 'doctor.full_name_and_profile'.tr()),
+                              _buildBullet(isDark, 'doctor.university_data'.tr()),
+                              _buildBullet(isDark,
+                                  'doctor.history_of_reservations_and'.tr()),
+                              _buildBullet(isDark,
+                                  'doctor.evaluations_provided_by_patients'.tr()),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                         _buildSection(
                           isDark: isDark,
-                          title: 'كيفية ظهور بياناتك',
+                          title: 'doctor.how_your_data_appears'.tr(),
                           icon: Icons.visibility_outlined,
-                          child: _buildBodyText(isDark, 'يظهر اسمك وتخصصك (والتقييمات) للمرضى لمساعدتهم في اختيار الطالب المناسب. لا يتم عرض رقم هاتفك إلا بعد تأكيد الحجز (حسب إعدادات التطبيق).'),
+                          child: _buildBodyText(
+                              isDark, 'doctor.how_data_appears_desc'.tr()),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                         _buildSection(
                           isDark: isDark,
-                          title: 'أمن الحساب',
+                          title: 'doctor.account_security'.tr(),
                           icon: Icons.security_outlined,
-                          child: _buildBodyText(isDark, 'أنت مسؤول عن الحفاظ على سرية بيانات دخولك. ننصح بتغيير كلمة المرور بشكل دوري وعدم مشاركتها مع أي شخص.'),
+                          child: _buildBodyText(isDark, 'doctor.str_297'.tr()),
                         ),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                         _buildFooter(isDark),
-                        SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
+                        SizedBox(
+                            height: MediaQuery.of(context).padding.bottom + 24),
                       ],
                     ),
                   ),
@@ -145,9 +152,9 @@ class _DoctorPrivacyPolicyScreenState extends State<DoctorPrivacyPolicyScreen>
   Widget _buildSection({required bool isDark, required String title, required IconData icon, required Widget child}) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF161B22) : Colors.white,
+        color: isDark ? Color(0xFF161B22) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? Colors.grey[800]! : const Color(0xFFE5E7EB)),
+        border: Border.all(color: isDark ? Colors.grey[800]! : Color(0xFFE5E7EB)),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -155,12 +162,12 @@ class _DoctorPrivacyPolicyScreenState extends State<DoctorPrivacyPolicyScreen>
         children: [
           Row(
             children: [
-              Icon(icon, size: 20, color: isDark ? Colors.white70 : const Color(0xFF021433)),
-              const SizedBox(width: 8),
-              Text(title, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, fontSize: 14)),
+              Icon(icon, size: 20, color: isDark ? Colors.white70 : Color(0xFF021433)),
+              SizedBox(width: 8),
+              Text(title, style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, fontSize: 14)),
             ],
           ),
-          const Divider(height: 24),
+          Divider(height: 24),
           child,
         ],
       ),
@@ -168,7 +175,7 @@ class _DoctorPrivacyPolicyScreenState extends State<DoctorPrivacyPolicyScreen>
   }
 
   Widget _buildBodyText(bool isDark, String text) {
-    return Text(text, style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, height: 1.6));
+    return Text(text, style: TextStyle(fontFamily: 'Cairo', fontSize: 13, height: 1.6));
   }
 
   Widget _buildBullet(bool isDark, String text) {
@@ -177,8 +184,8 @@ class _DoctorPrivacyPolicyScreenState extends State<DoctorPrivacyPolicyScreen>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(child: Text(text, style: const TextStyle(fontFamily: 'Cairo', fontSize: 13))),
+          Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(child: Text(text, style: TextStyle(fontFamily: 'Cairo', fontSize: 13))),
         ],
       ),
     );
@@ -186,7 +193,7 @@ class _DoctorPrivacyPolicyScreenState extends State<DoctorPrivacyPolicyScreen>
 
   Widget _buildFooter(bool isDark) {
     return Center(
-      child: Text('آخر تحديث: أبريل 2026', style: TextStyle(fontFamily: 'Cairo', fontSize: 11, color: isDark ? Colors.white54 : Colors.grey[500])),
+      child: Text('doctor.last_updated_april_2026'.tr(), style: TextStyle(fontFamily: 'Cairo', fontSize: 11, color: isDark ? Colors.white54 : Colors.grey[500])),
     );
   }
 }

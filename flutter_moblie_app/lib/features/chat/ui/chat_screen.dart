@@ -8,6 +8,7 @@ import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
 import 'package:thoutha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
 import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -24,15 +25,15 @@ class _ChatScreenState extends State<ChatScreen> {
 
   static const Color _color2 = Color(0xFF53CAF9);
   static const Color _color3 = Color(0x2853CAF9);
-  static const Color _outline = Color(0xFFCCCCE5);
-  static const String _thinkingText = 'يفكر.....';
+  static Color _outline = Color(0xFFCCCCE5);
+  static String _thinkingText = 'chat.he_thinks'.tr();
 
   final Dio _dio = Dio(
     BaseOptions(
       baseUrl: _apiBase,
       headers: _apiHeaders,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
+      connectTimeout: Duration(seconds: 30),
+      receiveTimeout: Duration(seconds: 30),
     ),
   );
 
@@ -157,7 +158,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (!_scrollController.hasClients) return;
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 250),
+        duration: Duration(milliseconds: 250),
         curve: Curves.easeOut,
       );
     });
@@ -248,7 +249,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     if (a.text.toLowerCase().contains('english')) {
       _isEnglish = true;
-    } else if (a.text.contains('عربي') || a.text.contains('العربية')) {
+    } else if (a.text.contains('chat.arab'.tr()) || a.text.contains('chat.arabic'.tr())) {
       _isEnglish = false;
     }
 
@@ -266,7 +267,7 @@ class _ChatScreenState extends State<ChatScreen> {
         _flowItems.add(_FlowItem.result(
             text: _isEnglish 
                 ? 'Please write your message in detail so I can help you better:' 
-                : 'من فضلك اكتب رسالتك بالتفصيل عشان أقدر أساعدك بشكل أفضل:'));
+                : 'chat.please_write_your_message'.tr()));
         _chatMode = true;
         _isLoading = false;
       });
@@ -287,7 +288,7 @@ class _ChatScreenState extends State<ChatScreen> {
           _flowItems.add(_FlowItem.result(
             text: _isEnglish
                 ? 'Sorry, I need more information. Please write a detailed message so I can better understand your needs:'
-                : 'عذراً، أحتاج المزيد من المعلومات. من فضلك اكتب رسالة بالتفصيل عشان أقدر أفهم احتياجك بشكل أفضل:',
+                : 'chat.sorry_i_need_more'.tr(),
           ));
           _chatMode = true;
         });
@@ -316,7 +317,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final errorMsg = _isEnglish 
         ? 'Sorry, a connection error occurred. Please try again.'
-        : 'عذراً، حدث خطأ في الاتصال. حاول مرة أخرى.';
+        : 'chat.sorry_a_connection_error_1'.tr();
     try {
       final res = await _dio
           .post('/chat', data: {'message': msg, 'session_id': _sessionId});
@@ -423,19 +424,19 @@ class _ChatScreenState extends State<ChatScreen> {
 
   String _normalize(String s) {
     String res = s
-        .replaceAll('أ', 'ا')
-        .replaceAll('إ', 'ا')
-        .replaceAll('آ', 'ا')
-        .replaceAll('ة', 'ه')
-        .replaceAll('ى', 'ي')
+        .replaceAll('chat.a'.tr(), 'chat.a_1'.tr())
+        .replaceAll('chat.e'.tr(), 'chat.a_1'.tr())
+        .replaceAll('chat.oh'.tr(), 'chat.a_1'.tr())
+        .replaceAll('chat.oh_1'.tr(), 'chat.e_1'.tr())
+        .replaceAll('chat.yes'.tr(), 'chat.y'.tr())
         .replaceAll(RegExp(r'[^\u0621-\u064A0-9a-zA-Z]'), '')
         .toLowerCase();
     
-    // Remove "ال" (definite article) at start or after "و" (and)
-    if (res.startsWith('ال')) {
+    // Remove 'chat.the'.tr() (definite article) at start or after 'chat.and'.tr() (and)
+    if (res.startsWith('chat.the'.tr())) {
       res = res.substring(2);
     }
-    res = res.replaceAll('وال', 'و');
+    res = res.replaceAll('chat.and_1'.tr(), 'chat.and'.tr());
     
     return res;
   }
@@ -443,83 +444,120 @@ class _ChatScreenState extends State<ChatScreen> {
   String _getArabicCanonical(String raw) {
     final clean = raw.trim();
     final Map<String, String> synonyms = {
-      'Cosmetic Filling': 'حشو تجميلي',
-      'Composite Filling': 'حشو تجميلي',
-      'Dental Fillings': 'حشو تجميلي',
-      'Dental Filling': 'حشو تجميلي',
-      'Filling': 'حشو تجميلي',
-      'Dental Fillings / Composite': 'حشو تجميلي',
-      'Composite': 'حشو تجميلي',
-      'حشوات الأسنان': 'حشو تجميلي',
+      'Cosmetic Filling': 'chat.cosmetic_filler'.tr(),
+      'Composite Filling': 'chat.cosmetic_filler'.tr(),
+      'Dental Fillings': 'chat.cosmetic_filler'.tr(),
+      'Dental Filling': 'chat.cosmetic_filler'.tr(),
+      'Filling': 'chat.cosmetic_filler'.tr(),
+      'Dental Fillings / Composite': 'chat.cosmetic_filler'.tr(),
+      'Composite': 'chat.cosmetic_filler'.tr(),
+      'chat.dental_fillings'.tr(): 'chat.cosmetic_filler'.tr(),
       
-      'Teeth Whitening': 'تنظيف وتبييض الأسنان',
-      'Bleaching': 'تنظيف وتبييض الأسنان',
-      'Teeth Cleaning': 'تنظيف وتبييض الأسنان',
-      'Cleaning and Whitening': 'تنظيف وتبييض الأسنان',
-      'Whitening': 'تنظيف وتبييض الأسنان',
-      'تبييض الأسنان': 'تنظيف وتبييض الأسنان',
-      'تنظيف وتبيض الأسنان': 'تنظيف وتبييض الأسنان',
+      'Teeth Whitening': 'chat.teeth_cleaning_and_whitening'.tr(),
+      'Bleaching': 'chat.teeth_cleaning_and_whitening'.tr(),
+      'Teeth Cleaning': 'chat.teeth_cleaning_and_whitening'.tr(),
+      'Cleaning and Whitening': 'chat.teeth_cleaning_and_whitening'.tr(),
+      'Whitening': 'chat.teeth_cleaning_and_whitening'.tr(),
+      'chat.teeth_whitening'.tr(): 'chat.teeth_cleaning_and_whitening'.tr(),
+      'chat.cleaning_and_whitening_teeth'.tr(): 'chat.teeth_cleaning_and_whitening'.tr(),
       
-      'Dental Implants': 'زراعة الأسنان',
-      'Implants': 'زراعة الأسنان',
-      'زراعة الأسنان': 'زراعة الأسنان',
+      'Dental Implants': 'chat.dental_implants'.tr(),
+      'Implants': 'chat.dental_implants'.tr(),
+      'chat.dental_implants'.tr(): 'chat.dental_implants'.tr(),
       
-      'Surgery and Extraction': 'الجراحة والخلع',
-      'Surgery': 'الجراحة والخلع',
-      'Extraction': 'الجراحة والخلع',
-      'Tooth Extraction': 'الجراحة والخلع',
-      'خلع الأسنان': 'الجراحة والخلع',
-      'الجراحة والخلع ': 'الجراحة والخلع',
+      'Surgery and Extraction': 'chat.surgery_and_extraction'.tr(),
+      'Surgery': 'chat.surgery_and_extraction'.tr(),
+      'Extraction': 'chat.surgery_and_extraction'.tr(),
+      'Tooth Extraction': 'chat.surgery_and_extraction'.tr(),
+      'chat.tooth_extraction'.tr(): 'chat.surgery_and_extraction'.tr(),
+      'chat.surgery_and_extraction_1'.tr(): 'chat.surgery_and_extraction'.tr(),
       
-      'Braces': 'تقويم الأسنان',
-      'Orthodontics': 'تقويم الأسنان',
-      'تقويم الأسنان': 'تقويم الأسنان',
+      'Braces': 'chat.orthodontics'.tr(),
+      'Orthodontics': 'chat.orthodontics'.tr(),
+      'chat.orthodontics'.tr(): 'chat.orthodontics'.tr(),
       
-      'Crowns and Bridges': 'التيجان والجسور',
-      'Fixed Prosthetics (Crowns and Bridges)': 'التيجان والجسور',
-      'Fixed Prosthetics': 'التيجان والجسور',
-      'Prosthodontics': 'التيجان والجسور',
-      'Crowns': 'التيجان والجسور',
-      'Bridges': 'التيجان والجسور',
-      'التيجان والجسور': 'التيجان والجسور',
-      'تيجان وجسور': 'التيجان والجسور',
-      'تيجان والجسور': 'التيجان والجسور',
-      'التيجان وجسور': 'التيجان والجسور',
-      'جسور وتيجان': 'التيجان والجسور',
-      'التيجان والتركيبات': 'التيجان والجسور',
-      'تيجان الأسنان / التركيبات': 'التيجان والجسور',
+      'Crowns and Bridges': 'chat.crowns_and_bridges_1'.tr(),
+      'Fixed Prosthetics (Crowns and Bridges)': 'chat.crowns_and_bridges_1'.tr(),
+      'Fixed Prosthetics': 'chat.crowns_and_bridges_1'.tr(),
+      'Prosthodontics': 'chat.crowns_and_bridges_1'.tr(),
+      'Crowns': 'chat.crowns_and_bridges_1'.tr(),
+      'Bridges': 'chat.crowns_and_bridges_1'.tr(),
+      'chat.crowns_and_bridges_1'.tr(): 'chat.crowns_and_bridges_1'.tr(),
+      'chat.crowns_and_bridges'.tr(): 'chat.crowns_and_bridges_1'.tr(),
+      'chat.crowns_and_bridges_2'.tr(): 'chat.crowns_and_bridges_1'.tr(),
+      'chat.crowns_and_bridges_3'.tr(): 'chat.crowns_and_bridges_1'.tr(),
+      'chat.bridges_and_crowns'.tr(): 'chat.crowns_and_bridges_1'.tr(),
+      'chat.crowns_and_fixtures'.tr(): 'chat.crowns_and_bridges_1'.tr(),
+      'chat.dental_crownsprostheses'.tr(): 'chat.crowns_and_bridges_1'.tr(),
       
-      'Amalgam Filling': 'حشو املجم',
-      'حشو املجم': 'حشو املجم',
+      'Amalgam Filling': 'chat.amalgam_filling'.tr(),
+      'Amalgam': 'chat.amalgam_filling'.tr(),
+      'حشو املغم': 'chat.amalgam_filling'.tr(),
+      'حشو املجم': 'chat.amalgam_filling'.tr(),
+      'املغم': 'chat.amalgam_filling'.tr(),
+      'املجم': 'chat.amalgam_filling'.tr(),
+      'chat.amalgam_filling'.tr(): 'chat.amalgam_filling'.tr(),
       
-      'Root Canal': 'حشو عصب',
-      'Root Canal Treatment': 'حشو عصب',
-      'Endodontic Fillings (Root Canal)': 'حشو عصب',
-      'Endodontic Fillings': 'حشو عصب',
-      'Endodontics': 'حشو عصب',
-      'حشو عصب': 'حشو عصب',
+      'Root Canal': 'chat.nerve_filling'.tr(),
+      'Root Canal Treatment': 'chat.nerve_filling'.tr(),
+      'Endodontic Fillings (Root Canal)': 'chat.nerve_filling'.tr(),
+      'Endodontic Fillings': 'chat.nerve_filling'.tr(),
+      'Endodontics': 'chat.nerve_filling'.tr(),
+      'حشو عصب': 'chat.nerve_filling'.tr(),
+      'عصب': 'chat.nerve_filling'.tr(),
+      'chat.nerve_filling'.tr(): 'chat.nerve_filling'.tr(),
       
-      'Pediatric Dentistry': 'طب أسنان الأطفال',
-      'Kids Dentistry': 'طب أسنان الأطفال',
-      'Pediatric': 'طب أسنان الأطفال',
-      'طب أسنان الأطفال': 'طب أسنان الأطفال',
-      'الاطفال': 'طب أسنان الأطفال',
-      'طب الأسنان للأطفال': 'طب أسنان الأطفال',
+      'Pediatric Dentistry': 'chat.pediatric_dentistry'.tr(),
+      'Kids Dentistry': 'chat.pediatric_dentistry'.tr(),
+      'Pediatric': 'chat.pediatric_dentistry'.tr(),
+      'طب أسنان الأطفال': 'chat.pediatric_dentistry'.tr(),
+      'اطفال': 'chat.pediatric_dentistry'.tr(),
+      'chat.pediatric_dentistry'.tr(): 'chat.pediatric_dentistry'.tr(),
+      'chat.children'.tr(): 'chat.pediatric_dentistry'.tr(),
+      'chat.dentistry_for_children'.tr(): 'chat.pediatric_dentistry'.tr(),
 
-      'Comprehensive Dental Examination': 'فحص شامل',
-      'Comprehensive Examination': 'فحص شامل',
-      'Examination': 'فحص شامل',
-      'Checkup': 'فحص شامل',
-      'فحص شامل للأسنان': 'فحص شامل',
-      'فحص شامل': 'فحص شامل',
+      'Comprehensive Dental Examination': 'chat.comprehensive_examination'.tr(),
+      'Comprehensive Examination': 'chat.comprehensive_examination'.tr(),
+      'Examination': 'chat.comprehensive_examination'.tr(),
+      'Checkup': 'chat.comprehensive_examination'.tr(),
+      'فحص شامل': 'chat.comprehensive_examination'.tr(),
+      'فحص': 'chat.comprehensive_examination'.tr(),
+      'chat.a_comprehensive_dental_examination'.tr(): 'chat.comprehensive_examination'.tr(),
+      'chat.comprehensive_examination'.tr(): 'chat.comprehensive_examination'.tr(),
 
-      'Dental Prosthetics': 'تركيبات الأسنان',
-      'Prosthetics': 'تركيبات الأسنان',
-      'تركيبات الأسنان': 'تركيبات الأسنان',
+      'Dental Prosthetics': 'chat.dental_prosthetics'.tr(),
+      'Prosthetics': 'chat.dental_prosthetics'.tr(),
+      'تركيبات اسنان': 'chat.dental_prosthetics'.tr(),
+      'تركيبات': 'chat.dental_prosthetics'.tr(),
+      'chat.dental_prosthetics'.tr(): 'chat.dental_prosthetics'.tr(),
 
-      'Removable Prosthetics': 'تركيبات متحركة',
-      'Removable': 'تركيبات متحركة',
-      'تركيبات متحركة': 'تركيبات متحركة',
+      'Removable Prosthetics': 'chat.moving_installations'.tr(),
+      'Removable': 'chat.moving_installations'.tr(),
+      'تركيبات متحركة': 'chat.moving_installations'.tr(),
+      'متحركة': 'chat.moving_installations'.tr(),
+      'chat.moving_installations'.tr(): 'chat.moving_installations'.tr(),
+
+      'Surgery and Extraction': 'chat.surgery_and_extraction'.tr(),
+      'Surgery': 'chat.surgery_and_extraction'.tr(),
+      'Extraction': 'chat.surgery_and_extraction'.tr(),
+      'Tooth Extraction': 'chat.surgery_and_extraction'.tr(),
+      'الجراحة والخلع': 'chat.surgery_and_extraction'.tr(),
+      'الجراحه والخلع': 'chat.surgery_and_extraction'.tr(),
+      'جراحة': 'chat.surgery_and_extraction'.tr(),
+      'خلع': 'chat.surgery_and_extraction'.tr(),
+      'chat.tooth_extraction'.tr(): 'chat.surgery_and_extraction'.tr(),
+      'chat.surgery_and_extraction_1'.tr(): 'chat.surgery_and_extraction'.tr(),
+      'chat.surgery_and_extraction'.tr(): 'chat.surgery_and_extraction'.tr(),
+
+      'Cosmetic Filling': 'chat.cosmetic_filler'.tr(),
+      'Composite Filling': 'chat.cosmetic_filler'.tr(),
+      'Cosmetic': 'chat.cosmetic_filler'.tr(),
+      'Composite': 'chat.cosmetic_filler'.tr(),
+      'تجميلي': 'chat.cosmetic_filler'.tr(),
+      'تحميلي': 'chat.cosmetic_filler'.tr(),
+      'حشو تجميلي': 'chat.cosmetic_filler'.tr(),
+      'حشو تحميلي': 'chat.cosmetic_filler'.tr(),
+      'chat.cosmetic_filler'.tr(): 'chat.cosmetic_filler'.tr(),
     };
     
     return synonyms[clean] ?? synonyms[raw] ?? clean;
@@ -527,53 +565,64 @@ class _ChatScreenState extends State<ChatScreen> {
 
   String _getEnglishName(String arabic) {
      final Map<String, String> arToEn = {
-        'حشو تجميلي': 'Cosmetic Filling',
-        'تنظيف وتبييض الأسنان': 'Teeth Whitening',
-        'زراعة الأسنان': 'Dental Implants',
-        'الجراحة والخلع': 'Surgery and Extraction',
-        'تقويم الأسنان': 'Orthodontics',
-        'التيجان والجسور': 'Fixed Prosthetics (Crowns and Bridges)',
-        'حشو املجم': 'Amalgam Filling',
-        'حشو عصب': 'Endodontic Fillings (Root Canal)',
-        'طب أسنان الأطفال': 'Pediatric Dentistry',
-        'فحص شامل': 'Comprehensive Examination',
-        'تركيبات الأسنان': 'Dental Prosthetics',
-        'تركيبات متحركة': 'Removable Prosthetics',
+        'chat.cosmetic_filler'.tr(): 'Cosmetic Filling',
+        'chat.teeth_cleaning_and_whitening'.tr(): 'Teeth Whitening',
+        'chat.dental_implants'.tr(): 'Dental Implants',
+        'chat.surgery_and_extraction'.tr(): 'Surgery and Extraction',
+        'chat.orthodontics'.tr(): 'Orthodontics',
+        'chat.crowns_and_bridges_1'.tr(): 'Fixed Prosthetics (Crowns and Bridges)',
+        'chat.amalgam_filling'.tr(): 'Amalgam Filling',
+        'chat.nerve_filling'.tr(): 'Endodontic Fillings (Root Canal)',
+        'chat.pediatric_dentistry'.tr(): 'Pediatric Dentistry',
+        'chat.comprehensive_examination'.tr(): 'Comprehensive Examination',
+        'chat.dental_prosthetics'.tr(): 'Dental Prosthetics',
+        'chat.moving_installations'.tr(): 'Removable Prosthetics',
      };
      return arToEn[arabic] ?? arabic;
   }
 
   String _getAssetForCategory(String categoryName) {
+    String name = categoryName.trim();
+    
+    // Exact mapping if possible
     final Map<String, String> categoryAssets = {
-      'حشو املجم': 'assets/svg/املغم.svg',
-      'حشو عصب': 'assets/svg/حشو اسنان.svg',
-      'حشو تجميلي': 'assets/svg/تجميلي.svg',
-      'زراعة الأسنان': 'assets/svg/زراعه اسنان.svg',
-      'الجراحة والخلع': 'assets/svg/خلع اسنان.svg',
-      'تنظيف وتبيض الأسنان': 'assets/svg/تبيض اسنان.svg',
-      'تبييض الأسنان': 'assets/svg/تبيض اسنان.svg',
-      'تقويم الأسنان': 'assets/svg/تقويم اسنان.svg',
-      'تركيبات الأسنان': 'assets/svg/تركيبات اسنان.svg',
-      'التيجان والجسور': 'assets/images/تيجان وجسور.webp',
-      'طب أسنان الأطفال': 'assets/svg/اطفال2.svg',
-      'تركيبات متحركة': 'assets/svg/تركيبات اسنان.svg',
+      'chat.amalgam_filling'.tr(): 'assets/svg/املغم.svg',
+      'chat.nerve_filling'.tr(): 'assets/svg/حشو اسنان.svg',
+      'chat.cosmetic_filler'.tr(): 'assets/svg/تجميلي.svg',
+      'chat.dental_implants'.tr(): 'assets/svg/زراعه اسنان.svg',
+      'chat.surgery_and_extraction'.tr(): 'assets/svg/خلع اسنان.svg',
+      'chat.cleaning_and_whitening_teeth'.tr(): 'assets/svg/تبيض اسنان.svg',
+      'chat.teeth_whitening'.tr(): 'assets/svg/تبيض اسنان.svg',
+      'chat.orthodontics'.tr(): 'assets/svg/تقويم اسنان.svg',
+      'chat.dental_prosthetics'.tr(): 'assets/svg/تركيبات اسنان.svg',
+      'chat.crowns_and_bridges_1'.tr(): 'assets/images/تيجان وجسور.webp',
+      'chat.pediatric_dentistry'.tr(): 'assets/svg/اطفال2.svg',
+      'chat.moving_installations'.tr(): 'assets/svg/تركيبات اسنان.svg',
     };
 
-    if (categoryAssets.containsKey(categoryName)) {
-      return categoryAssets[categoryName]!;
+    if (categoryAssets.containsKey(name)) {
+      return categoryAssets[name]!;
     }
 
-    if (categoryName.contains('فحص')) return 'assets/svg/فحص شامل.svg';
-    if (categoryName.contains('املجم') || categoryName.contains('amalgam')) return 'assets/svg/املغم.svg';
-    if (categoryName.contains('عصب')) return 'assets/svg/حشو اسنان.svg';
-    if (categoryName.contains('تجميلي')) return 'assets/svg/تجميلي.svg';
-    if (categoryName.contains('زراعة')) return 'assets/svg/زراعه اسنان.svg';
-    if (categoryName.contains('خلع') || categoryName.contains('جراحة')) return 'assets/svg/خلع اسنان.svg';
-    if (categoryName.contains('تنظيف') || categoryName.contains('تبييض')) return 'assets/svg/تبيض اسنان.svg';
-    if (categoryName.contains('تقويم')) return 'assets/svg/تقويم اسنان.svg';
-    if (categoryName.contains('تركيبات')) return 'assets/svg/تركيبات اسنان.svg';
-    if (categoryName.contains('تيجان') || categoryName.contains('جسور')) return 'assets/images/تيجان وجسور.webp';
-    if (categoryName.contains('اطفال')) return 'assets/svg/اطفال2.svg';
+    // Normalization and partial matching
+    String normalized = name
+        .replaceAll('ة', 'ه')
+        .replaceAll('أ', 'ا')
+        .replaceAll('إ', 'ا')
+        .replaceAll('آ', 'ا')
+        .replaceAll('ى', 'ي');
+
+    if (normalized.contains('فحص') || normalized.toLowerCase().contains('examination') || normalized.toLowerCase().contains('checkup')) return 'assets/svg/فحص شامل.svg';
+    if (normalized.contains('املغم') || normalized.contains('املجم') || normalized.toLowerCase().contains('amalgam')) return 'assets/svg/املغم.svg';
+    if (normalized.contains('عصب') || normalized.toLowerCase().contains('nerve') || normalized.toLowerCase().contains('root canal')) return 'assets/svg/حشو اسنان.svg';
+    if (normalized.contains('تجميلي') || normalized.contains('تحميلي') || normalized.toLowerCase().contains('cosmetic') || normalized.toLowerCase().contains('composite')) return 'assets/svg/تجميلي.svg';
+    if (normalized.contains('زراعه') || normalized.contains('زراعة') || normalized.toLowerCase().contains('implant')) return 'assets/svg/زراعه اسنان.svg';
+    if (normalized.contains('خلع') || normalized.contains('جراحه') || normalized.contains('جراحة') || normalized.toLowerCase().contains('extraction') || normalized.toLowerCase().contains('surgery')) return 'assets/svg/خلع اسنان.svg';
+    if (normalized.contains('تبيض') || normalized.contains('تنظيف') || normalized.toLowerCase().contains('whitening') || normalized.toLowerCase().contains('cleaning')) return 'assets/svg/تبيض اسنان.svg';
+    if (normalized.contains('تقويم') || normalized.toLowerCase().contains('orthodontic') || normalized.toLowerCase().contains('brace')) return 'assets/svg/تقويم اسنان.svg';
+    if (normalized.contains('تركيبات') || normalized.toLowerCase().contains('prosthetic') || normalized.toLowerCase().contains('installation')) return 'assets/svg/تركيبات اسنان.svg';
+    if (normalized.contains('تيجان') || normalized.contains('جسور') || normalized.toLowerCase().contains('crown') || normalized.toLowerCase().contains('bridge')) return 'assets/images/تيجان وجسور.webp';
+    if (normalized.contains('اطفال') || normalized.contains('أطفال') || normalized.toLowerCase().contains('pediatric') || normalized.toLowerCase().contains('child')) return 'assets/svg/اطفال2.svg';
 
     return 'assets/svg/فحص شامل.svg';
   }
@@ -649,9 +698,9 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               SvgPicture.asset('assets/svg/ثوثه الدكتور 1.svg',
                   width: 32, height: 32),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
-                _isEnglish ? 'Thoutha Smart Doctor' : 'ثوثة الطبيب الذكي',
+                _isEnglish ? 'Thoutha Smart Doctor' : 'chat.thotha_the_smart_doctor'.tr(),
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,
@@ -677,7 +726,7 @@ class _ChatScreenState extends State<ChatScreen> {
               },
               child: Padding(
                 padding: const EdgeInsets.all(8),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_forward_ios,
                   color: Colors.white,
                   size: 24,
@@ -701,25 +750,25 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _botMessage(_isEnglish ? '👋🏻 Welcome\nHow can I help you?' : '👋🏻 اهلا بك\nازاى اقدر اساعدك؟'),
+          _botMessage(_isEnglish ? '👋🏻 Welcome\nHow can I help you?' : 'chat.welcomenhow_can_i_help'.tr()),
           if (_isLoading && _flowItems.isEmpty) ...[
-            const SizedBox(height: 16),
-            _botMessage(_isEnglish ? '...Preparing questions' : '...جاري تجهيز الأسئلة'),
+            SizedBox(height: 16),
+            _botMessage(_isEnglish ? '...Preparing questions' : 'chat.preparing_questions'.tr()),
           ],
           for (final item in _flowItems) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             if (item.type == _FlowType.question) ...[
               _botMessage(item.question!.text),
               if (!_chatMode &&
                   _activeQuestionId == item.question!.id &&
                   item.question!.answers.isNotEmpty) ...[
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _quickReplies(item.question!),
               ],
             ] else if (item.type == _FlowType.result) ...[
               _botMessage(item.text),
               if (item.category != null) ...[
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _resultButton(item.category!),
               ],
             ] else ...[
@@ -727,7 +776,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ],
           for (final m in _chatHistory) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             if (m.role == _ChatRole.user)
               _userMessage(m.text)
             else
@@ -735,7 +784,7 @@ class _ChatScreenState extends State<ChatScreen> {
             if (m.role == _ChatRole.bot &&
                 m.category != null &&
                 m.category!.trim().isNotEmpty) ...[
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               _resultButton(m.category!),
             ],
           ],
@@ -753,7 +802,7 @@ class _ChatScreenState extends State<ChatScreen> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
       color: theme.scaffoldBackgroundColor,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: Duration(milliseconds: 200),
         curve: Curves.easeInOut,
         decoration: BoxDecoration(
           color: theme.brightness == Brightness.dark
@@ -772,7 +821,7 @@ class _ChatScreenState extends State<ChatScreen> {
             BoxShadow(
               color: Colors.black.withOpacity(0.02),
               blurRadius: 8,
-              offset: const Offset(0, 2),
+              offset: Offset(0, 2),
             ),
           ],
         ),
@@ -795,13 +844,13 @@ class _ChatScreenState extends State<ChatScreen> {
                         color: theme.colorScheme.onSurface,
                         fontSize: 15),
                     decoration: InputDecoration(
-                      hintText: _isEnglish ? 'Type your message...' : 'اكتب رسالتك...',
+                      hintText: _isEnglish ? 'Type your message...' : 'chat.write_your_message'.tr(),
                       hintTextDirection: TextDirection.rtl,
                       hintStyle: TextStyle(
                           fontFamily: 'Cairo',
                           color: theme.brightness == Brightness.dark
                               ? Colors.grey[500]
-                              : const Color(0xFF9E9E9E),
+                              : Color(0xFF9E9E9E),
                           fontSize: 14),
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -815,11 +864,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 AnimatedScale(
                   scale: hasText ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 250),
+                  duration: Duration(milliseconds: 250),
                   curve: Curves.easeOutBack,
                   child: AnimatedOpacity(
                     opacity: hasText ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 200),
+                    duration: Duration(milliseconds: 200),
                     child: Padding(
                       padding: const EdgeInsets.all(4),
                       child: InkWell(
@@ -828,16 +877,16 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Container(
                           height: 40,
                           width: 40,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                               shape: BoxShape.circle, color: _color2),
-                          child: const Icon(Icons.arrow_upward,
+                          child: Icon(Icons.arrow_upward,
                               color: Colors.white, size: 20),
                         ),
                       ),
                     ),
                   ),
                 ),
-                if (!hasText) const SizedBox(width: 4),
+                if (!hasText) SizedBox(width: 4),
               ],
             ),
           ),
@@ -851,7 +900,7 @@ class _ChatScreenState extends State<ChatScreen> {
       height: size,
       width: size,
       padding: EdgeInsets.all(size * 0.18),
-      decoration: const BoxDecoration(color: _color2, shape: BoxShape.circle),
+      decoration: BoxDecoration(color: _color2, shape: BoxShape.circle),
       child: SvgPicture.asset('assets/svg/ثوثه الدكتور 1.svg'),
     );
   }
@@ -869,7 +918,7 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: theme.brightness == Brightness.dark
-                  ? theme.colorScheme.surfaceVariant.withOpacity(0.5)
+                  ? theme.colorScheme.surfaceContainerHighest.withOpacity(0.5)
                   : _color3,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(13),
@@ -881,7 +930,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Text(
               text,
               textAlign: TextAlign.right,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 14,
                 height: 1.5,
@@ -890,7 +939,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         _botAvatar(size: 32),
       ],
     );
@@ -903,7 +952,7 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Container(
         constraints: BoxConstraints(maxWidth: screenWidth * 0.75),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: _color2,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(13),
@@ -915,7 +964,7 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Text(
           text,
           textAlign: TextAlign.right,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Cairo',
             fontSize: 14,
             height: 1.5,
@@ -940,7 +989,7 @@ class _ChatScreenState extends State<ChatScreen> {
               onPressed: _isLoading ? null : () => _submitAnswer(q, a),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.brightness == Brightness.dark
-                    ? const Color(0xFF1E1E2D)
+                    ? Color(0xFF1E1E2D)
                     : Colors.white,
                 foregroundColor: theme.brightness == Brightness.dark
                     ? Colors.white
@@ -958,7 +1007,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Text(
                 a.text,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -966,7 +1015,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
         ],
       ],
     );
@@ -992,7 +1041,7 @@ class _ChatScreenState extends State<ChatScreen> {
       
       // Add a separator instead of clearing
       _flowItems.add(_FlowItem.result(
-          text: _isEnglish ? '— New Conversation —' : '— محادثة جديدة —'));
+          text: _isEnglish ? '— New Conversation —' : 'chat.new_conversation'.tr()));
     });
 
     try {
@@ -1024,7 +1073,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 BoxShadow(
                   color: _color2.withOpacity(0.3),
                   blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  offset: Offset(0, 4),
                 ),
               ],
             ),
@@ -1049,7 +1098,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
@@ -1057,22 +1106,22 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    const Icon(Icons.arrow_back_rounded, size: 20),
+                    SizedBox(width: 10),
+                    Icon(Icons.arrow_back_rounded, size: 20),
                   ],
                 ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10),
         Center(
           child: OutlinedButton.icon(
             onPressed: _isLoading ? null : _restartSession,
-            icon: const Icon(Icons.refresh_rounded, size: 18, color: _color2),
+            icon: Icon(Icons.refresh_rounded, size: 18, color: _color2),
               label: Text(
-                _isEnglish ? 'Restart conversation' : 'إعادة المحادثة من البداية',
-                style: const TextStyle(
+                _isEnglish ? 'Restart conversation' : 'chat.restart_the_conversation_from'.tr(),
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -1080,7 +1129,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: _color2, width: 1.5),
+              side: BorderSide(color: _color2, width: 1.5),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999)),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

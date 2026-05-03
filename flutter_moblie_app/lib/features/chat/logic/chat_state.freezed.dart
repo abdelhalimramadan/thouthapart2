@@ -313,7 +313,7 @@ class _Initial implements ChatState {
 /// @nodoc
 
 class ChatLoading implements ChatState {
-  const ChatLoading();
+  ChatLoading();
 
   @override
   bool operator ==(Object other) {
@@ -333,7 +333,7 @@ class ChatLoading implements ChatState {
 /// @nodoc
 
 class ChatSuccess implements ChatState {
-  const ChatSuccess(
+  ChatSuccess(
       {required final List<FlowItem> flowItems,
       required final List<ChatItem> chatHistory,
       final List<Map<String, dynamic>> categories = const [],
@@ -386,11 +386,11 @@ class ChatSuccess implements ChatState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChatSuccess &&
-            const DeepCollectionEquality()
+            DeepCollectionEquality()
                 .equals(other._flowItems, _flowItems) &&
-            const DeepCollectionEquality()
+            DeepCollectionEquality()
                 .equals(other._chatHistory, _chatHistory) &&
-            const DeepCollectionEquality()
+            DeepCollectionEquality()
                 .equals(other._categories, _categories) &&
             (identical(other.sessionId, sessionId) ||
                 other.sessionId == sessionId) &&
@@ -405,9 +405,9 @@ class ChatSuccess implements ChatState {
   @override
   int get hashCode => Object.hash(
       runtimeType,
-      const DeepCollectionEquality().hash(_flowItems),
-      const DeepCollectionEquality().hash(_chatHistory),
-      const DeepCollectionEquality().hash(_categories),
+      DeepCollectionEquality().hash(_flowItems),
+      DeepCollectionEquality().hash(_chatHistory),
+      DeepCollectionEquality().hash(_categories),
       sessionId,
       activeQuestionId,
       chatMode,
@@ -491,7 +491,7 @@ class _$ChatSuccessCopyWithImpl<$Res> implements $ChatSuccessCopyWith<$Res> {
 /// @nodoc
 
 class ChatError implements ChatState {
-  const ChatError(this.message);
+  ChatError(this.message);
 
   final String message;
 

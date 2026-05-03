@@ -6,6 +6,7 @@ import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:thoutha_mobile_app/core/theming/colors.dart';
 import 'package:thoutha_mobile_app/core/theming/styles.dart';
 import 'package:thoutha_mobile_app/features/auth/data/auth_service.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -45,37 +46,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'البريد الإلكتروني مطلوب';
+      return 'auth.email_required'.tr();
     }
     if (!RegExp(r'^[^@]+@[^\s]+\.[^\s]+$').hasMatch(value)) {
-      return 'الرجاء إدخال بريد إلكتروني صالح';
+      return 'auth.please_enter_a_valid'.tr();
     }
     return null;
   }
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'كلمة المرور مطلوبة';
+      return 'auth.password_required'.tr();
     }
     if (value.length < 6) {
-      return 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
+      return 'auth.password_must_be_at'.tr();
     }
     return null;
   }
 
   String? _validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'تأكيد كلمة المرور مطلوب';
+      return 'auth.password_confirmation_is_required'.tr();
     }
     if (value != _passwordController.text) {
-      return 'كلمات المرور غير متطابقة';
+      return 'auth.passwords_do_not_match'.tr();
     }
     return null;
   }
 
   String? _validateRequired(String? value, String fieldName) {
     if (value == null || value.isEmpty) {
-      return '$fieldName مطلوب';
+      return 'auth.var0_is_required'.tr(namedArgs: {'var_0': fieldName.toString()});
     }
     return null;
   }
@@ -108,7 +109,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                response['message'] ?? 'تم إنشاء الحساب بنجاح',
+                response['message'] ?? 'auth.the_account_has_been'.tr(),
                 textAlign: TextAlign.right,
               ),
               backgroundColor: Colors.green,
@@ -119,12 +120,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       } else {
         setState(() {
           _errorMessage =
-              response['error'] ?? 'فشل إنشاء الحساب. الرجاء المحاولة مرة أخرى';
+              response['error'] ?? 'auth.account_creation_failed_please'.tr();
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'حدث خطأ في الاتصال بالخادم';
+        _errorMessage = 'auth.an_error_occurred_connecting'.tr();
       });
     } finally {
       if (mounted) {
@@ -145,7 +146,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('إنشاء حساب جديد'),
+          title: Text('auth.create_a_new_account'.tr()),
           centerTitle: true,
         ),
         body: SingleChildScrollView(
@@ -159,7 +160,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   verticalSpace(40),
                   Center(
                     child: Text(
-                      'ثوثة',
+                      'auth.thutha'.tr(),
                       style: TextStyles.font24BlueBold.copyWith(
                         fontSize: baseFontSize * 1.5,
                       ),
@@ -169,8 +170,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      labelText: 'البريد الإلكتروني',
-                      prefixIcon: const Icon(Icons.email_outlined),
+                      labelText: 'auth.email'.tr(),
+                      prefixIcon: Icon(Icons.email_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -183,8 +184,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(
-                      labelText: 'كلمة المرور',
-                      prefixIcon: const Icon(Icons.lock_outline),
+                      labelText: 'auth.password'.tr(),
+                      prefixIcon: Icon(Icons.lock_outline),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -196,8 +197,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _confirmPasswordController,
                     decoration: InputDecoration(
-                      labelText: 'تأكيد كلمة المرور',
-                      prefixIcon: const Icon(Icons.lock_outline),
+                      labelText: 'auth.confirm_password'.tr(),
+                      prefixIcon: Icon(Icons.lock_outline),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -209,8 +210,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _firstNameController,
                     decoration: InputDecoration(
-                      labelText: 'الاسم الأول',
-                      prefixIcon: const Icon(Icons.person_outline),
+                      labelText: 'auth.first_name'.tr(),
+                      prefixIcon: Icon(Icons.person_outline),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -222,10 +223,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ],
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'الاسم الأول مطلوب';
+                        return 'auth.first_name_required'.tr();
                       }
                       if (!AppRegex.isArabicName(value.trim())) {
-                        return 'الاسم الأول لازم يكون بالعربي فقط';
+                        return 'auth.the_first_name_must'.tr();
                       }
                       return null;
                     },
@@ -234,8 +235,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _lastNameController,
                     decoration: InputDecoration(
-                      labelText: 'الاسم الأخير',
-                      prefixIcon: const Icon(Icons.person_outline),
+                      labelText: 'auth.last_name'.tr(),
+                      prefixIcon: Icon(Icons.person_outline),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -247,10 +248,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ],
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'الاسم الأخير مطلوب';
+                        return 'auth.last_name_required'.tr();
                       }
                       if (!AppRegex.isArabicName(value.trim())) {
-                        return 'الاسم الأخير لازم يكون بالعربي فقط';
+                        return 'auth.the_last_name_must'.tr();
                       }
                       return null;
                     },
@@ -259,39 +260,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: _phoneController,
                     decoration: InputDecoration(
-                      labelText: 'رقم الهاتف',
-                      prefixIcon: const Icon(Icons.phone_outlined),
+                      labelText: 'auth.phone_number'.tr(),
+                      prefixIcon: Icon(Icons.phone_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
                     keyboardType: TextInputType.phone,
                     validator: (value) =>
-                        _validateRequired(value, 'رقم الهاتف'),
+                        _validateRequired(value, 'auth.phone_number'.tr()),
                   ),
                   verticalSpace(16),
                   TextFormField(
                     controller: _facultyController,
                     decoration: InputDecoration(
-                      labelText: 'الكلية',
-                      prefixIcon: const Icon(Icons.school_outlined),
+                      labelText: 'auth.college'.tr(),
+                      prefixIcon: Icon(Icons.school_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    validator: (value) => _validateRequired(value, 'الكلية'),
+                    validator: (value) => _validateRequired(value, 'auth.college'.tr()),
                   ),
                   verticalSpace(16),
                   DropdownButtonFormField<String>(
                     isExpanded: true,
                     decoration: InputDecoration(
-                      labelText: 'السنة الدراسية',
-                      prefixIcon: const Icon(Icons.calendar_today_outlined),
+                      labelText: 'auth.academic_year'.tr(),
+                      prefixIcon: Icon(Icons.calendar_today_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    items: const ['الرابعة', 'الخامسة', 'امتياز']
+                    items: ['auth.fourth'.tr(), 'auth.fifth'.tr(), 'auth.privilege'.tr()]
                         .map((year) => DropdownMenuItem(
                               value: year,
                               child: Text(year),
@@ -302,27 +303,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         _yearController.text = value;
                       }
                     },
-                    value: _yearController.text.isNotEmpty
+                    initialValue: _yearController.text.isNotEmpty
                         ? _yearController.text
                         : null,
                     validator: (value) =>
-                        _validateRequired(value, 'السنة الدراسية'),
+                        _validateRequired(value, 'auth.academic_year'.tr()),
                   ),
                   verticalSpace(16),
                   TextFormField(
                     controller: _governorateController,
                     decoration: InputDecoration(
-                      labelText: 'المحافظة',
-                      helperText: 'اختر المحافظة التابعة لها الكلية',
-                      prefixIcon: const Icon(Icons.location_city_outlined),
+                      labelText: 'auth.text'.tr(),
+                      helperText: 'auth.text_1'.tr(),
+                      prefixIcon: Icon(Icons.location_city_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    validator: (value) => _validateRequired(value, 'المحافظة'),
+                    validator: (value) => _validateRequired(value, 'auth.text'.tr()),
                   ),
                   if (_errorMessage != null) ...[
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Text(
                       _errorMessage!,
                       style: TextStyle(
@@ -332,7 +333,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       textAlign: TextAlign.center,
                     ),
                   ],
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
                   SizedBox(
                     height: 52 * (width / 390),
                     child: ElevatedButton(
@@ -344,12 +345,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         backgroundColor: ColorsManager.mainBlue,
                       ),
                       child: _isLoading
-                          ? const CircularProgressIndicator(
+                          ? CircularProgressIndicator(
                               color: Colors.white,
                               strokeWidth: 2,
                             )
                           : Text(
-                              'تسجيل',
+                              'auth.registration'.tr(),
                               style: TextStyle(
                                 fontSize: baseFontSize,
                                 fontWeight: FontWeight.bold,
@@ -358,14 +359,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   TextButton(
                     onPressed: () {
                       Navigator.pushReplacementNamed(
                           context, Routes.loginScreen);
                     },
                     child: Text(
-                      'لديك حساب بالفعل؟ تسجيل الدخول',
+                      'auth.already_have_an_account'.tr(),
                       style: TextStyle(
                         color: ColorsManager.mainBlue,
                         fontSize: baseFontSize * 0.875,

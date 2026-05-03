@@ -3,6 +3,7 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:thoutha_mobile_app/core/helpers/phone_helper.dart';
 import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 /// Handles all password-reset API calls.
 ///
@@ -24,8 +25,8 @@ class PasswordResetService {
     _cookieJar = CookieJar();
     _dio = Dio(BaseOptions(
       baseUrl: ApiConstants.baseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      connectTimeout: Duration(seconds: 10),
+      receiveTimeout: Duration(seconds: 10),
       contentType: 'application/json',
       responseType: ResponseType.json,
       headers: const {'Accept': 'application/json'},
@@ -58,7 +59,7 @@ class PasswordResetService {
         final data = res.data is Map ? res.data as Map : {};
         return {
           'success': true,
-          'message': data['message'] ?? 'تم إرسال رمز التحقق على الواتساب',
+          'message': data['message'] ?? 'forgot_password.a_verification_code_has'.tr(),
           'expires_in': data['expires_in_seconds'] ?? 300,
           'user_email': data['user_email'],
           'phone': normalised,
@@ -68,26 +69,26 @@ class PasswordResetService {
       // Handle specific error codes from API docs
       switch (res.statusCode) {
         case 400:
-          return {'success': false, 'message': 'تنسيق رقم الهاتف غير صحيح'};
+          return {'success': false, 'message': 'forgot_password.invalid_phone_number_format'.tr()};
         case 404:
-          return {'success': false, 'message': 'لا يوجد حساب مرتبط بهذا الرقم'};
+          return {'success': false, 'message': 'forgot_password.there_is_no_account'.tr()};
         case 429:
           return {
             'success': false,
-            'message': 'طلبات كثيرة جداً، انتظر قليلاً ثم أعد المحاولة'
+            'message': 'forgot_password.too_many_requests_wait'.tr()
           };
         case 503:
           return {
             'success': false,
-            'message': 'خدمة الواتساب غير متاحة حالياً، حاول مرة أخرى لاحقاً'
+            'message': 'forgot_password.whatsapp_service_is_currently'.tr()
           };
         default:
-          return _errorFromResponse(res, 'فشل في إرسال رمز التحقق');
+          return _errorFromResponse(res, 'forgot_password.failed_to_send_verification'.tr());
       }
     } on DioException catch (e) {
       return _dioError(e);
     } catch (e) {
-      return {'success': false, 'message': 'حدث خطأ غير متوقع'};
+      return {'success': false, 'message': 'booking.an_unexpected_error_occurred'.tr()};
     }
   }
 
@@ -112,7 +113,7 @@ class PasswordResetService {
         return {
           'success': true,
           'message': data['message'] ??
-              'تم التحقق بنجاح، يمكنك الآن تغيير كلمة المرور',
+              'forgot_password.verification_completed_successfully_you'.tr(),
           'session_expires_in': data['session_expires_in_minutes'] ?? 10,
         };
       }
@@ -122,31 +123,31 @@ class PasswordResetService {
         case 400:
           return {
             'success': false,
-            'message': 'رمز التحقق غير صحيح أو البيانات ناقصة'
+            'message': 'forgot_password.the_verification_code_is_1'.tr()
           };
         case 404:
           return {
             'success': false,
-            'message': 'لم يتم إرسال رمز تحقق لهذا الرقم، يرجى طلب رمز جديد'
+            'message': 'forgot_password.a_verification_code_was'.tr()
           };
         case 410:
           return {
             'success': false,
-            'message': 'انتهت صلاحية رمز التحقق، يرجى طلب رمز جديد'
+            'message': 'forgot_password.the_verification_code_has'.tr()
           };
         case 429:
           return {
             'success': false,
             'message':
-                'تجاوزت عدد المحاولات المسموح بها، يرجى الانتظار والمحاولة لاحقاً'
+                'forgot_password.you_have_exceeded_the'.tr()
           };
         default:
-          return _errorFromResponse(res, 'رمز التحقق غير صحيح');
+          return _errorFromResponse(res, 'forgot_password.the_verification_code_is'.tr());
       }
     } on DioException catch (e) {
       return _dioError(e);
     } catch (e) {
-      return {'success': false, 'message': 'حدث خطأ غير متوقع'};
+      return {'success': false, 'message': 'booking.an_unexpected_error_occurred'.tr()};
     }
   }
 
@@ -158,12 +159,12 @@ class PasswordResetService {
     required String confirmPassword,
   }) async {
     if (newPassword != confirmPassword) {
-      return {'success': false, 'message': 'كلمتا المرور غير متطابقتين'};
+      return {'success': false, 'message': 'forgot_password.the_two_passwords_do'.tr()};
     }
     if (newPassword.length < 6) {
       return {
         'success': false,
-        'message': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'
+        'message': 'forgot_password.password_must_be_at'.tr()
       };
     }
 
@@ -182,7 +183,7 @@ class PasswordResetService {
         final data = res.data is Map ? res.data as Map : {};
         return {
           'success': true,
-          'message': data['message'] ?? 'تم تغيير كلمة المرور بنجاح',
+          'message': data['message'] ?? 'forgot_password.the_password_has_been'.tr(),
         };
       }
 
@@ -191,34 +192,34 @@ class PasswordResetService {
         case 400:
           return {
             'success': false,
-            'message': 'بيانات غير صحيحة، تحقق من المدخلات'
+            'message': 'forgot_password.invalid_data_check_input'.tr()
           };
         case 401:
-          return {'success': false, 'message': 'يجب التحقق من رمز OTP أولاً'};
+          return {'success': false, 'message': 'forgot_password.you_must_check_the'.tr()};
         case 403:
           return {
             'success': false,
-            'message': 'يجب التحقق من رمز OTP أولاً قبل تغيير كلمة المرور'
+            'message': 'forgot_password.you_must_verify_the'.tr()
           };
         case 404:
-          return {'success': false, 'message': 'لا يوجد حساب مرتبط بهذا الرقم'};
+          return {'success': false, 'message': 'forgot_password.there_is_no_account'.tr()};
         case 410:
           return {
             'success': false,
-            'message': 'انتهت صلاحية الجلسة، يرجى إعادة التحقق من الرمز'
+            'message': 'forgot_password.the_session_has_expired'.tr()
           };
         case 429:
           return {
             'success': false,
-            'message': 'طلبات كثيرة جداً، انتظر قليلاً ثم أعد المحاولة'
+            'message': 'forgot_password.too_many_requests_wait'.tr()
           };
         default:
-          return _errorFromResponse(res, 'فشل في تغيير كلمة المرور');
+          return _errorFromResponse(res, 'forgot_password.failed_to_change_password'.tr());
       }
     } on DioException catch (e) {
       return _dioError(e);
     } catch (e) {
-      return {'success': false, 'message': 'حدث خطأ غير متوقع'};
+      return {'success': false, 'message': 'booking.an_unexpected_error_occurred'.tr()};
     }
   }
 
@@ -249,22 +250,22 @@ class PasswordResetService {
     if (!hasServerMsg) {
       switch (res.statusCode) {
         case 400:
-          msg = 'بيانات غير صحيحة، يرجى التحقق من المدخلات';
+          msg = 'forgot_password.invalid_data_please_check'.tr();
           break;
         case 404:
-          msg = 'لا يوجد حساب مرتبط بهذا الرقم';
+          msg = 'forgot_password.there_is_no_account'.tr();
           break;
         case 410:
-          msg = 'انتهت صلاحية رمز التحقق، أعد المحاولة';
+          msg = 'forgot_password.the_verification_code_has_1'.tr();
           break;
         case 429:
-          msg = 'طلبات كثيرة جداً، انتظر قليلاً ثم أعد المحاولة';
+          msg = 'forgot_password.too_many_requests_wait'.tr();
           break;
         case 403:
-          msg = 'يجب التحقق من رمز OTP أولاً';
+          msg = 'forgot_password.you_must_check_the'.tr();
           break;
         case 500:
-          msg = 'لا يوجد حساب مرتبط بهذا الرقم';
+          msg = 'forgot_password.there_is_no_account'.tr();
           break;
         default:
           break;
@@ -279,12 +280,12 @@ class PasswordResetService {
         e.type == DioExceptionType.receiveTimeout) {
       return {
         'success': false,
-        'message': 'انتهت مهلة الاتصال، تحقق من الإنترنت'
+        'message': 'forgot_password.connection_timed_out_check'.tr()
       };
     }
     if (e.type == DioExceptionType.connectionError) {
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
+      return {'success': false, 'message': 'forgot_password.unable_to_connect_to'.tr()};
     }
-    return {'success': false, 'message': 'حدث خطأ في الشبكة'};
+    return {'success': false, 'message': 'forgot_password.a_network_error_has'.tr()};
   }
 }

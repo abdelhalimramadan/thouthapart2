@@ -14,9 +14,12 @@ import 'core/helpers/constants.dart';
 import 'doc_app.dart';
 import 'firebase_options.dart';
 
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+
 void main() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Register background handler for data-only FCM payloads
@@ -39,7 +42,15 @@ void main() async {
   // Clear chat history at app startup (so it only persists during the current session)
   await SharedPrefHelper.removeData(SharedPrefKeys.chatHistory);
   
-  runApp(DocApp(
-    appRouter: AppRouter(),
-  ));
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('ar'), Locale('en')],
+      path: 'assets/translations',
+      fallbackLocale: Locale('ar'),
+      startLocale: Locale('ar'),
+      child: DocApp(
+        appRouter: AppRouter(),
+      ),
+    ),
+  );
 }

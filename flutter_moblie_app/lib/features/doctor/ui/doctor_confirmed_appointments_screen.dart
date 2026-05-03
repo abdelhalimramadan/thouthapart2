@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../../core/utils/notification_helper.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/networking/api_service.dart';
 import '../../../../core/routing/routes.dart';
 import '../drawer_doctor/doctor_drawer_screen.dart';
-import '../../notifications/ui/notifications_screen.dart';
 import '../widgets/appointment_card_widget.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class DoctorConfirmedAppointmentsScreen extends StatefulWidget {
   const DoctorConfirmedAppointmentsScreen({super.key});
@@ -50,7 +49,7 @@ class _DoctorConfirmedAppointmentsScreenState
       } else {
         setState(() {
           _error =
-              result['error']?.toString() ?? 'فشل في تحميل الحجوزات المؤكدة';
+              result['error']?.toString() ?? 'doctor.failed_to_load_confirmed'.tr();
           _isLoading = false;
         });
       }
@@ -80,7 +79,7 @@ class _DoctorConfirmedAppointmentsScreenState
       child: Scaffold(
         key: _scaffoldKey,
         backgroundColor: theme.scaffoldBackgroundColor,
-        drawer: const DoctorDrawer(),
+        drawer: DoctorDrawer(),
         appBar: AppBar(
           toolbarHeight: 70,
           elevation: 0,
@@ -100,7 +99,7 @@ class _DoctorConfirmedAppointmentsScreenState
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'الحجوزات المؤكدة',
+                'doctor.confirmed_reservations'.tr(),
                 style: textTheme.titleLarge?.copyWith(
                   fontFamily: 'Cairo',
                   fontSize: 18,
@@ -170,7 +169,7 @@ class _DoctorConfirmedAppointmentsScreenState
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       image: DecorationImage(
-                        image: const AssetImage('assets/images/dكتور.png'),
+                        image: AssetImage('assets/images/dكتور.png'),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -195,21 +194,21 @@ class _DoctorConfirmedAppointmentsScreenState
               _buildDetailRow(
                 context: context,
                 icon: Icons.calendar_month_outlined,
-                label: 'التاريخ',
+                label: 'doctor.the_date'.tr(),
                 value: date,
               ),
               SizedBox(height: 14),
               _buildDetailRow(
                 context: context,
                 icon: Icons.access_time_outlined,
-                label: 'الوقت',
+                label: 'doctor.the_time'.tr(),
                 value: time,
               ),
               SizedBox(height: 14),
               _buildDetailRow(
                 context: context,
                 icon: Icons.medical_services_outlined,
-                label: 'التخصص',
+                label: 'doctor.specialization'.tr(),
                 value: service,
               ),
               SizedBox(height: 24),
@@ -235,12 +234,12 @@ class _DoctorConfirmedAppointmentsScreenState
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
+            color: isDark ? Colors.grey[800] : Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon,
               size: 18,
-              color: isDark ? Colors.white : const Color(0xFF021433)),
+              color: isDark ? Colors.white : Color(0xFF021433)),
         ),
         SizedBox(width: 12),
         Expanded(
@@ -289,7 +288,7 @@ class _DoctorConfirmedAppointmentsScreenState
       service: service,
       time: time,
       date: date,
-      statusLabel: 'مؤكدة',
+      statusLabel: 'doctor.confirmed'.tr(),
       statusColor: Colors.greenAccent,
       onTap: () => _showBookingDetails(
         context: context,
@@ -333,8 +332,8 @@ class _DoctorConfirmedAppointmentsScreenState
             ElevatedButton(
               onPressed: _fetchConfirmedAppointments,
               child: Text(
-                'إعادة المحاولة',
-                style: const TextStyle(fontFamily: 'Cairo'),
+                'doctor.retry'.tr(),
+                style: TextStyle(fontFamily: 'Cairo'),
               ),
             ),
           ],
@@ -357,25 +356,25 @@ class _DoctorConfirmedAppointmentsScreenState
               ),
               SizedBox(height: 16),
               Text(
-                'لا توجد مرضى مكتملين حالياً',
+                'doctor.there_are_currently_no'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w700,
                   fontSize: 17,
-                  color: isDarkMode ? Colors.white : const Color(0xFF0C4A6E),
+                  color: isDarkMode ? Colors.white : Color(0xFF0C4A6E),
                 ),
               ),
               SizedBox(height: 10),
               Text(
-                'سيظهر المرضى هنا عندما تكمل حجوزات من سجل الحجوزات',
+                'doctor.patients_will_appear_here'.tr(),
                 textAlign: TextAlign.center,
                 textDirection: TextDirection.rtl,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 14,
                   height: 1.6,
-                  color: isDarkMode ? Colors.white60 : const Color(0xFF475569),
+                  color: isDarkMode ? Colors.white60 : Color(0xFF475569),
                 ),
               ),
             ],
@@ -393,7 +392,7 @@ class _DoctorConfirmedAppointmentsScreenState
             width: double.infinity,
             padding: EdgeInsets.symmetric(vertical: 10),
             child: Text(
-              'الحجوزات المؤكدة',
+              'doctor.confirmed_reservations'.tr(),
               textAlign: TextAlign.right,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
@@ -426,7 +425,7 @@ class _DoctorConfirmedAppointmentsScreenState
                     : '',
               ),
             );
-          }).toList(),
+          }),
           SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
         ],
       ),

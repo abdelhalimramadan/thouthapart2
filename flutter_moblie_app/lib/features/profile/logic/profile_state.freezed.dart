@@ -295,7 +295,7 @@ class _Initial<T> implements ProfileState<T> {
 /// @nodoc
 
 class Loading<T> implements ProfileState<T> {
-  const Loading(
+  Loading(
       {this.cachedData,
       final List<UniversityModel> universities = const [],
       final List<CityModel> cities = const [],
@@ -343,10 +343,10 @@ class Loading<T> implements ProfileState<T> {
             other is Loading<T> &&
             (identical(other.cachedData, cachedData) ||
                 other.cachedData == cachedData) &&
-            const DeepCollectionEquality()
+            DeepCollectionEquality()
                 .equals(other._universities, _universities) &&
-            const DeepCollectionEquality().equals(other._cities, _cities) &&
-            const DeepCollectionEquality()
+            DeepCollectionEquality().equals(other._cities, _cities) &&
+            DeepCollectionEquality()
                 .equals(other._categories, _categories));
   }
 
@@ -354,9 +354,9 @@ class Loading<T> implements ProfileState<T> {
   int get hashCode => Object.hash(
       runtimeType,
       cachedData,
-      const DeepCollectionEquality().hash(_universities),
-      const DeepCollectionEquality().hash(_cities),
-      const DeepCollectionEquality().hash(_categories));
+      DeepCollectionEquality().hash(_universities),
+      DeepCollectionEquality().hash(_cities),
+      DeepCollectionEquality().hash(_categories));
 
   @override
   String toString() {
@@ -433,7 +433,7 @@ class _$LoadingCopyWithImpl<T, $Res> implements $LoadingCopyWith<T, $Res> {
 /// @nodoc
 
 class Success<T> implements ProfileState<T> {
-  const Success(this.data,
+  Success(this.data,
       {final List<UniversityModel> universities = const [],
       final List<CityModel> cities = const [],
       final List<CategoryModel> categories = const []})
@@ -478,21 +478,21 @@ class Success<T> implements ProfileState<T> {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Success<T> &&
-            const DeepCollectionEquality().equals(other.data, data) &&
-            const DeepCollectionEquality()
+            DeepCollectionEquality().equals(other.data, data) &&
+            DeepCollectionEquality()
                 .equals(other._universities, _universities) &&
-            const DeepCollectionEquality().equals(other._cities, _cities) &&
-            const DeepCollectionEquality()
+            DeepCollectionEquality().equals(other._cities, _cities) &&
+            DeepCollectionEquality()
                 .equals(other._categories, _categories));
   }
 
   @override
   int get hashCode => Object.hash(
       runtimeType,
-      const DeepCollectionEquality().hash(data),
-      const DeepCollectionEquality().hash(_universities),
-      const DeepCollectionEquality().hash(_cities),
-      const DeepCollectionEquality().hash(_categories));
+      DeepCollectionEquality().hash(data),
+      DeepCollectionEquality().hash(_universities),
+      DeepCollectionEquality().hash(_cities),
+      DeepCollectionEquality().hash(_categories));
 
   @override
   String toString() {
@@ -553,7 +553,7 @@ class _$SuccessCopyWithImpl<T, $Res> implements $SuccessCopyWith<T, $Res> {
 /// @nodoc
 
 class Error<T> implements ProfileState<T> {
-  const Error({required this.error, required this.type});
+  Error({required this.error, required this.type});
 
   final String error;
   final DioExceptionType? type;

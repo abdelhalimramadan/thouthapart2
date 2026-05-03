@@ -53,12 +53,12 @@ mixin _$ChatResponse {
                 other.chatbotMode == chatbotMode) &&
             (identical(other.question, question) ||
                 other.question == question) &&
-            const DeepCollectionEquality().equals(other.answers, answers) &&
+            DeepCollectionEquality().equals(other.answers, answers) &&
             (identical(other.questionId, questionId) ||
                 other.questionId == questionId) &&
             (identical(other.questionText, questionText) ||
                 other.questionText == questionText) &&
-            const DeepCollectionEquality().equals(other.result, result) &&
+            DeepCollectionEquality().equals(other.result, result) &&
             (identical(other.reply, reply) || other.reply == reply));
   }
 
@@ -70,10 +70,10 @@ mixin _$ChatResponse {
       nextStep,
       chatbotMode,
       question,
-      const DeepCollectionEquality().hash(answers),
+      DeepCollectionEquality().hash(answers),
       questionId,
       questionText,
-      const DeepCollectionEquality().hash(result),
+      DeepCollectionEquality().hash(result),
       reply);
 
   @override
@@ -479,12 +479,12 @@ class _ChatResponse implements ChatResponse {
                 other.chatbotMode == chatbotMode) &&
             (identical(other.question, question) ||
                 other.question == question) &&
-            const DeepCollectionEquality().equals(other._answers, _answers) &&
+            DeepCollectionEquality().equals(other._answers, _answers) &&
             (identical(other.questionId, questionId) ||
                 other.questionId == questionId) &&
             (identical(other.questionText, questionText) ||
                 other.questionText == questionText) &&
-            const DeepCollectionEquality().equals(other._result, _result) &&
+            DeepCollectionEquality().equals(other._result, _result) &&
             (identical(other.reply, reply) || other.reply == reply));
   }
 
@@ -496,10 +496,10 @@ class _ChatResponse implements ChatResponse {
       nextStep,
       chatbotMode,
       question,
-      const DeepCollectionEquality().hash(_answers),
+      DeepCollectionEquality().hash(_answers),
       questionId,
       questionText,
-      const DeepCollectionEquality().hash(_result),
+      DeepCollectionEquality().hash(_result),
       reply);
 
   @override
@@ -633,13 +633,13 @@ mixin _$ChatQuestion {
             other is ChatQuestion &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.text, text) || other.text == text) &&
-            const DeepCollectionEquality().equals(other.answers, answers));
+            DeepCollectionEquality().equals(other.answers, answers));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType, id, text, const DeepCollectionEquality().hash(answers));
+      runtimeType, id, text, DeepCollectionEquality().hash(answers));
 
   @override
   String toString() {
@@ -893,13 +893,13 @@ class _ChatQuestion implements ChatQuestion {
             other is _ChatQuestion &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.text, text) || other.text == text) &&
-            const DeepCollectionEquality().equals(other._answers, _answers));
+            DeepCollectionEquality().equals(other._answers, _answers));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType, id, text, const DeepCollectionEquality().hash(_answers));
+      runtimeType, id, text, DeepCollectionEquality().hash(_answers));
 
   @override
   String toString() {

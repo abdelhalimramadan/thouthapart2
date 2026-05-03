@@ -4,6 +4,7 @@ import 'package:thoutha_mobile_app/features/onboarding/widgets/doctor_image_and_
 import '../../core/routing/routes.dart';
 import '../../core/theming/colors.dart';
 import '../../core/helpers/shared_pref_helper.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -20,7 +21,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
-    // بمجرد دخول الشاشة، نعتبر أن المستخدم "رأى" الاونبوردينج
+    // بمجرد دخول الشاشة، نعتبر أن المستخدم 'onboarding.opinion'.tr() الاونبوردينج
     // لكي لا تظهر له مرة أخرى إذا أغلق التطبيق وفتحه
     _markOnboardingAsSeen();
   }
@@ -33,21 +34,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<Map<String, String>> _pages = [
     {
       'image': 'assets/images/onboarding1.jpg',
-      'title': 'اعثر على أفضل الأطباء',
+      'title': 'onboarding.find_the_best_doctors'.tr(),
       'description':
-          'في ثوثة جمعنا أفضل طلاب وأطباء الأسنان عشان نقدم لك رعاية حقيقية بأسعار طلابية. ابتسامتك في أيد أمينة، مع نخبة من أمهر الأطباء الشباب.',
+          'onboarding.at_thootha_we_have'.tr(),
     },
     {
       'image': 'assets/images/onboarding2.jpg',
-      'title': 'احجز موعدك بسهولة',
+      'title': 'onboarding.book_your_appointment_easily'.tr(),
       'description':
-          'اختار الموعد المناسب لك واحجز مع طبيبك المفضل في ثواني. خدمة حجز المواعديد لدينا سهلة وسريعة وآمنة.',
+          'onboarding.choose_the_time_that'.tr(),
     },
     {
       'image': 'assets/images/onboarding3.jpg',
-      'title': 'متابعة دقيقة لصحة أسنانك',
+      'title': 'onboarding.careful_monitoring_of_your'.tr(),
       'description':
-          'احصل على سجل كامل لعلاجاتك ومواعيدك القادمة. نحن نهتم بابتسامتك من أول زيارة.',
+          'onboarding.get_a_complete_history'.tr(),
     },
   ];
 
@@ -84,7 +85,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         height: double.infinity,
         decoration: BoxDecoration(
           gradient: RadialGradient(
-            center: const Alignment(-0.8, -0.5),
+            center: Alignment(-0.8, -0.5),
             radius: 1.2,
             colors: [
               ColorsManager.layerBlur1.withAlpha(80),
@@ -99,7 +100,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           height: double.infinity,
           decoration: BoxDecoration(
             gradient: RadialGradient(
-              center: const Alignment(0.8, 0.5),
+              center: Alignment(0.8, 0.5),
               radius: 1.2,
               colors: [
                 ColorsManager.layerBlur2.withAlpha(80),
@@ -146,7 +147,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             onPressed: () async {
                               if (_currentPage < _numPages - 1) {
                                 await _pageController.nextPage(
-                                  duration: const Duration(milliseconds: 400),
+                                  duration: Duration(milliseconds: 400),
                                   curve: Curves.easeInOut,
                                 );
                               } else {
@@ -160,7 +161,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             TextButton(
                               onPressed: _onSkipPressed,
                               child: Text(
-                                'ندخل في الموضوع علي طول',
+                                'onboarding.we_get_into_the'.tr(),
                                 style: TextStyle(
                                   color: ColorsManager.darkBlue,
                                   fontSize: isTablet ? 17 : 16,
@@ -201,7 +202,7 @@ class PageIndicator extends StatelessWidget {
       children: List.generate(
         pageCount,
         (index) => AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 300),
           margin: EdgeInsets.symmetric(
             horizontal: 4,
           ),
@@ -250,7 +251,7 @@ class GetStartedButton extends StatelessWidget {
           elevation: 0,
         ),
         child: Text(
-          isLastPage ? 'ابدأ الآن' : 'التالي',
+          isLastPage ? 'onboarding.start_now'.tr() : 'onboarding.the_next'.tr(),
           style: TextStyle(
             color: Colors.white,
             fontSize: 16,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'core/routing/app_router.dart';
@@ -7,6 +6,7 @@ import 'core/routing/routes.dart';
 import 'core/routing/navigator_service.dart';
 import 'core/theming/app_theme.dart';
 import 'core/theming/theme_provider.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class DocApp extends StatelessWidget {
   final AppRouter appRouter;
@@ -20,7 +20,7 @@ class DocApp extends StatelessWidget {
         builder: (context, themeProvider, _) {
           return MaterialApp(
             navigatorKey: NavigatorService.navigatorKey,
-            title: 'ثوثة',
+            title: 'doc_app.thutha'.tr(),
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
@@ -40,16 +40,9 @@ class DocApp extends StatelessWidget {
             },
             initialRoute: Routes.splashScreen,
             onGenerateRoute: appRouter.generateRoute,
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('ar', 'EG'),
-              Locale('en', 'US'),
-            ],
-            locale: const Locale('ar', 'EG'),
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
           );
         },
       ),

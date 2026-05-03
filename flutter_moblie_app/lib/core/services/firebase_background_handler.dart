@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -18,8 +19,8 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   }
 
   // If it's a data-only payload, we construct and show a local notification manually.
-  final title = message.data['title'] ?? 'إشعار جديد';
-  final body = message.data['body'] ?? 'لديك إشعار جديد';
+  final title = message.data['title'] ?? 'core.new_notification'.tr();
+  final body = message.data['body'] ?? 'core.you_have_a_new'.tr();
 
   // We must re-initialize local notifications because this runs in an isolated background thread.
   final FlutterLocalNotificationsPlugin localNotifications =

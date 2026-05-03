@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
-import 'package:intl/intl.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
@@ -8,6 +7,7 @@ import 'package:thoutha_mobile_app/core/theming/colors.dart';
 import 'package:thoutha_mobile_app/core/theming/styles.dart';
 import 'package:thoutha_mobile_app/core/widgets/app_text_button.dart';
 import 'package:thoutha_mobile_app/features/requests/data/models/case_request_model.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class EditRequestScreen extends StatefulWidget {
   final CaseRequestModel request;
@@ -67,7 +67,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
   /// Builds "2026-03-10T15:30:00" format
   String get _dateTimeIso {
     if (_selectedDate == null || _selectedTime == null) return '';
-    return '${_formattedDate}T${_formattedTime}:00';
+    return '${_formattedDate}T$_formattedTime:00';
   }
 
   // ── Date & Time Pickers ───────────────────────────────────────────────────
@@ -79,7 +79,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
       initialDate: _selectedDate ?? now,
       firstDate: now,
       lastDate: DateTime(2101),
-      locale: const Locale('ar', 'EG'),
+      locale: Locale('ar', 'EG'),
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
@@ -90,7 +90,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
       initialTime: _selectedTime ?? TimeOfDay.now(),
       builder: (ctx, child) => Localizations.override(
         context: ctx,
-        locale: const Locale('ar', 'EG'),
+        locale: Locale('ar', 'EG'),
         child: child,
       ),
     );
@@ -104,7 +104,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
 
     if (_selectedDate == null || _selectedTime == null) {
       _showSnackBar(
-        'يرجى اختيار التاريخ والوقت',
+        'requests.please_select_a_date'.tr(),
         Colors.orange,
       );
       return;
@@ -116,7 +116,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
       final apiService = getIt<ApiService>();
 
       final description = _descriptionController.text.trim().isEmpty
-          ? 'لا توجد تفاصيل إضافية'
+          ? 'requests.there_are_no_additional'.tr()
           : _descriptionController.text.trim();
 
       final result = await apiService.editRequest(
@@ -128,18 +128,18 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
       if (mounted) {
         if (result['success'] == true) {
           _showSnackBar(
-            'تم تحديث الطلب بنجاح!',
+            'requests.the_request_has_been'.tr(),
             Colors.green,
           );
 
           // Wait a moment and then pop back
-          await Future.delayed(const Duration(milliseconds: 500));
+          await Future.delayed(Duration(milliseconds: 500));
           if (mounted) {
             Navigator.pop(context, true); // Return true to indicate success
           }
         } else {
           _showSnackBar(
-            result['error'] ?? 'فشل في تحديث الطلب',
+            result['error'] ?? 'requests.failed_to_update_the'.tr(),
             Colors.red,
           );
         }
@@ -163,7 +163,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
       SnackBar(
         content: Text(
           message,
-          style: const TextStyle(fontFamily: 'Cairo'),
+          style: TextStyle(fontFamily: 'Cairo'),
         ),
         backgroundColor: color,
         behavior: SnackBarBehavior.floating,
@@ -186,7 +186,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            'تعديل الطلب',
+            'requests.modify_the_request'.tr(),
             style: TextStyles.font18DarkBlueBold.copyWith(
               fontFamily: 'Cairo',
               fontSize: 18,
@@ -194,7 +194,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
             ),
           ),
           centerTitle: true,
-          backgroundColor: isDark ? const Color(0xFF2D2D2D) : Colors.white,
+          backgroundColor: isDark ? Color(0xFF2D2D2D) : Colors.white,
           elevation: 0,
           iconTheme: IconThemeData(
             color: isDark ? Colors.white : ColorsManager.darkBlue,
@@ -206,7 +206,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
           ),
         ),
         backgroundColor:
-            isDark ? const Color(0xFF1E1E1E) : ColorsManager.offWhite,
+            isDark ? Color(0xFF1E1E1E) : ColorsManager.offWhite,
         body: SafeArea(
           child: Directionality(
             textDirection: ui.TextDirection.rtl,
@@ -224,7 +224,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                       children: [
                         // ── Header ───────────────────────────────────────
                         Text(
-                          'تعديل بيانات الحالة',
+                          'requests.modify_case_data'.tr(),
                           style: TextStyles.font18DarkBlueBold.copyWith(
                             fontFamily: 'Cairo',
                             fontSize: 18,
@@ -233,7 +233,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'قم بتعديل البيانات التالية للطلب',
+                          'requests.modify_the_following_data'.tr(),
                           style: TextStyles.font14GrayRegular.copyWith(
                             fontFamily: 'Cairo',
                             color: isDark ? Colors.grey[400] : null,
@@ -246,7 +246,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                         SizedBox(height: 24),
 
                         // ── DateTime Picker ──────────────────────────────
-                        _buildLabel('التاريخ والوقت', isDark),
+                        _buildLabel('requests.date_and_time'.tr(), isDark),
                         SizedBox(height: 8),
                         _buildDateTimePicker(isDark),
                         SizedBox(height: 20),
@@ -265,7 +265,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                             fontSize: 14,
                           ),
                           decoration: _buildDecoration(
-                            hint: 'أضف وصفاً تفصيلياً للحالة...',
+                            hint: 'requests.add_a_detailed_description'.tr(),
                             icon: Icons.description_outlined,
                             isDark: isDark,
                           ),
@@ -282,7 +282,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                             : Column(
                                 children: [
                                   AppTextButton(
-                                    buttonText: 'حفظ التعديلات',
+                                    buttonText: 'requests.save_modifications'.tr(),
                                     textStyle:
                                         TextStyles.font16WhiteSemiBold.copyWith(
                                       fontFamily: 'Cairo',
@@ -294,7 +294,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                                   SizedBox(height: 16),
                                   // ── Cancel Button ────────────────────────────────
                                   AppTextButton(
-                                    buttonText: 'إلغاء',
+                                    buttonText: 'booking.cancellation'.tr(),
                                     textStyle:
                                         TextStyles.font16WhiteSemiBold.copyWith(
                                       fontFamily: 'Cairo',
@@ -326,7 +326,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
       width: double.infinity,
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2D2D2D) : Colors.white,
+        color: isDark ? Color(0xFF2D2D2D) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
@@ -338,7 +338,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
           // Category
           _buildInfoRow(
             icon: Icons.medical_services_outlined,
-            label: 'التخصص',
+            label: 'doctor.specialization'.tr(),
             value: widget.request.categoryName,
             isDark: isDark,
           ),
@@ -346,7 +346,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
           // Doctor Name
           _buildInfoRow(
             icon: Icons.person_outline,
-            label: 'الطبيب',
+            label: 'home_screen.the_doctor'.tr(),
             value: widget.request.doctorFullName,
             isDark: isDark,
           ),
@@ -354,7 +354,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
           // Request ID
           _buildInfoRow(
             icon: Icons.tag_outlined,
-            label: 'رقم الطلب',
+            label: 'requests.order_number'.tr(),
             value: '#${widget.request.id}',
             isDark: isDark,
           ),
@@ -416,7 +416,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: BoxDecoration(
                 color: isDark
-                    ? const Color(0xFF2D2D2D)
+                    ? Color(0xFF2D2D2D)
                     : ColorsManager.moreLighterGray,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
@@ -435,7 +435,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      hasDate ? _formattedDate : 'التاريخ',
+                      hasDate ? _formattedDate : 'doctor.the_date'.tr(),
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 13,
@@ -459,7 +459,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: BoxDecoration(
                 color: isDark
-                    ? const Color(0xFF2D2D2D)
+                    ? Color(0xFF2D2D2D)
                     : ColorsManager.moreLighterGray,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
@@ -478,7 +478,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      hasTime ? _formattedTime : 'الوقت',
+                      hasTime ? _formattedTime : 'doctor.the_time'.tr(),
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 13,
@@ -528,7 +528,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
       ),
       filled: true,
       fillColor:
-          isDark ? const Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
+          isDark ? Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,

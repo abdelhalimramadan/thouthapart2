@@ -6,11 +6,12 @@ import 'package:thoutha_mobile_app/core/networking/models/university_model.dart'
 import 'package:thoutha_mobile_app/features/profile/data/models/doctor_profile_model.dart';
 import 'package:thoutha_mobile_app/features/profile/data/repos/profile_repository.dart';
 import 'package:thoutha_mobile_app/features/profile/logic/profile_state.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
   final ProfileRepository _repository;
 
-  ProfileCubit(this._repository) : super(const ProfileState.initial());
+  ProfileCubit(this._repository) : super(ProfileState.initial());
 
   Future<void> fetchProfile() async {
     // Emit loading state without cached data - we want fresh data from server
@@ -46,7 +47,7 @@ class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
       emit(ProfileState.error(
         error: e.toString().contains('Exception:')
             ? e.toString().split('Exception:').last.trim()
-            : "حدث خطأ غير متوقع",
+            : 'booking.an_unexpected_error_occurred'.tr(),
         type: null,
       ));
     }
@@ -116,7 +117,7 @@ class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
       emit(ProfileState.error(
         error: e.toString().contains('Exception:')
             ? e.toString().split('Exception:').last.trim()
-            : 'حدث خطأ أثناء تحديث البيانات',
+            : 'profile.an_error_occurred_while'.tr(),
         type: null,
       ));
     }
@@ -125,12 +126,12 @@ class ProfileCubit extends Cubit<ProfileState<DoctorProfileModel>> {
   String _getErrorMessage(DioException e) {
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
-      return "انتهت مهلة الاتصال. تحقق من جودة الإنترنت وحاول مرة أخرى.";
+      return 'profile.the_connection_timed_out'.tr();
     } else if (e.type == DioExceptionType.connectionError) {
-      return "لا يمكن الاتصال بالخادم. تحقق من اتصالك بالإنترنت.";
+      return 'profile.cannot_connect_to_the'.tr();
     } else if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
-      return "يرجى تسجيل الدخول مرة أخرى.";
+      return 'profile.please_log_in_again'.tr();
     }
-    return "لا يمكن تحميل البيانات، يرجى المحاولة لاحقاً.";
+    return 'profile.the_data_could_not'.tr();
   }
 }

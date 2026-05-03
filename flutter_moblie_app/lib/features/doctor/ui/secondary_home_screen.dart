@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,14 +15,15 @@ import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/features/login/ui/login_screen.dart';
 import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class SecondaryHomeScreen extends StatefulWidget {
-  const SecondaryHomeScreen(
+  SecondaryHomeScreen(
       {super.key,
-      this.drawer = const HomeDrawer(),
+      this.drawer,
       this.showAddCaseCategory = false});
 
-  final Widget drawer;
+  final Widget? drawer;
   final bool showAddCaseCategory;
 
   @override
@@ -84,13 +84,13 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
 
   /// Returns true if [a] and [b] refer to the same governorate.
   /// Uses containment only (after stripping prefixes) to avoid false positives
-  /// like "القاهرة" matching "القليوبية" via shared leading characters.
+  /// like 'doctor.cairo'.tr() matching 'doctor.qalyubia'.tr() via shared leading characters.
   bool _namesMatch(String a, String b) {
     final na = _stripPrefix(a.trim());
     final nb = _stripPrefix(b.trim());
     if (na.isEmpty || nb.isEmpty) return false; // Exact match after stripping
     if (na == nb) return true;
-    // One fully contains the other (require ≥4 chars to avoid "ال" false hits)
+    // One fully contains the other (require ≥4 chars to avoid 'chat.the'.tr() false hits)
     if (na.length >= 4 && nb.contains(na)) return true;
     if (nb.length >= 4 && na.contains(nb)) return true;
     return false;
@@ -125,7 +125,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
     } else {
       setState(() {
         _gpsFailureMessage =
-            'لم يتمكن التطبيق من تحديد المحافظة تلقائيًا،\nيرجى الاختيار يدويًا';
+            'doctor.the_application_was_unable'.tr();
       });
     }
   }
@@ -144,7 +144,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
           setState(() {
             _gpsFinished = true;
             _gpsFailureMessage =
-                'تم رفض إذن الموقع بشكل دائم، يرجى تفعيله من إعدادات التطبيق';
+                'doctor.location_permission_has_been'.tr();
           });
         }
         return;
@@ -153,7 +153,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
         if (mounted) {
           setState(() {
             _gpsFinished = true;
-            _gpsFailureMessage = 'لا يمكن تحديد الموقع دون منح إذن الوصول';
+            _gpsFailureMessage = 'doctor.the_location_cannot_be'.tr();
           });
         }
         return;
@@ -165,14 +165,14 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
           setState(() {
             _gpsFinished = true;
             _gpsFailureMessage =
-                'خدمة الموقع معطّلة، يرجى تفعيلها لتحديد المحافظة تلقائيًا';
+                'doctor.the_location_service_is'.tr();
           });
         }
         return;
       }
 
       final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
+        locationSettings: LocationSettings(
           accuracy: LocationAccuracy.high,
           timeLimit: Duration(seconds: 10),
         ),
@@ -191,7 +191,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
         },
         options: Options(
           headers: {'User-Agent': 'ThothaApp/1.0'},
-          receiveTimeout: const Duration(seconds: 10),
+          receiveTimeout: Duration(seconds: 10),
         ),
       );
 
@@ -234,24 +234,106 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
   }
 
   // Asset mapping for categories
+  // Asset mapping for categories using Arabic names as stable keys from API
   final Map<String, String> _categoryAssets = {
     'فحص شامل': 'assets/svg/فحص شامل.svg',
-    'حشو أسنان': 'assets/svg/حشو اسنان.svg',
-    'حشو تجميلي': 'assets/svg/تجميلي.svg',
-    'حشو املجم': 'assets/svg/املغم.svg',
+    'حشو اسنان': 'assets/svg/حشو اسنان.svg',
+    'تجميلي': 'assets/svg/تجميلي.svg',
+    'املغم': 'assets/svg/املغم.svg',
     'حشو عصب': 'assets/svg/حشو اسنان.svg',
-    'زراعة أسنان': 'assets/svg/زراعه اسنان.svg',
+    'زراعه اسنان': 'assets/svg/زراعه اسنان.svg',
     'زراعة الأسنان': 'assets/svg/زراعه اسنان.svg',
-    'خلع الأسنان': 'assets/svg/خلع اسنان.svg',
-    'الجراحة والخلع': 'assets/svg/خلع اسنان.svg',
-    'تبييض الأسنان': 'assets/svg/تبيض اسنان.svg',
+    'خلع اسنان': 'assets/svg/خلع اسنان.svg',
+    'الجراحة وخلع': 'assets/svg/خلع اسنان.svg',
+    'تبيض اسنان': 'assets/svg/تبيض اسنان.svg',
     'تنظيف وتبييض الأسنان': 'assets/svg/تبيض اسنان.svg',
+    'تقويم اسنان': 'assets/svg/تقويم اسنان.svg',
     'تقويم الأسنان': 'assets/svg/تقويم اسنان.svg',
-    'تيجان وجسور': 'assets/images/تيجان وجسور.webp',
-    'تركيبات الأسنان': 'assets/svg/تركيبات اسنان.svg',
+    'تيجان وجسور': 'assets/svg/ثوثه الدكتور 1.svg', // Fallback if image not found
+    'تركيبات اسنان': 'assets/svg/تركيبات اسنان.svg',
     'تركيبات متحركة': 'assets/svg/تركيبات اسنان.svg',
+    'اطفال2': 'assets/svg/اطفال2.svg',
     'طب أسنان الأطفال': 'assets/svg/اطفال2.svg',
   };
+
+  // Translation mapping for categories
+  final Map<String, String> _categoryTranslations = {
+    'فحص شامل': 'chat.comprehensive_examination',
+    'حشو اسنان': 'doctor.dental_filling',
+    'تجميلي': 'chat.cosmetic_filler',
+    'املغم': 'chat.amalgam_filling',
+    'حشو عصب': 'chat.nerve_filling',
+    'زراعه اسنان': 'chat.dental_implants',
+    'زراعة الأسنان': 'chat.dental_implants',
+    'خلع اسنان': 'chat.tooth_extraction',
+    'الجراحة وخلع': 'chat.surgery_and_extraction',
+    'تبيض اسنان': 'chat.teeth_whitening',
+    'تنظيف وتبييض الأسنان': 'chat.teeth_cleaning_and_whitening',
+    'تقويم اسنان': 'chat.orthodontics',
+    'تقويم الأسنان': 'chat.orthodontics',
+    'تيجان وجسور': 'chat.crowns_and_bridges',
+    'تركيبات اسنان': 'chat.dental_prosthetics',
+    'تركيبات متحركة': 'chat.moving_installations',
+    'طب أسنان الأطفال': 'chat.pediatric_dentistry',
+  };
+
+  String _getAssetForCategory(String categoryName) {
+    String name = categoryName.trim();
+    if (_categoryAssets.containsKey(name)) {
+      return _categoryAssets[name]!;
+    }
+
+    // Normalization to handle variations in Arabic characters
+    String normalized = name
+        .replaceAll('ة', 'ه')
+        .replaceAll('أ', 'ا')
+        .replaceAll('إ', 'ا')
+        .replaceAll('آ', 'ا')
+        .replaceAll('ى', 'ي');
+
+    if (normalized.contains('فحص') || normalized.toLowerCase().contains('examination') || normalized.toLowerCase().contains('checkup')) return 'assets/svg/فحص شامل.svg';
+    if (normalized.contains('املغم') || normalized.contains('املجم') || normalized.toLowerCase().contains('amalgam')) return 'assets/svg/املغم.svg';
+    if (normalized.contains('عصب') || normalized.toLowerCase().contains('nerve') || normalized.toLowerCase().contains('root canal')) return 'assets/svg/حشو اسنان.svg';
+    if (normalized.contains('تجميلي') || normalized.contains('تحميلي') || normalized.toLowerCase().contains('cosmetic') || normalized.toLowerCase().contains('composite')) return 'assets/svg/تجميلي.svg';
+    if (normalized.contains('زراعه') || normalized.contains('زراعة') || normalized.toLowerCase().contains('implant')) return 'assets/svg/زراعه اسنان.svg';
+    if (normalized.contains('خلع') || normalized.contains('جراحه') || normalized.contains('جراحة') || normalized.toLowerCase().contains('extraction') || normalized.toLowerCase().contains('surgery')) return 'assets/svg/خلع اسنان.svg';
+    if (normalized.contains('تبيض') || normalized.contains('تنظيف') || normalized.toLowerCase().contains('whitening') || normalized.toLowerCase().contains('cleaning')) return 'assets/svg/تبيض اسنان.svg';
+    if (normalized.contains('تقويم') || normalized.toLowerCase().contains('orthodontic') || normalized.toLowerCase().contains('brace')) return 'assets/svg/تقويم اسنان.svg';
+    if (normalized.contains('تركيبات') || normalized.toLowerCase().contains('prosthetic') || normalized.toLowerCase().contains('installation')) return 'assets/svg/تركيبات اسنان.svg';
+    if (normalized.contains('تيجان') || normalized.contains('جسور') || normalized.toLowerCase().contains('crown') || normalized.toLowerCase().contains('bridge')) return 'assets/images/تيجان وجسور.webp';
+    if (normalized.contains('اطفال') || normalized.contains('أطفال') || normalized.toLowerCase().contains('pediatric') || normalized.toLowerCase().contains('child')) return 'assets/svg/اطفال2.svg';
+
+    return 'assets/svg/فحص شامل.svg';
+  }
+
+  String _localizedCategoryName(String category) {
+    final name = category.trim();
+    if (_categoryTranslations.containsKey(name)) {
+      return _categoryTranslations[name]!.tr();
+    }
+    
+    // Check for variations if exact match fails
+    String normalized = name
+        .replaceAll('ة', 'ه')
+        .replaceAll('أ', 'ا')
+        .replaceAll('إ', 'ا')
+        .replaceAll('آ', 'ا')
+        .replaceAll('ى', 'ي');
+
+    if (normalized.contains('فحص') || normalized.toLowerCase().contains('examination') || normalized.toLowerCase().contains('checkup')) return 'chat.comprehensive_examination'.tr();
+    if (normalized.contains('املغم') || normalized.contains('املجم') || normalized.toLowerCase().contains('amalgam')) return 'chat.amalgam_filling'.tr();
+    if (normalized.contains('عصب') || normalized.toLowerCase().contains('nerve') || normalized.toLowerCase().contains('root canal')) return 'chat.nerve_filling'.tr();
+    if (normalized.contains('تجميلي') || normalized.contains('تحميلي') || normalized.toLowerCase().contains('cosmetic') || normalized.toLowerCase().contains('composite')) return 'chat.cosmetic_filler'.tr();
+    if (normalized.contains('زراعه') || normalized.contains('زراعة') || normalized.toLowerCase().contains('implant')) return 'chat.dental_implants'.tr();
+    if (normalized.contains('خلع') || normalized.contains('جراحه') || normalized.toLowerCase().contains('extraction') || normalized.toLowerCase().contains('surgery')) return 'chat.surgery_and_extraction'.tr();
+    if (normalized.contains('تبيض') || normalized.contains('تنظيف') || normalized.toLowerCase().contains('whitening') || normalized.toLowerCase().contains('cleaning')) return 'chat.teeth_cleaning_and_whitening'.tr();
+    if (normalized.contains('تقويم') || normalized.toLowerCase().contains('orthodontic') || normalized.toLowerCase().contains('brace')) return 'chat.orthodontics'.tr();
+    if (normalized.contains('تيجان') || normalized.contains('جسور') || normalized.toLowerCase().contains('crown') || normalized.toLowerCase().contains('bridge')) return 'chat.crowns_and_bridges'.tr();
+    if (normalized.contains('تركيبات') || normalized.toLowerCase().contains('prosthetic') || normalized.toLowerCase().contains('installation')) return 'chat.dental_prosthetics'.tr();
+    if (normalized.contains('اطفال') || normalized.toLowerCase().contains('pediatric') || normalized.toLowerCase().contains('child')) return 'chat.pediatric_dentistry'.tr();
+
+    return category;
+  }
 
   Future<void> _handleCategoryTap({
     required String categoryName,
@@ -267,11 +349,11 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => LoginScreen(
-              nextScreen: const SecondaryHomeScreen(
+              nextScreen: SecondaryHomeScreen(
                 drawer: DoctorDrawer(),
                 showAddCaseCategory: true,
               ),
-              nextRouteSettings: const RouteSettings(name: 'add-case'),
+              nextRouteSettings: RouteSettings(name: 'add-case'),
             ),
           ),
         );
@@ -285,7 +367,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
       MaterialPageRoute(
         builder: (context) => CategoryDoctorsScreen(
           categoryName: categoryName,
-          categorySvg: _categoryAssets[categoryName] ?? 'assets/svg/فحص شامل.svg',
+          categorySvg: _getAssetForCategory(categoryName),
           categoryId: categoryId,
           cityId: _selectedCityId,
           cityName: cityName,
@@ -301,29 +383,29 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final svgFiles = [
-      'حشو املغم.svg',
-      'حشو عصب .svg',
-      'حشو تجميلي.svg',
-      'زراعه الأسنان.svg',
-      'الجراحة وخلع .svg',
-      'تنظيف وتبييض الأسنان .svg',
-      'تقويم الأسنان.svg',
-      'تركيبات متحركة.svg',
-      'تيجان وجسور.svg',
-      'طب أسنان الأطفال.svg',
+      'املغم.svg',
+      'حشو اسنان.svg',
+      'تجميلي.svg',
+      'زراعه اسنان.svg',
+      'خلع اسنان.svg',
+      'تبيض اسنان.svg',
+      'تقويم اسنان.svg',
+      'تركيبات اسنان.svg',
+      'ثوثه الدكتور 1.svg',
+      'اطفال2.svg',
     ];
 
     final categoryNames = [
-      'حشو املغم',
-      'حشو عصب',
-      'حشو تجميلي',
-      'زراعة الأسنان',
-      'الجراحة والخلع ',
-      'تنظيف وتبييض الأسنان',
-      'تقويم الأسنان',
-      'تركيبات  متحركة',
-      'تيجان وجسور',
-      'طب أسنان الأطفال',
+      'doctor.amalgam_filling'.tr(),
+      'chat.nerve_filling'.tr(),
+      'chat.cosmetic_filler'.tr(),
+      'chat.dental_implants'.tr(),
+      'chat.surgery_and_extraction_1'.tr(),
+      'chat.teeth_cleaning_and_whitening'.tr(),
+      'chat.orthodontics'.tr(),
+      'doctor.moving_installations'.tr(),
+      'chat.crowns_and_bridges'.tr(),
+      'chat.pediatric_dentistry'.tr(),
     ];
 
     final fileName =
@@ -331,13 +413,13 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
     final resolvedAssetPath =
         assetPath.isNotEmpty ? assetPath : 'assets/svg/$fileName';
     final resolvedCategoryName = categoryName.isNotEmpty
-        ? categoryName
+        ? _localizedCategoryName(categoryName)
         : (index < categoryNames.length ? categoryNames[index] : '');
 
     return GestureDetector(
       onTap: () {
         _handleCategoryTap(
-          categoryName: resolvedCategoryName,
+          categoryName: categoryName,
           categoryId: categoryId,
           cityName: cityName,
         );
@@ -357,14 +439,14 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                   ? Colors.black.withOpacity(0.3)
                   : Colors.grey.withOpacity(0.1),
               blurRadius: 4,
-              offset: const Offset(0, 2),
+              offset: Offset(0, 2),
             ),
           ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             // Display image flexibly to avoid overflow and clipping.
             Expanded(
               child: Padding(
@@ -375,7 +457,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                         fit: BoxFit.contain,
                         placeholderBuilder: (BuildContext context) => Container(
                           color: isDark ? Colors.grey[800] : Colors.grey[200],
-                          child: const Icon(Icons.image, size: 32, color: Colors.grey),
+                          child: Icon(Icons.image, size: 32, color: Colors.grey),
                         ),
                       )
                     : Image.asset(
@@ -383,12 +465,12 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) => Container(
                           color: isDark ? Colors.grey[800] : Colors.grey[200],
-                          child: const Icon(Icons.image, size: 32, color: Colors.grey),
+                          child: Icon(Icons.image, size: 32, color: Colors.grey),
                         ),
                       ),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
@@ -404,7 +486,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
           ],
         ),
       ),
@@ -418,10 +500,10 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
 
   bool _isAddCaseCategory(String name) {
     final compact = name.replaceAll(' ', '');
-    return name.contains('نشر حالة جديدة') ||
-        name.contains('إضافة حالة جديدة') ||
-        compact.contains('نشرحالةجديدة') ||
-        compact.contains('اضافةحالةجديدة');
+    return name.contains('doctor.post_a_new_status'.tr()) ||
+        name.contains('doctor.add_a_new_case'.tr()) ||
+        compact.contains('doctor.str_267'.tr()) ||
+        compact.contains('doctor.add_a_new_case_1'.tr());
   }
 
   @override
@@ -467,7 +549,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'نشر حالة جديدة',
+                  'doctor.post_a_new_status'.tr(),
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.bold,
@@ -485,7 +567,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
             ),
             centerTitle: true,
           ),
-        drawer: widget.drawer,
+        drawer: widget.drawer ?? const HomeDrawer(),
         body: SafeArea(
           child: BlocConsumer<DoctorCubit, DoctorState>(
             listener: (context, state) {
@@ -498,11 +580,11 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
             },
             builder: (context, state) {
               if (state is DoctorLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return Center(child: CircularProgressIndicator());
               } else if (state is DoctorError) {
                 return Center(
                     child: Text(state.error,
-                        style: const TextStyle(fontFamily: 'Cairo')));
+                        style: TextStyle(fontFamily: 'Cairo')));
               } else if (state is DoctorSuccess) {
                 final categories = state.categories;
                 final cities = state.cities;
@@ -524,13 +606,13 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                             margin: EdgeInsets.symmetric(
                                 horizontal: width * 0.06, vertical: 16),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.only(
-                                      right: 4, bottom: 8),
+                                      left: 4, right: 4, bottom: 8),
                                   child: Text(
-                                    'اختر المحافظة',
+                                    'doctor.select_the_governorate'.tr(),
                                     style: TextStyle(
                                       fontFamily: 'Cairo',
                                       fontSize: baseFontSize * 0.9,
@@ -549,7 +631,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                     border: Border.all(
                                       color: isDark
                                           ? Colors.grey[700]!
-                                          : const Color(0xFFD1D5DC),
+                                          : Color(0xFFD1D5DC),
                                       width: 1.1,
                                     ),
                                     boxShadow: [
@@ -559,7 +641,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                             .primary
                                             .withAlpha(77),
                                         blurRadius: 4,
-                                        offset: const Offset(0, 1),
+                                        offset: Offset(0, 1),
                                       ),
                                     ],
                                   ),
@@ -579,12 +661,12 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                                     .primary
                                                 : (isDark ? Colors.white70 : Colors.grey[500]),
                                           ),
-                                          const SizedBox(width: 6),
+                                          SizedBox(width: 6),
                                           Expanded(
                                             child: Text(
                                               _isDetecting
-                                                  ? 'جارٍ تحديد موقعك...'
-                                                  : 'اختر المدينة',
+                                                  ? 'doctor.locating_your_location'.tr()
+                                                  : 'doctor.select_city'.tr(),
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .titleMedium
@@ -664,9 +746,9 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.location_off,
+                                  Icon(Icons.location_off,
                                       color: Colors.orange, size: 18),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       _gpsFailureMessage!,
@@ -675,7 +757,6 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                         fontSize: baseFontSize * 0.8,
                                         color: isDark ? Colors.white.withOpacity(0.9) : Colors.orange.shade800,
                                       ),
-                                      textDirection: TextDirection.rtl,
                                     ),
                                   ),
                                 ],
@@ -689,7 +770,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                           margin: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 12),
                           child: Text(
-                            'اختر التخصص لنشر الحالة',
+                            'doctor.choose_the_specialty_to'.tr(),
                             style: Theme.of(context)
                                 .textTheme
                                 .titleLarge
@@ -713,7 +794,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                 final crossAxisCount = width > 600 ? 4 : 2;
                                 return GridView.builder(
                                   shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
+                                  physics: NeverScrollableScrollPhysics(),
                                   gridDelegate:
                                       SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: crossAxisCount,
@@ -725,8 +806,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                   itemBuilder: (context, index) {
                                     final category = visibleCategories[index];
                                     final asset =
-                                        _categoryAssets[category.name] ??
-                                            'assets/svg/فحص شامل.svg';
+                                        _getAssetForCategory(category.name);
 
                                     String? selectedCityName;
                                     if (_selectedCityId != null) {
@@ -753,7 +833,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                             ),
                           ),
 
-                        const SizedBox(height: 100), // Reserve space at bottom
+                        SizedBox(height: 100), // Reserve space at bottom
                       ],
                     ),
                   ),

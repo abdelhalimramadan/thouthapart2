@@ -5,9 +5,9 @@ part 'chat_state.freezed.dart';
 
 @freezed
 class ChatState with _$ChatState {
-  const factory ChatState.initial() = _Initial;
-  const factory ChatState.loading() = ChatLoading;
-  const factory ChatState.success({
+  factory ChatState.initial() = _Initial;
+  factory ChatState.loading() = ChatLoading;
+  factory ChatState.success({
     required List<FlowItem> flowItems,
     required List<ChatItem> chatHistory,
     @Default([]) List<Map<String, dynamic>> categories,
@@ -16,14 +16,14 @@ class ChatState with _$ChatState {
     @Default(false) bool chatMode,
     @Default(false) bool isActionLoading,
   }) = ChatSuccess;
-  const factory ChatState.error(String message) = ChatError;
+  factory ChatState.error(String message) = ChatError;
 }
 
 enum FlowType { question, answer, result }
 
 @freezed
 abstract class FlowItem with _$FlowItem {
-  const factory FlowItem({
+  factory FlowItem({
     required FlowType type,
     required String text,
     ChatQuestion? question,
@@ -35,7 +35,7 @@ enum ChatRole { user, bot }
 
 @freezed
 abstract class ChatItem with _$ChatItem {
-  const factory ChatItem({
+  factory ChatItem({
     required ChatRole role,
     required String text,
   }) = _ChatItem;

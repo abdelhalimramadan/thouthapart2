@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/routing/routes.dart';
 import '../../../../core/theming/styles.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class DontHaveAccountText extends StatelessWidget {
   const DontHaveAccountText({super.key});
@@ -15,11 +16,11 @@ class DontHaveAccountText extends StatelessWidget {
       text: TextSpan(
         children: [
           TextSpan(
-            text: 'ليس لديك حساب؟',
+            text: 'login.dont_have_an_account'.tr(),
             style: TextStyles.font13DarkBlueMedium,
           ),
           TextSpan(
-            text: ' إنشاء حساب',
+            text: 'login.create_an_account_1'.tr(),
             style: TextStyles.font13BlueSemiBold,
             recognizer: TapGestureRecognizer()
               ..onTap = () {

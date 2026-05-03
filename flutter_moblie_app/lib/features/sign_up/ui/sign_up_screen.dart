@@ -12,6 +12,7 @@ import 'package:thoutha_mobile_app/core/widgets/app_text_button.dart';
 import 'package:thoutha_mobile_app/features/booking/ui/otp_verification_dialog.dart';
 import 'package:thoutha_mobile_app/features/login/ui/widgets/password_validations.dart';
 import 'package:thoutha_mobile_app/features/sign_up/logic/sign_up_cubit.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -53,9 +54,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _isLoadingCategories = false;
 
   final List<String> _studyYears = [
-    'الفرقة الرابعة',
-    'الفرقة الخامسة',
-    'امتياز',
+    'sign_up.fourth_band'.tr(),
+    'sign_up.fifth_division'.tr(),
+    'profile.privilege'.tr(),
   ];
 
   @override
@@ -138,7 +139,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 behavior: SnackBarBehavior.floating,
               ),
             );
-            Future.delayed(const Duration(seconds: 3), () {
+            Future.delayed(Duration(seconds: 3), () {
               Navigator.pushReplacementNamed(context, Routes.loginScreen);
             });
           } else if (state is SignUpOtpSent) {
@@ -149,8 +150,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 contactInfo: state.phoneNumber,
                 onVerified: (pin) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('تم التحقق من رقم الهاتف بنجاح'),
+                    SnackBar(
+                      content: Text('sign_up.phone_number_verified_successfully'.tr()),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -179,7 +180,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 height: double.infinity,
                 decoration: BoxDecoration(
                   gradient: RadialGradient(
-                    center: const Alignment(-0.8, -0.5),
+                    center: Alignment(-0.8, -0.5),
                     radius: 1.2,
                     colors: [
                       isDarkMode
@@ -200,7 +201,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 height: double.infinity,
                 decoration: BoxDecoration(
                   gradient: RadialGradient(
-                    center: const Alignment(0.8, 0.5),
+                    center: Alignment(0.8, 0.5),
                     radius: 1.2,
                     colors: [
                       isDarkMode
@@ -265,7 +266,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         fit: BoxFit.contain,
                                       ),
                                       Text(
-                                        ' إنشاء حساب',
+                                        'login.create_an_account_1'.tr(),
                                         style: TextStyle(
                                           fontSize: 24,
                                           fontWeight: FontWeight.bold,
@@ -276,7 +277,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ),
                                       ),
                                       Text(
-                                        'أنشئ حسابك للبدء في استخدام التطبيق.',
+                                        'sign_up.create_your_account_to'.tr(),
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: isDarkMode
@@ -296,18 +297,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             RegExp(r'[\u0621-\u064A\s]'),
                                           ),
                                         ],
-                                        decoration: const InputDecoration(
-                                          labelText: 'الاسم الأول',
-                                          helperText: 'ادخال الاسم بالعربي',
+                                        decoration: InputDecoration(
+                                          labelText: 'booking.first_name'.tr(),
+                                          helperText: 'sign_up.enter_the_name_in'.tr(),
                                           prefixIcon:
                                               Icon(Icons.person_outline),
                                         ),
                                         validator: (value) {
                                           if (value == null || value.trim().isEmpty) {
-                                            return 'الرجاء إدخال الاسم الأول';
+                                            return 'booking.please_enter_first_name'.tr();
                                           }
                                           if (!AppRegex.isArabicName(value.trim())) {
-                                            return 'الاسم الأول لازم يكون بالعربي فقط';
+                                            return 'sign_up.the_first_name_must'.tr();
                                           }
                                           return null;
                                         },
@@ -322,18 +323,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             RegExp(r'[\u0621-\u064A\s]'),
                                           ),
                                         ],
-                                        decoration: const InputDecoration(
-                                          labelText: 'الاسم الأخير',
-                                          helperText: 'ادخال الاسم بالعربي',
+                                        decoration: InputDecoration(
+                                          labelText: 'sign_up.last_name'.tr(),
+                                          helperText: 'sign_up.enter_the_name_in'.tr(),
                                           prefixIcon:
                                               Icon(Icons.person_outline),
                                         ),
                                         validator: (value) {
                                           if (value == null || value.trim().isEmpty) {
-                                            return 'الرجاء إدخال الاسم الأخير';
+                                            return 'sign_up.please_enter_last_name'.tr();
                                           }
                                           if (!AppRegex.isArabicName(value.trim())) {
-                                            return 'الاسم الأخير لازم يكون بالعربي فقط';
+                                            return 'sign_up.the_last_name_must'.tr();
                                           }
                                           return null;
                                         },
@@ -344,20 +345,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         controller: emailController,
                                         keyboardType:
                                             TextInputType.emailAddress,
-                                        decoration: const InputDecoration(
-                                          labelText: 'البريد الإلكتروني',
+                                        decoration: InputDecoration(
+                                          labelText: 'doctor.email'.tr(),
                                           prefixIcon:
                                               Icon(Icons.email_outlined),
-                                          helperText: 'يجب أن ينتهي بـ @University.edu.eg',
+                                          helperText: 'sign_up.must_end_with_universityedueg'.tr(),
                                         ),
                                         validator: (value) {
                                           if (value == null ||
                                               value.isEmpty ||
                                               !AppRegex.isEmailValid(value)) {
-                                            return 'الرجاء إدخال بريد إلكتروني صالح';
+                                            return 'login.please_enter_a_valid'.tr();
                                           }
                                           if (!value.endsWith('.edu.eg')) {
-                                            return 'البريد الإلكتروني يجب أن ينتهي بـ .edu.eg';
+                                            return 'sign_up.email_must_end_with'.tr();
                                           }
                                           return null;
                                         },
@@ -367,8 +368,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       TextFormField(
                                         controller: phoneController,
                                         keyboardType: TextInputType.phone,
-                                        decoration: const InputDecoration(
-                                          labelText: 'رقم الهاتف',
+                                        decoration: InputDecoration(
+                                          labelText: 'doctor.phone_number'.tr(),
                                           prefixIcon:
                                               Icon(Icons.phone_outlined),
                                         ),
@@ -377,7 +378,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               value.isEmpty ||
                                               !AppRegex.isPhoneNumberValid(
                                                   value)) {
-                                            return 'الرجاء إدخال رقم هاتف صالح';
+                                            return 'sign_up.please_enter_a_valid'.tr();
                                           }
                                           return null;
                                         },
@@ -385,16 +386,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       SizedBox(height: 16),
                                       // University/College Dropdown
                                       _isLoadingUniversities
-                                          ? const Center(
+                                          ? Center(
                                               key: ValueKey('uni_loading'),
                                               child:
                                                   CircularProgressIndicator())
                                           : DropdownButtonFormField<String>(
-                                              key: const ValueKey(
+                                              key: ValueKey(
                                                   'uni_dropdown'),
                                               isExpanded: true,
-                                              decoration: const InputDecoration(
-                                                labelText: 'اختر الكلية',
+                                              decoration: InputDecoration(
+                                                labelText: 'sign_up.choose_college'.tr(),
                                               ),
                                               items: _universities
                                                    .map((u) {
@@ -414,7 +415,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               validator: (value) {
                                                 if (value == null ||
                                                     value.isEmpty) {
-                                                  return 'الرجاء اختيار الكلية';
+                                                  return 'sign_up.please_select_a_college'.tr();
                                                 }
                                                 return null;
                                               },
@@ -423,8 +424,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       // Study Year Dropdown
                                       DropdownButtonFormField<String>(
                                         isExpanded: true,
-                                        decoration: const InputDecoration(
-                                          labelText: 'السنة الدراسية',
+                                        decoration: InputDecoration(
+                                          labelText: 'profile.academic_year'.tr(),
                                         ),
                                         items: _studyYears
                                             .map((y) => DropdownMenuItem(
@@ -434,7 +435,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             () => _selectedStudyYear = v),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return 'الرجاء اختيار السنة الدراسية';
+                                            return 'sign_up.please_select_the_academic'.tr();
                                           }
                                           return null;
                                         },
@@ -442,17 +443,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       SizedBox(height: 16),
                                       // City/Governorate Dropdown
                                       _isLoadingCities
-                                          ? const Center(
+                                          ? Center(
                                               key: ValueKey('city_loading'),
                                               child:
                                                   CircularProgressIndicator())
                                           : DropdownButtonFormField<String>(
-                                              key: const ValueKey(
+                                              key: ValueKey(
                                                   'city_dropdown'),
                                               isExpanded: true,
-                                              decoration: const InputDecoration(
-                                                labelText: 'اختر المحافظة',
-                                                helperText: 'اختر المحافظة التابعة لها الكلية',
+                                              decoration: InputDecoration(
+                                                labelText: 'doctor.select_the_governorate'.tr(),
+                                                helperText: 'sign_up.select_the_governorate_to'.tr(),
                                               ),
                                               items: _cities
                                                    .map((city) {
@@ -472,7 +473,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               validator: (value) {
                                                 if (value == null ||
                                                     value.isEmpty) {
-                                                  return 'الرجاء اختيار المحافظة';
+                                                  return 'sign_up.please_select_a_governorate'.tr();
                                                 }
                                                 return null;
                                               },
@@ -480,16 +481,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       SizedBox(height: 16),
                                       // Category/Specialty Dropdown
                                       _isLoadingCategories
-                                          ? const Center(
+                                          ? Center(
                                               key: ValueKey('cat_loading'),
                                               child:
                                                   CircularProgressIndicator())
                                           : DropdownButtonFormField<String>(
-                                              key: const ValueKey(
+                                              key: ValueKey(
                                                   'cat_dropdown'),
                                               isExpanded: true,
-                                              decoration: const InputDecoration(
-                                                labelText: 'اختر التخصص',
+                                              decoration: InputDecoration(
+                                                labelText: 'profile.choose_your_specialty'.tr(),
                                               ),
                                               items: _categories
                                                    .map((cat) {
@@ -509,7 +510,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               validator: (value) {
                                                 if (value == null ||
                                                     value.isEmpty) {
-                                                  return 'الرجاء اختيار التخصص';
+                                                  return 'sign_up.please_choose_a_specialty'.tr();
                                                 }
                                                 return null;
                                               },
@@ -535,9 +536,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           });
                                         },
                                         decoration: InputDecoration(
-                                          labelText: 'كلمة المرور',
+                                          labelText: 'login.password'.tr(),
                                           prefixIcon:
-                                              const Icon(Icons.lock_outline),
+                                              Icon(Icons.lock_outline),
                                           suffixIcon: IconButton(
                                             icon: Icon(
                                               _obscurePassword
@@ -554,7 +555,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return 'الرجاء إدخال كلمة المرور';
+                                            return 'login.please_enter_your_password'.tr();
                                           }
                                           return null;
                                         },
@@ -565,9 +566,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         controller: confirmPasswordController,
                                         obscureText: _obscureConfirmPassword,
                                         decoration: InputDecoration(
-                                          labelText: 'تأكيد كلمة المرور',
+                                          labelText: 'reset_password.confirm_password'.tr(),
                                           prefixIcon:
-                                              const Icon(Icons.lock_outline),
+                                              Icon(Icons.lock_outline),
                                           suffixIcon: IconButton(
                                             icon: Icon(
                                               _obscureConfirmPassword
@@ -584,11 +585,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return 'الرجاء تأكيد كلمة المرور';
+                                            return 'reset_password.please_confirm_your_password'.tr();
                                           }
                                           if (value !=
                                               passwordController.text) {
-                                            return 'كلمات المرور غير متطابقة';
+                                            return 'sign_up.passwords_do_not_match'.tr();
                                           }
                                           return null;
                                         },
@@ -611,11 +612,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             width: double.infinity,
                                             height: 52,
                                             child: state is SignUpLoading
-                                                ? const Center(
+                                                ? Center(
                                                     child:
                                                         CircularProgressIndicator())
                                                 : AppTextButton(
-                                                    buttonText: 'إنشاء حساب',
+                                                    buttonText: 'login.create_an_account'.tr(),
                                                     textStyle: TextStyle(
                                                       fontSize: 16,
                                                       color: Colors.white,
@@ -634,9 +635,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                           ScaffoldMessenger.of(
                                                                   context)
                                                               .showSnackBar(
-                                                            const SnackBar(
+                                                            SnackBar(
                                                               content: Text(
-                                                                  'يرجى التأكد من استكمال جميع شروط كلمة المرور'),
+                                                                  'sign_up.please_ensure_you_complete'.tr()),
                                                               backgroundColor:
                                                                   Colors.red,
                                                             ),
@@ -691,7 +692,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             WrapCrossAlignment.center,
                                         children: [
                                           Text(
-                                            'لديك حساب بالفعل؟',
+                                            'sign_up.already_have_an_account'.tr(),
                                             style: TextStyle(
                                               fontSize: 13,
                                               color: isDarkMode
@@ -707,7 +708,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   Routes.loginScreen);
                                             },
                                             child: Text(
-                                              'تسجيل الدخول',
+                                              'home_screen.login'.tr(),
                                               style: TextStyle(
                                                 fontSize: 13,
                                                 color: ColorsManager.mainBlue,

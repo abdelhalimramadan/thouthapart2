@@ -6,6 +6,7 @@ import 'package:pinput/pinput.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
 import '../../forgot_password/data/forgot_password_service.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class OtpVerificationScreen extends StatefulWidget {
   final String phone;
@@ -36,7 +37,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     super.initState();
     _secondsLeft = widget.expiresInSeconds;
     _startTimer();
-    Future.delayed(const Duration(milliseconds: 100), () {
+    Future.delayed(Duration(milliseconds: 100), () {
       if (mounted) _focusNode.requestFocus();
     });
   }
@@ -52,7 +53,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   // ── Timer ───────────────────────────────────────────────────────────────
   void _startTimer() {
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+    _timer = Timer.periodic(Duration(seconds: 1), (t) {
       if (!mounted) {
         t.cancel();
         return;
@@ -103,10 +104,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         _otpController.clear();
         _focusNode.requestFocus();
         setState(
-            () => _errorMessage = result['message'] ?? 'رمز التحقق غير صحيح');
+            () => _errorMessage = result['message'] ?? 'forgot_password.the_verification_code_is'.tr());
       }
     } catch (_) {
-      if (mounted) setState(() => _errorMessage = 'حدث خطأ، أعد المحاولة');
+      if (mounted) setState(() => _errorMessage = 'reset_password.an_error_occurred_try'.tr());
     } finally {
       if (mounted) setState(() => _isVerifying = false);
     }
@@ -131,8 +132,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         setState(() => _secondsLeft = result['expires_in'] ?? 300);
         _startTimer();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ تم إعادة إرسال رمز التحقق',
+          SnackBar(
+            content: Text('reset_password.the_verification_code_has'.tr(),
                 style: TextStyle(fontFamily: 'Cairo')),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
@@ -140,10 +141,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         );
       } else {
         setState(
-            () => _errorMessage = result['message'] ?? 'فشل إعادة إرسال الرمز');
+            () => _errorMessage = result['message'] ?? 'reset_password.token_resend_failed'.tr());
       }
     } catch (_) {
-      if (mounted) setState(() => _errorMessage = 'حدث خطأ في إعادة الإرسال');
+      if (mounted) setState(() => _errorMessage = 'reset_password.a_retransmission_error_occurred'.tr());
     } finally {
       if (mounted) setState(() => _isResending = false);
     }
@@ -162,11 +163,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       height: 60 * (width / 390),
       textStyle: TextStyle(
         fontSize: baseFontSize * 1.375,
-        color: isDark ? Colors.white : const Color(0xFF1E293B),
+        color: isDark ? Colors.white : Color(0xFF1E293B),
         fontWeight: FontWeight.w600,
       ),
       decoration: BoxDecoration(
-        color: isDark ? Colors.grey[800] : const Color(0xFFF1F5F9),
+        color: isDark ? Colors.grey[800] : Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.transparent),
       ),
@@ -174,7 +175,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
     final focusedPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
-        border: Border.all(color: const Color(0xFF0B8FAC), width: 2),
+        border: Border.all(color: Color(0xFF0B8FAC), width: 2),
         color: isDark ? Colors.black : Colors.white,
       ),
     );
@@ -182,14 +183,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     final errorPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
         border: Border.all(color: Colors.redAccent, width: 2),
-        color: isDark ? const Color(0xFF451A1A) : const Color(0xFFFEF2F2),
+        color: isDark ? Color(0xFF451A1A) : Color(0xFFFEF2F2),
       ),
     );
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'تأكيد رمز التحقق',
+          'reset_password.confirm_verification_code'.tr(),
           style: TextStyle(fontFamily: 'Cairo', fontSize: baseFontSize * 1.1),
         ),
         centerTitle: true,
@@ -197,8 +198,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       body: Stack(
         children: [
           // Background gradients
-          _gradient(const Alignment(-0.7, -0.7), ColorsManager.layerBlur1),
-          _gradient(const Alignment(0.7, 0.7), ColorsManager.layerBlur2),
+          _gradient(Alignment(-0.7, -0.7), ColorsManager.layerBlur1),
+          _gradient(Alignment(0.7, 0.7), ColorsManager.layerBlur2),
 
           Center(
             child: SingleChildScrollView(
@@ -209,13 +210,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       maxWidth: width >= 600 ? 500 : double.infinity),
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                    color: isDark ? Color(0xFF1E1E1E) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
                         blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        offset: Offset(0, 4),
                       ),
                     ],
                   ),
@@ -227,31 +228,31 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         width: 72 * (width / 390),
                         height: 72 * (width / 390),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE0F2FE)
+                          color: Color(0xFFE0F2FE)
                               .withValues(alpha: isDark ? 0.1 : 1.0),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.mark_email_read_outlined,
                           size: 32 * (width / 390),
-                          color: const Color(0xFF0B8FAC),
+                          color: Color(0xFF0B8FAC),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24),
 
                       // ── Title ────────────────────────────────────────────
                       Text(
-                        'أدخل رمز التحقق',
+                        'reset_password.enter_the_verification_code'.tr(),
                         textDirection: TextDirection.rtl,
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: baseFontSize * 1.25,
                           fontWeight: FontWeight.w700,
                           color:
-                              isDark ? Colors.white : const Color(0xFF1E293B),
+                              isDark ? Colors.white : Color(0xFF1E293B),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
 
                       // ── Subtitle ─────────────────────────────────────────
                       Text(
@@ -263,11 +264,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           fontSize: baseFontSize * 0.875,
                           color: isDark
                               ? Colors.grey[400]
-                              : const Color(0xFF64748B),
+                              : Color(0xFF64748B),
                           height: 1.5,
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      SizedBox(height: 32),
 
                       // ── Pinput ───────────────────────────────────────────
                       Directionality(
@@ -284,8 +285,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           pinputAutovalidateMode:
                               PinputAutovalidateMode.onSubmit,
                           validator: (pin) {
-                            if (pin == null || pin.isEmpty) return 'مطلوب';
-                            if (pin.length != 6) return '6 أرقام';
+                            if (pin == null || pin.isEmpty) return 'booking.required'.tr();
+                            if (pin.length != 6) return 'booking.6_numbers'.tr();
                             return null;
                           },
                         ),
@@ -306,11 +307,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           ),
                         ),
 
-                      const SizedBox(height: 32),
+                      SizedBox(height: 32),
 
                       // ── Verify button / loading ──────────────────────────
                       _isVerifying
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 48,
                               width: 48,
                               child: Center(
@@ -326,19 +327,19 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                   children: [
                                     Text(
                                       _canResend
-                                          ? 'لم يصلك الرمز؟'
+                                          ? 'booking.didnt_receive_the_code'.tr()
                                           : 'إعادة الإرسال بعد $_timerLabel',
                                       style: TextStyle(
                                         fontFamily: 'Cairo',
                                         fontSize: baseFontSize * 0.875,
                                         color: isDark
                                             ? Colors.grey[400]
-                                            : const Color(0xFF64748B),
+                                            : Color(0xFF64748B),
                                       ),
                                     ),
                                     if (_canResend)
                                       _isResending
-                                          ? const Padding(
+                                          ? Padding(
                                               padding:
                                                   EdgeInsets.only(right: 8),
                                               child: SizedBox(
@@ -353,8 +354,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                             )
                                           : TextButton(
                                               onPressed: _resend,
-                                              child: const Text(
-                                                'إعادة الإرسال',
+                                              child: Text(
+                                                'booking.rebroadcast'.tr(),
                                                 style: TextStyle(
                                                   fontFamily: 'Cairo',
                                                   fontWeight: FontWeight.w700,
@@ -365,13 +366,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                   ],
                                 ),
 
-                                const SizedBox(height: 16),
+                                SizedBox(height: 16),
 
                                 // Back button
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
                                   child: Text(
-                                    'رجوع',
+                                    'reset_password.back'.tr(),
                                     style: TextStyle(
                                       fontFamily: 'Cairo',
                                       fontSize: baseFontSize * 0.875,

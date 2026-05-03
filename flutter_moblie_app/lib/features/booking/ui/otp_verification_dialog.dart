@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
 import 'package:thoutha_mobile_app/core/networking/otp_service.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class OtpVerificationDialog extends StatefulWidget {
   final String contactInfo;
@@ -10,12 +11,12 @@ class OtpVerificationDialog extends StatefulWidget {
   final Function(String)? onResend;
 
   const OtpVerificationDialog({
-    Key? key,
+    super.key,
     required this.contactInfo,
     this.isEmail = false,
     required this.onVerified,
     this.onResend,
-  }) : super(key: key);
+  });
 
   @override
   State<OtpVerificationDialog> createState() => _OtpVerificationDialogState();
@@ -36,7 +37,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
     super.initState();
     _startTimer();
     // Auto focus
-    Future.delayed(const Duration(milliseconds: 100), () {
+    Future.delayed(Duration(milliseconds: 100), () {
       if (mounted) _focusNode.requestFocus();
     });
   }
@@ -52,7 +53,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
   void _startTimer() {
     _resendCountdown = 60;
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_resendCountdown > 0) {
         if (mounted) {
           setState(() {
@@ -68,7 +69,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
   void _verifyOtp(String pin) async {
     if (pin.length != 6) {
       setState(() {
-        _error = 'رمز التحقق يجب أن يكون 6 أرقام';
+        _error = 'booking.verification_code_must_be'.tr();
       });
       return;
     }
@@ -91,7 +92,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
           widget.onVerified(pin);
         } else {
           setState(() {
-            _error = result['error'] ?? 'فشل التحقق من الرمز';
+            _error = result['error'] ?? 'booking.code_verification_failed'.tr();
           });
 
           _otpController.clear();
@@ -102,7 +103,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _error = 'حدث خطأ غير متوقع';
+          _error = 'booking.an_unexpected_error_occurred'.tr();
         });
       }
     }
@@ -127,8 +128,8 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
           widget.onResend?.call(widget.contactInfo);
 
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('تم إعادة إرسال رمز التحقق',
+            SnackBar(
+              content: Text('booking.verification_code_has_been'.tr(),
                   style: TextStyle(fontFamily: 'Cairo')),
               backgroundColor: Colors.green,
               duration: Duration(seconds: 2),
@@ -136,7 +137,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
           );
         } else {
           setState(() {
-            _error = result['error'] ?? 'فشل إعادة الإرسال';
+            _error = result['error'] ?? 'booking.retransmission_failed'.tr();
           });
         }
       }
@@ -144,7 +145,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
       if (mounted) {
         setState(() {
           _isResending = false;
-          _error = 'حدث خطأ غير متوقع';
+          _error = 'booking.an_unexpected_error_occurred'.tr();
         });
       }
     }
@@ -159,13 +160,13 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
     final defaultPinTheme = PinTheme(
       width: screenWidth > 600 ? 56 : (screenWidth - 80) / 6,
       height: 60,
-      textStyle: const TextStyle(
+      textStyle: TextStyle(
         fontSize: 22,
         color: Color(0xFF1E293B),
         fontWeight: FontWeight.w600,
       ),
       decoration: BoxDecoration(
-        color: isDark ? Colors.grey[800] : const Color(0xFFF1F5F9),
+        color: isDark ? Colors.grey[800] : Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.transparent),
       ),
@@ -173,21 +174,21 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
 
     final focusedPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
-        border: Border.all(color: const Color(0xFF0B8FAC), width: 2),
-        color: isDark ? Colors.black : const Color(0xFFFFFFFF),
+        border: Border.all(color: Color(0xFF0B8FAC), width: 2),
+        color: isDark ? Colors.black : Color(0xFFFFFFFF),
       ),
     );
 
     final errorPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
         border: Border.all(color: Colors.redAccent, width: 2),
-        color: isDark ? const Color(0xFF451A1A) : const Color(0xFFFEF2F2),
+        color: isDark ? Color(0xFF451A1A) : Color(0xFFFEF2F2),
       ),
     );
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      backgroundColor: isDark ? Color(0xFF1E1E1E) : Colors.white,
       insetPadding: const EdgeInsets.all(20),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -200,35 +201,35 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE0F2FE)
+                  color: Color(0xFFE0F2FE)
                       .withValues(alpha: isDark ? 0.1 : 1.0),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.mark_email_read_outlined,
+                child: Icon(Icons.mark_email_read_outlined,
                     size: 32, color: Color(0xFF0B8FAC)),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               Text(
-                widget.isEmail ? "تأكيد البريد الإلكتروني" : "تأكيد رقم الهاتف",
-                style: const TextStyle(
+                widget.isEmail ? 'booking.email_confirmation'.tr() : 'booking.confirm_phone_number'.tr(),
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF1E293B),
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 "أدخل رمز التحقق المرسل إلى\n${widget.contactInfo}",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 14,
-                  color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                  color: isDark ? Colors.grey[400] : Color(0xFF64748B),
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
 
               Directionality(
                 textDirection: TextDirection.ltr,
@@ -244,10 +245,10 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
                   pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
                   validator: (pin) {
                     if (pin == null || pin.isEmpty) {
-                      return 'مطلوب';
+                      return 'booking.required'.tr();
                     }
                     if (pin.length != 6) {
-                      return '6 أرقام';
+                      return 'booking.6_numbers'.tr();
                     }
                     return null;
                   },
@@ -259,7 +260,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
                   padding: const EdgeInsets.only(top: 16),
                   child: Text(
                     _error!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       color: Colors.redAccent,
                       fontSize: 14,
@@ -267,9 +268,9 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
                   ),
                 ),
 
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
               _isLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 48,
                       width: 48,
                       child: Center(
@@ -284,14 +285,14 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
                           children: [
                             Text(
                               _resendCountdown > 0
-                                  ? "إعادة الإرسال بعد ${_resendCountdown} ثانية"
-                                  : "لم يصلك الرمز؟",
+                                  ? "إعادة الإرسال بعد $_resendCountdown ثانية"
+                                  : 'booking.didnt_receive_the_code'.tr(),
                               style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 14,
                                 color: isDark
                                     ? Colors.grey[400]
-                                    : const Color(0xFF64748B),
+                                    : Color(0xFF64748B),
                               ),
                             ),
                             if (_resendCountdown == 0)
@@ -301,7 +302,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
                                       child: SizedBox(
                                         width: 16,
                                         height: 16,
-                                        child: const CircularProgressIndicator(
+                                        child: CircularProgressIndicator(
                                           strokeWidth: 2,
                                           color: Color(0xFF0B8FAC),
                                         ),
@@ -309,8 +310,8 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
                                     )
                                   : TextButton(
                                       onPressed: _resendOtp,
-                                      child: const Text(
-                                        "إعادة الإرسال",
+                                      child: Text(
+                                        'booking.rebroadcast'.tr(),
                                         style: TextStyle(
                                           fontFamily: 'Cairo',
                                           fontWeight: FontWeight.w700,
@@ -324,7 +325,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
                         TextButton(
                           onPressed: () => Navigator.pop(context),
                           child: Text(
-                            "إلغاء",
+                            'booking.cancellation'.tr(),
                             style: TextStyle(
                               fontFamily: 'Cairo',
                               fontSize: 14,

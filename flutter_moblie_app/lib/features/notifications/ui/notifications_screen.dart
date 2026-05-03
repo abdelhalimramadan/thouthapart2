@@ -7,6 +7,7 @@ import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/features/notifications/logic/notifications_cubit.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 /// Notifications Screen - Displays push notifications
 class NotificationsScreen extends StatefulWidget {
@@ -53,10 +54,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF1F1F1),
+        backgroundColor: isDark ? Color(0xFF1F1F1F) : Color(0xFFF1F1F1),
         appBar: AppBar(
           title: Text(
-            'الإشعارات',
+            'notifications.notifications'.tr(),
             style: TextStyle(
               fontFamily: 'Cairo',
               fontWeight: FontWeight.w700,
@@ -68,7 +69,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           scrolledUnderElevation: 0,
           backgroundColor: Colors.transparent,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+            icon: Icon(Icons.arrow_back_ios_new_rounded),
             onPressed: () async {
               final navigator = Navigator.of(context);
               if (navigator.canPop()) {
@@ -96,8 +97,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   
                   return IconButton(
                     tooltip: _showUnreadOnly
-                        ? 'عرض كل الإشعارات'
-                        : 'عرض غير المقروء فقط',
+                        ? 'notifications.view_all_notifications'.tr()
+                        : 'notifications.show_unread_only'.tr(),
                     onPressed: () {
                       setState(() {
                         _showUnreadOnly = !_showUnreadOnly;
@@ -160,14 +161,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ),
         body: Container(
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF1F1F1),
+            color: isDark ? Color(0xFF1F1F1F) : Color(0xFFF1F1F1),
           ),
           child: BlocBuilder<NotificationsCubit, NotificationsState>(
             bloc: _cubit,
             builder: (context, state) {
               final isDark = Theme.of(context).brightness == Brightness.dark;
             if (state is LoadingState) {
-              return const Center(
+              return Center(
                 child: CircularProgressIndicator(),
               );
             } else if (state is SuccessState) {
@@ -189,7 +190,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 },
                 color: theme.colorScheme.primary,
                 child: ListView.builder(
-                  physics: const BouncingScrollPhysics(
+                  physics: BouncingScrollPhysics(
                     parent: AlwaysScrollableScrollPhysics(),
                   ),
                   padding: EdgeInsets.fromLTRB(14, 8, 14, 20),
@@ -220,7 +221,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       ),
                       SizedBox(height: 12),
                       Text(
-                        'تعذر تحميل الإشعارات',
+                        'notifications.unable_to_load_notifications'.tr(),
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 17,
@@ -240,8 +241,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       SizedBox(height: 16),
                       FilledButton.icon(
                         onPressed: _cubit.fetchNotifications,
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('إعادة المحاولة'),
+                        icon: Icon(Icons.refresh_rounded),
+                        label: Text('doctor.retry'.tr()),
                       ),
                     ],
                   ),
@@ -283,7 +284,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
            SizedBox(height: 16),
            Text(
-             'لا توجد اشعارات',
+             'notifications.no_notifications'.tr(),
              style: TextStyle(
                fontSize: 20,
                fontWeight: FontWeight.bold,
@@ -293,7 +294,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
            ),
            SizedBox(height: 8),
            Text(
-             'سيتم عرض الاشعارات هنا عند وصولها',
+             'notifications.notifications_will_be_displayed'.tr(),
              style: TextStyle(
                fontSize: 14,
                color: theme.colorScheme.onSurface.withOpacity(0.65),
@@ -304,9 +305,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
            SizedBox(height: 20),
            OutlinedButton.icon(
              onPressed: _cubit.fetchNotifications,
-             icon: const Icon(Icons.refresh_rounded),
-             label: const Text(
-               'تحديث',
+             icon: Icon(Icons.refresh_rounded),
+             label: Text(
+               'notifications.to_update'.tr(),
                style: TextStyle(fontFamily: 'Cairo'),
              ),
            ),
@@ -330,7 +331,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
            SizedBox(height: 12),
            Text(
-             'كل الاشعارات مقروءة',
+             'notifications.all_notifications_are_read'.tr(),
              style: TextStyle(
                fontSize: 18,
                fontWeight: FontWeight.w700,
@@ -340,7 +341,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
            ),
            SizedBox(height: 6),
            Text(
-             'اضغط على الايقونة لعرض كل الاشعارات',
+             'notifications.click_on_the_icon'.tr(),
              style: TextStyle(
                fontSize: 13,
                color: isDark ? Colors.white.withOpacity(0.9) : theme.colorScheme.onSurface.withOpacity(0.65),
@@ -364,7 +365,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
+      duration: Duration(milliseconds: 220),
       margin: EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
         color: notification.readStatus
@@ -382,7 +383,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.06),
             blurRadius: 12,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -419,7 +420,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             top: 0,
             bottom: 0,
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
+              duration: Duration(milliseconds: 220),
               width: 4,
               decoration: BoxDecoration(
                 color: notification.readStatus
@@ -458,7 +459,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    notification.title ?? 'بدون عنوان',
+                    notification.title ?? 'notifications.untitled'.tr(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -488,7 +489,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    notification.body ?? 'بدون محتوى',
+                    notification.body ?? 'notifications.no_content'.tr(),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -519,16 +520,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final isDark = theme.brightness == Brightness.dark;
      final title = (notification.title?.toString().trim().isNotEmpty ?? false)
          ? notification.title.toString().trim()
-         : 'بدون عنوان';
+         : 'notifications.untitled'.tr();
      final body = (notification.body?.toString().trim().isNotEmpty ?? false)
          ? notification.body.toString().trim()
-         : 'بدون محتوى';
+         : 'notifications.no_content'.tr();
 
      final fullDate = createdDate != null
          ? intl.DateFormat('dd/MM/yyyy - HH:mm', 'ar').format(createdDate)
-         : 'وقت غير معروف';
+         : 'notifications.unknown_time'.tr();
      final shownRelativeTime =
-         relativeTime.isNotEmpty ? relativeTime : 'وقت غير معروف';
+         relativeTime.isNotEmpty ? relativeTime : 'notifications.unknown_time'.tr();
 
     showModalBottomSheet(
       context: context,
@@ -566,7 +567,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       color: isDark ? Colors.white : theme.colorScheme.onSurface.withOpacity(0.85),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                 ],
               ),
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/helpers/spacing.dart';
 import '../../../../core/theming/styles.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class EmailAndPassword extends StatelessWidget {
   final TextEditingController emailController;
@@ -12,7 +13,7 @@ class EmailAndPassword extends StatelessWidget {
   final ValueChanged<bool> onRememberMeChanged;
   final bool _rememberMe;
 
-  EmailAndPassword({
+  const EmailAndPassword({
     super.key,
     required this.emailController,
     required this.passwordController,
@@ -30,7 +31,7 @@ class EmailAndPassword extends StatelessWidget {
         TextFormField(
           controller: emailController,
           decoration: InputDecoration(
-            labelText: 'البريد الإلكتروني',
+            labelText: 'doctor.email'.tr(),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
             ),
@@ -41,7 +42,7 @@ class EmailAndPassword extends StatelessWidget {
         TextFormField(
           controller: passwordController,
           decoration: InputDecoration(
-            labelText: 'كلمة المرور',
+            labelText: 'login.password'.tr(),
             errorText: passwordError,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -61,7 +62,7 @@ class EmailAndPassword extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'هل نسيت كلمة المرور؟',
+              'login.forgot_your_password_1'.tr(),
               style: TextStyles.font13BlueRegular,
             ),
             Row(
@@ -82,7 +83,7 @@ class EmailAndPassword extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'تذكرني',
+                  'login.remember_me'.tr(),
                   style: TextStyles.font13DarkBlueRegular,
                 ),
               ],

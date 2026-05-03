@@ -8,6 +8,7 @@ import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thoutha_mobile_app/core/networking/models/university_model.dart';
 
 import '../models/doctor_profile_model.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class ProfileRepository {
   final Dio _dio = DioFactory.getDio();
@@ -92,7 +93,7 @@ class ProfileRepository {
       print('=== fetchProfile: No cached profile available ===');
     }
 
-    throw Exception('لا يمكن تحميل البيانات، يرجى التحقق من الاتصال');
+    throw Exception('profile.data_cannot_be_loaded'.tr());
   }
 
   Future<DoctorProfileModel> getCachedProfile() async {
@@ -124,7 +125,7 @@ class ProfileRepository {
     // The UI will handle displaying the updated data without caching it
     final result = await getIt<ApiService>().updateDoctor(body);
     if (result['success'] != true) {
-      throw Exception(result['error']?.toString() ?? 'فشل تحديث البيانات');
+      throw Exception(result['error']?.toString() ?? 'profile.data_update_failed'.tr());
     }
     // Profile updated successfully - no caching, fresh data will be fetched when needed
   }
@@ -134,7 +135,7 @@ class ProfileRepository {
     if (result['success'] == true) {
       return result['data'] as List<UniversityModel>;
     }
-    throw Exception(result['error'] ?? 'فشل في تحميل قائمة الجامعات');
+    throw Exception(result['error'] ?? 'profile.failed_to_load_list_1'.tr());
   }
 
   Future<List<CityModel>> getCities() async {
@@ -142,7 +143,7 @@ class ProfileRepository {
     if (result['success'] == true) {
       return result['data'] as List<CityModel>;
     }
-    throw Exception(result['error'] ?? 'فشل في تحميل قائمة المدن');
+    throw Exception(result['error'] ?? 'profile.failed_to_load_list'.tr());
   }
 
   Future<List<CategoryModel>> getCategories() async {
@@ -150,6 +151,6 @@ class ProfileRepository {
     if (result['success'] == true) {
       return result['data'] as List<CategoryModel>;
     }
-    throw Exception(result['error'] ?? 'فشل في تحميل قائمة التخصصات');
+    throw Exception(result['error'] ?? 'profile.failed_to_load_list_2'.tr());
   }
 }

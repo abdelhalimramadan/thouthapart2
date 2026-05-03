@@ -59,7 +59,7 @@ mixin _$NotificationLogModel {
                 other.updatedAt == updatedAt) &&
             (identical(other.readStatus, readStatus) ||
                 other.readStatus == readStatus) &&
-            const DeepCollectionEquality().equals(other.payload, payload) &&
+            DeepCollectionEquality().equals(other.payload, payload) &&
             (identical(other.appointmentId, appointmentId) ||
                 other.appointmentId == appointmentId) &&
             (identical(other.messageId, messageId) ||
@@ -84,7 +84,7 @@ mixin _$NotificationLogModel {
       createdAt,
       updatedAt,
       readStatus,
-      const DeepCollectionEquality().hash(payload),
+      DeepCollectionEquality().hash(payload),
       appointmentId,
       messageId,
       doctorId,
@@ -572,7 +572,7 @@ class _NotificationLogModel implements NotificationLogModel {
                 other.updatedAt == updatedAt) &&
             (identical(other.readStatus, readStatus) ||
                 other.readStatus == readStatus) &&
-            const DeepCollectionEquality().equals(other._payload, _payload) &&
+            DeepCollectionEquality().equals(other._payload, _payload) &&
             (identical(other.appointmentId, appointmentId) ||
                 other.appointmentId == appointmentId) &&
             (identical(other.messageId, messageId) ||
@@ -597,7 +597,7 @@ class _NotificationLogModel implements NotificationLogModel {
       createdAt,
       updatedAt,
       readStatus,
-      const DeepCollectionEquality().hash(_payload),
+      DeepCollectionEquality().hash(_payload),
       appointmentId,
       messageId,
       doctorId,

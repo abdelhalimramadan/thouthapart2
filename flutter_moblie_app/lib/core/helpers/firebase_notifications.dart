@@ -6,6 +6,7 @@ import 'constants.dart';
 import 'shared_pref_helper.dart';
 import '../routing/routes.dart';
 import '../routing/navigator_service.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -19,12 +20,12 @@ class NotificationHelper {
       FlutterLocalNotificationsPlugin();
 
   static Future<void> init() async {
-    const AndroidInitializationSettings androidSettings =
+    final AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    const DarwinInitializationSettings iosSettings =
+    final DarwinInitializationSettings iosSettings =
         DarwinInitializationSettings();
 
-    const InitializationSettings initSettings = InitializationSettings(
+    final InitializationSettings initSettings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
     );
@@ -45,10 +46,10 @@ class NotificationHelper {
 
     _getFcmToken();
 
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    AndroidNotificationChannel channel = AndroidNotificationChannel(
       'high_importance_channel',
-      'حجوزات المرضى',
-      description: 'هذه القناة مخصصة لإشعارات الحجوزات الجديدة',
+      'core.patient_reservations'.tr(),
+      description: 'core.this_channel_is_dedicated'.tr(),
       importance: Importance.max,
     );
 

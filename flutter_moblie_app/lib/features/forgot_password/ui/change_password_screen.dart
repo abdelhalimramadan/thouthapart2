@@ -7,6 +7,7 @@ import '../../../core/widgets/app_text_button.dart';
 import '../../profile/ui/doctor_profile.dart';
 
 import '../data/forgot_password_service.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -30,9 +31,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   // ── Validation ──────────────────────────────────────────────────────────
   String? _validatePhone(String? value) {
-    if (value == null || value.trim().isEmpty) return 'الرجاء إدخال رقم الهاتف';
+    if (value == null || value.trim().isEmpty) return 'forgot_password.please_enter_phone_number'.tr();
     final digits = value.trim().replaceAll(RegExp(r'[^\d]'), '');
-    if (digits.length < 10 || digits.length > 13) return 'رقم الهاتف غير صالح';
+    if (digits.length < 10 || digits.length > 13) return 'forgot_password.invalid_phone_number'.tr();
     return null;
   }
 
@@ -61,10 +62,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           },
         );
       } else {
-        setState(() => _errorMessage = result['message'] ?? 'حدث خطأ');
+        setState(() => _errorMessage = result['message'] ?? 'forgot_password.an_error_occurred'.tr());
       }
     } catch (_) {
-      if (mounted) setState(() => _errorMessage = 'حدث خطأ غير متوقع');
+      if (mounted) setState(() => _errorMessage = 'booking.an_unexpected_error_occurred'.tr());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -79,9 +80,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      backgroundColor: isDark ? Color(0xFF1E1E1E) : Colors.white,
       appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF2D2D2D) : Colors.transparent,
+        backgroundColor: isDark ? Color(0xFF2D2D2D) : Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded,
@@ -89,7 +90,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           onPressed: () {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (context) => const DoctorProfileScreen(),
+                builder: (context) => DoctorProfileScreen(),
               ),
             );
           },
@@ -98,8 +99,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       body: Stack(
         children: [
           // Background gradients
-          _gradient(const Alignment(-0.7, -0.7), ColorsManager.layerBlur1),
-          _gradient(const Alignment(0.7, 0.7), ColorsManager.layerBlur2),
+          _gradient(Alignment(-0.7, -0.7), ColorsManager.layerBlur1),
+          _gradient(Alignment(0.7, 0.7), ColorsManager.layerBlur2),
 
           SafeArea(
             child: Center(
@@ -115,7 +116,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         maxWidth: width >= 600 ? 500 : double.infinity),
                     padding: EdgeInsets.all(width * 0.06),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF2D2D2D) : Colors.white,
+                      color: isDark ? Color(0xFF2D2D2D) : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
@@ -123,7 +124,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 ? Colors.black.withAlpha(50)
                                 : Colors.black.withAlpha(25),
                             blurRadius: 10,
-                            offset: const Offset(0, 4))
+                            offset: Offset(0, 4))
                       ],
                     ),
                     child: Directionality(
@@ -141,11 +142,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             height: width * 0.2,
                             fit: BoxFit.contain,
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
 
                           // Title
                           Text(
-                            'تغيير كلمة المرور',
+                            'forgot_password.change_password'.tr(),
                             style: TextStyle(
                               fontSize: fs * 1.5,
                               fontWeight: FontWeight.bold,
@@ -155,11 +156,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               fontFamily: 'Cairo',
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
 
                           // Subtitle
                           Text(
-                            'سنرسل لك رمز تحقق على الواتساب',
+                            'forgot_password.we_will_send_you'.tr(),
                             style: TextStyle(
                                 fontSize: fs * 0.875,
                                 color: isDark ? Colors.grey[400] : Colors.grey,
@@ -189,7 +190,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     color: isDark ? Colors.white : Colors.black,
                                   ),
                                   decoration: InputDecoration(
-                                    labelText: 'رقم الهاتف',
+                                    labelText: 'doctor.phone_number'.tr(),
                                     hintText: '01xxxxxxxxx',
                                     prefixIcon: Icon(
                                         Icons.phone_android_outlined,
@@ -244,7 +245,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     child: Row(children: [
                                       Icon(Icons.error_outline,
                                           color: Colors.red.shade600, size: 18),
-                                      const SizedBox(width: 8),
+                                      SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
                                           _errorMessage!,
@@ -265,11 +266,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   height: 52,
                                   width: double.infinity,
                                   child: _isLoading
-                                      ? const Center(
+                                      ? Center(
                                           child: CircularProgressIndicator())
                                       : AppTextButton(
-                                          buttonText: 'إرسال رمز التحقق',
-                                          textStyle: const TextStyle(
+                                          buttonText: 'forgot_password.send_verification_code'.tr(),
+                                          textStyle: TextStyle(
                                             fontSize: 16,
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
@@ -280,19 +281,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 ),
 
                                 // Back to profile
-                                const SizedBox(height: 12),
+                                SizedBox(height: 12),
                                 Center(
                                   child: TextButton(
                                     onPressed: () {
                                       Navigator.of(context).pushReplacement(
                                         MaterialPageRoute(
                                           builder: (context) =>
-                                              const DoctorProfileScreen(),
+                                              DoctorProfileScreen(),
                                         ),
                                       );
                                     },
                                     child: Text(
-                                      'العودة للملف الشخصي',
+                                      'doctor.back_to_profile'.tr(),
                                       style: TextStyle(
                                         fontSize: fs * 0.8,
                                         color: ColorsManager.mainBlue,

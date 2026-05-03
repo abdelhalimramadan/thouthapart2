@@ -47,7 +47,7 @@ class DoctorImageAndText extends StatelessWidget {
                       color: ColorsManager.mainBlue.withAlpha(40),
                       spreadRadius: 8,
                       blurRadius: 20,
-                      offset: const Offset(0, 0),
+                      offset: Offset(0, 0),
                     ),
                   ],
                 ),

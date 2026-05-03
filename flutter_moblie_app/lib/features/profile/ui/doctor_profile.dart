@@ -12,6 +12,7 @@ import 'package:thoutha_mobile_app/features/profile/logic/profile_state.dart';
 import 'package:thoutha_mobile_app/features/requests/ui/my_requests_screen.dart';
 import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 
 class DoctorProfileScreen extends StatelessWidget {
@@ -21,7 +22,7 @@ class DoctorProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => getIt<ProfileCubit>()..fetchProfile(),
-      child: const DoctorProfileBody(),
+      child: DoctorProfileBody(),
     );
   }
 }
@@ -130,28 +131,28 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     final category = _categoryCtrl.text.trim();
 
     if (firstName.isEmpty || firstName.length < 2) {
-      return 'يرجى إدخال الاسم الأول بشكل صحيح';
+      return 'profile.please_enter_your_first'.tr();
     }
     if (lastName.isEmpty || lastName.length < 2) {
-      return 'يرجى إدخال اسم العائلة بشكل صحيح';
+      return 'profile.please_enter_your_last'.tr();
     }
     if (email.isEmpty || !_isValidEmail(email)) {
-      return 'يرجى إدخال بريد إلكتروني صحيح';
+      return 'profile.please_enter_a_valid_1'.tr();
     }
     if (phone.isEmpty || !_isValidPhone(phone)) {
-      return 'يرجى إدخال رقم هاتف صحيح';
+      return 'profile.please_enter_a_valid'.tr();
     }
     if (university.isEmpty) {
-      return 'يرجى اختيار الجامعة';
+      return 'profile.please_select_a_university'.tr();
     }
     if (year.isEmpty) {
-      return 'يرجى اختيار السنة الدراسية';
+      return 'profile.please_select_the_academic'.tr();
     }
     if (city.isEmpty) {
-      return 'يرجى اختيار المحافظة';
+      return 'profile.please_select_a_governorate'.tr();
     }
     if (category.isEmpty) {
-      return 'يرجى اختيار التخصص';
+      return 'profile.please_choose_a_specialty'.tr();
     }
     return null;
   }
@@ -165,7 +166,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(validationError,
-              style: const TextStyle(fontFamily: 'Cairo')),
+              style: TextStyle(fontFamily: 'Cairo')),
           backgroundColor: Colors.red[700],
           behavior: SnackBarBehavior.floating,
           shape:
@@ -231,10 +232,10 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                             setDialogState(() => searchQuery = val),
                         textAlign: TextAlign.right,
                         decoration: InputDecoration(
-                          hintText: 'بحث...',
+                          hintText: 'profile.research'.tr(),
                           hintStyle:
                               TextStyle(fontFamily: 'Cairo', fontSize: 14),
-                          prefixIcon: const Icon(Icons.search),
+                          prefixIcon: Icon(Icons.search),
                           isDense: true,
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12)),
@@ -293,7 +294,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
       child: Scaffold(
         key: _scaffoldKey,
         backgroundColor: theme.scaffoldBackgroundColor,
-        drawer: const DoctorDrawer(),
+        drawer: DoctorDrawer(),
         appBar: AppBar(
           toolbarHeight: 70,
           elevation: 0,
@@ -313,14 +314,14 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'الملف الشخصي',
+                'doctor.profile'.tr(),
                 style: textTheme.titleLarge?.copyWith(
                   fontFamily: 'Cairo',
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Image.asset(
                 'assets/images/splash-logo.png',
                 width: 36,
@@ -366,8 +367,8 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                     _isSaving = false;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: const Text(
-                          'تم تحديث الملف الشخصي بنجاح',
+                        content: Text(
+                          'profile.the_profile_has_been'.tr(),
                           style: TextStyle(fontFamily: 'Cairo'),
                         ),
                         backgroundColor: Colors.green[700],
@@ -383,7 +384,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content:
-                          Text(msg, style: const TextStyle(fontFamily: 'Cairo')),
+                          Text(msg, style: TextStyle(fontFamily: 'Cairo')),
                       backgroundColor: Colors.red[700],
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
@@ -404,7 +405,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 error: (s) => Center(child: Text(s.error)),
               );
               return loadingWidget ??
-                  const Center(child: CircularProgressIndicator());
+                  Center(child: CircularProgressIndicator());
             },
           ),
         ),
@@ -428,12 +429,12 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 onTap: (_hasChanges && !_isSaving) ? _onSave : null,
                 borderRadius: BorderRadius.circular(12),
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
+                  duration: Duration(milliseconds: 250),
                   width: double.infinity,
                   height: 54,
                   decoration: BoxDecoration(
                     gradient: (_hasChanges && !_isSaving)
-                        ? const LinearGradient(
+                        ? LinearGradient(
                             colors: [Color(0xFF1D61E7), Color(0xFF0B8FAC)],
                           )
                         : LinearGradient(
@@ -441,15 +442,15 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                           ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFF021433).withOpacity(0.18),
+                      color: Color(0xFF021433).withOpacity(0.18),
                     ),
                     boxShadow: [
                       BoxShadow(
                         color: (_hasChanges && !_isSaving)
-                            ? const Color(0xFF1D61E7).withOpacity(0.2)
+                            ? Color(0xFF1D61E7).withOpacity(0.2)
                             : Colors.transparent,
                         blurRadius: 8,
-                        offset: const Offset(0, 4),
+                        offset: Offset(0, 4),
                       ),
                     ],
                   ),
@@ -458,13 +459,13 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                         ? SizedBox(
                             width: 20,
                             height: 20,
-                            child: const CircularProgressIndicator(
+                            child: CircularProgressIndicator(
                               strokeWidth: 2.2,
                               color: Colors.white,
                             ),
                           )
                         : Text(
-                            'حفظ',
+                            'profile.save'.tr(),
                             style: TextStyle(
                               fontFamily: 'Cairo',
                               fontSize: 18,
@@ -482,7 +483,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 height: 50,
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF1D61E7), width: 1.5),
+                    side: BorderSide(color: Color(0xFF1D61E7), width: 1.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -491,19 +492,19 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const ChangePasswordScreen(),
+                        builder: (_) => ChangePasswordScreen(),
                       ),
                     );
                   },
                   icon: Icon(Icons.lock_reset_rounded,
-                      color: const Color(0xFF1D61E7), size: 24),
+                      color: Color(0xFF1D61E7), size: 24),
                   label: Text(
-                    'تغيير كلمة المرور',
+                    'forgot_password.change_password'.tr(),
                     style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1D61E7),
+                      color: Color(0xFF1D61E7),
                     ),
                   ),
                 ),
@@ -517,7 +518,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                       height: 50,
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1D61E7),
+                          backgroundColor: Color(0xFF1D61E7),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -528,13 +529,13 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const MyRequestsScreen(),
+                              builder: (context) => MyRequestsScreen(),
                             ),
                           );
                         },
                         icon: Icon(Icons.assignment_outlined, size: 24),
                         label: Text(
-                          'طلباتي',
+                          'doctor.my_requests'.tr(),
                           style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 16,
@@ -550,7 +551,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                       height: 50,
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.red, width: 1.5),
+                          side: BorderSide(color: Colors.red, width: 1.5),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -559,14 +560,14 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const AccountDeletionScreen(),
+                              builder: (_) => AccountDeletionScreen(),
                             ),
                           );
                         },
                         icon: Icon(Icons.delete_forever_rounded,
                             color: Colors.red, size: 24),
                         label: Text(
-                          'حذف الحساب',
+                          'doctor.delete_account'.tr(),
                           style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize:
@@ -599,12 +600,12 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            'معلوماتك الشخصية',
+            'profile.your_personal_information'.tr(),
             style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : const Color(0xFF4B5563),
+              color: isDark ? Colors.white : Color(0xFF4B5563),
             ),
           ),
 
@@ -626,7 +627,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
             child: Column(
               children: [
                 _buildEditableInputField(
-                  label: 'الإيميل',
+                  label: 'profile.email'.tr(),
                   controller: _emailCtrl,
                   focusNode: _emailFocusNode,
                   keyboardType: TextInputType.emailAddress,
@@ -636,67 +637,67 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 ),
                 _divider(),
                 _buildEditableInputField(
-                  label: 'الاسم الأول',
+                  label: 'booking.first_name'.tr(),
                   controller: _firstNameCtrl,
                   focusNode: _firstNameFocusNode,
-                  hintText: 'أدخل الاسم الأول',
+                  hintText: 'profile.enter_first_name'.tr(),
                 ),
                 _divider(),
                 _buildEditableInputField(
-                  label: 'اسم العائلة',
+                  label: 'booking.last_name'.tr(),
                   controller: _lastNameCtrl,
                   focusNode: _lastNameFocusNode,
-                  hintText: 'أدخل اسم العائلة',
+                  hintText: 'profile.enter_the_last_name'.tr(),
                 ),
                 _divider(),
                 _buildEditablePhoneField(),
                 _divider(),
                 _buildEditableField(
-                  label: 'الجامعة',
+                  label: 'doctor.the_university'.tr(),
                   id: 'university',
                   displayValue: _universityCtrl.text.isNotEmpty
                       ? _universityCtrl.text
                       : profile.faculty,
                   onTap: () => _showSelectionDialog(
-                    title: 'اختر الجامعة',
+                    title: 'profile.choose_the_university'.tr(),
                     items: universities.map((u) => u.name).toList(),
                     controller: _universityCtrl,
                   ),
                 ),
                 _divider(),
                 _buildEditableField(
-                  label: 'السنة الدراسية',
+                  label: 'profile.academic_year'.tr(),
                   id: 'year',
                   displayValue:
                       _yearCtrl.text.isNotEmpty ? _yearCtrl.text : profile.year,
                   onTap: () => _showSelectionDialog(
-                    title: 'اختر السنة الدراسية',
-                    items: const ['الرابعة', 'الخامسة', 'امتياز'],
+                    title: 'profile.select_the_academic_year'.tr(),
+                    items: ['profile.fourth'.tr(), 'profile.fifth'.tr(), 'profile.privilege'.tr()],
                     controller: _yearCtrl,
                   ),
                 ),
                 _divider(),
                 _buildEditableField(
-                  label: 'المحافظة',
+                  label: 'home_screen.governorate'.tr(),
                   id: 'city',
                   displayValue: _cityCtrl.text.isNotEmpty
                       ? _cityCtrl.text
                       : profile.governorate,
                   onTap: () => _showSelectionDialog(
-                    title: 'اختر المحافظة',
+                    title: 'doctor.select_the_governorate'.tr(),
                     items: cities.map((c) => c.name).toList(),
                     controller: _cityCtrl,
                   ),
                 ),
                 _divider(),
                 _buildEditableField(
-                  label: 'التخصص',
+                  label: 'doctor.specialization'.tr(),
                   id: 'category',
                   displayValue: _categoryCtrl.text.isNotEmpty
                       ? _categoryCtrl.text
                       : profile.category,
                   onTap: () => _showSelectionDialog(
-                    title: 'اختر التخصص',
+                    title: 'profile.choose_your_specialty'.tr(),
                     items: categories.map((c) => c.name).toList(),
                     controller: _categoryCtrl,
                   ),
@@ -729,7 +730,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
               GestureDetector(
                 onTap: onTap,
                 child: ShaderMask(
-                  shaderCallback: (bounds) => const LinearGradient(
+                  shaderCallback: (bounds) => LinearGradient(
                     colors: [Color(0xFF1D61E7), Color(0xFF0B8FAC)],
                   ).createShader(bounds),
                   child: Icon(
@@ -744,7 +745,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 14,
-                  color: isDark ? Colors.white : const Color(0xFF9CA3AF),
+                  color: isDark ? Colors.white : Color(0xFF9CA3AF),
                 ),
               ),
             ],
@@ -754,13 +755,13 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
             onTap: onTap,
             child: Text(
               (displayValue == null || displayValue.isEmpty)
-                  ? 'غير محدد'
+                  ? 'doctor.undefined'.tr()
                   : displayValue,
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : const Color(0xFF1F2937),
+                color: isDark ? Colors.white : Color(0xFF1F2937),
               ),
               textDirection: TextDirection.rtl,
             ),
@@ -792,7 +793,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
               GestureDetector(
                 onTap: () => FocusScope.of(context).requestFocus(focusNode),
                 child: ShaderMask(
-                  shaderCallback: (bounds) => const LinearGradient(
+                  shaderCallback: (bounds) => LinearGradient(
                     colors: [Color(0xFF1D61E7), Color(0xFF0B8FAC)],
                   ).createShader(bounds),
                   child: Icon(
@@ -807,7 +808,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 14,
-                  color: isDark ? Colors.white : const Color(0xFF9CA3AF),
+                  color: isDark ? Colors.white : Color(0xFF9CA3AF),
                 ),
               ),
             ],
@@ -824,27 +825,27 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
               hintStyle: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 14,
-                color: isDark ? Colors.white54 : const Color(0xFFD1D5DB),
+                color: isDark ? Colors.white54 : Color(0xFFD1D5DB),
               ),
               contentPadding:
                   EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
+                borderSide: BorderSide(
                   color: Color(0xFFE5E7EB),
                   width: 1.2,
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
+                borderSide: BorderSide(
                   color: Color(0xFFE5E7EB),
                   width: 1.2,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
+                borderSide: BorderSide(
                   color: Color(0xFF1D61E7),
                   width: 1.5,
                 ),
@@ -854,7 +855,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
               fontFamily: 'Cairo',
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : const Color(0xFF1F2937),
+              color: isDark ? Colors.white : Color(0xFF1F2937),
             ),
           ),
         ],
@@ -864,13 +865,13 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
 
   Widget _buildEditablePhoneField() {
     return _buildEditableInputField(
-      label: 'رقم الهاتف',
+      label: 'doctor.phone_number'.tr(),
       controller: _phoneCtrl,
       focusNode: _phoneFocusNode,
       keyboardType: TextInputType.phone,
       textDirection: TextDirection.ltr,
       textAlign: TextAlign.left,
-      hintText: 'أدخل رقم الهاتف',
+      hintText: 'profile.enter_phone_number'.tr(),
     );
   }
 
@@ -878,7 +879,7 @@ class _DoctorProfileBodyState extends State<DoctorProfileBody> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Divider(
       height: 1,
-      color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
+      color: isDark ? Colors.grey[800] : Color(0xFFF3F4F6),
       thickness: 1.2,
     );
   }

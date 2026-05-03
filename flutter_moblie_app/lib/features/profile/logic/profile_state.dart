@@ -9,24 +9,24 @@ part 'profile_state.freezed.dart';
 
 @freezed
 class ProfileState<T> with _$ProfileState<T> {
-  const factory ProfileState.initial() = _Initial;
+  factory ProfileState.initial() = _Initial;
 
   // Represents "Stale-While-Revalidate" state (loading but showing cached data)
-  const factory ProfileState.loading({
+  factory ProfileState.loading({
     DoctorProfileModel? cachedData,
     @Default([]) List<UniversityModel> universities,
     @Default([]) List<CityModel> cities,
     @Default([]) List<CategoryModel> categories,
   }) = Loading<T>;
 
-  const factory ProfileState.success(
+  factory ProfileState.success(
     T data, {
     @Default([]) List<UniversityModel> universities,
     @Default([]) List<CityModel> cities,
     @Default([]) List<CategoryModel> categories,
   }) = Success<T>;
 
-  const factory ProfileState.error({
+  factory ProfileState.error({
     required String error,
     required DioExceptionType? type,
   }) = Error;

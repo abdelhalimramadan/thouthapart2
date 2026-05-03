@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class NotificationPermissionHelper {
   static Future<bool?> showNotificationPermissionDialog(
@@ -19,10 +20,10 @@ class NotificationPermissionHelper {
             Icon(Icons.notifications_active,
                 color: Theme.of(context).primaryColor,
                 size: 28 * (width / 390)),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             Expanded(
               child: Text(
-                'تفعيل الإشعارات',
+                'core.activate_notifications'.tr(),
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.bold,
@@ -33,7 +34,7 @@ class NotificationPermissionHelper {
           ],
         ),
         content: Text(
-          'حافظ على متابعة عيادتك! قم بتفعيل الإشعارات لمتابعة أسماء المرضى، معلومات التواصل، ومواعيد الحجز فوراً من شاشتك الرئيسية.',
+          'core.keep_track_of_your'.tr(),
           style: TextStyle(
             fontFamily: 'Cairo',
             fontSize: baseFontSize * 0.875, // 14
@@ -43,8 +44,8 @@ class NotificationPermissionHelper {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(
-              'ليس الآن',
+            child: Text(
+              'core.not_now'.tr(),
               style: TextStyle(
                 fontFamily: 'Cairo',
                 color: Colors.grey,
@@ -62,8 +63,8 @@ class NotificationPermissionHelper {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text(
-              'تفعيل الآن',
+            child: Text(
+              'core.activate_now'.tr(),
               style: TextStyle(
                 fontFamily: 'Cairo',
                 color: Colors.white,
@@ -93,10 +94,10 @@ class NotificationPermissionHelper {
           children: [
             Icon(Icons.warning_amber_rounded,
                 color: Colors.orange, size: 28 * (width / 390)),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             Expanded(
               child: Text(
-                'الإشعارات معطلة',
+                'core.notifications_are_disabled'.tr(),
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.bold,
@@ -107,7 +108,7 @@ class NotificationPermissionHelper {
           ],
         ),
         content: Text(
-          'لقد تم تعطيل الإشعارات من إعدادات الهاتف. يرجى تفعيلها من الإعدادات لمتابعة حجوزات المرضى وعيادتك.',
+          'core.notifications_have_been_disabled'.tr(),
           style: TextStyle(
             fontFamily: 'Cairo',
             fontSize: baseFontSize * 0.875, // 14
@@ -123,8 +124,8 @@ class NotificationPermissionHelper {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text(
-              'الذهاب للإعدادات',
+            child: Text(
+              'core.go_to_settings'.tr(),
               style: TextStyle(
                 fontFamily: 'Cairo',
                 color: Colors.white,

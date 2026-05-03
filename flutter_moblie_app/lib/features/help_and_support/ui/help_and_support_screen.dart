@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:thoutha_mobile_app/features/home_screen/ui/drawer/drawer.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class HelpAndSupportScreen extends StatefulWidget {
   const HelpAndSupportScreen({super.key});
@@ -29,9 +30,9 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'لا يمكن فتح تطبيق البريد الإلكتروني.',
+            'doctor.the_email_application_cannot'.tr(),
             style: TextStyle(fontFamily: 'Cairo'),
           ),
           backgroundColor: Colors.red,
@@ -66,7 +67,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const HomeDrawer(),
+      drawer: HomeDrawer(),
       appBar: AppBar(
         toolbarHeight: 70,
         elevation: 0,
@@ -85,7 +86,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'الدعم الفني',
+              'help_and_support.technical_support'.tr(),
               style: textTheme.titleLarge?.copyWith(
                 fontFamily: 'Cairo',
                 fontSize: 18,
@@ -103,7 +104,9 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
         ),
       ),
       body: Directionality(
-        textDirection: TextDirection.rtl,
+        textDirection: context.locale.languageCode == 'ar'
+            ? TextDirection.rtl
+            : TextDirection.ltr,
         child: Center(
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -119,7 +122,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                 children: [
                 // Intro
                 Text(
-                  'لو واجهتك أي مشكلة تقنية أثناء استخدام تطبيق ثوثة، أو عندك استفسار بخصوص التسجيل أو الحساب، فريق الدعم الفني جاهز يساعدك.',
+                  'help_and_support.if_you_encounter_any'.tr(),
                   textAlign: TextAlign.start,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontFamily: 'Cairo',
@@ -127,12 +130,12 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                     height: 1.6,
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
 
                 // ملاحظات مهمة
                 Text(
-                  'ملاحظات مهمة',
-                  textAlign: TextAlign.right,
+                  'help_and_support.important_notes'.tr(),
+                  textAlign: TextAlign.start,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontFamily: 'Cairo',
                     fontSize: 16,
@@ -140,20 +143,20 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                     color: theme.colorScheme.primary,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildBullet(
                     theme,
-                    'الدعم الفني يقتصر فقط على المشاكل التقنية المتعلقة باستخدام التطبيق.'),
+                    'help_and_support.technical_support_is_limited'.tr()),
                 _buildBullet(
                     theme,
-                    'لا يتدخل فريق الدعم في أي نزاعات أو اتفاقات بين الطلاب والمرضى.'),
-                _buildBullet(theme, 'التطبيق دوره يقتصر على الربط فقط بين الطرفين.'),
-                const SizedBox(height: 24),
+                    'help_and_support.the_support_team_does'.tr()),
+                _buildBullet(theme, 'help_and_support.the_applications_role_is'.tr()),
+                SizedBox(height: 24),
 
                 // وسائل التواصل
                 Text(
-                  'وسائل التواصل',
-                  textAlign: TextAlign.right,
+                  'help_and_support.communication_means'.tr(),
+                  textAlign: TextAlign.start,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontFamily: 'Cairo',
                     fontSize: 16,
@@ -161,16 +164,16 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                     color: theme.colorScheme.primary,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
-                  'يمكنك التواصل معنا عبر البريد الإلكتروني:',
+                  'help_and_support.you_can_contact_us'.tr(),
                   textAlign: TextAlign.start,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontFamily: 'Cairo',
                     fontSize: 13,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 InkWell(
                   onTap: () => _launchEmail('Please describe your issue here.'),
                   child: Row(
@@ -187,19 +190,19 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                           decoration: TextDecoration.underline,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Icon(Icons.email_outlined,
                           size: 22,
                           color: theme.colorScheme.primary),
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
 
                 // نموذج التواصل
                 Text(
-                  'نموذج التواصل',
-                  textAlign: TextAlign.right,
+                  'help_and_support.communication_model'.tr(),
+                  textAlign: TextAlign.start,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontFamily: 'Cairo',
                     fontSize: 16,
@@ -207,7 +210,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                     color: theme.colorScheme.primary,
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 Form(
                   key: _formKey,
@@ -216,19 +219,19 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                     children: [
                       TextFormField(
                         controller: _messageController,
-                        textAlign: TextAlign.right,
+                        textAlign: TextAlign.start,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontFamily: 'Cairo',
                           fontSize: 14,
                         ),
                         maxLines: 5,
                         decoration: InputDecoration(
-                          labelText: 'اكتب رسالتك هنا',
+                          labelText: 'help_and_support.write_your_message_here'.tr(),
                           labelStyle: theme.textTheme.bodySmall?.copyWith(
                             fontFamily: 'Cairo',
                             fontSize: 13,
                           ),
-                          hintText: 'اكتب رسالتك هنا',
+                          hintText: 'help_and_support.write_your_message_here'.tr(),
                           hintStyle: theme.textTheme.bodySmall?.copyWith(
                             fontFamily: 'Cairo',
                             fontSize: 13,
@@ -255,12 +258,13 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                               horizontal: 16, vertical: 12),
                         ),
                         validator: (v) {
-                          if (v == null || v.trim().isEmpty)
-                            return 'يرجى كتابة رسالتك';
+                          if (v == null || v.trim().isEmpty) {
+                            return 'help_and_support.please_write_your_message'.tr();
+                          }
                           return null;
                         },
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24),
                       SizedBox(
                         height: 52,
                         child: ElevatedButton(
@@ -273,7 +277,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                             ),
                           ),
                           child: _isSending
-                              ? const SizedBox(
+                              ? SizedBox(
                                   height: 24,
                                   width: 24,
                                   child: CircularProgressIndicator(
@@ -283,7 +287,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                                   ),
                                 )
                               : Text(
-                                  'إرسال',
+                                  'help_and_support.send'.tr(),
                                   style: theme.textTheme.labelLarge?.copyWith(
                                     fontFamily: 'Cairo',
                                     fontSize: 15,
@@ -296,7 +300,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
               ],
             ),
           ),
@@ -320,7 +324,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
               color: theme.colorScheme.primary,
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Expanded(
             child: Text(
               text,

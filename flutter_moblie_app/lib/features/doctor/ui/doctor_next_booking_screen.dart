@@ -4,8 +4,8 @@ import 'package:thoutha_mobile_app/core/networking/api_service.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
 import 'package:thoutha_mobile_app/features/doctor/widgets/appointment_card_widget.dart';
-import 'package:intl/intl.dart';
 import 'dart:ui' as ui show TextDirection;
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class DoctorNextBookingScreen extends StatefulWidget {
   const DoctorNextBookingScreen({super.key});
@@ -53,7 +53,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         } else {
           setState(() {
             _isLoading = false;
-            _errorMessage = result['error'] ?? 'فشل في تحميل الحجوزات';
+            _errorMessage = result['error'] ?? 'doctor.failed_to_load_reservations'.tr();
             _bookings = [];
           });
         }
@@ -87,8 +87,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
 
           // Parse dateTime for display
           final String rawDateTime = booking['appointmentDate'] ?? '';
-          String displayDate = booking['date'] ?? 'غير محدد';
-          String displayTime = booking['time'] ?? 'غير محدد';
+          String displayDate = booking['date'] ?? 'doctor.undefined'.tr();
+          String displayTime = booking['time'] ?? 'doctor.undefined'.tr();
 
           if (rawDateTime.isNotEmpty) {
             try {
@@ -96,8 +96,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
               displayDate = DateFormat('dd/MM/yyyy').format(dt);
               displayTime = DateFormat('hh:mm a', 'ar')
                   .format(dt)
-                  .replaceAll('AM', 'صباحاً')
-                  .replaceAll('PM', 'مساءً');
+                  .replaceAll('AM', 'doctor.am'.tr())
+                  .replaceAll('PM', 'doctor.evening'.tr());
             } catch (_) {}
           }
 
@@ -106,10 +106,10 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
             patientName:
                 '${booking['patientFirstName'] ?? 'مريض'} ${booking['patientLastName'] ?? ''}'
                     .trim(),
-            phone: booking['patientPhoneNumber'] ?? 'غير متوفر',
+            phone: booking['patientPhoneNumber'] ?? 'doctor.unavailable'.tr(),
             date: displayDate,
             time: displayTime,
-            service: booking['categoryName'] ?? 'تخصص عام',
+            service: booking['categoryName'] ?? 'doctor.general_specialty'.tr(),
             baseFontSize: baseFontSize,
           );
         }
@@ -136,7 +136,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
       child: Scaffold(
         key: _scaffoldKey,
         backgroundColor: theme.scaffoldBackgroundColor,
-        drawer: const DoctorDrawer(),
+        drawer: DoctorDrawer(),
         appBar: AppBar(
           toolbarHeight: 70,
           elevation: 0,
@@ -146,7 +146,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           automaticallyImplyLeading: false,
           leading: Builder(
             builder: (context) => IconButton(
-              icon: const Icon(Icons.menu, size: 24),
+              icon: Icon(Icons.menu, size: 24),
               onPressed: () => _scaffoldKey.currentState?.openDrawer(),
             ),
           ),
@@ -157,14 +157,14 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'الحجوزات القادمة',
+                'doctor.upcoming_reservations'.tr(),
                 style: textTheme.titleLarge?.copyWith(
                   fontFamily: 'Cairo',
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Image.asset(
                 'assets/images/splash-logo.png',
                 width: 36,
@@ -176,7 +176,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           // ...existing code...
         ),
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(child: CircularProgressIndicator())
             : _errorMessage != null
                 ? Center(
                     child: Column(
@@ -187,20 +187,20 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                           size: 64,
                           color: Colors.red[300],
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         Text(
                           _errorMessage!,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Cairo',
                             color: Colors.red,
                             fontSize: 16,
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                         ElevatedButton(
                           onPressed: _fetchPendingAppointments,
-                          child: const Text('إعادة محاولة',
+                          child: Text('doctor.retry_1'.tr(),
                               style: TextStyle(fontFamily: 'Cairo')),
                         ),
                       ],
@@ -251,7 +251,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               // Patient name
               Text(
                 patientName,
@@ -261,46 +261,46 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                   fontSize: baseFontSize * 1.25,
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               Divider(
-                  color: isDark ? Colors.grey[700] : const Color(0xFFE5E7EB)),
-              const SizedBox(height: 12),
+                  color: isDark ? Colors.grey[700] : Color(0xFFE5E7EB)),
+              SizedBox(height: 12),
               // Phone
               _buildDetailRow(
                 context: context,
                 icon: Icons.phone_outlined,
-                label: 'رقم الهاتف',
+                label: 'doctor.phone_number'.tr(),
                 value: phone,
                 baseFontSize: baseFontSize,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               // Date
               _buildDetailRow(
                 context: context,
                 icon: Icons.calendar_month_outlined,
-                label: 'التاريخ',
+                label: 'doctor.the_date'.tr(),
                 value: date,
                 baseFontSize: baseFontSize,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               // Time
               _buildDetailRow(
                 context: context,
                 icon: Icons.access_time_outlined,
-                label: 'الوقت',
+                label: 'doctor.the_time'.tr(),
                 value: time,
                 baseFontSize: baseFontSize,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               // Specialty
               _buildDetailRow(
                 context: context,
                 icon: Icons.medical_services_outlined,
-                label: 'التخصص',
+                label: 'doctor.specialization'.tr(),
                 value: service,
                 baseFontSize: baseFontSize,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
             ],
           ),
         );
@@ -324,13 +324,13 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: isDark ? Colors.grey[800] : const Color(0xFFF3F4F6),
+            color: isDark ? Colors.grey[800] : Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon,
-              size: 18, color: isDark ? Colors.white : const Color(0xFF021433)),
+              size: 18, color: isDark ? Colors.white : Color(0xFF021433)),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -396,9 +396,9 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
             child: ElevatedButton.icon(
               onPressed: () =>
                   _handleAppointmentStatus(context, appointmentId, 'APPROVED'),
-              icon: const Icon(Icons.thumb_up_outlined),
+              icon: Icon(Icons.thumb_up_outlined),
               label: Text(
-                'قبول',
+                'doctor.acceptance'.tr(),
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,
@@ -406,7 +406,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
+                backgroundColor: Color(0xFF10B981),
                 foregroundColor: Colors.white,
                 elevation: 2,
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -416,14 +416,14 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Expanded(
             child: ElevatedButton.icon(
               onPressed: () =>
                   _handleAppointmentStatus(context, appointmentId, 'CANCELLED'),
-              icon: const Icon(Icons.thumb_down_outlined),
+              icon: Icon(Icons.thumb_down_outlined),
               label: Text(
-                'رفض',
+                'doctor.to_reject'.tr(),
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,
@@ -431,7 +431,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444),
+                backgroundColor: Color(0xFFEF4444),
                 foregroundColor: Colors.white,
                 elevation: 2,
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -463,53 +463,53 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                 size: 48,
                 color: isDark ? Colors.white30 : Colors.grey[400],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text(
-                'لا توجد حجوزات حالياً',
+                'doctor.there_are_no_reservations_1'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w700,
                   fontSize: 17,
-                  color: isDark ? Colors.white : const Color(0xFF0C4A6E),
+                  color: isDark ? Colors.white : Color(0xFF0C4A6E),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text(
-                'عند قيام أي مريض بحجز موعد، سيظهر هنا اسمه ورقم هاتفه.',
+                'doctor.when_any_patient_books'.tr(),
                 textAlign: TextAlign.right,
                 textDirection: ui.TextDirection.rtl,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 13.5,
                   height: 1.6,
-                  color: isDark ? Colors.white70 : const Color(0xFF334155),
+                  color: isDark ? Colors.white70 : Color(0xFF334155),
                 ),
               ),
               Text(
-                'يمكنك التواصل معه للتأكيد، ثم:',
+                'doctor.str_234'.tr(),
                 textAlign: TextAlign.right,
                 textDirection: ui.TextDirection.rtl,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 13.5,
                   height: 1.6,
-                  color: isDark ? Colors.white70 : const Color(0xFF334155),
+                  color: isDark ? Colors.white70 : Color(0xFF334155),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _buildInstructionRow(
                 isDarkMode: isDark,
                 icon: Icons.check_circle_outline,
-                iconColor: const Color(0xFF16A34A),
-                text: 'اضغط "قبول" لإضافة الحجز إلى سجل الحجوزات كـ حالة مؤكدة.',
+                iconColor: Color(0xFF16A34A),
+                text: 'doctor.click_accept_to_add'.tr(),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               _buildInstructionRow(
                 isDarkMode: isDark,
                 icon: Icons.cancel_outlined,
-                iconColor: const Color(0xFFE7000B),
-                text: 'اضغط "حذف" لإلغاء الحجز وإزالته نهائياً.',
+                iconColor: Color(0xFFE7000B),
+                text: 'doctor.click_delete_to_cancel'.tr(),
               ),
             ],
           ),
@@ -529,7 +529,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Text(
-                'حجوزاتي القادمة',
+                'doctor.my_next_reservations'.tr(),
                 textAlign: TextAlign.right,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontFamily: 'Cairo',
@@ -539,14 +539,14 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             ..._bookings.asMap().entries.map((entry) {
               final booking = entry.value;
 
               // Parse dateTime correctly using the correct API key 'appointmentDate'
               final String rawDateTime = booking['appointmentDate'] ?? '';
-              String displayDate = booking['date'] ?? 'غير محدد';
-              String displayTime = booking['time'] ?? 'غير محدد';
+              String displayDate = booking['date'] ?? 'doctor.undefined'.tr();
+              String displayTime = booking['time'] ?? 'doctor.undefined'.tr();
 
               if (rawDateTime.isNotEmpty) {
                 try {
@@ -556,8 +556,8 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                   // Format: 04:00 مساءً
                   displayTime = DateFormat('hh:mm a', 'ar')
                       .format(dt)
-                      .replaceAll('AM', 'صباحاً')
-                      .replaceAll('PM', 'مساءً');
+                      .replaceAll('AM', 'doctor.am'.tr())
+                      .replaceAll('PM', 'doctor.evening'.tr());
                 } catch (e) {
                   // Fallback to raw if parsing fails
                   if (rawDateTime.contains('T')) {
@@ -576,16 +576,16 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                     patientName:
                         '${booking['patientFirstName'] ?? 'مريض'} ${booking['patientLastName'] ?? ''}'
                             .trim(),
-                    phone: booking['patientPhoneNumber'] ?? 'غير متوفر',
-                    service: booking['categoryName'] ?? 'تخصص عام',
+                    phone: booking['patientPhoneNumber'] ?? 'doctor.unavailable'.tr(),
+                    service: booking['categoryName'] ?? 'doctor.general_specialty'.tr(),
                     time: displayTime,
                     date: displayDate,
-                    status: 'قيد الانتظار',
+                    status: 'doctor.on_hold'.tr(),
                     statusColor: Colors.orange,
                     width: width,
                     baseFontSize: baseFontSize,
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                 ],
               );
             }),
@@ -616,19 +616,19 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              status == 'APPROVED' ? 'تم قبول الحجز بنجاح' : 'تم رفض الحجز بنجاح',
-              style: const TextStyle(fontFamily: 'Cairo'),
+              status == 'APPROVED' ? 'doctor.your_reservation_has_been_2'.tr() : 'doctor.your_reservation_was_rejected'.tr(),
+              style: TextStyle(fontFamily: 'Cairo'),
             ),
             backgroundColor: status == 'APPROVED' || status == 'DONE'
                 ? Colors.green
                 : Colors.red,
-            duration: const Duration(seconds: 2),
+            duration: Duration(seconds: 2),
           ),
         );
 
         // Navigate to booking records if approved
         if (status == 'APPROVED') {
-          await Future.delayed(const Duration(milliseconds: 500));
+          await Future.delayed(Duration(milliseconds: 500));
           if (mounted) {
             Navigator.pushNamedAndRemoveUntil(
               context,
@@ -638,7 +638,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           }
         } else {
           // Refresh the list for other statuses
-          await Future.delayed(const Duration(milliseconds: 500));
+          await Future.delayed(Duration(milliseconds: 500));
           if (mounted) {
             _fetchPendingAppointments();
           }
@@ -647,11 +647,11 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              result['error'] ?? 'فشل في تحديث حالة الحجز',
-              style: const TextStyle(fontFamily: 'Cairo'),
+              result['error'] ?? 'doctor.failed_to_update_reservation_1'.tr(),
+              style: TextStyle(fontFamily: 'Cairo'),
             ),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+            duration: Duration(seconds: 3),
           ),
         );
       }
@@ -661,10 +661,10 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
         SnackBar(
           content: Text(
             'حدث خطأ: ${e.toString()}',
-            style: const TextStyle(fontFamily: 'Cairo'),
+            style: TextStyle(fontFamily: 'Cairo'),
           ),
           backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
+          duration: Duration(seconds: 3),
         ),
       );
     }
@@ -674,13 +674,13 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
   String _statusToArabic(String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return 'قيد الانتظار';
+        return 'doctor.on_hold'.tr();
       case 'APPROVED':
-        return 'موافق عليه';
+        return 'doctor.approved'.tr();
       case 'DONE':
-        return 'مكتمل';
+        return 'doctor.complete'.tr();
       case 'CANCELLED':
-        return 'ملغى';
+        return 'doctor.canceled'.tr();
       default:
         return status;
     }
@@ -700,7 +700,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
           padding: EdgeInsets.only(top: 2),
           child: Icon(icon, size: 18, color: iconColor),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
@@ -710,7 +710,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
               fontFamily: 'Cairo',
               fontSize: 13,
               height: 1.6,
-              color: isDarkMode ? Colors.white60 : const Color(0xFF475569),
+              color: isDarkMode ? Colors.white60 : Color(0xFF475569),
             ),
           ),
         ),

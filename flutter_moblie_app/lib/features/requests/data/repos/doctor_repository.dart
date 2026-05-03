@@ -3,6 +3,7 @@ import 'package:thoutha_mobile_app/core/networking/models/category_model.dart';
 import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thoutha_mobile_app/features/doctor/data/models/doctor_model.dart';
 import 'package:thoutha_mobile_app/features/requests/data/models/case_request_model.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class DoctorRepository {
   final ApiService _apiService;
@@ -14,7 +15,7 @@ class DoctorRepository {
     if (result['success'] == true) {
       return result['data'] as List<DoctorModel>;
     }
-    throw Exception(result['error'] ?? 'فشل في تحميل الأطباء');
+    throw Exception(result['error'] ?? 'doctor.failed_to_load_doctors'.tr());
   }
 
   Future<List<DoctorModel>> getDoctorsByCategory(int categoryId) async {
@@ -22,7 +23,7 @@ class DoctorRepository {
     if (result['success'] == true) {
       return result['data'] as List<DoctorModel>;
     }
-    throw Exception(result['error'] ?? 'فشل في تحميل الأطباء');
+    throw Exception(result['error'] ?? 'doctor.failed_to_load_doctors'.tr());
   }
 
   Future<List<CaseRequestModel>> getCaseRequestsByCategory(int categoryId,
@@ -34,7 +35,7 @@ class DoctorRepository {
       return result['data'] as List<CaseRequestModel>;
     }
 
-    throw Exception(result['error'] ?? 'فشل في تحميل الطلبات');
+    throw Exception(result['error'] ?? 'doctor.failed_to_load_requests'.tr());
   }
 
   Future<List<CategoryModel>> getCategories() async {
@@ -42,7 +43,7 @@ class DoctorRepository {
     if (result['success'] == true) {
       return result['data'] as List<CategoryModel>;
     }
-    throw Exception(result['error'] ?? 'فشل في تحميل التخصصات');
+    throw Exception(result['error'] ?? 'doctor.failed_to_load_specializations'.tr());
   }
 
   Future<List<CityModel>> getCities() async {
@@ -50,7 +51,7 @@ class DoctorRepository {
     if (result['success'] == true) {
       return result['data'] as List<CityModel>;
     }
-    throw Exception(result['error'] ?? 'فشل في تحميل المدن');
+    throw Exception(result['error'] ?? 'doctor.failed_to_load_cities'.tr());
   }
 
   Future<Map<String, dynamic>> deleteDoctor() async {

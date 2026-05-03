@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:thoutha_mobile_app/core/helpers/phone_helper.dart';
 import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
 import 'package:thoutha_mobile_app/core/networking/otp_service.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 part 'sign_up_state.dart';
 
@@ -29,12 +30,12 @@ class SignUpCubit extends Cubit<SignUpState> {
 
       // Basic validation
       if (email.isEmpty || password.isEmpty) {
-        emit(SignUpError('البريد الإلكتروني وكلمة المرور مطلوبان'));
+        emit(SignUpError('sign_up.email_and_password_are'.tr()));
         return;
       }
 
       if (password.length < 6) {
-        emit(SignUpError('يجب أن تكون كلمة المرور 6 أحرف على الأقل'));
+        emit(SignUpError('login.password_must_be_at'.tr()));
         return;
       }
 
@@ -47,8 +48,8 @@ class SignUpCubit extends Cubit<SignUpState> {
       final authDio = Dio(
         BaseOptions(
           baseUrl: ApiConstants.baseUrl,
-          connectTimeout: const Duration(seconds: 15),
-          receiveTimeout: const Duration(seconds: 15),
+          connectTimeout: Duration(seconds: 15),
+          receiveTimeout: Duration(seconds: 15),
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -108,20 +109,20 @@ class SignUpCubit extends Cubit<SignUpState> {
             emit(SignUpOtpSent(
               phoneNumber: formattedPhone,
               email: email.trim(),
-              message: otpResult['message'] ?? 'تم إرسال رمز التحقق',
+              message: otpResult['message'] ?? 'sign_up.verification_code_has_been'.tr(),
             ));
           } else {
             emit(SignUpError(
-              'تم إنشاء الحساب لكن فشل إرسال رمز التحقق. يرجى تسجيل الدخول.',
+              'sign_up.the_account_was_created'.tr(),
             ));
           }
         } else {
           // No phone number, just emit success
-          emit(SignUpSuccess(token ?? '', message: 'تم التسجيل بنجاح'));
+          emit(SignUpSuccess(token ?? '', message: 'sign_up.registration_completed_successfully'.tr()));
         }
       } else {
         // Handle error responses
-        String errorMessage = 'حدث خطأ في التسجيل';
+        String errorMessage = 'sign_up.an_error_occurred_in'.tr();
 
         if (response.data != null) {
           if (response.data is List) {
@@ -136,24 +137,24 @@ class SignUpCubit extends Cubit<SignUpState> {
 
               // Detect email duplicate
               if (errorText.contains('email') ||
-                  errorText.contains('بريد') ||
+                  errorText.contains('sign_up.mail'.tr()) ||
                   errorText.contains('Email') ||
-                  errorText.contains('البريد') ||
-                  errorText.contains('موجود') ||
-                  errorText.contains('مستخدم') ||
-                  errorText.contains('مسجل') ||
-                  errorText.contains('تكرار')) {
-                errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+                  errorText.contains('sign_up.mail_1'.tr()) ||
+                  errorText.contains('sign_up.existing'.tr()) ||
+                  errorText.contains('sign_up.user'.tr()) ||
+                  errorText.contains('sign_up.registered'.tr()) ||
+                  errorText.contains('sign_up.repetition'.tr())) {
+                errorMessage = 'sign_up.this_email_is_already'.tr();
               }
               // Detect phone duplicate
               else if (errorText.contains('phone') ||
-                  errorText.contains('تلفون') ||
+                  errorText.contains('sign_up.telephone'.tr()) ||
                   errorText.contains('Phone') ||
-                  errorText.contains('الهاتف') ||
-                  errorText.contains('رقم') ||
-                  errorText.contains('رقم الهاتف') ||
+                  errorText.contains('sign_up.phone'.tr()) ||
+                  errorText.contains('sign_up.number'.tr()) ||
+                  errorText.contains('doctor.phone_number'.tr()) ||
                   errorText.contains('phoneNumber')) {
-                errorMessage = 'رقم الهاتف مسجل سابقاً';
+                errorMessage = 'sign_up.the_phone_number_is'.tr();
               } else {
                 errorMessage = errorText;
               }
@@ -164,30 +165,30 @@ class SignUpCubit extends Cubit<SignUpState> {
                 responseMap['messageEn'] ??
                 responseMap['message'] ??
                 responseMap['error'] ??
-                'حدث خطأ في التسجيل';
+                'sign_up.an_error_occurred_in'.tr();
 
             // Detect email duplicate
             if (rawMessage.contains('email') ||
-                rawMessage.contains('بريد') ||
+                rawMessage.contains('sign_up.mail'.tr()) ||
                 rawMessage.contains('Email') ||
-                rawMessage.contains('البريد') ||
-                rawMessage.contains('مستخدم') ||
-                rawMessage.contains('موجود') ||
-                rawMessage.contains('مسجل') ||
-                rawMessage.contains('تكرار') ||
-                rawMessage.contains('العثور') ||
-                rawMessage.contains('المورد')) {
-              errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+                rawMessage.contains('sign_up.mail_1'.tr()) ||
+                rawMessage.contains('sign_up.user'.tr()) ||
+                rawMessage.contains('sign_up.existing'.tr()) ||
+                rawMessage.contains('sign_up.registered'.tr()) ||
+                rawMessage.contains('sign_up.repetition'.tr()) ||
+                rawMessage.contains('sign_up.find'.tr()) ||
+                rawMessage.contains('sign_up.supplier'.tr())) {
+              errorMessage = 'sign_up.this_email_is_already'.tr();
             }
             // Detect phone duplicate
             else if (rawMessage.contains('phone') ||
-                rawMessage.contains('تلفون') ||
+                rawMessage.contains('sign_up.telephone'.tr()) ||
                 rawMessage.contains('Phone') ||
-                rawMessage.contains('الهاتف') ||
-                rawMessage.contains('رقم') ||
-                rawMessage.contains('رقم الهاتف') ||
+                rawMessage.contains('sign_up.phone'.tr()) ||
+                rawMessage.contains('sign_up.number'.tr()) ||
+                rawMessage.contains('doctor.phone_number'.tr()) ||
                 rawMessage.contains('phoneNumber')) {
-              errorMessage = 'رقم الهاتف مسجل سابقاً';
+              errorMessage = 'sign_up.the_phone_number_is'.tr();
             } else {
               errorMessage = rawMessage;
             }
@@ -198,20 +199,20 @@ class SignUpCubit extends Cubit<SignUpState> {
         if (response.statusCode == 409) {
           // Try to determine if it's email or phone from previous attempts
           // Default to email since it's more common
-          errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+          errorMessage = 'sign_up.this_email_is_already'.tr();
         }
 
         // If message contains "No static resource found" or similar, it's likely a duplicate email
-        if (errorMessage.contains('لم يتم العثور على المورد الثابت') ||
+        if (errorMessage.contains('sign_up.static_resource_not_found'.tr()) ||
             errorMessage.contains('No static resource found') ||
-            errorMessage.contains('المورد الثابت')) {
-          errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+            errorMessage.contains('doctor.fixed_resource'.tr())) {
+          errorMessage = 'sign_up.this_email_is_already'.tr();
         }
 
         emit(SignUpError(errorMessage));
       }
     } on DioException catch (e) {
-      String errorMessage = 'حدث خطأ في الاتصال بالخادم';
+      String errorMessage = 'sign_up.an_error_occurred_connecting'.tr();
 
       if (e.response != null) {
         if (e.response!.data is List) {
@@ -225,24 +226,24 @@ class SignUpCubit extends Cubit<SignUpState> {
 
             // Detect email duplicate
             if (errorText.contains('email') ||
-                errorText.contains('بريد') ||
+                errorText.contains('sign_up.mail'.tr()) ||
                 errorText.contains('Email') ||
-                errorText.contains('البريد') ||
-                errorText.contains('موجود') ||
-                errorText.contains('مستخدم') ||
-                errorText.contains('مسجل') ||
-                errorText.contains('تكرار')) {
-              errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+                errorText.contains('sign_up.mail_1'.tr()) ||
+                errorText.contains('sign_up.existing'.tr()) ||
+                errorText.contains('sign_up.user'.tr()) ||
+                errorText.contains('sign_up.registered'.tr()) ||
+                errorText.contains('sign_up.repetition'.tr())) {
+              errorMessage = 'sign_up.this_email_is_already'.tr();
             }
             // Detect phone duplicate
             else if (errorText.contains('phone') ||
-                errorText.contains('تلفون') ||
+                errorText.contains('sign_up.telephone'.tr()) ||
                 errorText.contains('Phone') ||
-                errorText.contains('الهاتف') ||
-                errorText.contains('رقم') ||
-                errorText.contains('رقم الهاتف') ||
+                errorText.contains('sign_up.phone'.tr()) ||
+                errorText.contains('sign_up.number'.tr()) ||
+                errorText.contains('doctor.phone_number'.tr()) ||
                 errorText.contains('phoneNumber')) {
-              errorMessage = 'رقم الهاتف مسجل سابقاً';
+              errorMessage = 'sign_up.the_phone_number_is'.tr();
             } else {
               errorMessage = errorText;
             }
@@ -252,30 +253,30 @@ class SignUpCubit extends Cubit<SignUpState> {
           String rawMessage = responseMap['messageAr'] ??
               responseMap['messageEn'] ??
               responseMap['message'] ??
-              'بيانات غير صالحة';
+              'sign_up.invalid_data'.tr();
 
           // Detect email duplicate
           if (rawMessage.contains('email') ||
-              rawMessage.contains('بريد') ||
+              rawMessage.contains('sign_up.mail'.tr()) ||
               rawMessage.contains('Email') ||
-              rawMessage.contains('البريد') ||
-              rawMessage.contains('مستخدم') ||
-              rawMessage.contains('موجود') ||
-              rawMessage.contains('مسجل') ||
-              rawMessage.contains('تكرار') ||
-              rawMessage.contains('العثور') ||
-              rawMessage.contains('المورد')) {
-            errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+              rawMessage.contains('sign_up.mail_1'.tr()) ||
+              rawMessage.contains('sign_up.user'.tr()) ||
+              rawMessage.contains('sign_up.existing'.tr()) ||
+              rawMessage.contains('sign_up.registered'.tr()) ||
+              rawMessage.contains('sign_up.repetition'.tr()) ||
+              rawMessage.contains('sign_up.find'.tr()) ||
+              rawMessage.contains('sign_up.supplier'.tr())) {
+            errorMessage = 'sign_up.this_email_is_already'.tr();
           }
           // Detect phone duplicate
           else if (rawMessage.contains('phone') ||
-              rawMessage.contains('تلفون') ||
+              rawMessage.contains('sign_up.telephone'.tr()) ||
               rawMessage.contains('Phone') ||
-              rawMessage.contains('الهاتف') ||
-              rawMessage.contains('رقم') ||
-              rawMessage.contains('رقم الهاتف') ||
+              rawMessage.contains('sign_up.phone'.tr()) ||
+              rawMessage.contains('sign_up.number'.tr()) ||
+              rawMessage.contains('doctor.phone_number'.tr()) ||
               rawMessage.contains('phoneNumber')) {
-            errorMessage = 'رقم الهاتف مسجل سابقاً';
+            errorMessage = 'sign_up.the_phone_number_is'.tr();
           } else {
             errorMessage = rawMessage;
           }
@@ -283,20 +284,20 @@ class SignUpCubit extends Cubit<SignUpState> {
 
         // Status code 409 also means conflict (duplicate)
         if (e.response!.statusCode == 409) {
-          errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+          errorMessage = 'sign_up.this_email_is_already'.tr();
         }
 
         // If message contains "No static resource found" or similar, it's likely a duplicate email
-        if (errorMessage.contains('لم يتم العثور على المورد الثابت') ||
+        if (errorMessage.contains('sign_up.static_resource_not_found'.tr()) ||
             errorMessage.contains('No static resource found') ||
-            errorMessage.contains('المورد الثابت')) {
-          errorMessage = 'هذا البريد الإلكتروني مسجل سابقاً';
+            errorMessage.contains('doctor.fixed_resource'.tr())) {
+          errorMessage = 'sign_up.this_email_is_already'.tr();
         }
       } else if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
-        errorMessage = 'انتهت مهلة الاتصال بالخادم';
+        errorMessage = 'sign_up.the_connection_to_the'.tr();
       } else if (e.type == DioExceptionType.unknown) {
-        errorMessage = 'لا يوجد اتصال بالإنترنت';
+        errorMessage = 'sign_up.no_internet_connection'.tr();
       }
 
       emit(SignUpError(errorMessage));
