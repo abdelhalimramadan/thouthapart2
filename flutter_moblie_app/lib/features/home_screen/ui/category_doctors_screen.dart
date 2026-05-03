@@ -99,7 +99,49 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
 
   Future<void> _init() async {
     await _checkLoginStatus();
+    if (widget.categoryId == null) {
+      await _findCategoryIdByName();
+    }
     _loadRequests();
+  }
+
+  Future<void> _findCategoryIdByName() async {
+    try {
+      final res = await _apiService.getCategories();
+      if (res['success'] == true) {
+        final List categories = res['data'] as List;
+        final input = widget.categoryName.trim().toLowerCase();
+        
+        for (var cat in categories) {
+          final nameEn = (cat['name']?.toString() ?? '').toLowerCase();
+          final nameAr = (cat['name_ar']?.toString() ?? '').toLowerCase();
+          
+          if (nameEn == input || nameAr == input || 
+              _simpleNormalize(nameEn) == _simpleNormalize(input) ||
+              _simpleNormalize(nameAr) == _simpleNormalize(input)) {
+            // Found it! Use a workaround since widget.categoryId is final
+            // We can store it in a local variable and use that instead.
+            _foundCategoryId = cat['id'] as int?;
+            break;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error finding category ID: $e');
+    }
+  }
+
+  int? _foundCategoryId;
+
+  String _simpleNormalize(String s) {
+    return s
+        .replaceAll(RegExp(r'[^\u0621-\u064A0-9a-zA-Z]'), '')
+        .replaceAll('ة', 'ه')
+        .replaceAll('أ', 'ا')
+        .replaceAll('إ', 'ا')
+        .replaceAll('آ', 'ا')
+        .replaceAll('ى', 'ي')
+        .toLowerCase();
   }
 
   Future<void> _checkLoginStatus() async {
@@ -134,15 +176,17 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
     print('CategoryId: ${widget.categoryId}');
     print('CategoryName: ${widget.categoryName}');
 
+    final effectiveCategoryId = widget.categoryId ?? _foundCategoryId;
+
     // إذا كان المستخدم دكتور مسجّل دخولًا، اعرض فقط الطلبات الخاصة به
     if (_isDoctorLoggedIn) {
       print('Loading requests for current doctor only.');
       result = await _repo.getRequestsByDoctorId();
     } else {
       // زائر/مريض: استخدم منطق الكاتيجوري القديم
-      if (widget.categoryId != null) {
-        print('Using CategoryId (public): ${widget.categoryId}');
-        result = await _repo.getRequestsByCategoryId(widget.categoryId!);
+      if (effectiveCategoryId != null) {
+        print('Using CategoryId (public): $effectiveCategoryId');
+        result = await _repo.getRequestsByCategoryId(effectiveCategoryId);
       } else {
         result = {'success': false, 'error': 'home_screen.the_specialty_was_not'.tr()};
       }

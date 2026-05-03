@@ -403,182 +403,87 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {}
   }
 
-  /// ابحث عن category_id باستخدام الاسم المترجم
   int? _getCategoryIdByName(String categoryName) {
     try {
-      final normalizedInput = _normalize(categoryName);
+      final input = categoryName.trim().toLowerCase();
       for (var cat in _categories) {
-        final name = cat['name']?.toString() ?? '';
-        final nameAr = cat['name_ar']?.toString() ?? '';
+        final nameEn = (cat['name']?.toString() ?? '').toLowerCase();
+        final nameAr = (cat['name_ar']?.toString() ?? '').toLowerCase();
 
-        if (_normalize(name) == normalizedInput ||
-            _normalize(nameAr) == normalizedInput) {
+        if (nameEn == input || nameAr == input || 
+            _simpleNormalize(nameEn) == _simpleNormalize(input) ||
+            _simpleNormalize(nameAr) == _simpleNormalize(input)) {
           return cat['id'] as int?;
         }
       }
     } catch (_) {}
-    
-    debugPrint('ChatBot: No match found for $categoryName. Available: ${_categories.map((e) => "${e['name']}/${e['name_ar']}").toList()}');
     return null;
   }
 
-  String _normalize(String s) {
-    String res = s
-        .replaceAll('chat.a'.tr(), 'chat.a_1'.tr())
-        .replaceAll('chat.e'.tr(), 'chat.a_1'.tr())
-        .replaceAll('chat.oh'.tr(), 'chat.a_1'.tr())
-        .replaceAll('chat.oh_1'.tr(), 'chat.e_1'.tr())
-        .replaceAll('chat.yes'.tr(), 'chat.y'.tr())
+  String _simpleNormalize(String s) {
+    return s
         .replaceAll(RegExp(r'[^\u0621-\u064A0-9a-zA-Z]'), '')
+        .replaceAll('ة', 'ه')
+        .replaceAll('أ', 'ا')
+        .replaceAll('إ', 'ا')
+        .replaceAll('آ', 'ا')
+        .replaceAll('ى', 'ي')
         .toLowerCase();
-    
-    // Remove 'chat.the'.tr() (definite article) at start or after 'chat.and'.tr() (and)
-    if (res.startsWith('chat.the'.tr())) {
-      res = res.substring(2);
-    }
-    res = res.replaceAll('chat.and_1'.tr(), 'chat.and'.tr());
-    
-    return res;
   }
 
   String _getArabicCanonical(String raw) {
-    final clean = raw.trim();
-    final Map<String, String> synonyms = {
-      'Cosmetic Filling': 'chat.cosmetic_filler'.tr(),
-      'Composite Filling': 'chat.cosmetic_filler'.tr(),
-      'Dental Fillings': 'chat.cosmetic_filler'.tr(),
-      'Dental Filling': 'chat.cosmetic_filler'.tr(),
-      'Filling': 'chat.cosmetic_filler'.tr(),
-      'Dental Fillings / Composite': 'chat.cosmetic_filler'.tr(),
-      'Composite': 'chat.cosmetic_filler'.tr(),
-      'chat.dental_fillings'.tr(): 'chat.cosmetic_filler'.tr(),
-      
-      'Teeth Whitening': 'chat.teeth_cleaning_and_whitening'.tr(),
-      'Bleaching': 'chat.teeth_cleaning_and_whitening'.tr(),
-      'Teeth Cleaning': 'chat.teeth_cleaning_and_whitening'.tr(),
-      'Cleaning and Whitening': 'chat.teeth_cleaning_and_whitening'.tr(),
-      'Whitening': 'chat.teeth_cleaning_and_whitening'.tr(),
-      'chat.teeth_whitening'.tr(): 'chat.teeth_cleaning_and_whitening'.tr(),
-      'chat.cleaning_and_whitening_teeth'.tr(): 'chat.teeth_cleaning_and_whitening'.tr(),
-      
-      'Dental Implants': 'chat.dental_implants'.tr(),
-      'Implants': 'chat.dental_implants'.tr(),
-      'chat.dental_implants'.tr(): 'chat.dental_implants'.tr(),
-      
-      'Surgery and Extraction': 'chat.surgery_and_extraction'.tr(),
-      'Surgery': 'chat.surgery_and_extraction'.tr(),
-      'Extraction': 'chat.surgery_and_extraction'.tr(),
-      'Tooth Extraction': 'chat.surgery_and_extraction'.tr(),
-      'chat.tooth_extraction'.tr(): 'chat.surgery_and_extraction'.tr(),
-      'chat.surgery_and_extraction_1'.tr(): 'chat.surgery_and_extraction'.tr(),
-      
-      'Braces': 'chat.orthodontics'.tr(),
-      'Orthodontics': 'chat.orthodontics'.tr(),
-      'chat.orthodontics'.tr(): 'chat.orthodontics'.tr(),
-      
-      'Crowns and Bridges': 'chat.crowns_and_bridges_1'.tr(),
-      'Fixed Prosthetics (Crowns and Bridges)': 'chat.crowns_and_bridges_1'.tr(),
-      'Fixed Prosthetics': 'chat.crowns_and_bridges_1'.tr(),
-      'Prosthodontics': 'chat.crowns_and_bridges_1'.tr(),
-      'Crowns': 'chat.crowns_and_bridges_1'.tr(),
-      'Bridges': 'chat.crowns_and_bridges_1'.tr(),
-      'chat.crowns_and_bridges_1'.tr(): 'chat.crowns_and_bridges_1'.tr(),
-      'chat.crowns_and_bridges'.tr(): 'chat.crowns_and_bridges_1'.tr(),
-      'chat.crowns_and_bridges_2'.tr(): 'chat.crowns_and_bridges_1'.tr(),
-      'chat.crowns_and_bridges_3'.tr(): 'chat.crowns_and_bridges_1'.tr(),
-      'chat.bridges_and_crowns'.tr(): 'chat.crowns_and_bridges_1'.tr(),
-      'chat.crowns_and_fixtures'.tr(): 'chat.crowns_and_bridges_1'.tr(),
-      'chat.dental_crownsprostheses'.tr(): 'chat.crowns_and_bridges_1'.tr(),
-      
-      'Amalgam Filling': 'chat.amalgam_filling'.tr(),
-      'Amalgam': 'chat.amalgam_filling'.tr(),
-      'حشو املغم': 'chat.amalgam_filling'.tr(),
-      'حشو املجم': 'chat.amalgam_filling'.tr(),
-      'املغم': 'chat.amalgam_filling'.tr(),
-      'املجم': 'chat.amalgam_filling'.tr(),
-      'chat.amalgam_filling'.tr(): 'chat.amalgam_filling'.tr(),
-      
-      'Root Canal': 'chat.nerve_filling'.tr(),
-      'Root Canal Treatment': 'chat.nerve_filling'.tr(),
-      'Endodontic Fillings (Root Canal)': 'chat.nerve_filling'.tr(),
-      'Endodontic Fillings': 'chat.nerve_filling'.tr(),
-      'Endodontics': 'chat.nerve_filling'.tr(),
-      'حشو عصب': 'chat.nerve_filling'.tr(),
-      'عصب': 'chat.nerve_filling'.tr(),
-      'chat.nerve_filling'.tr(): 'chat.nerve_filling'.tr(),
-      
-      'Pediatric Dentistry': 'chat.pediatric_dentistry'.tr(),
-      'Kids Dentistry': 'chat.pediatric_dentistry'.tr(),
-      'Pediatric': 'chat.pediatric_dentistry'.tr(),
-      'طب أسنان الأطفال': 'chat.pediatric_dentistry'.tr(),
-      'اطفال': 'chat.pediatric_dentistry'.tr(),
-      'chat.pediatric_dentistry'.tr(): 'chat.pediatric_dentistry'.tr(),
-      'chat.children'.tr(): 'chat.pediatric_dentistry'.tr(),
-      'chat.dentistry_for_children'.tr(): 'chat.pediatric_dentistry'.tr(),
-
-      'Comprehensive Dental Examination': 'chat.comprehensive_examination'.tr(),
-      'Comprehensive Examination': 'chat.comprehensive_examination'.tr(),
-      'Examination': 'chat.comprehensive_examination'.tr(),
-      'Checkup': 'chat.comprehensive_examination'.tr(),
-      'فحص شامل': 'chat.comprehensive_examination'.tr(),
-      'فحص': 'chat.comprehensive_examination'.tr(),
-      'chat.a_comprehensive_dental_examination'.tr(): 'chat.comprehensive_examination'.tr(),
-      'chat.comprehensive_examination'.tr(): 'chat.comprehensive_examination'.tr(),
-
-      'Dental Prosthetics': 'chat.dental_prosthetics'.tr(),
-      'Prosthetics': 'chat.dental_prosthetics'.tr(),
-      'تركيبات اسنان': 'chat.dental_prosthetics'.tr(),
-      'تركيبات': 'chat.dental_prosthetics'.tr(),
-      'chat.dental_prosthetics'.tr(): 'chat.dental_prosthetics'.tr(),
-
-      'Removable Prosthetics': 'chat.moving_installations'.tr(),
-      'Removable': 'chat.moving_installations'.tr(),
-      'تركيبات متحركة': 'chat.moving_installations'.tr(),
-      'متحركة': 'chat.moving_installations'.tr(),
-      'chat.moving_installations'.tr(): 'chat.moving_installations'.tr(),
-
-      'Surgery and Extraction': 'chat.surgery_and_extraction'.tr(),
-      'Surgery': 'chat.surgery_and_extraction'.tr(),
-      'Extraction': 'chat.surgery_and_extraction'.tr(),
-      'Tooth Extraction': 'chat.surgery_and_extraction'.tr(),
-      'الجراحة والخلع': 'chat.surgery_and_extraction'.tr(),
-      'الجراحه والخلع': 'chat.surgery_and_extraction'.tr(),
-      'جراحة': 'chat.surgery_and_extraction'.tr(),
-      'خلع': 'chat.surgery_and_extraction'.tr(),
-      'chat.tooth_extraction'.tr(): 'chat.surgery_and_extraction'.tr(),
-      'chat.surgery_and_extraction_1'.tr(): 'chat.surgery_and_extraction'.tr(),
-      'chat.surgery_and_extraction'.tr(): 'chat.surgery_and_extraction'.tr(),
-
-      'Cosmetic Filling': 'chat.cosmetic_filler'.tr(),
-      'Composite Filling': 'chat.cosmetic_filler'.tr(),
-      'Cosmetic': 'chat.cosmetic_filler'.tr(),
-      'Composite': 'chat.cosmetic_filler'.tr(),
-      'تجميلي': 'chat.cosmetic_filler'.tr(),
-      'تحميلي': 'chat.cosmetic_filler'.tr(),
-      'حشو تجميلي': 'chat.cosmetic_filler'.tr(),
-      'حشو تحميلي': 'chat.cosmetic_filler'.tr(),
-      'chat.cosmetic_filler'.tr(): 'chat.cosmetic_filler'.tr(),
+    final clean = raw.trim().toLowerCase();
+    
+    // Map common variations to the official Arabic name used in the app/API
+    final Map<String, String> variations = {
+      'cosmetic filling': 'حشو تجميلي',
+      'composite filling': 'حشو تجميلي',
+      'cosmetic': 'حشو تجميلي',
+      'teeth whitening': 'تنظيف وتبييض الأسنان',
+      'teeth cleaning': 'تنظيف وتبييض الأسنان',
+      'cleaning and whitening': 'تنظيف وتبييض الأسنان',
+      'whitening': 'تنظيف وتبييض الأسنان',
+      'dental implants': 'زراعة الأسنان',
+      'implants': 'زراعة الأسنان',
+      'surgery and extraction': 'الجراحة والخلع',
+      'surgery': 'الجراحة والخلع',
+      'extraction': 'الجراحة والخلع',
+      'tooth extraction': 'الجراحة والخلع',
+      'braces': 'تقويم الأسنان',
+      'orthodontics': 'تقويم الأسنان',
+      'crowns and bridges': 'تيجان وجسور',
+      'fixed prosthetics': 'تيجان وجسور',
+      'amalgam filling': 'حشو املغم',
+      'amalgam': 'حشو املغم',
+      'root canal': 'حشو عصب',
+      'nerve filling': 'حشو عصب',
+      'pediatric dentistry': 'طب أسنان الأطفال',
+      'kids dentistry': 'طب أسنان الأطفال',
+      'comprehensive dental examination': 'فحص شامل',
+      'comprehensive examination': 'فحص شامل',
+      'dental prosthetics': 'تركيبات اسنان',
+      'removable prosthetics': 'تركيبات متحركة',
     };
     
-    return synonyms[clean] ?? synonyms[raw] ?? clean;
+    return variations[clean] ?? raw;
   }
 
-  String _getEnglishName(String arabic) {
+  String _getEnglishName(String arabicName) {
      final Map<String, String> arToEn = {
-        'chat.cosmetic_filler'.tr(): 'Cosmetic Filling',
-        'chat.teeth_cleaning_and_whitening'.tr(): 'Teeth Whitening',
-        'chat.dental_implants'.tr(): 'Dental Implants',
-        'chat.surgery_and_extraction'.tr(): 'Surgery and Extraction',
-        'chat.orthodontics'.tr(): 'Orthodontics',
-        'chat.crowns_and_bridges_1'.tr(): 'Fixed Prosthetics (Crowns and Bridges)',
-        'chat.amalgam_filling'.tr(): 'Amalgam Filling',
-        'chat.nerve_filling'.tr(): 'Endodontic Fillings (Root Canal)',
-        'chat.pediatric_dentistry'.tr(): 'Pediatric Dentistry',
-        'chat.comprehensive_examination'.tr(): 'Comprehensive Examination',
-        'chat.dental_prosthetics'.tr(): 'Dental Prosthetics',
-        'chat.moving_installations'.tr(): 'Removable Prosthetics',
+        'حشو تجميلي': 'Cosmetic Filling',
+        'تنظيف وتبييض الأسنان': 'Teeth Whitening',
+        'زراعة الأسنان': 'Dental Implants',
+        'الجراحة والخلع': 'Surgery and Extraction',
+        'تقويم الأسنان': 'Orthodontics',
+        'تيجان وجسور': 'Crowns and Bridges',
+        'حشو املغم': 'Amalgam Filling',
+        'حشو عصب': 'Nerve Filling',
+        'طب أسنان الأطفال': 'Pediatric Dentistry',
+        'فحص شامل': 'Comprehensive Examination',
+        'تركيبات اسنان': 'Dental Prosthetics',
+        'تركيبات متحركة': 'Removable Prosthetics',
      };
-     return arToEn[arabic] ?? arabic;
+     return arToEn[arabicName] ?? arabicName;
   }
 
   String _getAssetForCategory(String categoryName) {
