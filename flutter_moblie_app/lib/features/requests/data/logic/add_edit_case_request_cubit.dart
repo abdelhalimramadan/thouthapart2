@@ -3,30 +3,31 @@ import 'package:thoutha_mobile_app/features/requests/data/repos/case_request_rep
 import 'package:thoutha_mobile_app/features/requests/data/logic/add_edit_case_request_state.dart';
 
 import 'package:thoutha_mobile_app/features/requests/data/models/case_request_body.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class AddEditCaseRequestCubit extends Cubit<AddEditCaseRequestState> {
   final CaseRequestRepo _repo;
 
   AddEditCaseRequestCubit(this._repo)
-      : super(const AddEditCaseRequestState.initial());
+      : super(AddEditCaseRequestState.initial());
 
   Future<void> emitPublishRequest({
     required String description,
     required String dateTime,
     int? requestId,
   }) async {
-    emit(const AddEditCaseRequestState.loading());
+    emit(AddEditCaseRequestState.loading());
 
     // Validate inputs
     if (description.trim().isEmpty && dateTime.trim().isEmpty) {
       emit(AddEditCaseRequestState.error(
-          message: 'يرجى ملء الوصف والتاريخ والوقت'));
+          message: 'requests.please_fill_in_the'.tr()));
       return;
     }
 
     final body = CaseRequestBody(
       description: description.trim().isEmpty
-          ? 'لا توجد تفاصيل إضافية'
+          ? 'requests.there_are_no_additional'.tr()
           : description.trim(),
       dateTime: dateTime.trim(),
     );
@@ -37,10 +38,10 @@ class AddEditCaseRequestCubit extends Cubit<AddEditCaseRequestState> {
         : await _repo.createCaseRequest(body);
 
     if (result['success'] == true) {
-      emit(const AddEditCaseRequestState.success());
+      emit(AddEditCaseRequestState.success());
     } else {
       emit(AddEditCaseRequestState.error(
-          message: result['error']?.toString() ?? 'فشل في معالجة الطلب'));
+          message: result['error']?.toString() ?? 'requests.failed_to_process_the'.tr()));
     }
   }
 }

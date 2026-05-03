@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
-import 'package:intl/intl.dart';
 import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
@@ -11,6 +10,7 @@ import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thoutha_mobile_app/features/requests/data/models/case_request_body.dart';
 import 'package:thoutha_mobile_app/features/requests/data/models/case_request_model.dart';
 import 'package:thoutha_mobile_app/features/requests/data/repos/case_request_repo.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class AddCaseRequestScreen extends StatefulWidget {
   final String? initialSpecialization;
@@ -100,7 +100,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
     if (_selectedTime == null) return '';
     final hour = _selectedTime!.hourOfPeriod == 0 ? 12 : _selectedTime!.hourOfPeriod;
     final minute = _selectedTime!.minute.toString().padLeft(2, '0');
-    final period = _selectedTime!.period == DayPeriod.am ? 'صباحاً' : 'مساءً';
+    final period = _selectedTime!.period == DayPeriod.am ? 'doctor.am'.tr() : 'doctor.evening'.tr();
     return '$hour:$minute $period';
   }
 
@@ -112,7 +112,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
   /// Builds "2026-03-10T15:30:00" format
   String get _dateTimeIso {
     if (_selectedDate == null || _selectedTime == null) return '';
-    return '${_formattedDate}T${_formattedTime24}:00';
+    return '${_formattedDate}T$_formattedTime24:00';
   }
 
   Future<void> _pickDate() async {
@@ -123,7 +123,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
       initialDate: now,
       firstDate: now,
       lastDate: DateTime(2101),
-      locale: const Locale('ar', 'EG'),
+      locale: Locale('ar', 'EG'),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -142,7 +142,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                   ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                textStyle: const TextStyle(
+                textStyle: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.bold,
                 ),
@@ -178,17 +178,17 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                     onSurface: Colors.black,
                   ),
             timePickerTheme: TimePickerThemeData(
-              helpTextStyle: const TextStyle(
+              helpTextStyle: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
-              hourMinuteTextStyle: const TextStyle(
+              hourMinuteTextStyle: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 40,
                 fontWeight: FontWeight.bold,
               ),
-              dayPeriodTextStyle: const TextStyle(
+              dayPeriodTextStyle: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -196,7 +196,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                textStyle: const TextStyle(
+                textStyle: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.bold,
                 ),
@@ -230,9 +230,9 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         if (pickedMinutes <= nowMinutes) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
+              SnackBar(
                 content: Text(
-                  'لا يمكن اختيار وقت في الماضي. يرجى اختيار وقت بعد الآن.',
+                  'requests.you_cannot_choose_a'.tr(),
                   style: TextStyle(fontFamily: 'Cairo'),
                 ),
                 backgroundColor: Colors.orange,
@@ -255,8 +255,8 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
 
     if (_selectedDate == null || _selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('يرجى اختيار التاريخ والوقت',
+        SnackBar(
+          content: Text('requests.please_select_a_date'.tr(),
               style: TextStyle(fontFamily: 'Cairo')),
           backgroundColor: Colors.orange,
         ),
@@ -276,13 +276,13 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (_) => const Center(child: CircularProgressIndicator()),
+          builder: (_) => Center(child: CircularProgressIndicator()),
         );
       }
 
       final body = CaseRequestBody(
         description: _descriptionController.text.trim().isEmpty
-            ? 'لا توجد تفاصيل إضافية'
+            ? 'requests.there_are_no_additional'.tr()
             : _descriptionController.text.trim(),
         dateTime: _dateTimeIso,
       );
@@ -297,11 +297,11 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
       if (result['success'] == true) {
         if (mounted) {
           final message =
-              _isEditMode ? 'تم تحديث الطلب بنجاح!' : 'تم نشر الطلب بنجاح!';
+              _isEditMode ? 'requests.the_request_has_been'.tr() : 'requests.the_request_has_been_1'.tr();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content:
-                  Text(message, style: const TextStyle(fontFamily: 'Cairo')),
+                  Text(message, style: TextStyle(fontFamily: 'Cairo')),
               backgroundColor: Colors.green,
             ),
           );
@@ -311,8 +311,8 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['error'] ?? 'فشل في معالجة الطلب',
-                  style: const TextStyle(fontFamily: 'Cairo')),
+              content: Text(result['error'] ?? 'requests.failed_to_process_the'.tr(),
+                  style: TextStyle(fontFamily: 'Cairo')),
               backgroundColor: Colors.red,
             ),
           );
@@ -322,8 +322,8 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
       if (mounted) Navigator.pop(context);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('حدث خطأ غير متوقع',
+          SnackBar(
+            content: Text('booking.an_unexpected_error_occurred'.tr(),
                 style: TextStyle(fontFamily: 'Cairo')),
             backgroundColor: Colors.red,
           ),
@@ -339,22 +339,22 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         textDirection: ui.TextDirection.rtl,
         child: AlertDialog(
           title:
-              Text('تسجيل الدخول مطلوب', style: TextStyles.font18DarkBlueBold),
+              Text('requests.login_required'.tr(), style: TextStyles.font18DarkBlueBold),
           content: Text(
-            'يجب عليك تسجيل الدخول أولاً لتتمكن من نشر طلب حالة.',
+            'requests.you_must_log_in'.tr(),
             style: TextStyles.font14GrayRegular,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: Text('إلغاء', style: TextStyles.font14GrayRegular),
+              child: Text('booking.cancellation'.tr(), style: TextStyles.font14GrayRegular),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(ctx).pop();
                 Navigator.of(context).pushNamed(Routes.loginScreen);
               },
-              child: Text('تسجيل الدخول', style: TextStyles.font14BlueSemiBold),
+              child: Text('home_screen.login'.tr(), style: TextStyles.font14BlueSemiBold),
             ),
           ],
         ),
@@ -381,7 +381,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
             ),
             SizedBox(width: 8),
             Text(
-              _isEditMode ? 'تعديل الطلب' : 'إضافة طلب حالة',
+              _isEditMode ? 'requests.modify_the_request'.tr() : 'requests.add_a_case_request'.tr(),
               style: TextStyles.font18DarkBlueBold.copyWith(
                 fontFamily: 'Cairo',
                 fontSize: 18,
@@ -391,7 +391,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
           ],
         ),
         centerTitle: true,
-        backgroundColor: isDark ? const Color(0xFF2D2D2D) : Colors.white,
+        backgroundColor: isDark ? Color(0xFF2D2D2D) : Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(
           color: isDark ? Colors.white : ColorsManager.darkBlue,
@@ -399,10 +399,12 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         ),
       ),
       backgroundColor:
-          isDark ? const Color(0xFF1E1E1E) : ColorsManager.offWhite,
+          isDark ? Color(0xFF1E1E1E) : ColorsManager.offWhite,
       body: SafeArea(
         child: Directionality(
-          textDirection: ui.TextDirection.rtl,
+          textDirection: context.locale.languageCode == 'ar'
+              ? ui.TextDirection.rtl
+              : ui.TextDirection.ltr,
           child: SingleChildScrollView(
             padding: EdgeInsets.all(24),
             child: Form(
@@ -417,7 +419,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                     children: [
                       // ── Header ────────────────────────────────────────
                       Text(
-                        'بيانات الحالة',
+                        'requests.case_data'.tr(),
                         style: TextStyles.font18DarkBlueBold.copyWith(
                           fontFamily: 'Cairo',
                           fontSize: 18,
@@ -426,7 +428,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        'قم بملء البيانات التالية لنشر طلب حالة جديد',
+                        'requests.fill_out_the_following'.tr(),
                         style: TextStyles.font14GrayRegular.copyWith(
                           fontFamily: 'Cairo',
                           fontSize: 14,
@@ -440,13 +442,13 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                       SizedBox(height: 24),
 
                       // ── DateTime picker ───────────────────────────────
-                      _buildLabel('التاريخ والوقت', isDark),
+                      _buildLabel('requests.date_and_time'.tr(), isDark),
                       SizedBox(height: 8),
                       _buildDateTimePicker(isDark),
                       SizedBox(height: 20),
 
                       // ── Description ───────────────────────────────────
-                      _buildLabel('وصف الحالة (اختياري)', isDark),
+                      _buildLabel('requests.case_description_optional'.tr(), isDark),
                       SizedBox(height: 8),
                       TextFormField(
                         controller: _descriptionController,
@@ -459,7 +461,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                           fontSize: 14,
                         ),
                         decoration: _buildDecoration(
-                          hint: 'أضف وصفاً تفصيلياً للحالة...',
+                          hint: 'requests.add_a_detailed_description'.tr(),
                           icon: Icons.description_outlined,
                           isDark: isDark,
                         ),
@@ -468,7 +470,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
 
                       // ── Publish Button ────────────────────────────────
                       AppTextButton(
-                        buttonText: _isEditMode ? 'تحديث الطلب' : 'نشر الطلب',
+                        buttonText: _isEditMode ? 'requests.update_the_request'.tr() : 'requests.post_the_request'.tr(),
                         textStyle: TextStyles.font16WhiteSemiBold.copyWith(
                           fontFamily: 'Cairo',
                           fontSize: 16,
@@ -494,7 +496,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
       width: double.infinity,
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2D2D2D) : Colors.white,
+        color: isDark ? Color(0xFF2D2D2D) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
@@ -508,20 +510,20 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         ],
       ),
       child: _isLoadingInfo
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 _buildInfoRow(
                   icon: Icons.person_outline,
-                  label: 'الاسم',
+                  label: 'requests.the_name'.tr(),
                   value: '$_firstName $_lastName',
                   isDark: isDark,
                 ),
                 SizedBox(height: 12),
                 _buildInfoRow(
                   icon: Icons.medical_services_outlined,
-                  label: 'التخصص',
-                  value: _category.isNotEmpty ? _category : 'غير محدد',
+                  label: 'doctor.specialization'.tr(),
+                  value: _category.isNotEmpty ? _category : 'doctor.undefined'.tr(),
                   isDark: isDark,
                 ),
               ],
@@ -584,7 +586,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: BoxDecoration(
                 color: isDark
-                    ? const Color(0xFF2D2D2D)
+                    ? Color(0xFF2D2D2D)
                     : ColorsManager.moreLighterGray,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
@@ -603,7 +605,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      hasDate ? _formattedDate : 'التاريخ',
+                      hasDate ? _formattedDate : 'doctor.the_date'.tr(),
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 13,
@@ -627,7 +629,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: BoxDecoration(
                 color: isDark
-                    ? const Color(0xFF2D2D2D)
+                    ? Color(0xFF2D2D2D)
                     : ColorsManager.moreLighterGray,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
@@ -646,7 +648,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      hasTime ? _formattedTime : 'الوقت',
+                      hasTime ? _formattedTime : 'doctor.the_time'.tr(),
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 13,
@@ -698,7 +700,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         size: 22,
       ),
       fillColor:
-          isDark ? const Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
+          isDark ? Color(0xFF2D2D2D) : ColorsManager.moreLighterGray,
       filled: true,
       enabledBorder: OutlineInputBorder(
         borderSide: BorderSide(
@@ -708,15 +710,15 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         borderRadius: BorderRadius.circular(16),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: ColorsManager.mainBlue, width: 1.3),
+        borderSide: BorderSide(color: ColorsManager.mainBlue, width: 1.3),
         borderRadius: BorderRadius.circular(16),
       ),
       errorBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.red, width: 1.3),
+        borderSide: BorderSide(color: Colors.red, width: 1.3),
         borderRadius: BorderRadius.circular(16),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.red, width: 1.3),
+        borderSide: BorderSide(color: Colors.red, width: 1.3),
         borderRadius: BorderRadius.circular(16),
       ),
     );

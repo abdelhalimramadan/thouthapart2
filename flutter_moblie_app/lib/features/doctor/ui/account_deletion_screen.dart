@@ -3,9 +3,10 @@ import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
 
 import '../../../../core/routing/routes.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class AccountDeletionScreen extends StatefulWidget {
-  const AccountDeletionScreen({Key? key}) : super(key: key);
+  const AccountDeletionScreen({super.key});
 
   @override
   State<AccountDeletionScreen> createState() => _AccountDeletionScreenState();
@@ -27,11 +28,11 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
     super.initState();
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 650),
+      duration: Duration(milliseconds: 650),
     );
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
     _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.1),
+      begin: Offset(0, 0.1),
       end: Offset.zero,
     ).animate(
         CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
@@ -58,8 +59,8 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
         await SharedPrefHelper
             .clearAllSecuredData(); // حذف FlutterSecureStorage (التوكن)
         if (!mounted) return;
-        _showSnack('تم حذف الحساب بنجاح');
-        await Future.delayed(const Duration(seconds: 1));
+        _showSnack('doctor.the_account_has_been'.tr());
+        await Future.delayed(Duration(seconds: 1));
         if (!mounted) return;
         Navigator.of(context).pushNamedAndRemoveUntil(
           Routes.loginScreen,
@@ -72,20 +73,20 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
         if (backendError != null && backendError.isNotEmpty) {
           msg = backendError;
         } else if (code == 400) {
-          msg = 'طلب غير صحيح، تأكد من البيانات';
+          msg = 'doctor.invalid_request_check_the'.tr();
         } else if (code == 401) {
-          msg = 'غير مصرح: يرجى تسجيل الدخول مجدداً';
+          msg = 'doctor.unauthorized_please_log_in'.tr();
         } else if (code == 403) {
-          msg = 'ممنوع الوصول، تأكد من صلاحياتك';
+          msg = 'doctor.access_denied_check_your'.tr();
         } else if (code == 404) {
-          msg = 'الطبيب غير موجود';
+          msg = 'doctor.the_doctor_is_not'.tr();
         } else {
-          msg = result['error'] ?? 'فشل في حذف الحساب';
+          msg = result['error'] ?? 'doctor.failed_to_delete_account'.tr();
         }
         setState(() => _errorMessage = msg);
       }
     } catch (_) {
-      setState(() => _errorMessage = 'حدث خطأ أثناء الاتصال بالخادم');
+      setState(() => _errorMessage = 'doctor.an_error_occurred_while'.tr());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -98,22 +99,22 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
       builder: (dialogContext) {
         final isDark = Theme.of(dialogContext).brightness == Brightness.dark;
         return AlertDialog(
-          backgroundColor: isDark ? const Color(0xFF161B22) : Colors.white,
+          backgroundColor: isDark ? Color(0xFF161B22) : Colors.white,
           title: Text(
-            'تأكيد حذف الحساب',
+            'doctor.confirm_account_deletion'.tr(),
             style: TextStyle(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w700,
                 fontSize: 18),
           ),
           content: Text(
-            'هل أنت متأكد أنك تريد حذف الحساب نهائياً؟ هذا الإجراء لا يمكن التراجع عنه.',
+            'doctor.are_you_sure_you_1'.tr(),
             style: TextStyle(fontFamily: 'Cairo', height: 1.5, fontSize: 14),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text('إلغاء',
+              child: Text('booking.cancellation'.tr(),
                   style: TextStyle(fontFamily: 'Cairo', fontSize: 14)),
             ),
             ElevatedButton(
@@ -123,7 +124,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                     borderRadius: BorderRadius.circular(8)),
               ),
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text('حذف',
+              child: Text('doctor.delete'.tr(),
                   style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 14,
@@ -160,7 +161,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
 
     return Scaffold(
       backgroundColor:
-          isDark ? const Color(0xFF0D1117) : const Color(0xFFF5F6FA),
+          isDark ? Color(0xFF0D1117) : Color(0xFFF5F6FA),
       body: Directionality(
         textDirection: TextDirection.rtl,
         child: CustomScrollView(
@@ -173,7 +174,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
               backgroundColor: _darkBlue,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
@@ -231,7 +232,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                             ),
                             SizedBox(height: 10),
                             Text(
-                              'حذف الحساب',
+                              'doctor.delete_account'.tr(),
                               style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontWeight: FontWeight.w700,
@@ -241,7 +242,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                             ),
                             SizedBox(height: 4),
                             Text(
-                              'هذا الإجراء لا يمكن التراجع عنه',
+                              'doctor.this_action_cannot_be'.tr(),
                               style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 13,
@@ -368,7 +369,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'تحذير مهم',
+                  'doctor.important_warning'.tr(),
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w700,
@@ -378,12 +379,12 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'حذف الحساب إجراء دائم ولا يمكن التراجع عنه. ستفقد جميع بياناتك وسجلاتك بشكل نهائي.',
+                  'doctor.account_deletion_is_permanent'.tr(),
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 13,
                     height: 1.6,
-                    color: isDark ? Colors.white70 : const Color(0xFF374151),
+                    color: isDark ? Colors.white70 : Color(0xFF374151),
                   ),
                 ),
               ],
@@ -397,16 +398,16 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
   // ── What Will Be Deleted Card ─────────────────────────────────────────────
   Widget _buildWillBeDeletedCard(bool isDark) {
     final items = [
-      (Icons.person_outline, 'بيانات الملف الشخصي'),
-      (Icons.event_note_outlined, 'سجل الحجوزات والمواعيد'),
-      (Icons.medical_services_outlined, 'بيانات الحالات الطبية'),
-      (Icons.chat_bubble_outline, 'محادثات ورسائل التطبيق'),
-      (Icons.notifications_none_outlined, 'الإشعارات والتنبيهات'),
+      (Icons.person_outline, 'doctor.profile_data'.tr()),
+      (Icons.event_note_outlined, 'doctor.record_reservations_and_appointments'.tr()),
+      (Icons.medical_services_outlined, 'doctor.medical_case_data'.tr()),
+      (Icons.chat_bubble_outline, 'doctor.application_chats_and_messages'.tr()),
+      (Icons.notifications_none_outlined, 'doctor.notifications_and_alerts'.tr()),
     ];
 
     return _buildSectionCard(
       isDark: isDark,
-      title: 'ما الذي سيتم حذفه؟',
+      title: 'doctor.what_will_be_deleted'.tr(),
       icon: Icons.info_outline_rounded,
       child: Column(
         children: items.map((item) {
@@ -430,7 +431,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                     fontFamily: 'Cairo',
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.white70 : const Color(0xFF374151),
+                    color: isDark ? Colors.white70 : Color(0xFF374151),
                   ),
                 ),
               ],
@@ -471,7 +472,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
               ? SizedBox(
                   width: 22,
                   height: 22,
-                  child: const CircularProgressIndicator(
+                  child: CircularProgressIndicator(
                       strokeWidth: 2.5, color: Colors.white))
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -480,7 +481,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                         color: Colors.white, size: 20),
                     SizedBox(width: 8),
                     Text(
-                      'حذف الحساب نهائياً',
+                      'doctor.permanently_delete_the_account'.tr(),
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.w700,
@@ -503,19 +504,19 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(
           side: BorderSide(
-            color: isDark ? Colors.grey[700]! : const Color(0xFFD1D5DB),
+            color: isDark ? Colors.grey[700]! : Color(0xFFD1D5DB),
           ),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
         onPressed: () => Navigator.of(context).pop(),
         child: Text(
-          'العودة للملف الشخصي',
+          'doctor.back_to_profile'.tr(),
           style: TextStyle(
             fontFamily: 'Cairo',
             fontWeight: FontWeight.w600,
             fontSize: 14,
-            color: isDark ? Colors.white70 : const Color(0xFF374151),
+            color: isDark ? Colors.white70 : Color(0xFF374151),
           ),
         ),
       ),
@@ -531,10 +532,10 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF161B22) : Colors.white,
+        color: isDark ? Color(0xFF161B22) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-            color: isDark ? Colors.grey[800]! : const Color(0xFFE5E7EB)),
+            color: isDark ? Colors.grey[800]! : Color(0xFFE5E7EB)),
         boxShadow: [
           BoxShadow(
             color: isDark
@@ -553,7 +554,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
             padding: EdgeInsets.fromLTRB(16, 14, 16, 0),
             child: Row(
               children: [
-                Icon(icon, size: 16, color: const Color(0xFF021433)),
+                Icon(icon, size: 16, color: Color(0xFF021433)),
                 SizedBox(width: 6),
                 Text(
                   title,
@@ -561,7 +562,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
-                    color: isDark ? Colors.white70 : const Color(0xFF021433),
+                    color: isDark ? Colors.white70 : Color(0xFF021433),
                   ),
                 ),
               ],
@@ -570,7 +571,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen>
           SizedBox(height: 6),
           Divider(
               height: 1,
-              color: isDark ? Colors.grey[800] : const Color(0xFFE5E7EB)),
+              color: isDark ? Colors.grey[800] : Color(0xFFE5E7EB)),
           Padding(
             padding: EdgeInsets.fromLTRB(16, 10, 16, 14),
             child: child,
