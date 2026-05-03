@@ -11,6 +11,9 @@ class BookingConfirmationScreen extends StatefulWidget {
   final String date;
   final String time;
   final String specialty;
+  final String universityName;
+  final String cityName;
+  final String? doctorPhoto;
   final int? requestId;
   final int? doctorId;
 
@@ -19,6 +22,9 @@ class BookingConfirmationScreen extends StatefulWidget {
     required this.doctorName,
     required this.date,
     required this.time,
+    required this.universityName,
+    required this.cityName,
+    this.doctorPhoto,
     String? specialty,
     this.requestId,
     this.doctorId,
@@ -35,7 +41,6 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
   final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  // Appointment-related variables
   late ApiService _apiService;
   bool _isLoading = false;
 
@@ -78,7 +83,6 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
     });
 
     try {
-      // Call the API to create appointment
       final result = await _apiService.createAppointment(
         widget.requestId!,
         _firstNameController.text,
@@ -93,7 +97,6 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
       });
 
       if (result['success'] == true) {
-        // حفظ البيانات للمرة القادمة
         await SharedPrefHelper.setData(
             'first_name', _firstNameController.text.trim());
         await SharedPrefHelper.setData(
@@ -101,103 +104,9 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
         await SharedPrefHelper.setData(
             'phone_number', _phoneController.text.trim());
 
-        // Success - show confirmation dialog
         if (!mounted) return;
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            final isDark = Theme.of(context).brightness == Brightness.dark;
-            return Directionality(
-              textDirection: TextDirection.rtl,
-              child: AlertDialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                titlePadding: const EdgeInsets.only(top: 20, left: 20, right: 20),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                actionsPadding:
-                    const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-                actionsAlignment: MainAxisAlignment.center,
-                title: Text(
-                  'booking.your_reservation_has_been'.tr(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: ColorsManager.mainBlue,
-                  ),
-                ),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: ColorsManager.mainBlue.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.check_rounded,
-                          color: ColorsManager.mainBlue, size: 42),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'تم حجز موعدك بنجاح مع ${widget.doctorName}\nفي يوم ${widget.date} الساعة ${widget.time}',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 14,
-                        color: isDark ? Colors.white : Color(0xFF1F2937),
-                        height: 1.6,
-                      ),
-                    ),
-                  ],
-                ),
-                actions: [
-                  Builder(
-                    builder: (context) {
-                      final screenWidth = MediaQuery.of(context).size.width;
-                      final isTablet = screenWidth >= 600;
-
-                      return Center(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            Navigator.pop(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ColorsManager.mainBlue,
-                            minimumSize: Size(isTablet ? 220 : screenWidth * 0.6, isTablet ? 56 : 50),
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            'booking.good'.tr(),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontSize: isTablet ? 19 : 17,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              height: 1.1, // Improved line height for Cairo
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        );
+        _showSuccessDialog();
       } else {
-        // Error
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -228,282 +137,277 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
     }
   }
 
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final isAr = context.locale.languageCode == 'ar';
+        
+        return Directionality(
+          textDirection: isAr ? TextDirection.rtl : TextDirection.ltr,
+          child: AlertDialog(
+            backgroundColor: isDark ? Color(0xFF1A1A1A) : Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+            contentPadding: EdgeInsets.zero,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                _buildGradientHeader(),
+                
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                  child: Column(
+                    children: [
+                      // Success Icon
+                      Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFE0F2F5),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Color(0xFF53CAF7).withOpacity(0.3), width: 2),
+                        ),
+                        child: Center(
+                          child: Icon(Icons.check_rounded, color: ColorsManager.mainBlue, size: 40),
+                        ),
+                      ),
+                      
+                      SizedBox(height: 16),
+                      
+                      Text(
+                        'booking.your_reservation_has_been'.tr(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : Color(0xFF1F2937),
+                        ),
+                      ),
+                      
+                      SizedBox(height: 20),
+                      
+                      // Info Box
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFF4FAFB),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Color(0xFFE0F2F5)),
+                        ),
+                        child: Text(
+                          isAr 
+                            ? 'تم حجز موعدك بنجاح مع د. ${widget.doctorName} يوم ${widget.date} الساعة ${widget.time} في ${widget.universityName}.'
+                            : 'Your appointment has been successfully booked with Dr. ${widget.doctorName} on ${widget.date} at ${widget.time} in ${widget.universityName}.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 13,
+                            color: ColorsManager.fontColor,
+                            height: 1.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      
+                      SizedBox(height: 20),
+                      
+                      // Chips
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          _buildSuccessChip(widget.date, Icons.calendar_today_rounded),
+                          _buildSuccessChip(widget.time, Icons.access_time_rounded),
+                          _buildSuccessChip(widget.universityName, Icons.school_rounded),
+                        ],
+                      ),
+                      
+                      SizedBox(height: 32),
+                      
+                      // "Done" Button
+                      Container(
+                        width: 160,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF247CFF), Color(0xFF4CB8FF)],
+                            begin: Alignment.centerRight,
+                            end: Alignment.centerLeft,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: ColorsManager.mainBlue.withOpacity(0.2),
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context); // close dialog
+                            Navigator.pop(context); // go back
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          child: Text(
+                            'booking.good'.tr(),
+                            style: TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSuccessChip(String text, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Color(0xFFF0F7FF),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: ColorsManager.mainBlue.withOpacity(0.1)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: ColorsManager.mainBlue, size: 14),
+          SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 12,
+                color: ColorsManager.mainBlue,
+                fontWeight: FontWeight.w700,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isAr = context.locale.languageCode == 'ar';
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: isAr ? TextDirection.rtl : TextDirection.ltr,
       child: Scaffold(
-        body: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
+        backgroundColor: isDark ? Color(0xFF121212) : Color(0xFFF8FBFF),
+        body: SafeArea(
           child: Stack(
             children: [
-              Container(
-                width: double.infinity,
-                height: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    center: Alignment(-0.7, -0.7),
-                    radius: 1.5,
-                    colors: [
-                      Color(0xFF84E5F3).withOpacity(0.4),
-                      Color(0xFF84E5F3).withOpacity(0.1),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.3, 0.8],
-                  ),
-                ),
-              ),
-              Container(
-                width: double.infinity,
-                height: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    center: Alignment(0.7, 0.7),
-                    radius: 1.5,
-                    colors: [
-                      ColorsManager.layerBlur2,
-                      Colors.transparent,
-                    ],
-                    stops: [0.1, 0.8],
-                  ),
-                ),
-              ),
-              // Top Back Button
-              Positioned(
-                top: MediaQuery.of(context).padding.top + 10,
-                right: 20,
-                child: IconButton(
-                  icon: Icon(
-                    Icons.arrow_forward_ios,
-                    color: ColorsManager.mainBlue,
-                    size: 24,
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-              Center(
+              SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Container(
-                    width: double.infinity,
-                    constraints: BoxConstraints(
-                      maxWidth: 500,
-                    ),
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: theme.cardTheme.color ?? colorScheme.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: isDark
-                              ? Colors.black.withOpacity(0.3)
-                              : Colors.grey.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  child: Column(
+                    children: [
+                      // Space for the back button and top padding
+                      SizedBox(height: 50),
+                      
+                      // Main Card
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: isDark ? theme.cardColor : Colors.white,
+                          borderRadius: BorderRadius.circular(32),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 24,
+                              offset: Offset(0, 12),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: SingleChildScrollView(
-                      child: Form(
-                        key: _formKey,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Center(
-                              child: Text(
-                                'booking.booking_confirmation'.tr(),
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontFamily: 'Cairo',
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.primary,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            SizedBox(height: 16),
-                            Card(
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'booking.doctor_information'.tr(),
-                                      style:
-                                          theme.textTheme.titleMedium?.copyWith(
-                                        fontFamily: 'Cairo',
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(height: 12),
-                                    _buildInfoRow(
-                                        'booking.doctor'.tr(), widget.doctorName, 14),
-                                    SizedBox(height: 8),
-                                    _buildInfoRow(
-                                        'booking.specialization'.tr(), widget.specialty, 14),
-                                    SizedBox(height: 8),
-                                    _buildInfoRow(
-                                        'booking.the_date'.tr(), widget.date, 14),
-                                    SizedBox(height: 8),
-                                    _buildInfoRow('booking.the_time'.tr(), widget.time, 14),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 24),
-                            Text(
-                              'booking.patient_information'.tr(),
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontFamily: 'Cairo',
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 16),
-                            SizedBox(height: 16),
-                            TextFormField(
-                              controller: _firstNameController,
-                              style: TextStyle(fontFamily: 'Cairo'),
-                              decoration: InputDecoration(
-                                labelText: 'booking.first_name'.tr(),
-                                labelStyle:
-                                    TextStyle(fontFamily: 'Cairo'),
-                                prefixIcon: Icon(Icons.person_outline,
-                                    color: theme.iconTheme.color),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                              ),
-                              textInputAction: TextInputAction.next,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'booking.please_enter_first_name'.tr();
-                                }
-                                return null;
-                              },
-                            ),
-                            SizedBox(height: 16),
-                            TextFormField(
-                              controller: _lastNameController,
-                              style: TextStyle(fontFamily: 'Cairo'),
-                              decoration: InputDecoration(
-                                labelText: 'booking.last_name'.tr(),
-                                labelStyle:
-                                    TextStyle(fontFamily: 'Cairo'),
-                                prefixIcon: Icon(Icons.person_outline,
-                                    color: theme.iconTheme.color),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                              ),
-                              textInputAction: TextInputAction.next,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'booking.please_enter_your_last'.tr();
-                                }
-                                return null;
-                              },
-                            ),
-                            SizedBox(height: 16),
-                            TextFormField(
-                              controller: _phoneController,
-                              keyboardType: TextInputType.number,
-                              style: TextStyle(fontFamily: 'Cairo'),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                    RegExp(r'[0-9\u0660-\u0669]')),
-                              ],
-                              decoration: InputDecoration(
-                                labelText: 'booking.mobile_number'.tr(),
-                                labelStyle:
-                                    TextStyle(fontFamily: 'Cairo'),
-                                hintText: '01X XXX XXXXX',
-                                hintStyle: TextStyle(fontFamily: 'Cairo'),
-                                prefixIcon: Icon(Icons.phone_android,
-                                    color: theme.iconTheme.color),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'booking.please_enter_mobile_number'.tr();
-                                }
-
-                                String cleanPhone =
-                                    value.replaceAll(RegExp(r'[\s\-\(\)]'), '');
-
-                                if (cleanPhone.startsWith('01')) {
-                                  if (cleanPhone.length != 11) {
-                                    return 'booking.the_egyptian_mobile_number'.tr();
-                                  }
-                                  if (!RegExp(r'^01[0-5]\d{8}$')
-                                      .hasMatch(cleanPhone)) {
-                                    return 'booking.the_egyptian_mobile_number_1'.tr();
-                                  }
-                                } else if (cleanPhone.startsWith('+20')) {
-                                  if (cleanPhone.length != 13) {
-                                    return 'booking.the_egyptian_mobile_number_2'.tr();
-                                  }
-                                  if (!RegExp(r'^\+201[0-25]\d{8}$')
-                                      .hasMatch(cleanPhone)) {
-                                    return 'booking.the_egyptian_mobile_number_1'.tr();
-                                  }
-                                } else {
-                                  return 'booking.please_enter_a_valid'.tr();
-                                }
-
-                                return null;
-                              },
-                            ),
-                            SizedBox(height: 24),
-                            SizedBox(
-                              height: 48,
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed:
-                                    _isLoading ? null : () => _submitForm(),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: colorScheme.primary,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: _isLoading
-                                    ? SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : Text(
-                                        'booking.booking_confirmation'.tr(),
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                          fontFamily: 'Cairo',
-                                          fontSize: 16,
-                                          color: colorScheme.onPrimary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                            // Gradient Header
+                            _buildGradientHeader(),
+                            
+                            Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                children: [
+                                  // Doctor Info Section
+                                  _buildDoctorInfoCard(isDark),
+                                  
+                                  SizedBox(height: 32),
+                                  
+                                  // Divider with Text "بياناتك"
+                                  _buildSectionDivider('booking.your_data'.tr()),
+                                  
+                                  SizedBox(height: 24),
+                                  
+                                  // Patient Form
+                                  _buildPatientForm(isDark),
+                                  
+                                  SizedBox(height: 40),
+                                  
+                                  // Confirmation Button
+                                  _buildConfirmButton(),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
+                      SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+              
+              // Refined Back Button
+              PositionedDirectional(
+                top: 10,
+                start: 16,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[900] : Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      isAr ? Icons.arrow_forward_ios_rounded : Icons.arrow_back_ios_rounded,
+                      color: ColorsManager.mainBlue,
+                      size: 20,
                     ),
                   ),
                 ),
@@ -515,28 +419,391 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, double fontSize) {
-    final theme = Theme.of(context);
+  Widget _buildGradientHeader() {
+    final isAr = context.locale.languageCode == 'ar';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFF247CFF),
+            Color(0xFF4CB8FF),
+            Color(0xFF53CAF7),
+          ],
+          begin: isAr ? Alignment.topRight : Alignment.topLeft,
+          end: isAr ? Alignment.bottomLeft : Alignment.bottomRight,
+        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Doctor Info (Primary - appears at 'start')
+          Column(
+            crossAxisAlignment: isAr ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.doctorName,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 19,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  height: 1.2,
+                ),
+              ),
+              Text(
+                widget.specialty,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 13,
+                  color: Colors.white.withOpacity(0.85),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          
+          // Booking Badge (Secondary - appears at 'end')
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
+            ),
+            child: Text(
+              'home_screen.book_an_appointment'.tr(),
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 11,
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDoctorInfoCard(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[900] : Color(0xFFF4FAFB),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: isDark ? Colors.white10 : Color(0xFFE0F2F5),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        children: [
+          // Date & Time Row
+          Row(
+            children: [
+              _buildInfoIcon(Icons.calendar_today_rounded),
+              SizedBox(width: 10),
+              Expanded(
+                child: RichText(
+                  text: TextSpan(
+                    style: TextStyle(fontFamily: 'Cairo', fontSize: 13, color: Colors.grey[600]),
+                    children: [
+                      TextSpan(text: '${'home_screen.today'.tr()} '),
+                      TextSpan(
+                        text: widget.date,
+                        style: TextStyle(fontWeight: FontWeight.bold, color: ColorsManager.mainBlue),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Container(width: 1, height: 20, color: Colors.grey.withOpacity(0.2), margin: EdgeInsets.symmetric(horizontal: 8)),
+              _buildInfoIcon(Icons.access_time_rounded),
+              SizedBox(width: 10),
+              Text(
+                widget.time,
+                style: TextStyle(fontFamily: 'Cairo', fontSize: 13, fontWeight: FontWeight.bold, color: ColorsManager.mainBlue),
+              ),
+            ],
+          ),
+          
+          Divider(height: 40, thickness: 1, color: isDark ? Colors.white10 : Color(0xFFE0F2F5)),
+          
+          // University Row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildInfoIcon(Icons.school_rounded),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'doctor.the_university'.tr(),
+                      style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      widget.universityName,
+                      style: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.bold, color: ColorsManager.fontColor, height: 1.3),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          
+          SizedBox(height: 20),
+          
+          // Governorate Row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildInfoIcon(Icons.location_on_rounded),
+              SizedBox(width: 12),
+              Text(
+                'home_screen.governorate'.tr(),
+                style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.w600),
+              ),
+              SizedBox(width: 8),
+              Text(
+                widget.cityName,
+                style: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.bold, color: ColorsManager.fontColor),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoIcon(IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: ColorsManager.mainBlue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(icon, color: ColorsManager.mainBlue, size: 18),
+    );
+  }
+
+  Widget _buildSectionDivider(String label) {
     return Row(
       children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontFamily: 'Cairo',
-            fontSize: fontSize,
-            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+        Expanded(child: Container(height: 1, color: Colors.grey.withOpacity(0.1))),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 13,
+              color: Colors.grey[400],
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+            ),
           ),
         ),
-        SizedBox(width: 8),
-        Text(
-          value,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontFamily: 'Cairo',
-            fontSize: fontSize,
-            fontWeight: FontWeight.bold,
+        Expanded(child: Container(height: 1, color: Colors.grey.withOpacity(0.1))),
+      ],
+    );
+  }
+
+  Widget _buildPatientForm(bool isDark) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _buildTextField(
+                  controller: _firstNameController,
+                  label: 'booking.first_name'.tr(),
+                  hint: 'booking.first_name'.tr(),
+                  icon: Icons.person_outline_rounded,
+                  isDark: isDark,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'booking.please_enter_first_name'.tr();
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: _buildTextField(
+                  controller: _lastNameController,
+                  label: 'booking.last_name'.tr(),
+                  hint: 'booking.last_name'.tr(),
+                  icon: Icons.person_outline_rounded,
+                  isDark: isDark,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'booking.please_enter_your_last'.tr();
+                    }
+                    return null;
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 24),
+          _buildTextField(
+            controller: _phoneController,
+            label: 'booking.mobile_number'.tr(),
+            hint: '01X XXXX XXXX',
+            icon: Icons.phone_iphone_rounded,
+            keyboardType: TextInputType.phone,
+            isDark: isDark,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9\u0660-\u0669]')),
+            ],
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'booking.please_enter_mobile_number'.tr();
+              }
+              String cleanPhone = value.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+              if (cleanPhone.startsWith('01')) {
+                if (cleanPhone.length != 11) return 'booking.the_egyptian_mobile_number'.tr();
+                if (!RegExp(r'^01[0-5]\d{8}$').hasMatch(cleanPhone)) return 'booking.the_egyptian_mobile_number_1'.tr();
+              } else {
+                return 'booking.please_enter_a_valid'.tr();
+              }
+              return null;
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    required bool isDark,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10, right: 4),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.grey[300] : Colors.grey[700],
+            ),
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: controller,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
+            validator: validator,
+            textAlign: TextAlign.right,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(fontFamily: 'Cairo', color: Colors.grey.withOpacity(0.4), fontSize: 13),
+              prefixIcon: Icon(icon, color: ColorsManager.mainBlue.withOpacity(0.5), size: 22),
+              filled: true,
+              fillColor: isDark ? Colors.grey[850] : Colors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide(color: Colors.grey.withOpacity(0.1)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide(color: Colors.grey.withOpacity(0.1)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide(color: ColorsManager.mainBlue, width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide(color: Colors.red.withOpacity(0.5)),
+              ),
+            ),
+            style: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildConfirmButton() {
+    return Container(
+      width: double.infinity,
+      height: 64,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFF247CFF),
+            Color(0xFF1B62D6),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: ColorsManager.mainBlue.withOpacity(0.4),
+            blurRadius: 20,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : _submitForm,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        ),
+        child: _isLoading
+            ? CircularProgressIndicator(color: Colors.white)
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'booking.booking_confirmation'.tr(),
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 26),
+                ],
+              ),
+      ),
     );
   }
 }
