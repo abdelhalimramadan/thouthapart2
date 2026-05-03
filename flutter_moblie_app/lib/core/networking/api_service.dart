@@ -8,6 +8,7 @@ import 'package:thoutha_mobile_app/core/networking/models/university_model.dart'
 import 'package:thoutha_mobile_app/features/doctor/data/models/doctor_model.dart';
 import 'package:thoutha_mobile_app/features/requests/data/models/case_request_model.dart';
 import 'package:thoutha_mobile_app/features/profile/data/models/doctor_profile_model.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 /// Centralised API service.
 ///
@@ -20,8 +21,8 @@ class ApiService {
   // Public Dio — no auth, used for open reference-data endpoints
   Dio get _public => Dio(BaseOptions(
         baseUrl: ApiConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        connectTimeout: Duration(seconds: 10),
+        receiveTimeout: Duration(seconds: 10),
         headers: const {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
@@ -94,9 +95,9 @@ class ApiService {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.receiveTimeout:
-        return 'انتهت مهلة الاتصال. تحقق من الإنترنت';
+        return 'core.the_connection_timed_out'.tr();
       case DioExceptionType.connectionError:
-        return 'تعذر الاتصال بالخادم. تحقق من الإنترنت';
+        return 'core.unable_to_connect_to'.tr();
       case DioExceptionType.badResponse:
         final code = e.response?.statusCode;
         final serverMsg = e.response?.data is Map
@@ -107,17 +108,17 @@ class ApiService {
                 '')
             : e.response?.data?.toString() ?? '';
         if (serverMsg.toString().contains('No static resource found')) {
-          return 'المسار غير صحيح على الخادم. يرجى المحاولة مرة أخرى';
+          return 'core.the_path_is_invalid'.tr();
         }
-        if (code == 401) return 'غير مصرح: يرجى تسجيل الدخول مجدداً (401)';
-        if (code == 403) return 'ممنوع الوصول (403)';
-        if (code == 404) return 'الرابط غير موجود (404)';
-        if (code != null && code >= 500) return 'خطأ في الخادم ($code)';
+        if (code == 401) return 'core.unauthorized_please_log_in'.tr();
+        if (code == 403) return 'core.access_forbidden_403'.tr();
+        if (code == 404) return 'core.link_not_found_404'.tr();
+        if (code != null && code >= 500) return 'core.server_error_var0'.tr(namedArgs: {'var_0': code.toString()});
         return serverMsg.toString().isNotEmpty 
             ? serverMsg.toString() 
-            : 'خطأ HTTP $code';
+            : 'core.http_error_var0'.tr(namedArgs: {'var_0': code.toString()});
       default:
-        return 'خطأ غير متوقع: ${e.message ?? e.type.name}';
+        return 'core.unexpected_error_var0'.tr(namedArgs: {'var_0': e.message ?? e.type.name.toString()});
     }
   }
 
@@ -133,11 +134,11 @@ class ApiService {
         return _okList(
             (res.data as List).map((j) => DoctorModel.fromJson(j)).toList());
       }
-      return _fail('فشل في تحميل الأطباء', code: res.statusCode);
+      return _fail('core.failed_to_load_doctors'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -151,11 +152,11 @@ class ApiService {
         return _okList(
             (res.data as List).map((j) => DoctorModel.fromJson(j)).toList());
       }
-      return _fail('فشل في تحميل الأطباء', code: res.statusCode);
+      return _fail('core.failed_to_load_doctors'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -168,11 +169,11 @@ class ApiService {
         return _okList(
             (res.data as List).map((j) => CategoryModel.fromJson(j)).toList());
       }
-      return _fail('فشل في تحميل التخصصات', code: res.statusCode);
+      return _fail('core.failed_to_load_specializations'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e));
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -183,11 +184,11 @@ class ApiService {
         return _okList(
             (res.data as List).map((j) => CityModel.fromJson(j)).toList());
       }
-      return _fail('فشل في تحميل المدن', code: res.statusCode);
+      return _fail('core.failed_to_load_cities'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e));
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -199,11 +200,11 @@ class ApiService {
             .map((j) => UniversityModel.fromJson(j))
             .toList());
       }
-      return _fail('فشل في تحميل الجامعات', code: res.statusCode);
+      return _fail('core.failed_to_load_universities'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e));
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -263,9 +264,9 @@ class ApiService {
           return _okList(parsed);
         }
         print('ERROR: unexpected response format: $data');
-        return _fail('صيغة البيانات غير صحيحة', code: res.statusCode);
+        return _fail('core.the_data_format_is'.tr(), code: res.statusCode);
       }
-      return _fail('فشل في تحميل الطلبات', code: res.statusCode);
+      return _fail('core.failed_to_load_requests'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       print('=== DioException in getCaseRequestsByCategory ===');
       print('type: ${e.type}');
@@ -277,7 +278,7 @@ class ApiService {
       print('=== UNEXPECTED ERROR in getCaseRequestsByCategory ===');
       print('error: $e');
       print('stackTrace: $st');
-      return _fail('حدث خطأ غير متوقع: ${e.toString()}');
+      return _fail('core.an_unexpected_error_occurred_1'.tr(namedArgs: {'var_0': e.toString().toString()}));
     }
   }
 
@@ -286,13 +287,13 @@ class ApiService {
     try {
       final res = await _dio.post(ApiConstants.createCaseRequest, data: body);
       if (res.statusCode == 200 || res.statusCode == 201) {
-        return _okData(res.data)..['message'] = 'تم إنشاء الطلب بنجاح';
+        return _okData(res.data)..['message'] = 'core.the_order_was_created'.tr();
       }
-      return _fail('فشل في إنشاء الطلب', code: res.statusCode);
+      return _fail('core.failed_to_create_request'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -305,13 +306,13 @@ class ApiService {
         data: body,
       );
       if (res.statusCode == 200 || res.statusCode == 201) {
-        return _okData(res.data)..['message'] = 'تم تحديث الطلب بنجاح';
+        return _okData(res.data)..['message'] = 'core.the_request_has_been'.tr();
       }
-      return _fail('فشل في تحديث الطلب', code: res.statusCode);
+      return _fail('core.failed_to_update_the'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -328,10 +329,10 @@ class ApiService {
 
       // Validate inputs
       if (description.trim().isEmpty) {
-        return _fail('الوصف مطلوب');
+        return _fail('core.description_required'.tr());
       }
       if (dateTime.trim().isEmpty) {
-        return _fail('التاريخ والوقت مطلوب');
+        return _fail('core.date_and_time_required'.tr());
       }
 
       final body = {
@@ -347,9 +348,9 @@ class ApiService {
       );
 
       if (res.statusCode == 200 || res.statusCode == 201) {
-        return _okData(res.data)..['message'] = 'تم تحديث الطلب بنجاح';
+        return _okData(res.data)..['message'] = 'core.the_request_has_been'.tr();
       }
-      return _fail('فشل في تحديث الطلب: ${res.statusCode}',
+      return _fail('core.failed_to_update_request'.tr(namedArgs: {'var_0': res.statusCode.toString()}),
           code: res.statusCode);
     } on DioException catch (e) {
       debugPrint('Edit request error: ${e.message}');
@@ -357,7 +358,7 @@ class ApiService {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (e) {
       debugPrint('Unexpected error in editRequest: $e');
-      return _fail('حدث خطأ غير متوقع: $e');
+      return _fail('core.an_unexpected_error_occurred_1'.tr(namedArgs: {'var_0': e.toString()}));
     }
   }
 
@@ -368,11 +369,11 @@ class ApiService {
         return _okData(
             CaseRequestModel.fromJson(res.data as Map<String, dynamic>));
       }
-      return _fail('فشل في تحميل الطلب', code: res.statusCode);
+      return _fail('core.text'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -402,16 +403,16 @@ class ApiService {
                 .toList(),
           );
         }
-        return _fail('صيغة البيانات غير صحيحة', code: res.statusCode);
+        return _fail('core.the_data_format_is'.tr(), code: res.statusCode);
       }
-      return _fail('فشل في تحميل الطلبات', code: res.statusCode);
+      return _fail('core.failed_to_load_requests'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       print('=== deleteDoctor error body ===');
       print('status code: ${e.response?.statusCode}');
       print('response data: ${e.response?.data}');
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -436,12 +437,12 @@ class ApiService {
 
       if (res.statusCode == 200 || res.statusCode == 204) {
         debugPrint('✓ Request ID $id deleted successfully');
-        return {'success': true, 'message': 'تم حذف الطلب بنجاح'};
+        return {'success': true, 'message': 'core.the_request_has_been_1'.tr()};
       }
       if (res.statusCode == 403) {
-        return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: 403);
+        return _fail('core.access_denied_make_sure'.tr(), code: 403);
       }
-      return _fail('فشل في حذف الطلب', code: res.statusCode);
+      return _fail('core.failed_to_delete_request'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       debugPrint('=== deleteRequest DioException ===');
       debugPrint('Status Code: ${e.response?.statusCode}');
@@ -450,15 +451,15 @@ class ApiService {
 
       final code = e.response?.statusCode;
       if (code == 403) {
-        return _fail('ممنوع الوصول: تأكد من أن هذا الطلب خاص بك', code: code);
+        return _fail('core.access_denied_make_sure'.tr(), code: code);
       }
-      if (code == 404) return _fail('الطلب غير موجود', code: code);
-      if (code == 500) return _fail('خطأ في الخادم، حاول مرة أخرى', code: code);
+      if (code == 404) return _fail('core.the_request_does_not'.tr(), code: code);
+      if (code == 500) return _fail('core.server_error_try_again'.tr(), code: code);
       return _fail(_dioError(e), code: code);
     } catch (e) {
       debugPrint('=== deleteRequest Unexpected Error ===');
       debugPrint('Error: $e');
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -538,7 +539,7 @@ class ApiService {
             }
 
             if (jsonData == null) {
-              return _fail('صيغة بيانات الطبيب غير صحيحة',
+              return _fail('core.the_doctors_data_format'.tr(),
                   code: res.statusCode);
             }
 
@@ -559,9 +560,9 @@ class ApiService {
         }
       }
 
-      return _fail('تعذر تحميل بيانات الطبيب');
+      return _fail('core.unable_to_load_doctor'.tr());
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -572,19 +573,22 @@ class ApiService {
         ApiConstants.updateDoctor,
         data: body,
       );
-      if (res.statusCode == 200 || res.statusCode == 201)
+      if (res.statusCode == 200 || res.statusCode == 201) {
         return _okData(res.data);
-      if (res.statusCode == 403)
-        return _fail('ممنوع الوصول: تأكد من صلاحياتك', code: 403);
-      return _fail('فشل في تحديث بيانات الطبيب', code: res.statusCode);
+      }
+      if (res.statusCode == 403) {
+        return _fail('core.access_denied_check_your'.tr(), code: 403);
+      }
+      return _fail('core.failed_to_update_doctor'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       final code = e.response?.statusCode;
-      if (code == 403)
-        return _fail('ممنوع الوصول: تأكد من صلاحياتك', code: code);
+      if (code == 403) {
+        return _fail('core.access_denied_check_your'.tr(), code: code);
+      }
       return _fail(_dioError(e), code: code);
     } catch (e) {
       debugPrint('updateDoctor unexpected error: $e');
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -597,7 +601,7 @@ class ApiService {
         if (res.statusCode == 200 || res.statusCode == 204) {
           return {'success': true};
         }
-        return _fail('فشل في حذف الحساب', code: res.statusCode);
+        return _fail('core.failed_to_delete_account'.tr(), code: res.statusCode);
       } on DioException catch (postError) {
         // إذا فشل POST، حاول DELETE
         if (postError.response?.statusCode == 404 ||
@@ -607,28 +611,32 @@ class ApiService {
             if (res.statusCode == 200 || res.statusCode == 204) {
               return {'success': true};
             }
-            return _fail('فشل في حذف الحساب', code: res.statusCode);
+            return _fail('core.failed_to_delete_account'.tr(), code: res.statusCode);
           } on DioException catch (deleteError) {
             final code = deleteError.response?.statusCode;
-            if (code == 404) return _fail('الطبيب غير موجود', code: code);
-            if (code == 401)
-              return _fail('غير مصرح: يرجى تسجيل الدخول مجدداً', code: code);
-            if (code == 403)
-              return _fail('ممنوع الوصول، تأكد من صلاحياتك', code: code);
+            if (code == 404) return _fail('core.the_doctor_is_not'.tr(), code: code);
+            if (code == 401) {
+              return _fail('core.unauthorized_please_log_in_1'.tr(), code: code);
+            }
+            if (code == 403) {
+              return _fail('core.access_denied_check_your_1'.tr(), code: code);
+            }
             return _fail(_dioError(deleteError), code: code);
           }
         }
         // إذا كان الخطأ ليس 404 أو 405، أرجع الخطأ من POST
         final code = postError.response?.statusCode;
-        if (code == 404) return _fail('الطبيب غير موجود', code: code);
-        if (code == 401)
-          return _fail('غير مصرح: يرجى تسجيل الدخول مجدداً', code: code);
-        if (code == 403)
-          return _fail('ممنوع الوصول، تأكد من صلاحياتك', code: code);
+        if (code == 404) return _fail('core.the_doctor_is_not'.tr(), code: code);
+        if (code == 401) {
+          return _fail('core.unauthorized_please_log_in_1'.tr(), code: code);
+        }
+        if (code == 403) {
+          return _fail('core.access_denied_check_your_1'.tr(), code: code);
+        }
         return _fail(_dioError(postError), code: code);
       }
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -648,16 +656,16 @@ class ApiService {
 
       // Normalize phone number to English digits
       final normalizedPhone = patientPhoneNumber
-          .replaceAll('٠', '0')
-          .replaceAll('١', '1')
-          .replaceAll('٢', '2')
-          .replaceAll('٣', '3')
-          .replaceAll('٤', '4')
-          .replaceAll('٥', '5')
-          .replaceAll('٦', '6')
-          .replaceAll('٧', '7')
-          .replaceAll('٨', '8')
-          .replaceAll('٩', '9');
+          .replaceAll('core.str_0'.tr(), '0')
+          .replaceAll('core.str_1'.tr(), '1')
+          .replaceAll('core.str_2'.tr(), '2')
+          .replaceAll('core.str_3'.tr(), '3')
+          .replaceAll('core.str_4'.tr(), '4')
+          .replaceAll('core.str_5'.tr(), '5')
+          .replaceAll('core.str_6'.tr(), '6')
+          .replaceAll('core.str_7'.tr(), '7')
+          .replaceAll('core.str_8'.tr(), '8')
+          .replaceAll('core.str_9'.tr(), '9');
 
       final body = {
         'patientFirstName': patientFirstName,
@@ -678,9 +686,9 @@ class ApiService {
       print('Response Data: ${res.data}');
 
       if (res.statusCode == 200 || res.statusCode == 201) {
-        return _okData(res.data)..['message'] = 'تم حجز الموعد بنجاح';
+        return _okData(res.data)..['message'] = 'core.the_appointment_has_been'.tr();
       }
-      return _fail('فشل في حجز الموعد', code: res.statusCode);
+      return _fail('core.failed_to_book_an'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       print('=== DioException in createAppointment ===');
       print('Status: ${e.response?.statusCode}');
@@ -698,11 +706,11 @@ class ApiService {
             : data?.toString().toLowerCase() ?? '';
             
         if (serverMsg.contains('already booked') || 
-            serverMsg.contains('تم الحجز') || 
+            serverMsg.contains('core.booked'.tr()) || 
             serverMsg.contains('duplicate') ||
             serverMsg.contains('static resource') ||
-            serverMsg.contains('المورد الثابت')) {
-          errorMsg = 'لقد تم الحجز مسبقا بنفس الرقم';
+            serverMsg.contains('core.fixed_resource'.tr())) {
+          errorMsg = 'core.we_have_already_booked'.tr();
         }
       }
       
@@ -710,7 +718,7 @@ class ApiService {
     } catch (e) {
       print('=== Unexpected error in createAppointment ===');
       print('Error: $e');
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -729,11 +737,11 @@ class ApiService {
               .toList(),
         );
       }
-      return _fail('فشل في تحميل الحجوزات', code: res.statusCode);
+      return _fail('core.failed_to_load_reservations'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -763,11 +771,11 @@ class ApiService {
         }
         return _okList([]);
       }
-      return _fail('فشل في تحميل الحجوزات المعتمدة', code: res.statusCode);
+      return _fail('core.failed_to_load_approved'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -797,11 +805,11 @@ class ApiService {
         }
         return _okList([]);
       }
-      return _fail('فشل في تحميل الحجوزات المؤكدة', code: res.statusCode);
+      return _fail('core.failed_to_load_confirmed'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -823,13 +831,13 @@ class ApiService {
       if (res.statusCode == 200 || res.statusCode == 201) {
         final statusAr = _statusToArabic(status);
         return _okData(res.data)
-          ..['message'] = 'تم تحديث حالة الحجز إلى $statusAr بنجاح';
+          ..['message'] = 'core.the_reservation_status_has'.tr(namedArgs: {'var_0': statusAr.toString()});
       }
-      return _fail('فشل في تحديث حالة الحجز', code: res.statusCode);
+      return _fail('core.failed_to_update_reservation'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -837,13 +845,13 @@ class ApiService {
   String _statusToArabic(String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return 'قيد الانتظار';
+        return 'core.on_hold'.tr();
       case 'APPROVED':
-        return 'موافق عليه';
+        return 'core.approved'.tr();
       case 'DONE':
-        return 'مكتمل';
+        return 'core.complete'.tr();
       case 'CANCELLED':
-        return 'ملغى';
+        return 'core.canceled'.tr();
       default:
         return status;
     }
@@ -887,7 +895,7 @@ class ApiService {
         return _okList([]);
       }
       print('=== API Error: ${res.statusCode} ===');
-      return _fail('فشل في تحميل سجل الحجوزات', code: res.statusCode);
+      return _fail('core.failed_to_load_reservation'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       print('=== DioException: ${e.message} ===');
       print('=== Status Code: ${e.response?.statusCode} ===');
@@ -895,7 +903,7 @@ class ApiService {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (e) {
       print('=== Exception: $e ===');
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 
@@ -911,13 +919,13 @@ class ApiService {
       );
 
       if (res.statusCode == 200 || res.statusCode == 204) {
-        return {'success': true, 'message': 'تم حذف السجل بنجاح'};
+        return {'success': true, 'message': 'core.the_record_has_been'.tr()};
       }
-      return _fail('فشل في حذف السجل', code: res.statusCode);
+      return _fail('core.failed_to_delete_record'.tr(), code: res.statusCode);
     } on DioException catch (e) {
       return _fail(_dioError(e), code: e.response?.statusCode);
     } catch (_) {
-      return _fail('حدث خطأ غير متوقع');
+      return _fail('core.an_unexpected_error_occurred'.tr());
     }
   }
 }

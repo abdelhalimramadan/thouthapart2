@@ -24,37 +24,37 @@ class AppRouter {
       case Routes.splashScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const SplashScreen(),
+          builder: (context) => SplashScreen(),
         );
       case Routes.onBoardingScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const OnboardingScreen(),
+          builder: (context) => OnboardingScreen(),
         );
       case Routes.loginScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const LoginScreen(),
+          builder: (context) => LoginScreen(),
         );
       case Routes.signUpScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const SignUpScreen(),
+          builder: (context) => SignUpScreen(),
         );
       case Routes.chatScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const ChatScreen(),
+          builder: (context) => ChatScreen(),
         );
       case Routes.forgotPasswordScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const ForgotPasswordScreen(),
+          builder: (context) => ForgotPasswordScreen(),
         );
       case Routes.changePasswordScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const ChangePasswordScreen(),
+          builder: (context) => ChangePasswordScreen(),
         );
       case Routes.otpVerificationScreen:
         final args = settings.arguments as Map<String, dynamic>? ?? {};
@@ -76,42 +76,42 @@ class AppRouter {
       case Routes.categoriesScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const HomeScreen(),
+          builder: (context) => HomeScreen(),
         );
       case Routes.notificationsScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const NotificationsScreen(),
+          builder: (context) => NotificationsScreen(),
         );
       case Routes.accountDeletionScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const AccountDeletionScreen(),
+          builder: (context) => AccountDeletionScreen(),
         );
       case Routes.doctorBookingRecordsScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const DoctorBookingRecordsScreen(),
+          builder: (context) => DoctorBookingRecordsScreen(),
         );
       case Routes.doctorConfirmedAppointmentsScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const DoctorConfirmedAppointmentsScreen(),
+          builder: (context) => DoctorConfirmedAppointmentsScreen(),
         );
       case Routes.doctorHomeScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const DoctorHomeScreen(),
+          builder: (context) => DoctorHomeScreen(),
         );
       case Routes.doctorNextBookingScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const DoctorNextBookingScreen(),
+          builder: (context) => DoctorNextBookingScreen(),
         );
       case Routes.appointmentsScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => const AppointmentsScreen(),
+          builder: (context) => AppointmentsScreen(),
         );
 
       default:

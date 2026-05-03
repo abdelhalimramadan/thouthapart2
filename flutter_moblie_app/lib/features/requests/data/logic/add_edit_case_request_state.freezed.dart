@@ -269,7 +269,7 @@ class _Initial implements AddEditCaseRequestState {
 /// @nodoc
 
 class Loading implements AddEditCaseRequestState {
-  const Loading();
+  Loading();
 
   @override
   bool operator ==(Object other) {
@@ -289,7 +289,7 @@ class Loading implements AddEditCaseRequestState {
 /// @nodoc
 
 class Success implements AddEditCaseRequestState {
-  const Success();
+  Success();
 
   @override
   bool operator ==(Object other) {
@@ -309,7 +309,7 @@ class Success implements AddEditCaseRequestState {
 /// @nodoc
 
 class Error implements AddEditCaseRequestState {
-  const Error({required this.message});
+  Error({required this.message});
 
   final String message;
 
