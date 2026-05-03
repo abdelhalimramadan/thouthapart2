@@ -459,8 +459,11 @@ class _DoctorInfoContentState extends State<DoctorInfoContent> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
-                                                  BookingConfirmationScreen(
+                                                BookingConfirmationScreen(
                                                 doctorName: doctorName,
+                                                universityName: widget.doctor.universityName,
+                                                cityName: widget.doctor.cityName,
+                                                doctorPhoto: widget.doctor.photo,
                                                 specialty:
                                                     widget.doctor.categoryName,
                                                 date: date,
