@@ -610,7 +610,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w600,
                   fontSize: 18,
-                  color: Colors.white,
+                  color: theme.brightness == Brightness.dark ? Colors.white : Colors.black,
                 ),
               ),
             ],
@@ -633,7 +633,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 padding: const EdgeInsets.all(8),
                 child: Icon(
                   Icons.arrow_forward_ios,
-                  color: Colors.white,
+                  color: theme.brightness == Brightness.dark ? Colors.white : Colors.black,
                   size: 24,
                 ),
               ),

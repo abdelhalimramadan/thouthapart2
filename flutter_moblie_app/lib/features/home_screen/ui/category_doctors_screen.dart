@@ -568,7 +568,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                               fontFamily: 'Cairo',
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: ColorsManager.fontColor,
+                              color: isDark ? Colors.white : Colors.black,
                             ),
                           ),
                         ],
@@ -810,7 +810,7 @@ class _CategoryDoctorsScreenState extends State<CategoryDoctorsScreen> {
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 11,
-                    color: isDark ? Colors.white : ColorsManager.fontColor,
+                    color: isDark ? Colors.white : Colors.black,
                     fontWeight: FontWeight.w600,
                   ),
                   textAlign: TextAlign.start,

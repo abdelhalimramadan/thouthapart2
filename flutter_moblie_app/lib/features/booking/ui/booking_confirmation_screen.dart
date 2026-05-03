@@ -184,7 +184,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                           fontFamily: 'Cairo',
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
-                          color: isDark ? Colors.white : Color(0xFF1F2937),
+                          color: isDark ? Colors.white : Colors.black,
                         ),
                       ),
                       
@@ -207,7 +207,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                           style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 13,
-                            color: ColorsManager.fontColor,
+                            color: isDark ? Colors.white70 : Colors.black87,
                             height: 1.5,
                             fontWeight: FontWeight.w600,
                           ),
@@ -421,6 +421,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
 
   Widget _buildGradientHeader() {
     final isAr = context.locale.languageCode == 'ar';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(28),
@@ -449,7 +450,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                   fontFamily: 'Cairo',
                   fontSize: 19,
                   fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                  color: isDark ? Colors.white : Colors.black,
                   height: 1.2,
                 ),
               ),
@@ -458,7 +459,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 13,
-                  color: Colors.white.withOpacity(0.85),
+                  color: isDark ? Colors.white.withOpacity(0.85) : Colors.black.withOpacity(0.7),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -469,16 +470,16 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: isDark ? Colors.white.withOpacity(0.15) : Colors.black.withOpacity(0.08),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
+              border: Border.all(color: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.1)),
             ),
             child: Text(
               'home_screen.book_an_appointment'.tr(),
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 11,
-                color: Colors.white,
+                color: isDark ? Colors.white : Colors.black,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.5,
               ),
@@ -549,7 +550,13 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                     ),
                     Text(
                       widget.universityName,
-                      style: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.bold, color: ColorsManager.fontColor, height: 1.3),
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black,
+                        height: 1.3,
+                      ),
                     ),
                   ],
                 ),
@@ -572,7 +579,12 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
               SizedBox(width: 8),
               Text(
                 widget.cityName,
-                style: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.bold, color: ColorsManager.fontColor),
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
               ),
             ],
           ),
@@ -705,7 +717,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
               fontFamily: 'Cairo',
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: isDark ? Colors.grey[300] : Colors.grey[700],
+              color: isDark ? Colors.white : Colors.black,
             ),
           ),
         ),
