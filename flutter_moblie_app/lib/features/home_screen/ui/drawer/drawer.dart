@@ -60,6 +60,7 @@ class HomeDrawer extends StatelessWidget {
     Color? iconColor,
     double? fontSize,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Row(
@@ -83,7 +84,7 @@ class HomeDrawer extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeTrackColor: Color(0xFF8DECB8),
-            inactiveThumbColor: Colors.white,
+            inactiveThumbColor: isDark ? Colors.black : Colors.white,
             inactiveTrackColor: Theme.of(context).dividerColor,
           ),
         ],
@@ -199,19 +200,19 @@ class HomeDrawer extends StatelessWidget {
                         );
                       },
                     ),
-                    _menuItem(
+                    _toggleMenuItem(
                       context,
                       title: 'doctor.change_language'.tr(),
-                      icon: Icons.language,
-                      fontSize: 16,
-                      onTap: () {
-                        final currentLocale = context.locale;
-                        if (currentLocale.languageCode == 'ar') {
+                      value: context.locale.languageCode == 'en',
+                      onChanged: (v) {
+                        if (v) {
                           context.setLocale(const Locale('en'));
                         } else {
                           context.setLocale(const Locale('ar'));
                         }
                       },
+                      icon: Icons.language,
+                      fontSize: 16,
                     ),
                     _menuItem(
                       context,

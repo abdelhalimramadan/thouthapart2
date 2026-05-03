@@ -210,6 +210,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     IconData? icon,
     Color? iconColor,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final textTheme = Theme.of(context).textTheme;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -242,7 +243,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                 value: value,
                 onChanged: onChanged,
                 activeTrackColor: Color(0xFF10B981),
-                inactiveThumbColor: Colors.white,
+                inactiveThumbColor: isDark ? Colors.black : Colors.white,
                 inactiveTrackColor: Theme.of(context).dividerColor,
               ),
             ],
@@ -599,18 +600,18 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       );
                     },
                   ),
-                  _menuItem(
+                  _toggleMenuItem(
                     context,
                     title: 'doctor.change_language'.tr(),
-                    icon: Icons.language,
-                    onTap: () {
-                      final currentLocale = context.locale;
-                      if (currentLocale.languageCode == 'ar') {
-                        context.setLocale(Locale('en'));
+                    value: context.locale.languageCode == 'en',
+                    onChanged: (v) {
+                      if (v) {
+                        context.setLocale(const Locale('en'));
                       } else {
-                        context.setLocale(Locale('ar'));
+                        context.setLocale(const Locale('ar'));
                       }
                     },
+                    icon: Icons.language,
                   ),
                   _menuItem(
                     context,
