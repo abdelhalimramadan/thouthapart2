@@ -1,5 +1,6 @@
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
 import 'package:thoutha_mobile_app/features/requests/data/models/case_request_body.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class CaseRequestRepo {
   final ApiService _apiService;
@@ -25,7 +26,7 @@ class CaseRequestRepo {
       if (body.description.trim().isEmpty || body.dateTime.trim().isEmpty) {
         return {
           'success': false,
-          'error': 'يجب ملء جميع الحقول المطلوبة',
+          'error': 'requests.all_required_fields_must'.tr(),
         };
       }
 

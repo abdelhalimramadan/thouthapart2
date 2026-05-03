@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:thoutha_mobile_app/core/networking/connectivity_service.dart';
 
 class ConnectivityTestScreen extends StatefulWidget {
-  const ConnectivityTestScreen({Key? key}) : super(key: key);
+  const ConnectivityTestScreen({super.key});
 
   @override
   State<ConnectivityTestScreen> createState() => _ConnectivityTestScreenState();
@@ -56,7 +56,7 @@ class _ConnectivityTestScreenState extends State<ConnectivityTestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Connectivity Test'),
+        title: Text('Connectivity Test'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -73,12 +73,12 @@ class _ConnectivityTestScreenState extends State<ConnectivityTestScreen> {
                       size: 64,
                       color: _isConnected ? Colors.green : Colors.red,
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Text(
                       'Connection Status',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
                       _connectionStatus,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -87,7 +87,7 @@ class _ConnectivityTestScreenState extends State<ConnectivityTestScreen> {
                           ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
                       _isConnected ? 'Connected' : 'Disconnected',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -98,13 +98,13 @@ class _ConnectivityTestScreenState extends State<ConnectivityTestScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             if (_isChecking)
-              const CircularProgressIndicator()
+              CircularProgressIndicator()
             else
               ElevatedButton(
                 onPressed: _checkConnectivity,
-                child: const Text('Check Again'),
+                child: Text('Check Again'),
               ),
           ],
         ),

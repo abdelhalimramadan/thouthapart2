@@ -4,6 +4,7 @@ import 'package:thoutha_mobile_app/core/theming/colors.dart';
 import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class BookingConfirmationScreen extends StatefulWidget {
   final String doctorName;
@@ -13,15 +14,15 @@ class BookingConfirmationScreen extends StatefulWidget {
   final int? requestId;
   final int? doctorId;
 
-  const BookingConfirmationScreen({
+  BookingConfirmationScreen({
     super.key,
     required this.doctorName,
     required this.date,
     required this.time,
-    this.specialty = 'طب الأسنان',
+    String? specialty,
     this.requestId,
     this.doctorId,
-  });
+  }) : specialty = specialty ?? 'booking.dentistry'.tr();
 
   @override
   State<BookingConfirmationScreen> createState() =>
@@ -61,9 +62,9 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
   void _completeBooking() async {
     if (widget.requestId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-              'عذراً، لا يمكن إتمام الحجز بدون تحديد حالة. يرجى المحاولة من صفحة الحالات.',
+              'booking.sorry_your_reservation_cannot'.tr(),
               style: TextStyle(fontFamily: 'Cairo')),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 3),
@@ -119,7 +120,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                     const EdgeInsets.only(bottom: 16, left: 16, right: 16),
                 actionsAlignment: MainAxisAlignment.center,
                 title: Text(
-                  'تم الحجز بنجاح',
+                  'booking.your_reservation_has_been'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: 'Cairo',
@@ -141,14 +142,14 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                       child: Icon(Icons.check_rounded,
                           color: ColorsManager.mainBlue, size: 42),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Text(
                       'تم حجز موعدك بنجاح مع ${widget.doctorName}\nفي يوم ${widget.date} الساعة ${widget.time}',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 14,
-                        color: isDark ? Colors.white : const Color(0xFF1F2937),
+                        color: isDark ? Colors.white : Color(0xFF1F2937),
                         height: 1.6,
                       ),
                     ),
@@ -176,7 +177,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                             ),
                           ),
                           child: Text(
-                            'حسناً',
+                            'booking.good'.tr(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: 'Cairo',
@@ -201,11 +202,11 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              result['error'] ?? 'فشل في إنشاء الموعد',
-              style: const TextStyle(fontFamily: 'Cairo'),
+              result['error'] ?? 'booking.failed_to_create_appointment'.tr(),
+              style: TextStyle(fontFamily: 'Cairo'),
             ),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+            duration: Duration(seconds: 3),
           ),
         );
       }
@@ -218,10 +219,10 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
         SnackBar(
           content: Text(
             'حدث خطأ: ${e.toString()}',
-            style: const TextStyle(fontFamily: 'Cairo'),
+            style: TextStyle(fontFamily: 'Cairo'),
           ),
           backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
+          duration: Duration(seconds: 3),
         ),
       );
     }
@@ -246,11 +247,11 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 height: double.infinity,
                 decoration: BoxDecoration(
                   gradient: RadialGradient(
-                    center: const Alignment(-0.7, -0.7),
+                    center: Alignment(-0.7, -0.7),
                     radius: 1.5,
                     colors: [
-                      const Color(0xFF84E5F3).withOpacity(0.4),
-                      const Color(0xFF84E5F3).withOpacity(0.1),
+                      Color(0xFF84E5F3).withOpacity(0.4),
+                      Color(0xFF84E5F3).withOpacity(0.1),
                       Colors.transparent,
                     ],
                     stops: const [0.0, 0.3, 0.8],
@@ -260,7 +261,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
               Container(
                 width: double.infinity,
                 height: double.infinity,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: RadialGradient(
                     center: Alignment(0.7, 0.7),
                     radius: 1.5,
@@ -277,7 +278,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 top: MediaQuery.of(context).padding.top + 10,
                 right: 20,
                 child: IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_forward_ios,
                     color: ColorsManager.mainBlue,
                     size: 24,
@@ -290,7 +291,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                   padding: const EdgeInsets.all(24),
                   child: Container(
                     width: double.infinity,
-                    constraints: const BoxConstraints(
+                    constraints: BoxConstraints(
                       maxWidth: 500,
                     ),
                     padding: const EdgeInsets.all(24),
@@ -303,7 +304,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                               ? Colors.black.withOpacity(0.3)
                               : Colors.grey.withOpacity(0.1),
                           blurRadius: 10,
-                          offset: const Offset(0, 4),
+                          offset: Offset(0, 4),
                         ),
                       ],
                     ),
@@ -315,7 +316,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                           children: [
                             Center(
                               child: Text(
-                                'تأكيد الحجز',
+                                'booking.booking_confirmation'.tr(),
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontFamily: 'Cairo',
                                   fontSize: 24,
@@ -325,7 +326,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
                             Card(
                               elevation: 2,
                               shape: RoundedRectangleBorder(
@@ -337,7 +338,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'معلومات الطبيب',
+                                      'booking.doctor_information'.tr(),
                                       style:
                                           theme.textTheme.titleMedium?.copyWith(
                                         fontFamily: 'Cairo',
@@ -345,39 +346,39 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(height: 12),
+                                    SizedBox(height: 12),
                                     _buildInfoRow(
-                                        'الطبيب:', widget.doctorName, 14),
-                                    const SizedBox(height: 8),
+                                        'booking.doctor'.tr(), widget.doctorName, 14),
+                                    SizedBox(height: 8),
                                     _buildInfoRow(
-                                        'التخصص:', widget.specialty, 14),
-                                    const SizedBox(height: 8),
+                                        'booking.specialization'.tr(), widget.specialty, 14),
+                                    SizedBox(height: 8),
                                     _buildInfoRow(
-                                        'التاريخ:', widget.date, 14),
-                                    const SizedBox(height: 8),
-                                    _buildInfoRow('الوقت:', widget.time, 14),
+                                        'booking.the_date'.tr(), widget.date, 14),
+                                    SizedBox(height: 8),
+                                    _buildInfoRow('booking.the_time'.tr(), widget.time, 14),
                                   ],
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            SizedBox(height: 24),
                             Text(
-                              'معلومات المريض',
+                              'booking.patient_information'.tr(),
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontFamily: 'Cairo',
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 16),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
+                            SizedBox(height: 16),
                             TextFormField(
                               controller: _firstNameController,
-                              style: const TextStyle(fontFamily: 'Cairo'),
+                              style: TextStyle(fontFamily: 'Cairo'),
                               decoration: InputDecoration(
-                                labelText: 'الاسم الأول',
+                                labelText: 'booking.first_name'.tr(),
                                 labelStyle:
-                                    const TextStyle(fontFamily: 'Cairo'),
+                                    TextStyle(fontFamily: 'Cairo'),
                                 prefixIcon: Icon(Icons.person_outline,
                                     color: theme.iconTheme.color),
                                 border: OutlineInputBorder(
@@ -387,19 +388,19 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                               textInputAction: TextInputAction.next,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'الرجاء إدخال الاسم الأول';
+                                  return 'booking.please_enter_first_name'.tr();
                                 }
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
                             TextFormField(
                               controller: _lastNameController,
-                              style: const TextStyle(fontFamily: 'Cairo'),
+                              style: TextStyle(fontFamily: 'Cairo'),
                               decoration: InputDecoration(
-                                labelText: 'اسم العائلة',
+                                labelText: 'booking.last_name'.tr(),
                                 labelStyle:
-                                    const TextStyle(fontFamily: 'Cairo'),
+                                    TextStyle(fontFamily: 'Cairo'),
                                 prefixIcon: Icon(Icons.person_outline,
                                     color: theme.iconTheme.color),
                                 border: OutlineInputBorder(
@@ -409,26 +410,26 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                               textInputAction: TextInputAction.next,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'الرجاء إدخال اسم العائلة';
+                                  return 'booking.please_enter_your_last'.tr();
                                 }
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
                             TextFormField(
                               controller: _phoneController,
                               keyboardType: TextInputType.number,
-                              style: const TextStyle(fontFamily: 'Cairo'),
+                              style: TextStyle(fontFamily: 'Cairo'),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(
                                     RegExp(r'[0-9\u0660-\u0669]')),
                               ],
                               decoration: InputDecoration(
-                                labelText: 'رقم الجوال',
+                                labelText: 'booking.mobile_number'.tr(),
                                 labelStyle:
-                                    const TextStyle(fontFamily: 'Cairo'),
+                                    TextStyle(fontFamily: 'Cairo'),
                                 hintText: '01X XXX XXXXX',
-                                hintStyle: const TextStyle(fontFamily: 'Cairo'),
+                                hintStyle: TextStyle(fontFamily: 'Cairo'),
                                 prefixIcon: Icon(Icons.phone_android,
                                     color: theme.iconTheme.color),
                                 border: OutlineInputBorder(
@@ -437,7 +438,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'الرجاء إدخال رقم الجوال';
+                                  return 'booking.please_enter_mobile_number'.tr();
                                 }
 
                                 String cleanPhone =
@@ -445,28 +446,28 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
 
                                 if (cleanPhone.startsWith('01')) {
                                   if (cleanPhone.length != 11) {
-                                    return 'رقم الجوال المصري يجب أن يكون 11 رقم';
+                                    return 'booking.the_egyptian_mobile_number'.tr();
                                   }
                                   if (!RegExp(r'^01[0-5]\d{8}$')
                                       .hasMatch(cleanPhone)) {
-                                    return 'رقم الجوال المصري غير صحيح';
+                                    return 'booking.the_egyptian_mobile_number_1'.tr();
                                   }
                                 } else if (cleanPhone.startsWith('+20')) {
                                   if (cleanPhone.length != 13) {
-                                    return 'رقم الجوال المصري يجب أن يكون 13 رقم مع +20';
+                                    return 'booking.the_egyptian_mobile_number_2'.tr();
                                   }
                                   if (!RegExp(r'^\+201[0-25]\d{8}$')
                                       .hasMatch(cleanPhone)) {
-                                    return 'رقم الجوال المصري غير صحيح';
+                                    return 'booking.the_egyptian_mobile_number_1'.tr();
                                   }
                                 } else {
-                                  return 'الرجاء إدخال رقم جوال مصري صحيح';
+                                  return 'booking.please_enter_a_valid'.tr();
                                 }
 
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 24),
+                            SizedBox(height: 24),
                             SizedBox(
                               height: 48,
                               width: double.infinity,
@@ -480,7 +481,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                   ),
                                 ),
                                 child: _isLoading
-                                    ? const SizedBox(
+                                    ? SizedBox(
                                         width: 20,
                                         height: 20,
                                         child: CircularProgressIndicator(
@@ -489,7 +490,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                                         ),
                                       )
                                     : Text(
-                                        'تأكيد الحجز',
+                                        'booking.booking_confirmation'.tr(),
                                         style: theme.textTheme.titleMedium
                                             ?.copyWith(
                                           fontFamily: 'Cairo',
@@ -526,7 +527,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
             color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Text(
           value,
           style: theme.textTheme.bodyLarge?.copyWith(

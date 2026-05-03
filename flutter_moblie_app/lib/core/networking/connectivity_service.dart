@@ -49,8 +49,8 @@ class ConnectivityService {
       final response = await _dio.get(
         'https://www.google.com',
         options: Options(
-          receiveTimeout: const Duration(seconds: 5),
-          sendTimeout: const Duration(seconds: 5),
+          receiveTimeout: Duration(seconds: 5),
+          sendTimeout: Duration(seconds: 5),
         ),
       );
       return response.statusCode == 200;
@@ -60,8 +60,8 @@ class ConnectivityService {
         final response = await _dio.get(
           'https://jsonplaceholder.typicode.com/posts/1',
           options: Options(
-            receiveTimeout: const Duration(seconds: 5),
-            sendTimeout: const Duration(seconds: 5),
+            receiveTimeout: Duration(seconds: 5),
+            sendTimeout: Duration(seconds: 5),
           ),
         );
         return response.statusCode == 200;
