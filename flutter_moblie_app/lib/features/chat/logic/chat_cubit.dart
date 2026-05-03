@@ -2,14 +2,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../data/chat_repo.dart';
 import '../data/models/chat_models.dart';
 import 'chat_state.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class ChatCubit extends Cubit<ChatState> {
   final ChatRepo _chatRepo;
 
-  ChatCubit(this._chatRepo) : super(const ChatState.initial());
+  ChatCubit(this._chatRepo) : super(ChatState.initial());
 
   Future<void> startSession() async {
-    emit(const ChatState.loading());
+    emit(ChatState.loading());
 
     // Load categories first for matching later
     final categories = await _loadCategories();
@@ -26,7 +27,7 @@ class ChatCubit extends Cubit<ChatState> {
       _processResponse(response, flowItems, chatHistory, response.sessionId,
           true, categories);
     } else {
-      emit(ChatState.error(result['error'] ?? 'فشل في بدء المحادثة'));
+      emit(ChatState.error(result['error'] ?? 'chat.failed_to_start_a'.tr()));
     }
   }
 
@@ -121,36 +122,36 @@ class ChatCubit extends Cubit<ChatState> {
 
   String _normalize(String s) {
     return s
-        .replaceAll('أ', 'ا')
-        .replaceAll('إ', 'ا')
-        .replaceAll('آ', 'ا')
-        .replaceAll('ة', 'ه')
-        .replaceAll('ى', 'ي')
+        .replaceAll('chat.a'.tr(), 'chat.a_1'.tr())
+        .replaceAll('chat.e'.tr(), 'chat.a_1'.tr())
+        .replaceAll('chat.oh'.tr(), 'chat.a_1'.tr())
+        .replaceAll('chat.oh_1'.tr(), 'chat.e_1'.tr())
+        .replaceAll('chat.yes'.tr(), 'chat.y'.tr())
         .replaceAll(RegExp(r'[^\u0621-\u064A0-9a-zA-Z]'), '')
         .toLowerCase();
   }
 
   String _mapToAppCategory(String raw) {
-    const map = <String, String>{
-      'تبييض الأسنان': 'تنظيف وتبييض الأسنان',
-      'Teeth Whitening': 'تنظيف وتبييض الأسنان',
-      'زراعة الأسنان': 'زراعة الأسنان',
-      'Dental Implants': 'زراعة الأسنان',
-      'حشوات الأسنان': 'حشو تجميلي',
-      'Dental Fillings': 'حشو تجميلي',
-      'خلع الأسنان': 'الجراحة والخلع',
-      'Tooth Extraction': 'الجراحة والخلع',
-      'تيجان الأسنان / التركيبات': 'تيجان وجسور',
-      'Dental Crowns / Prosthodontics': 'تيجان وجسور',
-      'تقويم الأسنان': 'تقويم الأسنان',
-      'Braces': 'تقويم الأسنان',
-      'فحص شامل للأسنان': 'فحص شامل',
-      'Comprehensive Dental Examination': 'فحص شامل',
-      'تنظيف وتبييض': 'تنظيف وتبييض الأسنان',
-      'الاطفال': 'طب أسنان الأطفال',
-      'Pediatric': 'طب أسنان الأطفال',
-      'تيجان وجسور': 'تيجان وجسور',
-      'Crowns and Bridges': 'تيجان وجسور',
+    final map = <String, String>{
+      'chat.teeth_whitening'.tr(): 'chat.teeth_cleaning_and_whitening'.tr(),
+      'Teeth Whitening': 'chat.teeth_cleaning_and_whitening'.tr(),
+      'chat.dental_implants'.tr(): 'chat.dental_implants'.tr(),
+      'Dental Implants': 'chat.dental_implants'.tr(),
+      'chat.dental_fillings'.tr(): 'chat.cosmetic_filler'.tr(),
+      'Dental Fillings': 'chat.cosmetic_filler'.tr(),
+      'chat.tooth_extraction'.tr(): 'chat.surgery_and_extraction'.tr(),
+      'Tooth Extraction': 'chat.surgery_and_extraction'.tr(),
+      'chat.dental_crownsprostheses'.tr(): 'chat.crowns_and_bridges'.tr(),
+      'Dental Crowns / Prosthodontics': 'chat.crowns_and_bridges'.tr(),
+      'chat.orthodontics'.tr(): 'chat.orthodontics'.tr(),
+      'Braces': 'chat.orthodontics'.tr(),
+      'chat.a_comprehensive_dental_examination'.tr(): 'chat.comprehensive_examination'.tr(),
+      'Comprehensive Dental Examination': 'chat.comprehensive_examination'.tr(),
+      'chat.cleaning_and_whitening'.tr(): 'chat.teeth_cleaning_and_whitening'.tr(),
+      'chat.children'.tr(): 'chat.pediatric_dentistry'.tr(),
+      'Pediatric': 'chat.pediatric_dentistry'.tr(),
+      'chat.crowns_and_bridges'.tr(): 'chat.crowns_and_bridges'.tr(),
+      'Crowns and Bridges': 'chat.crowns_and_bridges'.tr(),
     };
     return map[raw] ?? map[raw.trim()] ?? raw;
   }
@@ -196,7 +197,7 @@ class ChatCubit extends Cubit<ChatState> {
 
     final chatHistory = List<ChatItem>.from(currentState.chatHistory);
     chatHistory.add(ChatItem(role: ChatRole.user, text: message));
-    chatHistory.add(const ChatItem(role: ChatRole.bot, text: 'يفكر.....'));
+    chatHistory.add(ChatItem(role: ChatRole.bot, text: 'chat.he_thinks'.tr()));
 
     emit(
         currentState.copyWith(chatHistory: chatHistory, isActionLoading: true));
@@ -207,11 +208,11 @@ class ChatCubit extends Cubit<ChatState> {
     );
 
     chatHistory
-        .removeWhere((m) => m.role == ChatRole.bot && m.text == 'يفكر.....');
+        .removeWhere((m) => m.role == ChatRole.bot && m.text == 'chat.he_thinks'.tr());
 
     if (result['success'] == true) {
       final response = ChatResponse.fromJson(result['data']);
-      final reply = response.reply ?? 'عذراً، لم أفهم ذلك.';
+      final reply = response.reply ?? 'chat.sorry_i_didnt_understand'.tr();
       chatHistory.add(ChatItem(role: ChatRole.bot, text: reply));
 
       emit(currentState.copyWith(
@@ -220,15 +221,15 @@ class ChatCubit extends Cubit<ChatState> {
         isActionLoading: false,
       ));
     } else {
-      chatHistory.add(const ChatItem(
-          role: ChatRole.bot, text: 'عذراً، حدث خطأ في الاتصال.'));
+      chatHistory.add(ChatItem(
+          role: ChatRole.bot, text: 'chat.sorry_a_connection_error'.tr()));
       emit(currentState.copyWith(
           chatHistory: chatHistory, isActionLoading: false));
     }
   }
 
   Future<void> restartSession() async {
-    emit(const ChatState.loading());
+    emit(ChatState.loading());
     startSession();
   }
 }

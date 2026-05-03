@@ -43,14 +43,14 @@ class AppointmentCardWidget extends StatelessWidget {
           color: theme.cardTheme.color ?? colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-              color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
+              color: isDark ? Colors.grey[700]! : Color(0xFFE5E7EB)),
           boxShadow: [
             BoxShadow(
               color: isDark
                   ? Colors.black.withAlpha((0.3 * 255).round())
                   : Colors.grey.withAlpha((0.08 * 255).round()),
               blurRadius: 10,
-              offset: const Offset(0, 2),
+              offset: Offset(0, 2),
             ),
           ],
         ),
@@ -73,7 +73,7 @@ class AppointmentCardWidget extends StatelessWidget {
                           fontSize: 16,
                           color: isDark ? Colors.white : Colors.black,
                         ) ??
-                        const TextStyle(
+                        TextStyle(
                           fontFamily: 'Cairo',
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
@@ -81,7 +81,7 @@ class AppointmentCardWidget extends StatelessWidget {
                   ),
                 ),
                 if (statusLabel != null && statusColor != null) ...[
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -91,7 +91,7 @@ class AppointmentCardWidget extends StatelessWidget {
                     ),
                     child: Text(
                       statusLabel!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.bold,
@@ -103,13 +103,13 @@ class AppointmentCardWidget extends StatelessWidget {
               ],
             ),
             if (showDetails) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               // Phone
               Row(
                 textDirection: TextDirection.rtl,
                 children: [
                   Icon(Icons.phone_outlined, size: 14, color: Colors.grey[600]),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       phone,
@@ -124,14 +124,14 @@ class AppointmentCardWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               // Date
               Row(
                 textDirection: TextDirection.rtl,
                 children: [
                   Icon(Icons.calendar_today_outlined,
                       size: 14, color: Colors.grey[600]),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       date,
@@ -144,14 +144,14 @@ class AppointmentCardWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               // Time
               Row(
                 textDirection: TextDirection.rtl,
                 children: [
                   Icon(Icons.access_time_outlined,
                       size: 14, color: Colors.grey[600]),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       time,
@@ -164,14 +164,14 @@ class AppointmentCardWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               // Service
               Row(
                 textDirection: TextDirection.rtl,
                 children: [
                   Icon(Icons.medical_services_outlined,
                       size: 14, color: Colors.grey[600]),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       service,
@@ -189,7 +189,7 @@ class AppointmentCardWidget extends StatelessWidget {
             ],
             // Action Buttons (Optional)
             if (actionButtons != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               actionButtons!,
             ],
           ],

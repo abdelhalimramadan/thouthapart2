@@ -1,9 +1,9 @@
 import 'package:thoutha_mobile_app/features/appointments/data/appointments_service.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 class AppointmentsScreen extends StatefulWidget {
-  const AppointmentsScreen({Key? key}) : super(key: key);
+  const AppointmentsScreen({super.key});
 
   @override
   State<AppointmentsScreen> createState() => _AppointmentsScreenState();
@@ -13,7 +13,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   List<Map<String, dynamic>> appointments = [];
   List<Map<String, dynamic>> _allAppointments = [];
   bool _isLoading = true;
-  String _selectedFilter = 'الكل';
+  String _selectedFilter = 'appointments.everyone'.tr();
   bool _hasCheckedArguments = false;
 
   @override
@@ -33,11 +33,11 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
     final processedAppointments = savedAppointments.map((appt) {
       Color statusColor = Colors.grey;
-      if (appt['status'] == 'مؤكد') {
+      if (appt['status'] == 'appointments.certain'.tr()) {
         statusColor = Colors.green;
-      } else if (appt['status'] == 'قيد الانتظار') {
+      } else if (appt['status'] == 'appointments.on_hold'.tr()) {
         statusColor = Colors.orange;
-      } else if (appt['status'] == 'تم الرفض' || appt['status'] == 'ملغى') {
+      } else if (appt['status'] == 'appointments.access_denied'.tr() || appt['status'] == 'appointments.canceled'.tr()) {
         statusColor = Colors.red;
       }
 
@@ -85,7 +85,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   }
 
   void _applyFilter() {
-    if (_selectedFilter == 'الكل') {
+    if (_selectedFilter == 'appointments.everyone'.tr()) {
       appointments = List.from(_allAppointments);
     } else {
       appointments = _allAppointments
@@ -100,20 +100,20 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'مواعيدي',
+        title: Text(
+          'appointments.my_appointments'.tr(),
           style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 18,
               fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFF0B8FAC),
+        backgroundColor: Color(0xFF0B8FAC),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -123,29 +123,29 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _filterChip('الكل'),
-                        const SizedBox(width: 8),
-                        _filterChip('مؤكد'),
-                        const SizedBox(width: 8),
-                        _filterChip('قيد الانتظار'),
+                        _filterChip('appointments.everyone'.tr()),
+                        SizedBox(width: 8),
+                        _filterChip('appointments.certain'.tr()),
+                        SizedBox(width: 8),
+                        _filterChip('appointments.on_hold'.tr()),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   if (appointments.isEmpty)
                     Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 50),
+                          SizedBox(height: 50),
                           Icon(
                             Icons.calendar_today_outlined,
                             size: 64,
                             color: Colors.grey[400],
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           Text(
-                            'لا توجد مواعيد حالية',
+                            'appointments.there_are_no_current'.tr(),
                             style: TextStyle(
                               fontSize: 18,
                               color: Colors.grey[600],
@@ -159,7 +159,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     ListView.builder(
                       itemCount: appointments.length,
                       shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
+                      physics: NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         final appointment = appointments[index];
                         String dateStr = '';
@@ -190,7 +190,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                     children: [
                                       Text(
                                         appointment['doctorName'] ?? '',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                           fontFamily: 'Cairo',
@@ -220,7 +220,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: 8),
                                   Text(
                                     appointment['specialty'] ?? '',
                                     style: TextStyle(
@@ -231,14 +231,14 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                       fontFamily: 'Cairo',
                                     ),
                                   ),
-                                  const SizedBox(height: 16),
+                                  SizedBox(height: 16),
                                   Row(
                                     children: [
                                       _buildInfoChip(
                                         icon: Icons.calendar_today,
                                         text: dateStr,
                                       ),
-                                      const SizedBox(width: 12),
+                                      SizedBox(width: 12),
                                       _buildInfoChip(
                                         icon: Icons.access_time,
                                         text: appointment['time'] ?? '',
@@ -272,12 +272,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: selected
-              ? const Color(0xFF0B8FAC).withOpacity(0.1)
+              ? Color(0xFF0B8FAC).withOpacity(0.1)
               : (isDark ? Colors.grey[800] : Colors.grey[100]),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: selected
-                ? const Color(0xFF0B8FAC)
+                ? Color(0xFF0B8FAC)
                 : (isDark ? Colors.grey[700]! : Colors.grey[300]!),
           ),
         ),
@@ -286,15 +286,15 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           children: [
             Icon(Icons.filter_alt_outlined,
                 size: 16,
-                color: selected ? const Color(0xFF0B8FAC) : Colors.grey[600]),
-            const SizedBox(width: 4),
+                color: selected ? Color(0xFF0B8FAC) : Colors.grey[600]),
+            SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 12,
                 color: selected
-                    ? const Color(0xFF0B8FAC)
+                    ? Color(0xFF0B8FAC)
                     : (isDark ? Colors.grey[300] : Colors.grey[800]),
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
               ),
@@ -316,8 +316,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: const Color(0xFF0B8FAC)),
-          const SizedBox(width: 4),
+          Icon(icon, size: 16, color: Color(0xFF0B8FAC)),
+          SizedBox(width: 4),
           Text(
             text,
             style: TextStyle(
@@ -343,7 +343,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(17),
           topRight: Radius.circular(17),
@@ -354,7 +354,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         return SingleChildScrollView(
           child: Container(
             padding: const EdgeInsets.all(24),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(17),
                 topRight: Radius.circular(17),
@@ -374,9 +374,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 Text(
-                  'تفاصيل الموعد',
+                  'appointments.appointment_details'.tr(),
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 20,
@@ -384,35 +384,35 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 _buildDetailRow(
-                    Icons.person, 'الطبيب', appointment['doctorName'] ?? ''),
-                const SizedBox(height: 16),
-                _buildDetailRow(Icons.medical_services, 'التخصص',
+                    Icons.person, 'appointments.the_doctor'.tr(), appointment['doctorName'] ?? ''),
+                SizedBox(height: 16),
+                _buildDetailRow(Icons.medical_services, 'appointments.specialization'.tr(),
                     appointment['specialty'] ?? ''),
-                const SizedBox(height: 16),
-                _buildDetailRow(Icons.calendar_today, 'التاريخ', dateStr),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
+                _buildDetailRow(Icons.calendar_today, 'appointments.the_date'.tr(), dateStr),
+                SizedBox(height: 16),
                 _buildDetailRow(
-                    Icons.access_time, 'الوقت', appointment['time'] ?? ''),
-                const SizedBox(height: 16),
+                    Icons.access_time, 'appointments.the_time'.tr(), appointment['time'] ?? ''),
+                SizedBox(height: 16),
                 _buildDetailRow(
-                    Icons.info_outline, 'الحالة', appointment['status'] ?? '',
+                    Icons.info_outline, 'appointments.the_condition'.tr(), appointment['status'] ?? '',
                     color: appointment['statusColor']),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0B8FAC),
+                      backgroundColor: Color(0xFF0B8FAC),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                     ),
-                    child: const Text(
-                      'إغلاق',
+                    child: Text(
+                      'appointments.closing'.tr(),
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 16,
@@ -421,7 +421,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 25),
+                SizedBox(height: 25),
               ],
             ),
           ),
@@ -438,12 +438,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: (color ?? const Color(0xFF0B8FAC)).withOpacity(0.1),
+            color: (color ?? Color(0xFF0B8FAC)).withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: color ?? const Color(0xFF0B8FAC), size: 20),
+          child: Icon(icon, color: color ?? Color(0xFF0B8FAC), size: 20),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: 16),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

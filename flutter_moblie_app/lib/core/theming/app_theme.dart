@@ -19,9 +19,7 @@ class AppTheme {
         primary: primaryColor,
         secondary: primaryColor,
         surface: Colors.white,
-        background: Colors.white,
-        onSurface: const Color(0xFF0A0A0A),
-        onBackground: const Color(0xFF0A0A0A),
+        onSurface: Color(0xFF0A0A0A),
         onPrimary: Colors.white,
         error: Colors.red[700]!,
         onError: Colors.white,
@@ -30,7 +28,7 @@ class AppTheme {
       scaffoldBackgroundColor: Colors.white,
 
       // AppBar Theme
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -51,7 +49,7 @@ class AppTheme {
       ),
 
       // Text Theme
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         displayLarge: TextStyle(color: Color(0xFF0A0A0A), fontFamily: 'Cairo'),
         displayMedium: TextStyle(color: Color(0xFF0A0A0A), fontFamily: 'Cairo'),
         displaySmall: TextStyle(color: Color(0xFF0A0A0A), fontFamily: 'Cairo'),
@@ -96,7 +94,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: primaryColor, width: 2),
+          borderSide: BorderSide(color: primaryColor, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -106,7 +104,7 @@ class AppTheme {
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         hintStyle: TextStyle(color: Colors.grey[600], fontFamily: 'Cairo'),
         labelStyle:
-            const TextStyle(color: Color(0xFF0A0A0A), fontFamily: 'Cairo'),
+            TextStyle(color: Color(0xFF0A0A0A), fontFamily: 'Cairo'),
       ),
 
       // Elevated Button Theme
@@ -119,7 +117,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             fontFamily: 'Cairo',
@@ -131,7 +129,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primaryColor,
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             fontFamily: 'Cairo',
@@ -143,12 +141,12 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: primaryColor,
-          side: const BorderSide(color: primaryColor, width: 2),
+          side: BorderSide(color: primaryColor, width: 2),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             fontFamily: 'Cairo',
@@ -157,7 +155,7 @@ class AppTheme {
       ),
 
       // Icon Theme
-      iconTheme: const IconThemeData(
+      iconTheme: IconThemeData(
         color: Color(0xFF0A0A0A),
         size: 24,
       ),
@@ -170,7 +168,7 @@ class AppTheme {
       ),
 
       // Bottom Navigation Bar Theme
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
         selectedItemColor: primaryColor,
         unselectedItemColor: Colors.grey,
@@ -188,13 +186,13 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           color: Color(0xFF0A0A0A),
           fontSize: 20,
           fontWeight: FontWeight.bold,
           fontFamily: 'Cairo',
         ),
-        contentTextStyle: const TextStyle(
+        contentTextStyle: TextStyle(
           color: Color(0xFF0A0A0A),
           fontSize: 16,
           fontFamily: 'Cairo',
@@ -207,9 +205,9 @@ class AppTheme {
         selectedColor: primaryColor,
         disabledColor: Colors.grey[300]!,
         labelStyle:
-            const TextStyle(color: Color(0xFF0A0A0A), fontFamily: 'Cairo'),
+            TextStyle(color: Color(0xFF0A0A0A), fontFamily: 'Cairo'),
         secondaryLabelStyle:
-            const TextStyle(color: Colors.white, fontFamily: 'Cairo'),
+            TextStyle(color: Colors.white, fontFamily: 'Cairo'),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -217,7 +215,7 @@ class AppTheme {
       ),
 
       // List Tile Theme
-      listTileTheme: const ListTileThemeData(
+      listTileTheme: ListTileThemeData(
         textColor: Color(0xFF0A0A0A),
         iconColor: Color(0xFF0A0A0A),
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -225,14 +223,14 @@ class AppTheme {
 
       // Switch Theme
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return Colors.white;
           }
           return Colors.grey[400];
         }),
-        trackColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return primaryColor;
           }
           return Colors.grey[300];
@@ -240,14 +238,14 @@ class AppTheme {
       ),
 
       // Progress Indicator Theme
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
+      progressIndicatorTheme: ProgressIndicatorThemeData(
         color: primaryColor,
       ),
 
       // SnackBar Theme
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: const Color(0xFF323232),
-        contentTextStyle: const TextStyle(
+        backgroundColor: Color(0xFF323232),
+        contentTextStyle: TextStyle(
           fontFamily: 'Cairo',
           color: Colors.white,
           fontSize: 14,
@@ -271,9 +269,7 @@ class AppTheme {
         primary: primaryColor,
         secondary: primaryColor,
         surface: darkSurface,
-        background: darkBackground,
         onSurface: Colors.white,
-        onBackground: Colors.white,
         onPrimary: Color(0xFF0A0A0A),
         error: Color(0xFFCF6679),
         onError: Colors.black,
@@ -282,7 +278,7 @@ class AppTheme {
       scaffoldBackgroundColor: darkBackground,
 
       // AppBar Theme
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: darkSurface,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -303,7 +299,7 @@ class AppTheme {
       ),
 
       // Text Theme
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         displayLarge: TextStyle(color: Colors.white, fontFamily: 'Cairo'),
         displayMedium: TextStyle(color: Colors.white, fontFamily: 'Cairo'),
         displaySmall: TextStyle(color: Colors.white, fontFamily: 'Cairo'),
@@ -348,29 +344,29 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: primaryColor, width: 2),
+          borderSide: BorderSide(color: primaryColor, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFCF6679), width: 1),
+          borderSide: BorderSide(color: Color(0xFFCF6679), width: 1),
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         hintStyle: TextStyle(color: Colors.grey[400], fontFamily: 'Cairo'),
-        labelStyle: const TextStyle(color: Colors.white, fontFamily: 'Cairo'),
+        labelStyle: TextStyle(color: Colors.white, fontFamily: 'Cairo'),
       ),
 
       // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
-          foregroundColor: const Color(0xFF0A0A0A),
+          foregroundColor: Color(0xFF0A0A0A),
           elevation: 4,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             fontFamily: 'Cairo',
@@ -382,7 +378,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primaryColor,
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             fontFamily: 'Cairo',
@@ -394,12 +390,12 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: primaryColor,
-          side: const BorderSide(color: primaryColor, width: 2),
+          side: BorderSide(color: primaryColor, width: 2),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             fontFamily: 'Cairo',
@@ -408,7 +404,7 @@ class AppTheme {
       ),
 
       // Icon Theme
-      iconTheme: const IconThemeData(
+      iconTheme: IconThemeData(
         color: Colors.white,
         size: 24,
       ),
@@ -421,7 +417,7 @@ class AppTheme {
       ),
 
       // Bottom Navigation Bar Theme
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: darkSurface,
         selectedItemColor: primaryColor,
         unselectedItemColor: Colors.grey,
@@ -439,13 +435,13 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 20,
           fontWeight: FontWeight.bold,
           fontFamily: 'Cairo',
         ),
-        contentTextStyle: const TextStyle(
+        contentTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 16,
           fontFamily: 'Cairo',
@@ -457,9 +453,9 @@ class AppTheme {
         backgroundColor: darkCard,
         selectedColor: primaryColor,
         disabledColor: Colors.grey[800]!,
-        labelStyle: const TextStyle(color: Colors.white, fontFamily: 'Cairo'),
+        labelStyle: TextStyle(color: Colors.white, fontFamily: 'Cairo'),
         secondaryLabelStyle:
-            const TextStyle(color: Color(0xFF0A0A0A), fontFamily: 'Cairo'),
+            TextStyle(color: Color(0xFF0A0A0A), fontFamily: 'Cairo'),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -468,7 +464,7 @@ class AppTheme {
       ),
 
       // List Tile Theme
-      listTileTheme: const ListTileThemeData(
+      listTileTheme: ListTileThemeData(
         textColor: Colors.white,
         iconColor: Colors.white,
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -476,14 +472,14 @@ class AppTheme {
 
       // Switch Theme
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
-            return const Color(0xFF0A0A0A);
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Color(0xFF0A0A0A);
           }
           return Colors.grey[400];
         }),
-        trackColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return primaryColor;
           }
           return Colors.grey[700];
@@ -491,14 +487,14 @@ class AppTheme {
       ),
 
       // Progress Indicator Theme
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
+      progressIndicatorTheme: ProgressIndicatorThemeData(
         color: primaryColor,
       ),
 
       // SnackBar Theme
       snackBarTheme: SnackBarThemeData(
         backgroundColor: Colors.white,
-        contentTextStyle: const TextStyle(
+        contentTextStyle: TextStyle(
           fontFamily: 'Cairo',
           color: Color(0xFF0A0A0A),
           fontSize: 14,
