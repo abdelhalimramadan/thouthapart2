@@ -705,71 +705,100 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _footer(ThemeData theme) {
     final hasText = _inputController.text.trim().isNotEmpty;
     final isFocused = _inputFocusNode.hasFocus;
+    final borderRadius = BorderRadius.circular(30);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(22, 15, 22, 20),
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
-        border: theme.brightness == Brightness.dark
-            ? Border(top: BorderSide(color: theme.dividerColor))
-            : null,
-      ),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+      color: theme.scaffoldBackgroundColor,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
         decoration: BoxDecoration(
           color: theme.brightness == Brightness.dark
               ? theme.cardColor
               : Colors.white,
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: borderRadius,
           border: Border.all(
-              color: isFocused
-                  ? _color2
-                  : (theme.brightness == Brightness.dark
-                      ? Colors.grey[700]!
-                      : _outline),
-              width: isFocused ? 2 : 1),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _inputController,
-                focusNode: _inputFocusNode,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => _sendChatMessage(),
-                style: TextStyle(
-                    fontFamily: 'Cairo',
-                    color: theme.colorScheme.onSurface,
-                    fontSize: 16),
-                decoration: InputDecoration(
-                  hintText: _isEnglish ? 'Type your message...' : 'اكتب رسالتك..............................',
-                  hintStyle: const TextStyle(
-                      fontFamily: 'Cairo',
-                      color: Color(0xFF6B8090),
-                      fontSize: 14),
-                  border: InputBorder.none,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
-                ),
-              ),
+            color: isFocused
+                ? _color2
+                : (theme.brightness == Brightness.dark
+                    ? Colors.grey[700]!
+                    : _outline.withOpacity(0.3)),
+            width: isFocused ? 1.5 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-            if (hasText)
-              Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: InkWell(
-                  onTap: _isLoading ? null : _sendChatMessage,
-                  borderRadius: BorderRadius.circular(999),
-                  child: Container(
-                    height: 35,
-                    width: 35,
-                    decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: _color2),
-                    child: const Icon(Icons.arrow_upward,
-                        color: Colors.white, size: 18),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: borderRadius,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _inputController,
+                    focusNode: _inputFocusNode,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => _sendChatMessage(),
+                    textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                        fontFamily: 'Cairo',
+                        color: theme.colorScheme.onSurface,
+                        fontSize: 15),
+                    decoration: InputDecoration(
+                      hintText: _isEnglish ? 'Type your message...' : 'اكتب رسالتك...',
+                      hintTextDirection: TextDirection.rtl,
+                      hintStyle: TextStyle(
+                          fontFamily: 'Cairo',
+                          color: theme.brightness == Brightness.dark
+                              ? Colors.grey[500]
+                              : const Color(0xFF9E9E9E),
+                          fontSize: 14),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      filled: false,
+                      fillColor: Colors.transparent,
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
                   ),
                 ),
-              ),
-          ],
+                AnimatedScale(
+                  scale: hasText ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOutBack,
+                  child: AnimatedOpacity(
+                    opacity: hasText ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: InkWell(
+                        onTap: _isLoading ? null : _sendChatMessage,
+                        borderRadius: BorderRadius.circular(999),
+                        child: Container(
+                          height: 40,
+                          width: 40,
+                          decoration: const BoxDecoration(
+                              shape: BoxShape.circle, color: _color2),
+                          child: const Icon(Icons.arrow_upward,
+                              color: Colors.white, size: 20),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                if (!hasText) const SizedBox(width: 4),
+              ],
+            ),
+          ),
         ),
       ),
     );
