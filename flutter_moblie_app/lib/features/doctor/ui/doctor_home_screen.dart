@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../notifications/logic/notifications_cubit.dart';
 import '../../../../core/helpers/constants.dart';
 import '../../../../core/helpers/shared_pref_helper.dart';
 import '../../../../core/utils/notification_helper.dart';
@@ -35,13 +37,19 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   List<Map<String, dynamic>> _approvedAppointments = [];
   bool _isLoadingAppointments = true;
   String? _appointmentsError;
+  late NotificationsCubit _notificationsCubit;
 
   // ── Lifecycle ──────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
-    // Run both fetches in parallel — faster startup
-    Future.wait([_fetchDoctorName(), _fetchAllAppointments()]);
+    _notificationsCubit = getIt<NotificationsCubit>();
+    // Run all fetches in parallel — faster startup
+    Future.wait([
+      _fetchDoctorName(),
+      _fetchAllAppointments(),
+      _notificationsCubit.fetchNotifications(showLoading: false),
+    ]);
   }
 
   // ── Data Fetching ──────────────────────────────────────────────
@@ -592,14 +600,38 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         ],
       ),
       actions: [
-        IconButton(
-          icon: Icon(Icons.notifications_none, size: 24),
-          onPressed: () {
-            NotificationHelper.hasUnreadNotifications = false;
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => NotificationsScreen()),
+        BlocBuilder<NotificationsCubit, NotificationsState>(
+          bloc: _notificationsCubit,
+          builder: (context, state) {
+            int unreadCount = 0;
+            if (state is SuccessState) {
+              unreadCount = state.notifications
+                  .where((n) => n.readStatus == false)
+                  .length;
+            }
+
+            return Badge(
+              label: Text(
+                unreadCount > 9 ? '9+' : unreadCount.toString(),
+                style: const TextStyle(fontSize: 10, color: Colors.white),
+              ),
+              isLabelVisible: unreadCount > 0,
+              backgroundColor: Colors.red,
+              largeSize: 18,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              offset: const Offset(-2, 2),
+              child: IconButton(
+                icon: Icon(Icons.notifications_none, size: 24),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => NotificationsScreen()),
+                  ).then((_) {
+                    // Re-fetch when coming back to update the count
+                    _notificationsCubit.fetchNotifications(showLoading: false);
+                  });
+                },
+              ),
             );
           },
         ),
