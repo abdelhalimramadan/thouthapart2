@@ -694,7 +694,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Transform.translate(
-                offset: const Offset(0, -30),
+                offset: const Offset(0, -45),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
