@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thoutha_mobile_app/core/networking/api_constants.dart';
 import 'package:thoutha_mobile_app/features/home_screen/ui/category_doctors_screen.dart';
+import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -49,7 +50,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<_FlowItem> _flowItems = <_FlowItem>[];
   final List<_ChatItem> _chatHistory = <_ChatItem>[];
 
-  static const String _chatStorageKey = 'chat_screen_state';
+  static const String _chatStorageKey = SharedPrefKeys.chatHistory;
 
   @override
   void initState() {
@@ -326,10 +327,45 @@ class _ChatScreenState extends State<ChatScreen> {
       final reply = (data is Map && data['reply'] != null)
           ? data['reply'].toString()
           : errorMsg;
+
+      // Detect category from structured response OR by searching for known category names in text
+      String? detectedCategory;
+      if (data is Map) {
+        final result = data['result'];
+        if (result is Map) {
+          detectedCategory = (_isEnglish
+              ? (result['category_en'] ?? result['category'])
+              : (result['category'] ?? result['category_en']))?.toString();
+        }
+        detectedCategory ??= data['category']?.toString();
+      }
+
+      // If not found in structured data, search in the text for any known category names
+      if (detectedCategory == null || detectedCategory.trim().isEmpty) {
+        for (final cat in _categories) {
+          final nameAr = cat['name_ar']?.toString() ?? '';
+          final nameEn = cat['name']?.toString() ?? '';
+          
+          if (nameAr.isNotEmpty && reply.contains(nameAr)) {
+            detectedCategory = nameAr;
+            break;
+          }
+          if (nameEn.isNotEmpty && reply.toLowerCase().contains(nameEn.toLowerCase())) {
+            detectedCategory = nameEn;
+            break;
+          }
+        }
+      }
+
+      // Convert to Arabic canonical for consistency
+      if (detectedCategory != null && detectedCategory.trim().isNotEmpty) {
+        detectedCategory = _getArabicCanonical(detectedCategory);
+      }
+
       setState(() {
         _chatHistory.removeWhere(
             (m) => m.role == _ChatRole.bot && m.text == _thinkingText);
-        _chatHistory.add(_ChatItem.bot(reply));
+        _chatHistory.add(_ChatItem.bot(reply, category: detectedCategory));
       });
     } catch (_) {
       setState(() {
@@ -696,6 +732,12 @@ class _ChatScreenState extends State<ChatScreen> {
               _userMessage(m.text)
             else
               _botMessage(m.text),
+            if (m.role == _ChatRole.bot &&
+                m.category != null &&
+                m.category!.trim().isNotEmpty) ...[
+              const SizedBox(height: 14),
+              _resultButton(m.category!),
+            ],
           ],
         ],
       ),
@@ -931,19 +973,34 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _restartSession() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      
+      // Move current chat history into flow items to preserve chronological order
+      for (final item in _chatHistory) {
+        if (item.role == _ChatRole.user) {
+          _flowItems.add(_FlowItem.answer(text: item.text));
+        } else {
+          _flowItems.add(_FlowItem.result(text: item.text, category: item.category));
+        }
+      }
+      _chatHistory.clear();
+
+      _sessionId = null;
+      _activeQuestionId = null;
+      _chatMode = false;
+      
+      // Add a separator instead of clearing
+      _flowItems.add(_FlowItem.result(
+          text: _isEnglish ? '— New Conversation —' : '— محادثة جديدة —'));
+    });
+
     try {
       final res = await _dio.post('/session/start', data: {'language': 'ar'});
       final data = res.data;
       if (data is Map && data['session_id'] != null) {
         _sessionId = data['session_id'].toString();
       }
-      setState(() {
-        _chatMode = false;
-        _activeQuestionId = null;
-        _flowItems.add(_FlowItem.result(
-            text: _isEnglish ? '— Starting new conversation —' : '— بدء محادثة جديدة —'));
-      });
       _processResponse(data);
     } catch (_) {
       setState(() => _chatMode = true);
@@ -1117,18 +1174,26 @@ enum _ChatRole { user, bot }
 class _ChatItem {
   final _ChatRole role;
   final String text;
-  _ChatItem._(this.role, this.text);
+  final String? category;
+  _ChatItem._(this.role, this.text, {this.category});
 
   factory _ChatItem.user(String text) => _ChatItem._(_ChatRole.user, text);
-  factory _ChatItem.bot(String text) => _ChatItem._(_ChatRole.bot, text);
+  factory _ChatItem.bot(String text, {String? category}) =>
+      _ChatItem._(_ChatRole.bot, text, category: category);
 
   Map<String, dynamic> toJson() => {
         'role': role.name,
         'text': text,
+        if (category != null) 'category': category,
       };
 
   factory _ChatItem.fromJson(Map<String, dynamic> json) {
-    final role = (json['role'] as String?) == 'user' ? _ChatRole.user : _ChatRole.bot;
-    return _ChatItem._(role, json['text'] as String? ?? '');
+    final role =
+        (json['role'] as String?) == 'user' ? _ChatRole.user : _ChatRole.bot;
+    return _ChatItem._(
+      role,
+      json['text'] as String? ?? '',
+      category: json['category'] as String?,
+    );
   }
 }

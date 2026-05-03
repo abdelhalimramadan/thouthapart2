@@ -9,6 +9,8 @@ import 'core/services/firebase_background_handler.dart';
 import 'core/routing/app_router.dart';
 import 'core/services/firebase_messaging_service.dart';
 import 'features/notifications/data/repos/notification_repo.dart';
+import 'core/helpers/shared_pref_helper.dart';
+import 'core/helpers/constants.dart';
 import 'doc_app.dart';
 import 'firebase_options.dart';
 
@@ -34,6 +36,9 @@ void main() async {
   // Allow all orientations so layouts can adapt on tablets and landscape.
   await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
 
+  // Clear chat history at app startup (so it only persists during the current session)
+  await SharedPrefHelper.removeData(SharedPrefKeys.chatHistory);
+  
   runApp(DocApp(
     appRouter: AppRouter(),
   ));
