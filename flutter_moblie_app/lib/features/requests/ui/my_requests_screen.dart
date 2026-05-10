@@ -192,7 +192,7 @@ class _MyRequestsViewState extends State<MyRequestsView> {
               padding: EdgeInsets.zero,
               itemCount: requests.length,
               itemBuilder: (context, index) {
-                final card = _RequestCard(request: requests![index]);
+                final card = _RequestCard(request: requests![index], isFirst: index == 0);
                 if (index == 0) {
                   return Showcase(
                     key: TourConfig.myRequestsCardKey,
@@ -395,7 +395,8 @@ class _MyRequestsViewState extends State<MyRequestsView> {
 
 class _RequestCard extends StatelessWidget {
   final CaseRequestModel request;
-  const _RequestCard({required this.request});
+  final bool isFirst;
+  const _RequestCard({required this.request, this.isFirst = false});
 
   @override
   Widget build(BuildContext context) {
@@ -604,7 +605,7 @@ class _RequestCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Showcase(
+                      child: isFirst ? Showcase(
                         key: TourConfig.myRequestsEditKey,
                         title: 'تعديل الطلب',
                         description: 'يمكنك تعديل تفاصيل الحالة أو الموعد في أي وقت',
@@ -623,11 +624,25 @@ class _RequestCard extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                         ),
+                      ) : OutlinedButton.icon(
+                        onPressed: () => _navigateToEdit(context, request),
+                        icon: Icon(Icons.edit_note_rounded, size: 20),
+                        label: Text('requests.modify_the_request'.tr(),
+                            style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.bold)),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.blue.shade700,
+                          side: BorderSide(color: Colors.blue.shade200),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
                       ),
                     ),
                     SizedBox(width: 12),
                     Expanded(
-                      child: Showcase(
+                      child: isFirst ? Showcase(
                         key: TourConfig.myRequestsDeleteKey,
                         title: 'حذف الطلب',
                         description: 'إذا لم تعد الحالة متاحة، يمكنك حذفها من هنا',
@@ -647,6 +662,22 @@ class _RequestCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(10)),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
+                        ),
+                      ) : ElevatedButton.icon(
+                        onPressed: () => _showDeleteDialog(context, request),
+                        icon: Icon(Icons.delete_sweep_rounded,
+                            size: 20, color: Colors.white),
+                        label: Text('home_screen.delete_the_request'.tr(),
+                            style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red.shade400,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                       ),
                     ),

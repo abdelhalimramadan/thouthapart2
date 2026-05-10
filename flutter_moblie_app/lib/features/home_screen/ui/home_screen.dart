@@ -45,6 +45,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   List<CityModel> _loadedCities = [];
   bool _isTourStarted = false;
 
+  late final DoctorCubit _doctorCubit;
+
   // Asset mapping for categories (keys are Arabic names from server)
   final Map<String, String> _categoryAssets = {
     'املغم': 'assets/svg/املغم.svg',
@@ -297,6 +299,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    _doctorCubit = getIt<DoctorCubit>()..loadInitialData();
     WidgetsBinding.instance.addObserver(this);
     _checkLoginStatus();
   }
@@ -385,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _gpsFailureMessage = null;
       });
       // Optionally trigger search automatically
-      context.read<DoctorCubit>().filterByCity(match.id);
+      _doctorCubit.filterByCity(match.id);
     } else {
       setState(() {
         _gpsFailureMessage =
@@ -497,8 +500,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return BlocProvider(
-      create: (context) => getIt<DoctorCubit>()..loadInitialData(),
+    return BlocProvider.value(
+      value: _doctorCubit,
       child: ShowCaseWidget(
         onComplete: (index, key) {
           TourService.onDismiss(key)();
@@ -759,7 +762,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   _gpsFailureMessage = null;
                                 });
                                 if (val != null) {
-                                  context.read<DoctorCubit>().filterByCity(val);
+                                  _doctorCubit.filterByCity(val);
                                 }
                               },
                             ),

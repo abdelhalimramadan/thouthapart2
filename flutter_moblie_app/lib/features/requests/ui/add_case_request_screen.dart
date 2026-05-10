@@ -97,7 +97,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
   // ── Helpers ──────────────────────────────────────────────────────────────
 
   String get _formattedDate => _selectedDate != null
-      ? DateFormat('yyyy-MM-dd').format(_selectedDate!)
+      ? DateFormat('yyyy-MM-dd', 'en').format(_selectedDate!)
       : '';
 
   String get _formattedTime {
@@ -113,10 +113,12 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
       ? '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}'
       : '';
 
-  /// Builds "2026-03-10T15:30:00" format
+  /// Builds "2026-03-10T15:30:00" format correctly regardless of Locale
   String get _dateTimeIso {
     if (_selectedDate == null || _selectedTime == null) return '';
-    return '${_formattedDate}T$_formattedTime24:00';
+    final d = _selectedDate!;
+    final isoDate = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    return '${isoDate}T$_formattedTime24:00';
   }
 
   Future<void> _pickDate() async {

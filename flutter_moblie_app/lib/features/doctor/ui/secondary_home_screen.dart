@@ -44,9 +44,12 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
   String? _gpsFailureMessage; // non-null → show failure banner
   List<CityModel> _loadedCities = [];
 
+  late final DoctorCubit _doctorCubit;
+
   @override
   void initState() {
     super.initState();
+    _doctorCubit = getIt<DoctorCubit>()..loadInitialData();
     _checkLoginStatus();
   }
 
@@ -514,8 +517,8 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
     final baseFontSize = width * 0.04;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return BlocProvider(
-      create: (context) => getIt<DoctorCubit>()..loadInitialData(),
+    return BlocProvider.value(
+      value: _doctorCubit,
       child: PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, result) async {
@@ -720,9 +723,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
                                           _gpsFailureMessage = null;
                                         });
                                         if (val != null) {
-                                          context
-                                              .read<DoctorCubit>()
-                                              .filterByCity(val);
+                                          _doctorCubit.filterByCity(val);
                                         }
                                       },
                                     ),
