@@ -8,6 +8,9 @@ import 'package:thoutha_mobile_app/features/notifications/logic/notifications_cu
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:showcaseview/showcaseview.dart';
+import 'package:thoutha_mobile_app/tour/tour_config.dart';
+import 'package:thoutha_mobile_app/tour/tour_service.dart';
 
 /// Notifications Screen - Displays push notifications
 class NotificationsScreen extends StatefulWidget {
@@ -20,13 +23,14 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   late NotificationsCubit _cubit;
   bool _showUnreadOnly = false;
+  bool _isTourStarted = false;
 
   @override
   void initState() {
     super.initState();
     _cubit = getIt<NotificationsCubit>();
     _cubit.fetchNotifications();
-    log('📱 NotificationsScreen displayed');
+    log('NotificationsScreen displayed');
   }
 
   @override
@@ -53,7 +57,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           }
         }
       },
-      child: Scaffold(
+      child: ShowCaseWidget(
+        onComplete: (index, key) {
+          TourService.onDismiss(key)();
+        },
+        builder: (context) {
+          if (!_isTourStarted) {
+            _isTourStarted = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) TourService.startTourForScreen(context, 'notifications');
+            });
+          }
+          return Scaffold(
         backgroundColor: isDark ? Color(0xFF1F1F1F) : Color(0xFFF1F1F1),
         appBar: AppBar(
           title: Text(
@@ -95,7 +110,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   final unreadCount =
                       state.notifications.where((n) => n.readStatus == false).length;
   
-                  return IconButton(
+                  return Showcase(
+                    key: TourConfig.notifFilterKey,
+                    title: 'تصفية الإشعارات',
+                    description: 'فلتر لعرض الإشعارات غير المقروءة فقط',
+                    child: IconButton(
                     tooltip: _showUnreadOnly
                         ? 'notifications.view_all_notifications'.tr()
                         : 'notifications.show_unread_only'.tr(),
@@ -151,6 +170,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                            ),
                       ],
                     ),
+                  ),
                   );
                 }
                 return const SizedBox.shrink();
@@ -253,10 +273,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             },
           ),
         ),
-      ),
-    );
-
-  }
+      );
+    },
+   ),
+  );
+ }
 
 
   Widget _buildEmptyState() {

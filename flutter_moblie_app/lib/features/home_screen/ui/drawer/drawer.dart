@@ -8,9 +8,24 @@ import 'package:thoutha_mobile_app/features/privacy_policy/ui/privacy_policy_scr
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thoutha_mobile_app/features/chat/ui/chat_screen.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:showcaseview/showcaseview.dart';
+import 'package:thoutha_mobile_app/tour/tour_config.dart';
+import 'package:thoutha_mobile_app/tour/tour_service.dart';
 
-class HomeDrawer extends StatelessWidget {
+class HomeDrawer extends StatefulWidget {
   const HomeDrawer({super.key});
+
+  @override
+  State<HomeDrawer> createState() => _HomeDrawerState();
+}
+
+class _HomeDrawerState extends State<HomeDrawer> {
+  bool _isTourStarted = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   Widget _menuItem(
     BuildContext context, {
@@ -98,7 +113,18 @@ class HomeDrawer extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Drawer(
+    return ShowCaseWidget(
+      onComplete: (index, key) {
+        TourService.onDismiss(key)();
+      },
+      builder: (context) {
+        if (!_isTourStarted) {
+          _isTourStarted = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) TourService.startTourForScreen(context, 'home_drawer');
+          });
+        }
+        return Drawer(
       child: Container(
         color: theme.scaffoldBackgroundColor,
         child: SafeArea(
@@ -155,7 +181,11 @@ class HomeDrawer extends StatelessWidget {
                     ),
 
                     // Menu Items
-                    _menuItem(
+                    Showcase(
+                      key: TourConfig.drawerHomeKey,
+                      title: 'الرئيسية',
+                      description: 'ارجع لصفحة التصفح الرئيسية',
+                      child: _menuItem(
                       context,
                       title: 'doctor.home'.tr(),
                       icon: Icons.home_outlined,
@@ -169,7 +199,12 @@ class HomeDrawer extends StatelessWidget {
                         );
                       },
                     ),
-                    _menuItem(
+                    ),
+                    Showcase(
+                      key: TourConfig.drawerChatKey,
+                      title: 'مساعد ثوثة',
+                      description: 'تحدث مع المساعد الذكي للحصول على توصيات',
+                      child: _menuItem(
                       context,
                       title: 'home_screen.thutha_assistant'.tr(),
                       customIcon: SvgPicture.asset(
@@ -188,6 +223,7 @@ class HomeDrawer extends StatelessWidget {
                         );
                       },
                     ),
+                    ),
                     Consumer<ThemeProvider>(
                       builder: (context, themeProvider, _) {
                         return _toggleMenuItem(
@@ -200,7 +236,11 @@ class HomeDrawer extends StatelessWidget {
                         );
                       },
                     ),
-                    _toggleMenuItem(
+                    Showcase(
+                      key: TourConfig.drawerLanguageKey,
+                      title: 'تغيير اللغة',
+                      description: 'بدّل بين العربية والإنجليزية',
+                      child: _toggleMenuItem(
                       context,
                       title: 'doctor.change_language'.tr(),
                       value: context.locale.languageCode == 'en',
@@ -213,6 +253,7 @@ class HomeDrawer extends StatelessWidget {
                       },
                       icon: Icons.language,
                       fontSize: 16,
+                    ),
                     ),
                     _menuItem(
                       context,
@@ -260,7 +301,11 @@ class HomeDrawer extends StatelessWidget {
                         );
                       },
                     ),
-                    _menuItem(
+                    Showcase(
+                      key: TourConfig.drawerLoginKey,
+                      title: 'تسجيل الدخول',
+                      description: 'سجّل دخولك كطبيب لإدارة حجوزاتك',
+                      child: _menuItem(
                       context,
                       title: 'home_screen.login'.tr(),
                       icon: Icons.login_outlined,
@@ -273,6 +318,7 @@ class HomeDrawer extends StatelessWidget {
                           (route) => false,
                         );
                       },
+                    ),
                     ),
                   ],
                 ),
@@ -300,7 +346,9 @@ class HomeDrawer extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+        ),
+      );
+    },
+   );
   }
 }

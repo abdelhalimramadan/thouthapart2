@@ -11,6 +11,9 @@ import 'package:thoutha_mobile_app/features/requests/data/models/case_request_bo
 import 'package:thoutha_mobile_app/features/requests/data/models/case_request_model.dart';
 import 'package:thoutha_mobile_app/features/requests/data/repos/case_request_repo.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:showcaseview/showcaseview.dart';
+import 'package:thoutha_mobile_app/tour/tour_config.dart';
+import 'package:thoutha_mobile_app/tour/tour_service.dart';
 
 class AddCaseRequestScreen extends StatefulWidget {
   final String? initialSpecialization;
@@ -34,6 +37,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
   String _lastName = '';
   String _category = '';
   bool _isLoadingInfo = true;
+  bool _isTourStarted = false;
 
   // Selected date & time
   DateTime? _selectedDate;
@@ -368,8 +372,19 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
+    return ShowCaseWidget(
+      onComplete: (index, key) {
+        TourService.onDismiss(key)();
+      },
+      builder: (context) {
+        if (!_isTourStarted) {
+          _isTourStarted = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) TourService.startTourForScreen(context, 'add_case');
+          });
+        }
+        return Scaffold(
+          appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -438,45 +453,65 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                       SizedBox(height: 24),
 
                       // ── Doctor Info Card (auto-filled) ────────────────
-                      _buildInfoCard(isDark),
+                      Showcase(
+                        key: TourConfig.addCaseInfoKey,
+                        title: 'بياناتك الشخصية',
+                        description: 'يتم ملء اسمك وتخصصك تلقائياً من ملفك الشخصي',
+                        child: _buildInfoCard(isDark),
+                      ),
                       SizedBox(height: 24),
 
                       // ── DateTime picker ───────────────────────────────
                       _buildLabel('requests.date_and_time'.tr(), isDark),
                       SizedBox(height: 8),
-                      _buildDateTimePicker(isDark),
+                      Showcase(
+                        key: TourConfig.addCaseDateTimeKey,
+                        title: 'تحديد الموعد',
+                        description: 'اختر التاريخ والوقت المناسبين لاستقبال الحالة',
+                        child: _buildDateTimePicker(isDark),
+                      ),
                       SizedBox(height: 20),
 
                       // ── Description ───────────────────────────────────
                       _buildLabel('requests.case_description_optional'.tr(), isDark),
                       SizedBox(height: 8),
-                      TextFormField(
-                        controller: _descriptionController,
-                        maxLines: 4,
-                        maxLength: 500,
-                        textDirection: ui.TextDirection.rtl,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          color: isDark ? Colors.white : Colors.black,
-                          fontSize: 14,
-                        ),
-                        decoration: _buildDecoration(
-                          hint: 'requests.add_a_detailed_description'.tr(),
-                          icon: Icons.description_outlined,
-                          isDark: isDark,
+                      Showcase(
+                        key: TourConfig.addCaseDescriptionKey,
+                        title: 'وصف الحالة',
+                        description: 'أضف أي تفاصيل إضافية تساعد المريض على فهم الحالة',
+                        child: TextFormField(
+                          controller: _descriptionController,
+                          maxLines: 4,
+                          maxLength: 500,
+                          textDirection: ui.TextDirection.rtl,
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            color: isDark ? Colors.white : Colors.black,
+                            fontSize: 14,
+                          ),
+                          decoration: _buildDecoration(
+                            hint: 'requests.add_a_detailed_description'.tr(),
+                            icon: Icons.description_outlined,
+                            isDark: isDark,
+                          ),
                         ),
                       ),
                       SizedBox(height: 32),
 
                       // ── Publish Button ────────────────────────────────
-                      AppTextButton(
-                        buttonText: _isEditMode ? 'requests.update_the_request'.tr() : 'requests.post_the_request'.tr(),
-                        textStyle: TextStyles.font16WhiteSemiBold.copyWith(
-                          fontFamily: 'Cairo',
-                          fontSize: 16,
+                      Showcase(
+                        key: TourConfig.addCaseSubmitKey,
+                        title: 'نشر الطلب',
+                        description: 'اضغط هنا ليتم نشر الحالة وتظهر للمرضى في التطبيق',
+                        child: AppTextButton(
+                          buttonText: _isEditMode ? 'requests.update_the_request'.tr() : 'requests.post_the_request'.tr(),
+                          textStyle: TextStyles.font16WhiteSemiBold.copyWith(
+                            fontFamily: 'Cairo',
+                            fontSize: 16,
+                          ),
+                          backgroundColor: ColorsManager.mainBlue,
+                          onPressed: _publishRequest,
                         ),
-                        backgroundColor: ColorsManager.mainBlue,
-                        onPressed: _publishRequest,
                       ),
                     ],
                   ),
@@ -486,6 +521,8 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
           ),
         ),
       ),
+    );
+    },
     );
   }
 

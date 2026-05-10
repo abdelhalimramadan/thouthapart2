@@ -10,6 +10,9 @@ import 'package:thoutha_mobile_app/features/requests/ui/edit_request_screen.dart
 import 'package:thoutha_mobile_app/features/doctor/drawer_doctor/doctor_drawer_screen.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:showcaseview/showcaseview.dart';
+import 'package:thoutha_mobile_app/tour/tour_config.dart';
+import 'package:thoutha_mobile_app/tour/tour_service.dart';
 
 class MyRequestsScreen extends StatelessWidget {
   const MyRequestsScreen({super.key});
@@ -32,6 +35,7 @@ class MyRequestsView extends StatefulWidget {
 
 class _MyRequestsViewState extends State<MyRequestsView> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isTourStarted = false;
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +48,21 @@ class _MyRequestsViewState extends State<MyRequestsView> {
         if (didPop) return;
         Navigator.of(context).pushReplacementNamed(Routes.doctorHomeScreen);
       },
-      child: Scaffold(
-        key: _scaffoldKey,
-        drawer: DoctorDrawer(),
-        backgroundColor: theme.scaffoldBackgroundColor,
+      child: ShowCaseWidget(
+        onComplete: (index, key) {
+          TourService.onDismiss(key)();
+        },
+        builder: (context) {
+          if (!_isTourStarted) {
+            _isTourStarted = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) TourService.startTourForScreen(context, 'my_requests');
+            });
+          }
+          return Scaffold(
+            key: _scaffoldKey,
+            drawer: DoctorDrawer(),
+            backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           toolbarHeight: 70,
           elevation: 0,
@@ -113,7 +128,9 @@ class _MyRequestsViewState extends State<MyRequestsView> {
             return _buildBody(context, state);
           },
         ),
-      ),
+      );
+    },
+    ),
     );
   }
 
@@ -149,14 +166,19 @@ class _MyRequestsViewState extends State<MyRequestsView> {
           Container(
             width: double.infinity,
             padding: EdgeInsets.symmetric(vertical: 10),
-            child: Text(
-              'doctor.my_requests'.tr(),
-              textAlign: TextAlign.start,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w700,
-                fontSize: 24,
-                height: 1.5,
+            child: Showcase(
+              key: TourConfig.myRequestsTitleKey,
+              title: 'طلباتي',
+              description: 'هنا تجد جميع طلبات الحالات التي قمت بنشرها',
+              child: Text(
+                'doctor.my_requests'.tr(),
+                textAlign: TextAlign.start,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 24,
+                  height: 1.5,
+                ),
               ),
             ),
           ),
@@ -169,8 +191,18 @@ class _MyRequestsViewState extends State<MyRequestsView> {
               physics: NeverScrollableScrollPhysics(),
               padding: EdgeInsets.zero,
               itemCount: requests.length,
-              itemBuilder: (context, index) =>
-                  _RequestCard(request: requests![index]),
+              itemBuilder: (context, index) {
+                final card = _RequestCard(request: requests![index]);
+                if (index == 0) {
+                  return Showcase(
+                    key: TourConfig.myRequestsCardKey,
+                    title: 'بيانات الطلب',
+                    description: 'تظهر هنا تفاصيل الحالة والجامعة والموعد المحدد',
+                    child: card,
+                  );
+                }
+                return card;
+              },
             ),
           ),
           SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
@@ -572,39 +604,49 @@ class _RequestCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _navigateToEdit(context, request),
-                        icon: Icon(Icons.edit_note_rounded, size: 20),
-                        label: Text('requests.modify_the_request'.tr(),
-                            style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontWeight: FontWeight.bold)),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.blue.shade700,
-                          side: BorderSide(color: Colors.blue.shade200),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Showcase(
+                        key: TourConfig.myRequestsEditKey,
+                        title: 'تعديل الطلب',
+                        description: 'يمكنك تعديل تفاصيل الحالة أو الموعد في أي وقت',
+                        child: OutlinedButton.icon(
+                          onPressed: () => _navigateToEdit(context, request),
+                          icon: Icon(Icons.edit_note_rounded, size: 20),
+                          label: Text('requests.modify_the_request'.tr(),
+                              style: TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontWeight: FontWeight.bold)),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.blue.shade700,
+                            side: BorderSide(color: Colors.blue.shade200),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
                         ),
                       ),
                     ),
                     SizedBox(width: 12),
                     Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showDeleteDialog(context, request),
-                        icon: Icon(Icons.delete_sweep_rounded,
-                            size: 20, color: Colors.white),
-                        label: Text('home_screen.delete_the_request'.tr(),
-                            style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.shade400,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Showcase(
+                        key: TourConfig.myRequestsDeleteKey,
+                        title: 'حذف الطلب',
+                        description: 'إذا لم تعد الحالة متاحة، يمكنك حذفها من هنا',
+                        child: ElevatedButton.icon(
+                          onPressed: () => _showDeleteDialog(context, request),
+                          icon: Icon(Icons.delete_sweep_rounded,
+                              size: 20, color: Colors.white),
+                          label: Text('home_screen.delete_the_request'.tr(),
+                              style: TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red.shade400,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
                         ),
                       ),
                     ),

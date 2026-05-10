@@ -1,0 +1,90 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:showcaseview/showcaseview.dart';
+
+import 'tour_config.dart';
+
+/// Manages the one-time onboarding tour for a given screen.
+///
+/// Uses SharedPreferences with keys `tour_seen_<elementId>` to ensure
+/// each tooltip is shown only once, ever, across app sessions.
+class TourService {
+  TourService._();
+
+  /// Key prefix used in SharedPreferences.
+  static const String _prefix = 'tour_seen_';
+
+  // ── Public API ───────────────────────────────────────────────────────────
+
+  /// Call this in the screen's `initState` (inside a post-frame callback)
+  /// to start the tour for the given [screenName].
+  ///
+  /// Only unseen steps will be shown. If all steps have been seen,
+  /// nothing happens.
+  ///
+  /// The [context] must be a descendant of [ShowCaseWidget].
+  static Future<void> startTourForScreen(
+    BuildContext context,
+    String screenName,
+  ) async {
+    final steps = TourConfig.stepsForScreen(screenName);
+    if (steps.isEmpty) return;
+
+    final unseenKeys = <GlobalKey>[];
+    final prefs = await SharedPreferences.getInstance();
+
+    for (final step in steps) {
+      final seen = prefs.getBool('$_prefix${step.id}') ?? false;
+      if (!seen) {
+        unseenKeys.add(step.key);
+      }
+    }
+
+    if (unseenKeys.isEmpty) return;
+
+    // Small delay so the widget tree is fully laid out
+    if (context.mounted) {
+      ShowCaseWidget.of(context).startShowCase(unseenKeys);
+    }
+  }
+
+  /// Marks a single step as seen so it won't appear again.
+  static Future<void> markSeen(String stepId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('$_prefix$stepId', true);
+  }
+
+  /// Checks whether a specific step has been seen.
+  static Future<bool> hasBeenSeen(String stepId) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('$_prefix$stepId') ?? false;
+  }
+
+  /// Resets all tour progress (useful for testing / debugging).
+  static Future<void> resetAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    for (final step in TourConfig.allSteps) {
+      await prefs.remove('$_prefix${step.id}');
+    }
+  }
+
+  /// Returns the [TourStep] matching the given [key], or null.
+  static TourStep? stepForKey(GlobalKey key) {
+    try {
+      return TourConfig.allSteps.firstWhere((s) => s.key == key);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Builds the standard `onTargetClick` callback that marks the step
+  /// as seen and dismisses the tooltip.
+  static VoidCallback onDismiss(GlobalKey key) {
+    return () {
+      final step = stepForKey(key);
+      if (step != null) {
+        markSeen(step.id);
+      }
+    };
+  }
+}

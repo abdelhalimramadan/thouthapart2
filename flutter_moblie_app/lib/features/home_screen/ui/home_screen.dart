@@ -14,6 +14,9 @@ import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 import 'package:thoutha_mobile_app/core/networking/models/city_model.dart';
 import 'package:thoutha_mobile_app/core/helpers/responsive_utils.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:showcaseview/showcaseview.dart';
+import 'package:thoutha_mobile_app/tour/tour_config.dart';
+import 'package:thoutha_mobile_app/tour/tour_service.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen(
@@ -40,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _isDetecting = false;
   String? _gpsFailureMessage; // non-null → show failure banner
   List<CityModel> _loadedCities = [];
+  bool _isTourStarted = false;
 
   // Asset mapping for categories (keys are Arabic names from server)
   final Map<String, String> _categoryAssets = {
@@ -495,22 +499,39 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     return BlocProvider(
       create: (context) => getIt<DoctorCubit>()..loadInitialData(),
-      child: Scaffold(
+      child: ShowCaseWidget(
+        onComplete: (index, key) {
+          TourService.onDismiss(key)();
+        },
+        builder: (context) {
+          if (!_isTourStarted) {
+            _isTourStarted = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) TourService.startTourForScreen(context, 'home');
+            });
+          }
+          return Scaffold(
         key: _scaffoldKey,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           automaticallyImplyLeading: false,
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
-           leading: IconButton(
-             icon: Icon(
-               Icons.menu,
-               size: 24,
-               color: Theme.of(context).iconTheme.color,
+           // Tour: Menu button
+           leading: Showcase(
+             key: TourConfig.homeMenuKey,
+             title: 'القائمة الرئيسية',
+             description: 'اضغط هنا لفتح القائمة الجانبية والوصول للإعدادات',
+             child: IconButton(
+               icon: Icon(
+                 Icons.menu,
+                 size: 24,
+                 color: Theme.of(context).iconTheme.color,
+               ),
+               onPressed: () {
+                 _scaffoldKey.currentState?.openDrawer();
+               },
              ),
-             onPressed: () {
-               _scaffoldKey.currentState?.openDrawer();
-             },
            ),
         ),
         drawer: widget.drawer ?? const HomeDrawer(),
@@ -543,96 +564,105 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     children: [
 
 
-                      // Promotional Card — Row layout is fully responsive
-                      Builder(builder: (context) {
-                        final cardW = MediaQuery.of(context).size.width;
-                        final cardH = (cardW * 0.36).clamp(120.0, 180.0);
-                        return Container(
-                          width: double.infinity,
-                          height: cardH,
-                          margin: EdgeInsets.symmetric(
-                              horizontal: cardW * 0.05,
-                              vertical: 12),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            gradient: LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [Color(0xFF95F8C9), Color(0xFF54CAF7)],
+                      // Tour: Promotional Card
+                      Showcase(
+                        key: TourConfig.homePromoBannerKey,
+                        title: 'بانر الحجز',
+                        description: 'تعرّف على خدمات الحجز مع أفضل أطباء الأسنان',
+                        child: Builder(builder: (context) {
+                          final cardW = MediaQuery.of(context).size.width;
+                          final cardH = (cardW * 0.36).clamp(120.0, 180.0);
+                          return Container(
+                            width: double.infinity,
+                            height: cardH,
+                            margin: EdgeInsets.symmetric(
+                                horizontal: cardW * 0.05,
+                                vertical: 12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              gradient: LinearGradient(
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                                colors: [Color(0xFF95F8C9), Color(0xFF54CAF7)],
+                              ),
                             ),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Flexible(
-                                flex: 4,
-                                child: Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: Image.asset(
-                                    'assets/images/دكتور.png',
-                                    fit: BoxFit.contain,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Flexible(
+                                  flex: 4,
+                                  child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Image.asset(
+                                      'assets/images/دكتور.png',
+                                      fit: BoxFit.contain,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Flexible(
-                                flex: 6,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 16, right: 16, bottom: 16, left: 8),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'home_screen.book_and_register'.tr(),
-                                        style: TextStyle(
-                                          fontFamily: 'Cairo',
-                                          color: Colors.white,
-                                          fontSize: (cardW * 0.04).clamp(13.0, 18.0),
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.start,
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                        'home_screen.with_the_best_doctors'.tr(),
-                                        style: TextStyle(
-                                          fontFamily: 'Cairo',
-                                          color: Colors.white,
-                                          fontSize: (cardW * 0.033).clamp(11.0, 15.0),
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        textAlign: TextAlign.start,
-                                      ),
-                                      SizedBox(height: 10),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 14, vertical: 5),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Text(
-                                          'home_screen.book_now_1'.tr(),
+                                Flexible(
+                                  flex: 6,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 16, right: 16, bottom: 16, left: 8),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'home_screen.book_and_register'.tr(),
                                           style: TextStyle(
                                             fontFamily: 'Cairo',
-                                            color: Colors.black,
-                                            fontSize: (cardW * 0.028).clamp(10.0, 13.0),
+                                            color: Colors.white,
+                                            fontSize: (cardW * 0.04).clamp(13.0, 18.0),
                                             fontWeight: FontWeight.bold,
                                           ),
+                                          textAlign: TextAlign.start,
                                         ),
-                                      ),
-                                    ],
+                                        SizedBox(height: 6),
+                                        Text(
+                                          'home_screen.with_the_best_doctors'.tr(),
+                                          style: TextStyle(
+                                            fontFamily: 'Cairo',
+                                            color: Colors.white,
+                                            fontSize: (cardW * 0.033).clamp(11.0, 15.0),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          textAlign: TextAlign.start,
+                                        ),
+                                        SizedBox(height: 10),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 14, vertical: 5),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            'home_screen.book_now_1'.tr(),
+                                            style: TextStyle(
+                                              fontFamily: 'Cairo',
+                                              color: Colors.black,
+                                              fontSize: (cardW * 0.028).clamp(10.0, 13.0),
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
 
-                      // City Dropdown
-                      Container(
+                      // Tour: City Dropdown
+                      Showcase(
+                        key: TourConfig.homeCityDropdownKey,
+                        title: 'اختيار المحافظة',
+                        description: 'اختر محافظتك لعرض الأطباء القريبين منك',
+                        child: Container(
                         width: double.infinity,
                         margin: EdgeInsets.symmetric(
                             horizontal: ResponsiveUtils.screenWidth(context) * 0.06,
@@ -736,6 +766,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           ),
                         ),
                       ),
+                      ),
 
                       // GPS failure banner
                       if (!_isLoggedIn && _gpsFailureMessage != null)
@@ -781,44 +812,49 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           ),
                         ),
 
-                      // Chatbot Banner
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, Routes.chatScreen);
-                        },
-                        child: Container(
-                          margin: EdgeInsets.symmetric(
-                              horizontal: ResponsiveUtils.screenWidth(context) * 0.05,
-                              vertical: 4),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 46,
-                                height: 46,
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: Color(0xFF54CAF7), width: 1.5),
-                                ),
-                                child: SvgPicture.asset(
-                                  'assets/svg/ثوثه الدكتور 1.svg',
-                                ),
-                              ),
-                              SizedBox(width: 12),
-                              Flexible(
-                                child: Text(
-                                  'home_screen.if_you_dont_know'.tr(),
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontFamily: 'Cairo',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                      // Tour: Chatbot Banner
+                      Showcase(
+                        key: TourConfig.homeChatBannerKey,
+                        title: 'مساعد ثوثة الذكي',
+                        description: 'لا تعرف ماذا تحتاج؟ اضغط هنا للتحدث مع المساعد الذكي',
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, Routes.chatScreen);
+                          },
+                          child: Container(
+                            margin: EdgeInsets.symmetric(
+                                horizontal: ResponsiveUtils.screenWidth(context) * 0.05,
+                                vertical: 4),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 46,
+                                  height: 46,
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Color(0xFF54CAF7), width: 1.5),
                                   ),
-                                  textAlign: TextAlign.start,
+                                  child: SvgPicture.asset(
+                                    'assets/svg/ثوثه الدكتور 1.svg',
+                                  ),
                                 ),
-                              ),
-                            ],
+                                SizedBox(width: 12),
+                                Flexible(
+                                  child: Text(
+                                    'home_screen.if_you_dont_know'.tr(),
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontFamily: 'Cairo',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -842,47 +878,52 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         ),
                       ),
 
-                      // Categories Grid
+                      // Tour: Categories Grid
                       if (visibleCategories.isNotEmpty)
-                        Padding(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: ResponsiveUtils.screenWidth(context) * 0.05),
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final crossAxisCount = ResponsiveUtils.screenWidth(context) > 600 ? 4 : 2;
-                              return GridView.builder(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: crossAxisCount,
-                                  mainAxisSpacing: 12,
-                                  crossAxisSpacing: 12,
-                                  childAspectRatio: 1.0,
-                                ),
-                                itemCount: visibleCategories.length,
-                                itemBuilder: (context, index) {
-                                  final category = visibleCategories[index];
-                                  final asset =
-                                      _getAssetForCategory(category.name);
+                        Showcase(
+                          key: TourConfig.homeCategoriesGridKey,
+                          title: 'الخدمات المتاحة',
+                          description: 'اختر التخصص المطلوب لعرض الأطباء وحجز موعد',
+                          child: Padding(
+                            padding:
+                                EdgeInsets.symmetric(horizontal: ResponsiveUtils.screenWidth(context) * 0.05),
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final crossAxisCount = ResponsiveUtils.screenWidth(context) > 600 ? 4 : 2;
+                                return GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: crossAxisCount,
+                                    mainAxisSpacing: 12,
+                                    crossAxisSpacing: 12,
+                                    childAspectRatio: 1.0,
+                                  ),
+                                  itemCount: visibleCategories.length,
+                                  itemBuilder: (context, index) {
+                                    final category = visibleCategories[index];
+                                    final asset =
+                                        _getAssetForCategory(category.name);
 
-                                  String? selectedCityName;
-                                  if (_selectedCityId != null) {
-                                    try {
-                                      selectedCityName = cities
-                                          .firstWhere(
-                                              (c) => c.id == _selectedCityId)
-                                          .name;
-                                    } catch (_) {}
-                                  }
+                                    String? selectedCityName;
+                                    if (_selectedCityId != null) {
+                                      try {
+                                        selectedCityName = cities
+                                            .firstWhere(
+                                                (c) => c.id == _selectedCityId)
+                                            .name;
+                                      } catch (_) {}
+                                    }
 
-                                  return _buildSquareCategory(
-                                      asset, index, category.name,
-                                      categoryId: category.id,
-                                      cityName: selectedCityName);
-                                },
-                              );
-                            },
+                                    return _buildSquareCategory(
+                                        asset, index, category.name,
+                                        categoryId: category.id,
+                                        cityName: selectedCityName);
+                                  },
+                                );
+                              },
+                            ),
                           ),
                         ),
 
@@ -895,7 +936,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             },
           ),
         ),
-      ),
-    );
-  }
+      );
+    },
+   ),
+  );
+ }
 }

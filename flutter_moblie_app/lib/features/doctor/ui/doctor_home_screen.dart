@@ -14,6 +14,9 @@ import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/networking/api_service.dart';
 import '../widgets/appointment_card_widget.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:showcaseview/showcaseview.dart';
+import 'package:thoutha_mobile_app/tour/tour_config.dart';
+import 'package:thoutha_mobile_app/tour/tour_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DoctorHomeScreen
@@ -38,6 +41,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   bool _isLoadingAppointments = true;
   String? _appointmentsError;
   late NotificationsCubit _notificationsCubit;
+  bool _isTourStarted = false;
 
   // ── Lifecycle ──────────────────────────────────────────────────
   @override
@@ -510,7 +514,18 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         if (didPop) return;
         SystemNavigator.pop();
       },
-      child: Scaffold(
+      child: ShowCaseWidget(
+        onComplete: (index, key) {
+          TourService.onDismiss(key)();
+        },
+        builder: (context) {
+          if (!_isTourStarted) {
+            _isTourStarted = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) TourService.startTourForScreen(context, 'doctor_home');
+            });
+          }
+          return Scaffold(
         key: _scaffoldKey,
         backgroundColor: theme.scaffoldBackgroundColor,
         drawer: DoctorDrawer(),
@@ -523,28 +538,40 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildGreeting(),
-                _buildSectionTitle(
-                  'doctor.my_next_reservations'.tr(),
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      Routes.doctorNextBookingScreen,
-                    );
-                  },
+                // Tour: Pending Appointments Section
+                Showcase(
+                  key: TourConfig.doctorHomePendingKey,
+                  title: 'الحجوزات المعلّقة',
+                  description: 'حجوزات تحتاج قبولك أو رفضك',
+                  child: _buildSectionTitle(
+                    'doctor.my_next_reservations'.tr(),
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        Routes.doctorNextBookingScreen,
+                      );
+                    },
+                  ),
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.38,
                   child: _buildAppointmentsList(_pendingAppointments, isPending: true),
                 ),
                 SizedBox(height: 10),
-                _buildSectionTitle(
-                  'doctor.confirmed_cases'.tr(),
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      Routes.doctorConfirmedAppointmentsScreen,
-                    );
-                  },
+                // Tour: Confirmed Cases Section
+                Showcase(
+                  key: TourConfig.doctorHomeConfirmedKey,
+                  title: 'الحالات المؤكدة',
+                  description: 'الحجوزات التي تم قبولها وتأكيدها',
+                  child: _buildSectionTitle(
+                    'doctor.confirmed_cases'.tr(),
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        Routes.doctorConfirmedAppointmentsScreen,
+                      );
+                    },
+                  ),
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.38,
@@ -555,9 +582,11 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    },
+   ),
+  );
+ }
 
   // ── AppBar ─────────────────────────────────────────────────────
   PreferredSizeWidget _buildAppBar(
@@ -573,9 +602,14 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       backgroundColor: isDark ? Colors.transparent : Colors.white,
       foregroundColor: cs.onSurface,
       automaticallyImplyLeading: false,
-      leading: IconButton(
-        icon: Icon(Icons.menu, size: 24),
-        onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+      leading: Showcase(
+        key: TourConfig.doctorHomeMenuKey,
+        title: 'القائمة',
+        description: 'افتح القائمة الجانبية لإدارة حسابك وحجوزاتك',
+        child: IconButton(
+          icon: Icon(Icons.menu, size: 24),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        ),
       ),
       centerTitle: true,
       title: Row(
@@ -610,7 +644,11 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                   .length;
             }
 
-            return Badge(
+            return Showcase(
+              key: TourConfig.doctorHomeNotificationsKey,
+              title: 'الإشعارات',
+              description: 'اضغط لعرض إشعارات الحجوزات الجديدة',
+              child: Badge(
               label: Text(
                 unreadCount > 9 ? '9+' : unreadCount.toString(),
                 style: const TextStyle(fontSize: 10, color: Colors.white),
@@ -632,6 +670,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                   });
                 },
               ),
+            ),
             );
           },
         ),

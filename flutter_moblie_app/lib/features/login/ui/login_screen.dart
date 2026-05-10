@@ -5,6 +5,9 @@ import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
 import '../../auth/data/auth_service.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:showcaseview/showcaseview.dart';
+import 'package:thoutha_mobile_app/tour/tour_config.dart';
+import 'package:thoutha_mobile_app/tour/tour_service.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -303,7 +306,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                       ),
 
-                                    // Email Field
+                                    // Tour: Email Field
                                     TextFormField(
                                       controller: emailController,
                                       keyboardType: TextInputType.emailAddress,
@@ -326,7 +329,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                     SizedBox(height: 16),
 
-                                    // Password Field
+                                    // Tour: Password Field
                                     TextFormField(
                                       controller: passwordController,
                                       obscureText: isObscureText,
@@ -417,7 +420,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                     SizedBox(height: 24),
 
-                                    // Login Button
                                     SizedBox(
                                       width: double.infinity,
                                       height: isTablet ? 60 : 52,
@@ -553,11 +555,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ));
+                );
               },
             ),
           ),

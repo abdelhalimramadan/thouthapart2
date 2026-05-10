@@ -22,6 +22,9 @@ import 'package:thoutha_mobile_app/features/login/ui/login_screen.dart';
 import '../ui/doctor_home_screen.dart';
 import '../../profile/data/models/doctor_profile_model.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:showcaseview/showcaseview.dart';
+import 'package:thoutha_mobile_app/tour/tour_config.dart';
+import 'package:thoutha_mobile_app/tour/tour_service.dart';
 
 class DoctorDrawer extends StatefulWidget {
   final int? selectedIndex;
@@ -42,6 +45,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
   int? _doctorId;
   String _appVersion = '1.0.0';
   bool _isLoadingName = false;
+  bool _isTourStarted = false;
 
   static const _cCyan = Color(0xFF84E5F3);
   static const _cGreen = Color(0xFF8DECB4);
@@ -364,7 +368,18 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
     final double topPad = MediaQuery.of(context).padding.top;
     final int currentIndex = _getCurrentIndex();
 
-    return Drawer(
+    return ShowCaseWidget(
+      onComplete: (index, key) {
+        TourService.onDismiss(key)();
+      },
+      builder: (context) {
+        if (!_isTourStarted) {
+          _isTourStarted = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) TourService.startTourForScreen(context, 'doctor_drawer');
+          });
+        }
+        return Drawer(
       child: Container(
         color: Theme.of(context).scaffoldBackgroundColor,
         child: Column(
@@ -475,7 +490,11 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  _menuItem(
+                  Showcase(
+                    key: TourConfig.doctorDrawerHomeKey,
+                    title: 'الرئيسية',
+                    description: 'ارجع للصفحة الرئيسية لعرض حجوزاتك',
+                    child: _menuItem(
                     context,
                     title: 'doctor.home'.tr(),
                     icon: Icons.home,
@@ -490,7 +509,12 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       );
                     },
                   ),
-                  _menuItem(
+                  ),
+                  Showcase(
+                    key: TourConfig.doctorDrawerAddCaseKey,
+                    title: 'إضافة حالة جديدة',
+                    description: 'أنشئ حالة جديدة ليراها المرضى ويحجزوا',
+                    child: _menuItem(
                     context,
                     title: 'doctor.add_a_new_case'.tr(),
                     icon: Icons.add_circle_outline,
@@ -508,7 +532,12 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       );
                     },
                   ),
-                  _menuItem(
+                  ),
+                  Showcase(
+                    key: TourConfig.doctorDrawerProfileKey,
+                    title: 'الملف الشخصي',
+                    description: 'عدّل بيانات ملفك الشخصي والصورة',
+                    child: _menuItem(
                     context,
                     title: 'doctor.profile'.tr(),
                     icon: Icons.person_outline,
@@ -523,7 +552,12 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       );
                     },
                   ),
-                  _menuItem(
+                  ),
+                  Showcase(
+                    key: TourConfig.doctorDrawerUpcomingKey,
+                    title: 'الحجوزات القادمة',
+                    description: 'اعرض جميع حجوزاتك القادمة',
+                    child: _menuItem(
                     context,
                     title: 'doctor.upcoming_reservations'.tr(),
                     icon: Icons.event_note_outlined,
@@ -539,7 +573,12 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       );
                     },
                   ),
-                  _menuItem(
+                  ),
+                  Showcase(
+                    key: TourConfig.doctorDrawerHistoryKey,
+                    title: 'سجل الحجوزات',
+                    description: 'راجع تاريخ حجوزاتك السابقة',
+                    child: _menuItem(
                     context,
                     title: 'doctor.booking_history'.tr(),
                     icon: Icons.history,
@@ -556,7 +595,12 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       );
                     },
                   ),
-                  _menuItem(
+                  ),
+                  Showcase(
+                    key: TourConfig.doctorDrawerConfirmedKey,
+                    title: 'الحجوزات المؤكدة',
+                    description: 'اعرض الحجوزات التي تم تأكيدها وقبولها',
+                    child: _menuItem(
                     context,
                     title: 'doctor.confirmed_reservations'.tr(),
                     icon: Icons.check_circle_outline,
@@ -573,7 +617,12 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                       );
                     },
                   ),
-                  _menuItem(
+                  ),
+                  Showcase(
+                    key: TourConfig.doctorDrawerRequestsKey,
+                    title: 'طلباتي',
+                    description: 'أدِر طلبات الحالات التي نشرتها',
+                    child: _menuItem(
                     context,
                     title: 'doctor.my_requests'.tr(),
                     icon: Icons.assignment_outlined,
@@ -588,6 +637,7 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
                         ),
                       );
                     },
+                  ),
                   ),
                   Consumer<ThemeProvider>(
                     builder: (context, themeProvider, _) {
@@ -702,7 +752,9 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
             ),
           ],
         ),
-      ),
-    );
+        ),
+      );
+    },
+   );
   }
 }
