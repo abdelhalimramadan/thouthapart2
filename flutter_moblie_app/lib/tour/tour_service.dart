@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'multi_tour_widget.dart';
 
 import 'tour_config.dart';
 
@@ -27,25 +28,39 @@ class TourService {
     BuildContext context,
     String screenName,
   ) async {
-    final steps = TourConfig.stepsForScreen(screenName);
-    if (steps.isEmpty) return;
+    final groups = TourConfig.stepGroupsForScreen(screenName);
+    if (groups.isEmpty) return;
 
-    final unseenKeys = <GlobalKey>[];
+    final unseenGroups = <List<TourStep>>[];
     final prefs = await SharedPreferences.getInstance();
 
-    for (final step in steps) {
-      final seen = prefs.getBool('$_prefix${step.id}') ?? false;
-      if (!seen) {
-        unseenKeys.add(step.key);
+    for (final group in groups) {
+      final unseenStepsInGroup = <TourStep>[];
+      for (final step in group) {
+        final seen = prefs.getBool('$_prefix${step.id}') ?? false;
+        if (!seen) {
+          unseenStepsInGroup.add(step);
+        }
+      }
+      if (unseenStepsInGroup.isNotEmpty) {
+        unseenGroups.add(unseenStepsInGroup);
       }
     }
 
-    if (unseenKeys.isEmpty) return;
+    if (unseenGroups.isEmpty) return;
 
     // Small delay so the widget tree is fully laid out
-    if (context.mounted) {
-      ShowCaseWidget.of(context).startShowCase(unseenKeys);
-    }
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (context.mounted) {
+        try {
+          MultiTourWidget.of(context).startTour(unseenGroups);
+        } catch (e) {
+          // If MultiTourWidget is not found, fallback to ShowCaseWidget if still wrapped
+          final keys = unseenGroups.expand((g) => g).map((s) => s.key).toList();
+          ShowCaseWidget.of(context).startShowCase(keys);
+        }
+      }
+    });
   }
 
   /// Marks a single step as seen so it won't appear again.
@@ -58,6 +73,14 @@ class TourService {
   static Future<bool> hasBeenSeen(String stepId) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('$_prefix$stepId') ?? false;
+  }
+
+  /// Marks all steps as seen to skip the entire tour.
+  static Future<void> skipAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    for (final step in TourConfig.allSteps) {
+      await prefs.setBool('$_prefix${step.id}', true);
+    }
   }
 
   /// Resets all tour progress (useful for testing / debugging).

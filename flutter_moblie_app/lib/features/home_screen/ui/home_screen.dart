@@ -17,6 +17,8 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:showcaseview/showcaseview.dart';
 import 'package:thoutha_mobile_app/tour/tour_config.dart';
 import 'package:thoutha_mobile_app/tour/tour_service.dart';
+import 'package:thoutha_mobile_app/tour/tour_widgets.dart';
+import 'package:thoutha_mobile_app/tour/multi_tour_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen(
@@ -502,7 +504,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     return BlocProvider.value(
       value: _doctorCubit,
-      child: ShowCaseWidget(
+      child: MultiTourWidget(
+        child: ShowCaseWidget(
         onComplete: (index, key) {
           TourService.onDismiss(key)();
         },
@@ -521,21 +524,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
            // Tour: Menu button
-           leading: Showcase(
-             key: TourConfig.homeMenuKey,
-             title: 'القائمة الرئيسية',
-             description: 'اضغط هنا لفتح القائمة الجانبية والوصول للإعدادات',
-             child: IconButton(
-               icon: Icon(
-                 Icons.menu,
-                 size: 24,
-                 color: Theme.of(context).iconTheme.color,
-               ),
-               onPressed: () {
-                 _scaffoldKey.currentState?.openDrawer();
-               },
-             ),
-           ),
+            leading: Showcase.withWidget(
+                height: 150,
+                width: 280,
+              key: TourConfig.homeMenuKey,
+              container: CustomTourTooltip(
+                title: 'القائمة الرئيسية',
+                description: 'اضغط هنا لفتح القائمة الجانبية والوصول للإعدادات',
+                onNext: () => ShowCaseWidget.of(context)!.next(),
+              ),
+              child: IconButton(
+                icon: Icon(
+                  Icons.menu,
+                  size: 24,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                onPressed: () {
+                  _scaffoldKey.currentState?.openDrawer();
+                },
+              ),
+            ),
         ),
         drawer: widget.drawer ?? const HomeDrawer(),
         body: SafeArea(
@@ -568,10 +576,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
 
                       // Tour: Promotional Card
-                      Showcase(
+                      Showcase.withWidget(
+                height: 150,
+                width: 280,
                         key: TourConfig.homePromoBannerKey,
-                        title: 'بانر الحجز',
-                        description: 'تعرّف على خدمات الحجز مع أفضل أطباء الأسنان',
+                        container: CustomTourTooltip(
+                          title: 'بانر الحجز',
+                          description: 'تعرّف على خدمات الحجز مع أفضل أطباء الأسنان',
+                          onNext: () => ShowCaseWidget.of(context)!.next(),
+                        ),
                         child: Builder(builder: (context) {
                           final cardW = MediaQuery.of(context).size.width;
                           final cardH = (cardW * 0.36).clamp(120.0, 180.0);
@@ -661,10 +674,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       ),
 
                       // Tour: City Dropdown
-                      Showcase(
+                      Showcase.withWidget(
+                height: 150,
+                width: 280,
                         key: TourConfig.homeCityDropdownKey,
-                        title: 'اختيار المحافظة',
-                        description: 'اختر محافظتك لعرض الأطباء القريبين منك',
+                        container: CustomTourTooltip(
+                          title: 'اختيار المحافظة',
+                          description: 'اختر محافظتك لعرض الأطباء القريبين منك',
+                          onNext: () => ShowCaseWidget.of(context)!.next(),
+                        ),
                         child: Container(
                         width: double.infinity,
                         margin: EdgeInsets.symmetric(
@@ -816,10 +834,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         ),
 
                       // Tour: Chatbot Banner
-                      Showcase(
+                      Showcase.withWidget(
+                height: 150,
+                width: 280,
                         key: TourConfig.homeChatBannerKey,
-                        title: 'مساعد ثوثة الذكي',
-                        description: 'لا تعرف ماذا تحتاج؟ اضغط هنا للتحدث مع المساعد الذكي',
+                        container: CustomTourTooltip(
+                          title: 'مساعد ثوثة الذكي',
+                          description: 'لا تعرف ماذا تحتاج؟ اضغط هنا للتحدث مع المساعد الذكي',
+                          onNext: () => ShowCaseWidget.of(context)!.next(),
+                        ),
                         child: GestureDetector(
                           onTap: () {
                             Navigator.pushNamed(context, Routes.chatScreen);
@@ -883,10 +906,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
                       // Tour: Categories Grid
                       if (visibleCategories.isNotEmpty)
-                        Showcase(
+                        Showcase.withWidget(
+                height: 150,
+                width: 280,
                           key: TourConfig.homeCategoriesGridKey,
-                          title: 'الخدمات المتاحة',
-                          description: 'اختر التخصص المطلوب لعرض الأطباء وحجز موعد',
+                          container: CustomTourTooltip(
+                            title: 'الخدمات المتاحة',
+                            description: 'اختر التخصص المطلوب لعرض الأطباء وحجز موعد',
+                            onNext: () => ShowCaseWidget.of(context)!.next(),
+                            isLast: true,
+                          ),
                           child: Padding(
                             padding:
                                 EdgeInsets.symmetric(horizontal: ResponsiveUtils.screenWidth(context) * 0.05),
@@ -941,7 +970,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       );
     },
-   ),
-  );
- }
+        ),
+      ),
+    );
+  }
 }

@@ -25,6 +25,7 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:showcaseview/showcaseview.dart';
 import 'package:thoutha_mobile_app/tour/tour_config.dart';
 import 'package:thoutha_mobile_app/tour/tour_service.dart';
+import 'package:thoutha_mobile_app/tour/tour_widgets.dart';
 
 class DoctorDrawer extends StatefulWidget {
   final int? selectedIndex;
@@ -490,138 +491,142 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  Showcase(
-                    key: TourConfig.doctorDrawerHomeKey,
-                    title: 'الرئيسية',
-                    description: 'ارجع للصفحة الرئيسية لعرض حجوزاتك',
-                    child: _menuItem(
-                    context,
-                    title: 'doctor.home'.tr(),
-                    icon: Icons.home,
-                    isSelected: currentIndex == 0,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          settings: RouteSettings(name: 'doctor-home'),
-                          builder: (context) => DoctorHomeScreen(),
+                  // Management Group
+                  Showcase.withWidget(
+                    height: 150,
+                    width: 280,
+                    key: TourConfig.doctorDrawerManagementKey,
+                    container: CustomTourTooltip(
+                      title: 'tour.doctor_management'.tr(),
+                      description: 'tour.doctor_management_desc'.tr(),
+                      onNext: () => ShowCaseWidget.of(context)!.next(),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _menuItem(
+                          context,
+                          title: 'doctor.home'.tr(),
+                          icon: Icons.home,
+                          isSelected: currentIndex == 0,
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                settings: RouteSettings(name: 'doctor-home'),
+                                builder: (context) => DoctorHomeScreen(),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-                  ),
-                  Showcase(
-                    key: TourConfig.doctorDrawerAddCaseKey,
-                    title: 'إضافة حالة جديدة',
-                    description: 'أنشئ حالة جديدة ليراها المرضى ويحجزوا',
-                    child: _menuItem(
-                    context,
-                    title: 'doctor.add_a_new_case'.tr(),
-                    icon: Icons.add_circle_outline,
-                    isSelected: currentIndex == 1,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          settings: RouteSettings(name: 'add-case'),
-                          builder: (context) => SecondaryHomeScreen(
-                            drawer: DoctorDrawer(),
-                            showAddCaseCategory: true,
-                          ),
+                        _menuItem(
+                          context,
+                          title: 'doctor.add_a_new_case'.tr(),
+                          icon: Icons.add_circle_outline,
+                          isSelected: currentIndex == 1,
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                settings: RouteSettings(name: 'add-case'),
+                                builder: (context) => SecondaryHomeScreen(
+                                  drawer: DoctorDrawer(),
+                                  showAddCaseCategory: true,
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-                  ),
-                  Showcase(
-                    key: TourConfig.doctorDrawerProfileKey,
-                    title: 'الملف الشخصي',
-                    description: 'عدّل بيانات ملفك الشخصي والصورة',
-                    child: _menuItem(
-                    context,
-                    title: 'doctor.profile'.tr(),
-                    icon: Icons.person_outline,
-                    isSelected: currentIndex == 2,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          settings: RouteSettings(name: 'doctor-profile'),
-                          builder: (context) => DoctorProfileScreen(),
+                        _menuItem(
+                          context,
+                          title: 'doctor.profile'.tr(),
+                          icon: Icons.person_outline,
+                          isSelected: currentIndex == 2,
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                settings: RouteSettings(name: 'doctor-profile'),
+                                builder: (context) => DoctorProfileScreen(),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
-                  ),
-                  Showcase(
-                    key: TourConfig.doctorDrawerUpcomingKey,
-                    title: 'الحجوزات القادمة',
-                    description: 'اعرض جميع حجوزاتك القادمة',
-                    child: _menuItem(
-                    context,
-                    title: 'doctor.upcoming_reservations'.tr(),
-                    icon: Icons.event_note_outlined,
-                    isSelected: currentIndex == 3,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          settings:
-                              RouteSettings(name: 'upcoming-bookings'),
-                          builder: (context) => DoctorNextBookingScreen(),
+                  
+                  // Bookings Group
+                  Showcase.withWidget(
+                    height: 150,
+                    width: 280,
+                    key: TourConfig.doctorDrawerBookingsKey,
+                    container: CustomTourTooltip(
+                      title: 'tour.doctor_bookings'.tr(),
+                      description: 'tour.doctor_bookings_desc'.tr(),
+                      onNext: () => ShowCaseWidget.of(context)!.next(),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _menuItem(
+                          context,
+                          title: 'doctor.upcoming_reservations'.tr(),
+                          icon: Icons.event_note_outlined,
+                          isSelected: currentIndex == 3,
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                settings: RouteSettings(name: 'upcoming-bookings'),
+                                builder: (context) => DoctorNextBookingScreen(),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-                  ),
-                  Showcase(
-                    key: TourConfig.doctorDrawerHistoryKey,
-                    title: 'سجل الحجوزات',
-                    description: 'راجع تاريخ حجوزاتك السابقة',
-                    child: _menuItem(
-                    context,
-                    title: 'doctor.booking_history'.tr(),
-                    icon: Icons.history,
-                    isSelected: currentIndex == 4,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          settings:
-                              RouteSettings(name: 'booking-records'),
-                          builder: (context) =>
-                              DoctorBookingRecordsScreen(),
+                        _menuItem(
+                          context,
+                          title: 'doctor.booking_history'.tr(),
+                          icon: Icons.history,
+                          isSelected: currentIndex == 4,
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                settings: RouteSettings(name: 'booking-records'),
+                                builder: (context) => DoctorBookingRecordsScreen(),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-                  ),
-                  Showcase(
-                    key: TourConfig.doctorDrawerConfirmedKey,
-                    title: 'الحجوزات المؤكدة',
-                    description: 'اعرض الحجوزات التي تم تأكيدها وقبولها',
-                    child: _menuItem(
-                    context,
-                    title: 'doctor.confirmed_reservations'.tr(),
-                    icon: Icons.check_circle_outline,
-                    isSelected: currentIndex == 5,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          settings: RouteSettings(
-                              name: 'confirmed-appointments'),
-                          builder: (context) =>
-                              DoctorConfirmedAppointmentsScreen(),
+                        _menuItem(
+                          context,
+                          title: 'doctor.confirmed_reservations'.tr(),
+                          icon: Icons.check_circle_outline,
+                          isSelected: currentIndex == 5,
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                settings: RouteSettings(name: 'confirmed-appointments'),
+                                builder: (context) => DoctorConfirmedAppointmentsScreen(),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
-                  ),
-                  Showcase(
+                  Showcase.withWidget(
+                    height: 150,
+                    width: 280,
                     key: TourConfig.doctorDrawerRequestsKey,
-                    title: 'طلباتي',
-                    description: 'أدِر طلبات الحالات التي نشرتها',
+                    container: CustomTourTooltip(
+                      title: 'طلباتي',
+                      description: 'أدِر طلبات الحالات التي نشرتها',
+                      onNext: () => ShowCaseWidget.of(context)!.next(),
+                      isLast: true,
+                    ),
                     child: _menuItem(
                     context,
                     title: 'doctor.my_requests'.tr(),

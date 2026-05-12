@@ -17,6 +17,7 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:showcaseview/showcaseview.dart';
 import 'package:thoutha_mobile_app/tour/tour_config.dart';
 import 'package:thoutha_mobile_app/tour/tour_service.dart';
+import 'package:thoutha_mobile_app/tour/tour_widgets.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DoctorHomeScreen
@@ -539,10 +540,15 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               children: [
                 _buildGreeting(),
                 // Tour: Pending Appointments Section
-                Showcase(
+                Showcase.withWidget(
+                      height: 150,
+                      width: 280,
                   key: TourConfig.doctorHomePendingKey,
-                  title: 'الحجوزات المعلّقة',
-                  description: 'حجوزات تحتاج قبولك أو رفضك',
+                  container: CustomTourTooltip(
+                    title: 'الحجوزات المعلّقة',
+                    description: 'حجوزات تحتاج قبولك أو رفضك',
+                    onNext: () => ShowCaseWidget.of(context)!.next(),
+                  ),
                   child: _buildSectionTitle(
                     'doctor.my_next_reservations'.tr(),
                     onTap: () {
@@ -559,10 +565,16 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                 ),
                 SizedBox(height: 10),
                 // Tour: Confirmed Cases Section
-                Showcase(
+                Showcase.withWidget(
+                      height: 150,
+                      width: 280,
                   key: TourConfig.doctorHomeConfirmedKey,
-                  title: 'الحالات المؤكدة',
-                  description: 'الحجوزات التي تم قبولها وتأكيدها',
+                  container: CustomTourTooltip(
+                    title: 'الحالات المؤكدة',
+                    description: 'الحجوزات التي تم قبولها وتأكيدها',
+                    onNext: () => ShowCaseWidget.of(context)!.next(),
+                    isLast: true,
+                  ),
                   child: _buildSectionTitle(
                     'doctor.confirmed_cases'.tr(),
                     onTap: () {
@@ -602,10 +614,15 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       backgroundColor: isDark ? Colors.transparent : Colors.white,
       foregroundColor: cs.onSurface,
       automaticallyImplyLeading: false,
-      leading: Showcase(
+      leading: Showcase.withWidget(
+                      height: 150,
+                      width: 280,
         key: TourConfig.doctorHomeMenuKey,
-        title: 'القائمة',
-        description: 'افتح القائمة الجانبية لإدارة حسابك وحجوزاتك',
+        container: CustomTourTooltip(
+          title: 'القائمة',
+          description: 'افتح القائمة الجانبية لإدارة حسابك وحجوزاتك',
+          onNext: () => ShowCaseWidget.of(context)!.next(),
+        ),
         child: IconButton(
           icon: Icon(Icons.menu, size: 24),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
@@ -644,10 +661,15 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                   .length;
             }
 
-            return Showcase(
+            return Showcase.withWidget(
+                      height: 150,
+                      width: 280,
               key: TourConfig.doctorHomeNotificationsKey,
-              title: 'الإشعارات',
-              description: 'اضغط لعرض إشعارات الحجوزات الجديدة',
+              container: CustomTourTooltip(
+                title: 'الإشعارات',
+                description: 'اضغط لعرض إشعارات الحجوزات الجديدة',
+                onNext: () => ShowCaseWidget.of(context)!.next(),
+              ),
               child: Badge(
               label: Text(
                 unreadCount > 9 ? '9+' : unreadCount.toString(),

@@ -13,6 +13,7 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:showcaseview/showcaseview.dart';
 import 'package:thoutha_mobile_app/tour/tour_config.dart';
 import 'package:thoutha_mobile_app/tour/tour_service.dart';
+import 'package:thoutha_mobile_app/tour/tour_widgets.dart';
 
 class MyRequestsScreen extends StatelessWidget {
   const MyRequestsScreen({super.key});
@@ -166,10 +167,15 @@ class _MyRequestsViewState extends State<MyRequestsView> {
           Container(
             width: double.infinity,
             padding: EdgeInsets.symmetric(vertical: 10),
-            child: Showcase(
+            child: Showcase.withWidget(
+                height: 150,
+                width: 280,
               key: TourConfig.myRequestsTitleKey,
-              title: 'طلباتي',
-              description: 'هنا تجد جميع طلبات الحالات التي قمت بنشرها',
+              container: CustomTourTooltip(
+                title: 'طلباتي',
+                description: 'هنا تجد جميع طلبات الحالات التي قمت بنشرها',
+                onNext: () => ShowCaseWidget.of(context)!.next(),
+              ),
               child: Text(
                 'doctor.my_requests'.tr(),
                 textAlign: TextAlign.start,
@@ -194,10 +200,15 @@ class _MyRequestsViewState extends State<MyRequestsView> {
               itemBuilder: (context, index) {
                 final card = _RequestCard(request: requests![index], isFirst: index == 0);
                 if (index == 0) {
-                  return Showcase(
+                  return Showcase.withWidget(
+                height: 150,
+                width: 280,
                     key: TourConfig.myRequestsCardKey,
-                    title: 'بيانات الطلب',
-                    description: 'تظهر هنا تفاصيل الحالة والجامعة والموعد المحدد',
+                    container: CustomTourTooltip(
+                      title: 'بيانات الطلب',
+                      description: 'تظهر هنا تفاصيل الحالة والجامعة والموعد المحدد',
+                      onNext: () => ShowCaseWidget.of(context)!.next(),
+                    ),
                     child: card,
                   );
                 }
@@ -605,10 +616,15 @@ class _RequestCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: isFirst ? Showcase(
+                      child: isFirst ? Showcase.withWidget(
+                height: 150,
+                width: 280,
                         key: TourConfig.myRequestsEditKey,
-                        title: 'تعديل الطلب',
-                        description: 'يمكنك تعديل تفاصيل الحالة أو الموعد في أي وقت',
+                        container: CustomTourTooltip(
+                          title: 'تعديل الطلب',
+                          description: 'يمكنك تعديل تفاصيل الحالة أو الموعد في أي وقت',
+                          onNext: () => ShowCaseWidget.of(context)!.next(),
+                        ),
                         child: OutlinedButton.icon(
                           onPressed: () => _navigateToEdit(context, request),
                           icon: Icon(Icons.edit_note_rounded, size: 20),
@@ -642,10 +658,16 @@ class _RequestCard extends StatelessWidget {
                     ),
                     SizedBox(width: 12),
                     Expanded(
-                      child: isFirst ? Showcase(
+                      child: isFirst ? Showcase.withWidget(
+                height: 150,
+                width: 280,
                         key: TourConfig.myRequestsDeleteKey,
-                        title: 'حذف الطلب',
-                        description: 'إذا لم تعد الحالة متاحة، يمكنك حذفها من هنا',
+                        container: CustomTourTooltip(
+                          title: 'حذف الطلب',
+                          description: 'إذا لم تعد الحالة متاحة، يمكنك حذفها من هنا',
+                          onNext: () => ShowCaseWidget.of(context)!.next(),
+                          isLast: true,
+                        ),
                         child: ElevatedButton.icon(
                           onPressed: () => _showDeleteDialog(context, request),
                           icon: Icon(Icons.delete_sweep_rounded,

@@ -1,4 +1,16 @@
 {
+  "tour": {
+    "next": "Next",
+    "finish": "Got it",
+    "main_features": "Main Features",
+    "main_features_desc": "Find the home screen and Thoutha smart assistant here",
+    "settings_group": "Settings & Appearance",
+    "settings_group_desc": "Control dark mode and app language from here",
+    "doctor_management": "Account Management",
+    "doctor_management_desc": "Go home, add new cases, or edit your profile",
+    "doctor_bookings": "Booking Management",
+    "doctor_bookings_desc": "Track your upcoming, past, and confirmed bookings easily"
+  },
   "booking": {
     "dentistry": "dentistry",
     "sorry_your_reservation_cannot": "Sorry, your reservation cannot be completed without selecting a status. Please try from the Cases page.",

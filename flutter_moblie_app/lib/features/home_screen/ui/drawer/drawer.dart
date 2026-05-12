@@ -11,6 +11,7 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:showcaseview/showcaseview.dart';
 import 'package:thoutha_mobile_app/tour/tour_config.dart';
 import 'package:thoutha_mobile_app/tour/tour_service.dart';
+import 'package:thoutha_mobile_app/tour/tour_widgets.dart';
 
 class HomeDrawer extends StatefulWidget {
   const HomeDrawer({super.key});
@@ -180,80 +181,97 @@ class _HomeDrawerState extends State<HomeDrawer> {
                       ),
                     ),
 
-                    // Menu Items
-                    Showcase(
-                      key: TourConfig.drawerHomeKey,
-                      title: 'الرئيسية',
-                      description: 'ارجع لصفحة التصفح الرئيسية',
-                      child: _menuItem(
-                      context,
-                      title: 'doctor.home'.tr(),
-                      icon: Icons.home_outlined,
-                      fontSize: 16,
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          Routes.categoriesScreen,
-                          (route) => false,
-                        );
-                      },
-                    ),
-                    ),
-                    Showcase(
-                      key: TourConfig.drawerChatKey,
-                      title: 'مساعد ثوثة',
-                      description: 'تحدث مع المساعد الذكي للحصول على توصيات',
-                      child: _menuItem(
-                      context,
-                      title: 'home_screen.thutha_assistant'.tr(),
-                      customIcon: SvgPicture.asset(
-                        'assets/svg/ثوثه الدكتور 1.svg',
-                        width: 24,
-                        height: 24,
+                    // Main Features Group
+                    Showcase.withWidget(
+                      height: 150,
+                      width: 280,
+                      key: TourConfig.drawerMainGroupKey,
+                      container: CustomTourTooltip(
+                        title: 'tour.main_features'.tr(),
+                        description: 'tour.main_features_desc'.tr(),
+                        onNext: () => ShowCaseWidget.of(context)!.next(),
                       ),
-                      fontSize: 16,
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatScreen(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _menuItem(
+                            context,
+                            title: 'doctor.home'.tr(),
+                            icon: Icons.home_outlined,
+                            fontSize: 16,
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.pushNamedAndRemoveUntil(
+                                context,
+                                Routes.categoriesScreen,
+                                (route) => false,
+                              );
+                            },
                           ),
-                        );
-                      },
+                          _menuItem(
+                            context,
+                            title: 'home_screen.thutha_assistant'.tr(),
+                            customIcon: SvgPicture.asset(
+                              'assets/svg/ثوثه الدكتور 1.svg',
+                              width: 24,
+                              height: 24,
+                            ),
+                            fontSize: 16,
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                    ),
-                    Consumer<ThemeProvider>(
-                      builder: (context, themeProvider, _) {
-                        return _toggleMenuItem(
-                          context,
-                          title: 'doctor.dark_mode'.tr(),
-                          value: themeProvider.isDarkMode,
-                          onChanged: (v) => themeProvider.toggleTheme(v),
-                          icon: Icons.dark_mode_outlined,
-                          fontSize: 16,
-                        );
-                      },
-                    ),
-                    Showcase(
-                      key: TourConfig.drawerLanguageKey,
-                      title: 'تغيير اللغة',
-                      description: 'بدّل بين العربية والإنجليزية',
-                      child: _toggleMenuItem(
-                      context,
-                      title: 'doctor.change_language'.tr(),
-                      value: context.locale.languageCode == 'en',
-                      onChanged: (v) {
-                        if (v) {
-                          context.setLocale(const Locale('en'));
-                        } else {
-                          context.setLocale(const Locale('ar'));
-                        }
-                      },
-                      icon: Icons.language,
-                      fontSize: 16,
-                    ),
+                    
+                    // Settings Group
+                    Showcase.withWidget(
+                      height: 150,
+                      width: 280,
+                      key: TourConfig.drawerSettingsGroupKey,
+                      container: CustomTourTooltip(
+                        title: 'tour.settings_group'.tr(),
+                        description: 'tour.settings_group_desc'.tr(),
+                        onNext: () => ShowCaseWidget.of(context)!.next(),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Consumer<ThemeProvider>(
+                            builder: (context, themeProvider, _) {
+                              return _toggleMenuItem(
+                                context,
+                                title: 'doctor.dark_mode'.tr(),
+                                value: themeProvider.isDarkMode,
+                                onChanged: (v) => themeProvider.toggleTheme(v),
+                                icon: Icons.dark_mode_outlined,
+                                fontSize: 16,
+                              );
+                            },
+                          ),
+                          _toggleMenuItem(
+                            context,
+                            title: 'doctor.change_language'.tr(),
+                            value: context.locale.languageCode == 'en',
+                            onChanged: (v) {
+                              if (v) {
+                                context.setLocale(const Locale('en'));
+                              } else {
+                                context.setLocale(const Locale('ar'));
+                              }
+                            },
+                            icon: Icons.language,
+                            fontSize: 16,
+                          ),
+                        ],
+                      ),
                     ),
                     _menuItem(
                       context,
@@ -301,10 +319,16 @@ class _HomeDrawerState extends State<HomeDrawer> {
                         );
                       },
                     ),
-                    Showcase(
+                    Showcase.withWidget(
+                      height: 150,
+                      width: 280,
                       key: TourConfig.drawerLoginKey,
-                      title: 'تسجيل الدخول',
-                      description: 'سجّل دخولك كطبيب لإدارة حجوزاتك',
+                      container: CustomTourTooltip(
+                        title: 'تسجيل الدخول',
+                        description: 'سجّل دخولك كطبيب لإدارة حجوزاتك',
+                        onNext: () => ShowCaseWidget.of(context)!.next(),
+                        isLast: true,
+                      ),
                       child: _menuItem(
                       context,
                       title: 'home_screen.login'.tr(),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Defines a single step in the onboarding tour.
 class TourStep {
@@ -40,14 +41,10 @@ class TourConfig {
   // ──────────────────────────────────────────────────────────────────────────
   // HOME DRAWER (Patient)
   // ──────────────────────────────────────────────────────────────────────────
-  static final GlobalKey drawerHomeKey =
-      GlobalKey(debugLabel: 'tour_drawer_home');
-  static final GlobalKey drawerChatKey =
-      GlobalKey(debugLabel: 'tour_drawer_chat');
-  static final GlobalKey drawerDarkModeKey =
-      GlobalKey(debugLabel: 'tour_drawer_dark_mode');
-  static final GlobalKey drawerLanguageKey =
-      GlobalKey(debugLabel: 'tour_drawer_language');
+  static final GlobalKey drawerMainGroupKey =
+      GlobalKey(debugLabel: 'tour_drawer_main_group');
+  static final GlobalKey drawerSettingsGroupKey =
+      GlobalKey(debugLabel: 'tour_drawer_settings_group');
   static final GlobalKey drawerTermsKey =
       GlobalKey(debugLabel: 'tour_drawer_terms');
   static final GlobalKey drawerPrivacyKey =
@@ -109,20 +106,10 @@ class TourConfig {
   // ──────────────────────────────────────────────────────────────────────────
   // DOCTOR DRAWER
   // ──────────────────────────────────────────────────────────────────────────
-  static final GlobalKey doctorDrawerHomeKey =
-      GlobalKey(debugLabel: 'tour_doctor_drawer_home');
-  static final GlobalKey doctorDrawerAddCaseKey =
-      GlobalKey(debugLabel: 'tour_doctor_drawer_add_case');
-  static final GlobalKey doctorDrawerProfileKey =
-      GlobalKey(debugLabel: 'tour_doctor_drawer_profile');
-  static final GlobalKey doctorDrawerUpcomingKey =
-      GlobalKey(debugLabel: 'tour_doctor_drawer_upcoming');
-  static final GlobalKey doctorDrawerHistoryKey =
-      GlobalKey(debugLabel: 'tour_doctor_drawer_history');
-  static final GlobalKey doctorDrawerConfirmedKey =
-      GlobalKey(debugLabel: 'tour_doctor_drawer_confirmed');
-  static final GlobalKey doctorDrawerRequestsKey =
-      GlobalKey(debugLabel: 'tour_doctor_drawer_requests');
+  static final GlobalKey doctorDrawerManagementKey =
+      GlobalKey(debugLabel: 'tour_doctor_drawer_management');
+  static final GlobalKey doctorDrawerBookingsKey =
+      GlobalKey(debugLabel: 'tour_doctor_drawer_bookings');
   static final GlobalKey doctorDrawerDarkModeKey =
       GlobalKey(debugLabel: 'tour_doctor_drawer_dark_mode');
   static final GlobalKey doctorDrawerLanguageKey =
@@ -137,6 +124,8 @@ class TourConfig {
       GlobalKey(debugLabel: 'tour_doctor_drawer_help');
   static final GlobalKey doctorDrawerLogoutKey =
       GlobalKey(debugLabel: 'tour_doctor_drawer_logout');
+  static final GlobalKey doctorDrawerRequestsKey =
+      GlobalKey(debugLabel: 'tour_doctor_drawer_requests');
 
   // ─── MY REQUESTS SCREEN ──────────────────────────────────────────
   static final GlobalKey myRequestsTitleKey =
@@ -223,28 +212,19 @@ class TourConfig {
 
         // ─── HOME DRAWER ─────────────────────────────────────────────
         TourStep(
-          id: 'drawer_home',
-          key: drawerHomeKey,
-          title: 'الرئيسية',
-          description: 'ارجع لصفحة التصفح الرئيسية',
+          id: 'drawer_main_group',
+          key: drawerMainGroupKey,
+          title: 'tour.main_features'.tr(),
+          description: 'tour.main_features_desc'.tr(),
           screen: 'home_drawer',
         ),
         TourStep(
-          id: 'drawer_chat',
-          key: drawerChatKey,
-          title: 'مساعد ثوثة',
-          description: 'تحدث مع المساعد الذكي للحصول على توصيات',
+          id: 'drawer_settings_group',
+          key: drawerSettingsGroupKey,
+          title: 'tour.settings_group'.tr(),
+          description: 'tour.settings_group_desc'.tr(),
           screen: 'home_drawer',
         ),
-
-        TourStep(
-          id: 'drawer_language',
-          key: drawerLanguageKey,
-          title: 'تغيير اللغة',
-          description: 'بدّل بين العربية والإنجليزية',
-          screen: 'home_drawer',
-        ),
-
         TourStep(
           id: 'drawer_login',
           key: drawerLoginKey,
@@ -287,45 +267,17 @@ class TourConfig {
 
         // ─── DOCTOR DRAWER ───────────────────────────────────────────
         TourStep(
-          id: 'doctor_drawer_home',
-          key: doctorDrawerHomeKey,
-          title: 'الرئيسية',
-          description: 'ارجع للصفحة الرئيسية لعرض حجوزاتك',
+          id: 'doctor_drawer_management',
+          key: doctorDrawerManagementKey,
+          title: 'tour.doctor_management'.tr(),
+          description: 'tour.doctor_management_desc'.tr(),
           screen: 'doctor_drawer',
         ),
         TourStep(
-          id: 'doctor_drawer_add_case',
-          key: doctorDrawerAddCaseKey,
-          title: 'إضافة حالة جديدة',
-          description: 'أنشئ حالة جديدة ليراها المرضى ويحجزوا',
-          screen: 'doctor_drawer',
-        ),
-        TourStep(
-          id: 'doctor_drawer_profile',
-          key: doctorDrawerProfileKey,
-          title: 'الملف الشخصي',
-          description: 'عدّل بيانات ملفك الشخصي والصورة',
-          screen: 'doctor_drawer',
-        ),
-        TourStep(
-          id: 'doctor_drawer_upcoming',
-          key: doctorDrawerUpcomingKey,
-          title: 'الحجوزات القادمة',
-          description: 'اعرض جميع حجوزاتك القادمة',
-          screen: 'doctor_drawer',
-        ),
-        TourStep(
-          id: 'doctor_drawer_history',
-          key: doctorDrawerHistoryKey,
-          title: 'سجل الحجوزات',
-          description: 'راجع تاريخ حجوزاتك السابقة',
-          screen: 'doctor_drawer',
-        ),
-        TourStep(
-          id: 'doctor_drawer_confirmed',
-          key: doctorDrawerConfirmedKey,
-          title: 'الحجوزات المؤكدة',
-          description: 'اعرض الحجوزات التي تم تأكيدها وقبولها',
+          id: 'doctor_drawer_bookings',
+          key: doctorDrawerBookingsKey,
+          title: 'tour.doctor_bookings'.tr(),
+          description: 'tour.doctor_bookings_desc'.tr(),
           screen: 'doctor_drawer',
         ),
         TourStep(
@@ -437,4 +389,15 @@ class TourConfig {
   /// Returns only the steps belonging to [screenName].
   static List<TourStep> stepsForScreen(String screenName) =>
       allSteps.where((s) => s.screen == screenName).toList();
+
+  /// Returns the steps grouped by 3 (or logically) for the MultiTourWidget.
+  static List<List<TourStep>> stepGroupsForScreen(String screenName) {
+    final steps = stepsForScreen(screenName);
+    List<List<TourStep>> groups = [];
+    // Group every 3 steps together
+    for (int i = 0; i < steps.length; i += 3) {
+      groups.add(steps.sublist(i, i + 3 > steps.length ? steps.length : i + 3));
+    }
+    return groups;
+  }
 }
