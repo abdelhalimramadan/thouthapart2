@@ -18,10 +18,7 @@ import 'package:showcaseview/showcaseview.dart';
 import 'package:thoutha_mobile_app/tour/tour_config.dart';
 import 'package:thoutha_mobile_app/tour/tour_service.dart';
 import 'package:thoutha_mobile_app/tour/tour_widgets.dart';
-<<<<<<< Updated upstream
-=======
 import 'package:thoutha_mobile_app/tour/multi_tour_widget.dart';
->>>>>>> Stashed changes
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DoctorHomeScreen
