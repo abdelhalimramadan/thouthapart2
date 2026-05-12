@@ -5,9 +5,9 @@ import '../../../core/routing/routes.dart';
 import '../../../core/theming/colors.dart';
 import '../../auth/data/auth_service.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
-import 'package:showcaseview/showcaseview.dart';
+/*import 'package:showcaseview/showcaseview.dart';
 import 'package:thoutha_mobile_app/tour/tour_config.dart';
-import 'package:thoutha_mobile_app/tour/tour_service.dart';
+import 'package:thoutha_mobile_app/tour/tour_service.dart';*/
 
 
 class LoginScreen extends StatefulWidget {
