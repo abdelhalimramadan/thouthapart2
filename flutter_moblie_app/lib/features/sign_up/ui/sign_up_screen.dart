@@ -13,9 +13,9 @@ import 'package:thoutha_mobile_app/features/booking/ui/otp_verification_dialog.d
 import 'package:thoutha_mobile_app/features/login/ui/widgets/password_validations.dart';
 import 'package:thoutha_mobile_app/features/sign_up/logic/sign_up_cubit.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
-//import 'package:showcaseview/showcaseview.dart';
-//import 'package:thoutha_mobile_app/tour/tour_config.dart';
-//import 'package:thoutha_mobile_app/tour/tour_service.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:thoutha_mobile_app/tour/tour_config.dart';
+import 'package:thoutha_mobile_app/tour/tour_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});

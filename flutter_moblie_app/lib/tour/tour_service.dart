@@ -53,11 +53,15 @@ class TourService {
     Future.delayed(const Duration(milliseconds: 500), () {
       if (context.mounted) {
         try {
-          MultiTourWidget.of(context).startTour(unseenGroups);
+          final tourWidget = MultiTourWidget.of(context);
+          if (tourWidget != null) {
+            tourWidget.startTour(unseenGroups);
+          } else {
+            final keys = unseenGroups.expand((g) => g).map((s) => s.key).toList();
+            ShowCaseWidget.of(context).startShowCase(keys);
+          }
         } catch (e) {
-          // If MultiTourWidget is not found, fallback to ShowCaseWidget if still wrapped
-          final keys = unseenGroups.expand((g) => g).map((s) => s.key).toList();
-          ShowCaseWidget.of(context).startShowCase(keys);
+          // Fallback if anything goes wrong
         }
       }
     });

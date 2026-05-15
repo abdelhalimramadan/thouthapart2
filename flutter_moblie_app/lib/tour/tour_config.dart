@@ -390,13 +390,13 @@ class TourConfig {
   static List<TourStep> stepsForScreen(String screenName) =>
       allSteps.where((s) => s.screen == screenName).toList();
 
-  /// Returns the steps grouped by 3 (or logically) for the MultiTourWidget.
+  /// Returns the steps grouped by 1 for the MultiTourWidget to show one at a time.
   static List<List<TourStep>> stepGroupsForScreen(String screenName) {
     final steps = stepsForScreen(screenName);
     List<List<TourStep>> groups = [];
-    // Group every 3 steps together
-    for (int i = 0; i < steps.length; i += 3) {
-      groups.add(steps.sublist(i, i + 3 > steps.length ? steps.length : i + 3));
+    // Show one step per screen at a time to prevent overlap
+    for (int i = 0; i < steps.length; i++) {
+        groups.add([steps[i]]);
     }
     return groups;
   }

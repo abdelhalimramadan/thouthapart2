@@ -57,42 +57,135 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
   // ── Getters ───────────────────────────────────────────────────────────────
 
   String get _formattedDate => _selectedDate != null
-      ? DateFormat('yyyy-MM-dd').format(_selectedDate!)
+      ? DateFormat('yyyy-MM-dd', 'en').format(_selectedDate!)
       : '';
 
-  String get _formattedTime => _selectedTime != null
-      ? '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}'
+  String get _formattedTime {
+    if (_selectedTime == null) return '';
+    final hour = _selectedTime!.hourOfPeriod == 0 ? 12 :
+    _selectedTime!.hourOfPeriod;
+    final minute = _selectedTime!.minute.toString().padLeft(2, '0');
+    final period = _selectedTime!.period ==
+        DayPeriod.am ? 'doctor.am'.tr() : 'doctor.evening'.tr();
+    return '$hour:$minute $period';
+  }
+
+  /// 24-hour format for API submission
+  String get _formattedTime24 => _selectedTime != null
+      ? '${_selectedTime!.hour.toString().padLeft(2, '0')}'
+      ':${_selectedTime!.minute.toString().padLeft(2, '0')}'
       : '';
 
-  /// Builds "2026-03-10T15:30:00" format
+  /// Builds "2026-03-10T15:30:00" format correctly regardless of Locale
   String get _dateTimeIso {
     if (_selectedDate == null || _selectedTime == null) return '';
-    return '${_formattedDate}T$_formattedTime:00';
+    final d = _selectedDate!;
+    final isoDate = '${d.year}-${d.month.toString().padLeft(2, '0')}'
+        '-${d.day.toString().padLeft(2, '0')}';
+    return '${isoDate}T$_formattedTime24:00';
   }
 
   // ── Date & Time Pickers ───────────────────────────────────────────────────
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? now,
       firstDate: now,
       lastDate: DateTime(2101),
       locale: Locale('ar', 'EG'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: isDark
+                ? const ColorScheme.dark(
+                    primary: ColorsManager.mainBlue,
+                    onPrimary: Colors.white,
+                    surface: Color(0xFF2D2D2D),
+                    onSurface: Colors.white,
+                  )
+                : const ColorScheme.light(
+                    primary: ColorsManager.mainBlue,
+                    onPrimary: Colors.white,
+                    surface: Colors.white,
+                    onSurface: Colors.black,
+                  ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                textStyle: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
   Future<void> _pickTime() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final picked = await showTimePicker(
       context: context,
       initialTime: _selectedTime ?? TimeOfDay.now(),
-      builder: (ctx, child) => Localizations.override(
-        context: ctx,
-        locale: Locale('ar', 'EG'),
-        child: child,
-      ),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: isDark
+                ? const ColorScheme.dark(
+                    primary: ColorsManager.mainBlue,
+                    onPrimary: Colors.white,
+                    surface: Color(0xFF2D2D2D),
+                    onSurface: Colors.white,
+                  )
+                : const ColorScheme.light(
+                    primary: ColorsManager.mainBlue,
+                    onPrimary: Colors.white,
+                    surface: Colors.white,
+                    onSurface: Colors.black,
+                  ),
+            timePickerTheme: TimePickerThemeData(
+              helpTextStyle: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+              hourMinuteTextStyle: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+              ),
+              dayPeriodTextStyle: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                textStyle: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              alwaysUse24HourFormat: false,
+            ),
+            child: Directionality(
+              textDirection: ui.TextDirection.rtl,
+              child: child!,
+            ),
+          ),
+        );
+      },
     );
     if (picked != null) setState(() => _selectedTime = picked);
   }
@@ -287,6 +380,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                                         TextStyles.font16WhiteSemiBold.copyWith(
                                       fontFamily: 'Cairo',
                                       fontSize: 16,
+                                      color: isDark ? Colors.black : Colors.white,
                                     ),
                                     backgroundColor: ColorsManager.mainBlue,
                                     onPressed: _saveRequest,
