@@ -36,6 +36,18 @@ abstract class INotificationRepo {
   /// Delete all notifications
   /// Endpoint: DELETE /api/v1/notifications
   Future<bool> deleteAllNotifications();
+
+  /// Fetch patient temporary token
+  /// Endpoint: GET /api/v1/patient/token
+  Future<String?> getPatientToken({String? phone, int? appointmentId});
+
+  /// Fetch notifications for a patient using temporary token
+  /// Endpoint: GET /api/v1/patient/notifications/{token}
+  Future<List<NotificationLogModel>> getPatientNotifications(String token);
+
+  /// Validate patient temporary token
+  /// Endpoint: POST /api/v1/patient/token-validate
+  Future<bool> validatePatientToken(String token);
 }
 
 /// Implementation of notification repository
@@ -222,6 +234,63 @@ class NotificationRepo implements INotificationRepo {
       return success;
     } catch (e, stackTrace) {
       log('❌ Error deleting all notifications: $e\n$stackTrace');
+      return false;
+    }
+  }
+
+  @override
+  Future<String?> getPatientToken({String? phone, int? appointmentId}) async {
+    try {
+      log('🎫 Fetching patient temporary token...');
+      final Map<String, dynamic> query = {};
+      if (phone != null) query['phone'] = phone;
+      if (appointmentId != null) query['appointment_id'] = appointmentId;
+
+      final response = await _apiService.get(ApiConstants.getPatientToken, query: query);
+      if (response['success'] == true && response['data'] != null) {
+        return response['data']['token'];
+      }
+      return null;
+    } catch (e) {
+      log('❌ Error fetching patient token: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<List<NotificationLogModel>> getPatientNotifications(String token) async {
+    try {
+      log('📨 Fetching patient notifications...');
+      final response = await _apiService.get(
+        ApiConstants.getPatientNotifications.replaceFirst('{token}', token),
+      );
+
+      if (response['success'] == true) {
+        final data = response['data'];
+        List? rawList = data is List ? data : (data is Map ? data['notifications'] as List? : null);
+        
+        if (rawList == null) return [];
+
+        return rawList.map((item) => NotificationLogModel.fromJson(Map<String, dynamic>.from(item))).toList();
+      }
+      return [];
+    } catch (e) {
+      log('❌ Error fetching patient notifications: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<bool> validatePatientToken(String token) async {
+    try {
+      log('🔍 Validating patient token...');
+      final response = await _apiService.post(
+        ApiConstants.validatePatientToken,
+        data: {'token': token},
+      );
+      return response['success'] == true;
+    } catch (e) {
+      log('❌ Error validating patient token: $e');
       return false;
     }
   }

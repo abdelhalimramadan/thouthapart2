@@ -1,4 +1,14 @@
 {
+  "ثوثة": "Thoutha",
+  "core": {
+    "link_not_found_404": "Link not found on server (404)",
+    "server_error_var0": "Server error ({var_0})",
+    "the_connection_timed_out": "Connection timed out",
+    "unable_to_connect_to": "Unable to connect to server",
+    "unauthorized_please_log_in": "Unauthorized, please login",
+    "unexpected_error_var0": "Unexpected error ({var_0})",
+    "http_error_var0": "HTTP error ({var_0})"
+  },
   "tour": {
     "next": "Next",
     "finish": "Got it",
@@ -433,7 +443,11 @@
     "notifications_will_be_displayed": "Notifications will be displayed here as they arrive",
     "click_on_the_icon": "Click on the icon to view all notifications",
     "unknown_time": "Unknown time",
-    "no_content": "No content"
+    "no_content": "No content",
+    "delete_all": "Delete All",
+    "delete_all_confirmation": "Are you sure you want to delete all notifications?",
+    "notification_deleted": "Notification deleted",
+    "appointment_not_found": "Sorry, this booking is no longer available or has been deleted"
   },
   "onboarding": {
     "opinion": "opinion",

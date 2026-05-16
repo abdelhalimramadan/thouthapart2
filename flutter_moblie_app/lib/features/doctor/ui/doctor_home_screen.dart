@@ -34,6 +34,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final ApiService _apiService = getIt<ApiService>();
 
+  // Instance-specific keys to prevent GlobalKey duplication during transitions
+  late GlobalKey _doctorHomeMenuKey;
+  late GlobalKey _doctorHomeNotificationsKey;
+  late GlobalKey _doctorHomePendingKey;
+  late GlobalKey _doctorHomeConfirmedKey;
+
   // ── State ──────────────────────────────────────────────────────
   String? _firstName;
   bool _isLoadingName = true;
@@ -49,6 +55,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   @override
   void initState() {
     super.initState();
+    _initKeys();
     _notificationsCubit = getIt<NotificationsCubit>();
     // Run all fetches in parallel — faster startup
     Future.wait([
@@ -56,6 +63,13 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       _fetchAllAppointments(),
       _notificationsCubit.fetchNotifications(showLoading: false),
     ]);
+  }
+
+  void _initKeys() {
+    _doctorHomeMenuKey = GlobalKey(debugLabel: 'dr_home_menu_${DateTime.now().microsecondsSinceEpoch}');
+    _doctorHomeNotificationsKey = GlobalKey(debugLabel: 'dr_home_notif_${DateTime.now().microsecondsSinceEpoch}');
+    _doctorHomePendingKey = GlobalKey(debugLabel: 'dr_home_pending_${DateTime.now().microsecondsSinceEpoch}');
+    _doctorHomeConfirmedKey = GlobalKey(debugLabel: 'dr_home_confirmed_${DateTime.now().microsecondsSinceEpoch}');
   }
 
   // ── Data Fetching ──────────────────────────────────────────────
@@ -503,6 +517,39 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     }
   }
 
+  /// Returns the steps for this screen instance
+  List<TourStep> _getStepsForDoctorHome() {
+    return [
+      TourStep(id: 'doctor_home_menu', key: _doctorHomeMenuKey, title: 'القائمة', description: 'افتح القائمة الجانبية لإدارة حسابك وحجوزاتك', screen: 'doctor_home'),
+      TourStep(id: 'doctor_home_notifications', key: _doctorHomeNotificationsKey, title: 'الإشعارات', description: 'اضغط لعرض إشعارات الحجوزات الجديدة', screen: 'doctor_home'),
+      TourStep(id: 'doctor_home_pending', key: _doctorHomePendingKey, title: 'الحجوزات المعلّقة', description: 'حجوزات تحتاج قبولك أو رفضك', screen: 'doctor_home'),
+      TourStep(id: 'doctor_home_confirmed', key: _doctorHomeConfirmedKey, title: 'الحالات المؤكدة', description: 'الحجوزات التي تم قبولها وتأكيدها', screen: 'doctor_home'),
+    ];
+  }
+
+  Future<void> _startTour(BuildContext context) async {
+    final steps = _getStepsForDoctorHome();
+    final unseenGroups = <List<TourStep>>[];
+    
+    for (final step in steps) {
+        final seen = await TourService.hasBeenSeen(step.id);
+        if (!seen) {
+          unseenGroups.add([step]);
+        }
+    }
+
+    if (unseenGroups.isEmpty) return;
+
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (mounted) {
+        final tour = MultiTourWidget.of(context);
+        if (tour != null) {
+          tour.startTour(unseenGroups);
+        }
+      }
+    });
+  }
+
   // ── Build ──────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
@@ -519,13 +566,17 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       child: MultiTourWidget(
         child: ShowCaseWidget(
         onComplete: (index, key) {
-          TourService.onDismiss(key)();
+          final steps = _getStepsForDoctorHome();
+          try {
+            final step = steps.firstWhere((s) => s.key == key);
+            TourService.markSeen(step.id);
+          } catch (_) {}
         },
         builder: (context) {
           if (!_isTourStarted) {
             _isTourStarted = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) TourService.startTourForScreen(context, 'doctor_home');
+              if (mounted) _startTour(context);
             });
           }
           return Scaffold(
@@ -545,7 +596,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                 Showcase.withWidget(
                       height: 150,
                       width: 280,
-                  key: TourConfig.doctorHomePendingKey,
+                  key: _doctorHomePendingKey,
                   container: CustomTourTooltip(
                     title: 'الحجوزات المعلّقة',
                     description: 'حجوزات تحتاج قبولك أو رفضك',
@@ -570,7 +621,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                 Showcase.withWidget(
                       height: 150,
                       width: 280,
-                  key: TourConfig.doctorHomeConfirmedKey,
+                  key: _doctorHomeConfirmedKey,
                   container: CustomTourTooltip(
                     title: 'الحالات المؤكدة',
                     description: 'الحجوزات التي تم قبولها وتأكيدها',
@@ -620,7 +671,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       leading: Showcase.withWidget(
                       height: 150,
                       width: 280,
-        key: TourConfig.doctorHomeMenuKey,
+        key: _doctorHomeMenuKey,
         container: CustomTourTooltip(
           title: 'القائمة',
           description: 'افتح القائمة الجانبية لإدارة حسابك وحجوزاتك',
@@ -667,7 +718,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
             return Showcase.withWidget(
                       height: 150,
                       width: 280,
-              key: TourConfig.doctorHomeNotificationsKey,
+              key: _doctorHomeNotificationsKey,
               container: CustomTourTooltip(
                 title: 'الإشعارات',
                 description: 'اضغط لعرض إشعارات الحجوزات الجديدة',

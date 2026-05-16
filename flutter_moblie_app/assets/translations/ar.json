@@ -1,4 +1,14 @@
 {
+  "ثوثة": "ثوثة",
+  "core": {
+    "link_not_found_404": "الرابط غير موجود على السيرفر (404)",
+    "server_error_var0": "خطأ في السيرفر ({var_0})",
+    "the_connection_timed_out": "انتهت مهلة الاتصال",
+    "unable_to_connect_to": "تعذر الاتصال بالسيرفر",
+    "unauthorized_please_log_in": "غير مصرح، يرجى تسجيل الدخول",
+    "unexpected_error_var0": "خطأ غير متوقع ({var_0})",
+    "http_error_var0": "خطأ HTTP ({var_0})"
+  },
   "tour": {
     "next": "التالي",
     "finish": "فهمت",
@@ -432,7 +442,11 @@
     "notifications_will_be_displayed": "سيتم عرض الاشعارات هنا عند وصولها",
     "click_on_the_icon": "اضغط على الايقونة لعرض كل الاشعارات",
     "unknown_time": "وقت غير معروف",
-    "no_content": "بدون محتوى"
+    "no_content": "بدون محتوى",
+    "delete_all": "حذف الكل",
+    "delete_all_confirmation": "هل أنت متأكد من حذف جميع الإشعارات؟",
+    "notification_deleted": "تم حذف الإشعار",
+    "appointment_not_found": "عذراً، هذا الحجز لم يعد متاحاً أو تم حذفه"
   },
   "onboarding": {
     "opinion": "رأى",

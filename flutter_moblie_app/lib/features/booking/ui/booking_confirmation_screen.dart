@@ -1,4 +1,6 @@
+import 'package:thoutha_mobile_app/core/helpers/constants.dart';
 import 'package:thoutha_mobile_app/core/networking/api_service.dart';
+import 'package:thoutha_mobile_app/features/notifications/data/repos/notification_repo.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
 import 'package:thoutha_mobile_app/core/theming/colors.dart';
 import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
@@ -103,6 +105,19 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
             'last_name', _lastNameController.text.trim());
         await SharedPrefHelper.setData(
             'phone_number', _phoneController.text.trim());
+
+        // Fetch and store patient temporary token for notifications
+        try {
+          final notificationRepo = getIt<NotificationRepo>();
+          final pToken = await notificationRepo.getPatientToken(
+            phone: _phoneController.text.trim(),
+          );
+          if (pToken != null) {
+            await SharedPrefHelper.setData(SharedPrefKeys.patientToken, pToken);
+          }
+        } catch (e) {
+          debugPrint('Error fetching patient notification token: $e');
+        }
 
         if (!mounted) return;
         _showSuccessDialog();

@@ -112,6 +112,18 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
             service: booking['categoryName'] ?? 'doctor.general_specialty'.tr(),
             baseFontSize: baseFontSize,
           );
+        } else {
+          // If the booking is not in the list, show a friendly message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'notifications.appointment_not_found'.tr(),
+                style: const TextStyle(fontFamily: 'Cairo'),
+              ),
+              backgroundColor: Colors.orange,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
       }
     }
@@ -189,7 +201,7 @@ class _DoctorNextBookingScreenState extends State<DoctorNextBookingScreen> {
                         ),
                         SizedBox(height: 16),
                         Text(
-                          _errorMessage!,
+                          _errorMessage!.contains('core.') ? 'booking.an_unexpected_error_occurred'.tr() : _errorMessage!,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Cairo',

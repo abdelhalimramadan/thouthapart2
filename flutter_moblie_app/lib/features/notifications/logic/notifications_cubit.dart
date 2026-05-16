@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:thoutha_mobile_app/core/helpers/constants.dart';
+import 'package:thoutha_mobile_app/core/helpers/shared_pref_helper.dart';
 import 'package:thoutha_mobile_app/features/notifications/data/models/notification_log_model.dart';
 import 'package:thoutha_mobile_app/features/notifications/data/repos/notification_repo.dart';
 
@@ -15,9 +17,36 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     if (showLoading && !isClosed) {
       emit(NotificationsState.loading());
     }
-    final notifications = await _notificationRepo.getNotifications();
+
+    final doctorToken = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+    List<NotificationLogModel> notifications = [];
+
+    if (doctorToken.isNotEmpty && doctorToken != 'null') {
+      // 1. Logged-in Doctor
+      notifications = await _notificationRepo.getNotifications();
+    } else {
+      // 2. Patient (Guest)
+      final patientToken = await SharedPrefHelper.getString(SharedPrefKeys.patientToken);
+      if (patientToken.isNotEmpty) {
+        notifications = await _notificationRepo.getPatientNotifications(patientToken);
+      }
+    }
+
     if (!isClosed) {
       emit(NotificationsState.success(notifications));
+    }
+  }
+
+  /// Request a new patient temporary token and fetch notifications
+  Future<void> fetchPatientNotificationsByPhone(String phone) async {
+    emit(NotificationsState.loading());
+    final token = await _notificationRepo.getPatientToken(phone: phone);
+    if (token != null) {
+      await SharedPrefHelper.setData(SharedPrefKeys.patientToken, token);
+      final notifications = await _notificationRepo.getPatientNotifications(token);
+      emit(NotificationsState.success(notifications));
+    } else {
+      emit(NotificationsState.success([]));
     }
   }
 

@@ -113,12 +113,16 @@ class ApiService {
         if (code == 401) return 'core.unauthorized_please_log_in'.tr();
         if (code == 403) return 'core.access_forbidden_403'.tr();
         if (code == 404) return 'core.link_not_found_404'.tr();
-        if (code != null && code >= 500) return 'core.server_error_var0'.tr(namedArgs: {'var_0': code.toString()});
+        if (code != null && code >= 500) {
+          final msg = 'core.server_error_var0'.tr(namedArgs: {'var_0': code.toString()});
+          return msg.contains('core.') ? 'booking.an_unexpected_error_occurred'.tr() : msg;
+        }
         return serverMsg.toString().isNotEmpty 
             ? serverMsg.toString() 
             : 'core.http_error_var0'.tr(namedArgs: {'var_0': code.toString()});
       default:
-        return 'core.unexpected_error_var0'.tr(namedArgs: {'var_0': e.message ?? e.type.name.toString()});
+        final msg = 'core.unexpected_error_var0'.tr(namedArgs: {'var_0': e.message ?? e.type.name.toString()});
+        return msg.contains('core.') ? 'booking.an_unexpected_error_occurred'.tr() : msg;
     }
   }
 

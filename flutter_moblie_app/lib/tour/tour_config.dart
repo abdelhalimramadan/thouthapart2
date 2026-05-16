@@ -25,10 +25,9 @@ class TourStep {
 class TourConfig {
   TourConfig._();
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // HOME SCREEN (Patient) — categoriesScreen / HomeScreen
-  // ──────────────────────────────────────────────────────────────────────────
+  // Primary GlobalKeys for tour steps
   static final GlobalKey homeMenuKey = GlobalKey(debugLabel: 'tour_home_menu');
+  static final GlobalKey secondaryHomeMenuKey = GlobalKey(debugLabel: 'tour_secondary_home_menu');
   static final GlobalKey homeCityDropdownKey =
       GlobalKey(debugLabel: 'tour_home_city_dropdown');
   static final GlobalKey homeChatBannerKey =

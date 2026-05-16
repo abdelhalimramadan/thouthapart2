@@ -34,6 +34,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  
+  // Instance-specific keys to prevent GlobalKey duplication during transitions
+  late GlobalKey _homeMenuKey;
+  late GlobalKey _homeCityDropdownKey;
+  late GlobalKey _homeChatBannerKey;
+  late GlobalKey _homeCategoriesGridKey;
+  late GlobalKey _homePromoBannerKey;
 
   int? _selectedCityId;
   // All candidate strings returned by Nominatim (state, county, city, etc.)
@@ -299,6 +306,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    // Unique keys for THIS instance
+    _homeMenuKey = GlobalKey(debugLabel: 'home_menu_${DateTime.now().microsecondsSinceEpoch}');
+    _homeCityDropdownKey = GlobalKey(debugLabel: 'home_city_${DateTime.now().microsecondsSinceEpoch}');
+    _homeChatBannerKey = GlobalKey(debugLabel: 'home_chat_${DateTime.now().microsecondsSinceEpoch}');
+    _homeCategoriesGridKey = GlobalKey(debugLabel: 'home_grid_${DateTime.now().microsecondsSinceEpoch}');
+    _homePromoBannerKey = GlobalKey(debugLabel: 'home_promo_${DateTime.now().microsecondsSinceEpoch}');
+
     _doctorCubit = getIt<DoctorCubit>()..loadInitialData();
     WidgetsBinding.instance.addObserver(this);
     _checkLoginStatus();
@@ -496,6 +510,41 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  /// Returns only the steps belonging to [screenName], with instance keys.
+  List<TourStep> _getStepsForHome() {
+    return [
+      TourStep(id: 'home_menu', key: _homeMenuKey, title: 'القائمة الرئيسية', description: 'اضغط هنا لفتح القائمة الجانبية والوصول للإعدادات', screen: 'home'),
+      TourStep(id: 'home_promo_banner', key: _homePromoBannerKey, title: 'بانر الحجز', description: 'تعرّف على خدمات الحجز مع أفضل أطباء الأسنان', screen: 'home'),
+      TourStep(id: 'home_city_dropdown', key: _homeCityDropdownKey, title: 'اختيار المحافظة', description: 'اختر محافظتك لعرض الأطباء القريبين منك', screen: 'home'),
+      TourStep(id: 'home_chat_banner', key: _homeChatBannerKey, title: 'مساعد ثوثة الذكي', description: 'لا تعرف ماذا تحتاج؟ اضغط هنا للتحدث مع المساعد الذكي', screen: 'home'),
+      TourStep(id: 'home_categories_grid', key: _homeCategoriesGridKey, title: 'الخدمات المتاحة', description: 'اختر التخصص المطلوب لعرض الأطباء وحجز موعد', screen: 'home'),
+    ];
+  }
+
+  Future<void> _startTour(BuildContext context) async {
+    final steps = _getStepsForHome();
+    final unseenGroups = <List<TourStep>>[];
+    
+    // Logic to show only unseen steps
+    for (final step in steps) {
+        final seen = await TourService.hasBeenSeen(step.id);
+        if (!seen) {
+          unseenGroups.add([step]);
+        }
+    }
+    
+    if (unseenGroups.isEmpty) return;
+    
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (mounted) {
+        final tour = MultiTourWidget.of(context);
+        if (tour != null) {
+          tour.startTour(unseenGroups);
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -505,13 +554,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       child: MultiTourWidget(
         child: ShowCaseWidget(
         onComplete: (index, key) {
-          TourService.onDismiss(key)();
+          final steps = _getStepsForHome();
+          try {
+            final step = steps.firstWhere((s) => s.key == key);
+            TourService.markSeen(step.id);
+          } catch (_) {}
         },
         builder: (context) {
           if (!_isTourStarted) {
             _isTourStarted = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) TourService.startTourForScreen(context, 'home');
+              if (mounted) _startTour(context);
             });
           }
           return Scaffold(
@@ -525,7 +578,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             leading: Showcase.withWidget(
                 height: 150,
                 width: 280,
-              key: TourConfig.homeMenuKey,
+              key: _homeMenuKey,
               container: CustomTourTooltip(
                 title: 'القائمة الرئيسية',
                 description: 'اضغط هنا لفتح القائمة الجانبية والوصول للإعدادات',
@@ -577,7 +630,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       Showcase.withWidget(
                 height: 150,
                 width: 280,
-                        key: TourConfig.homePromoBannerKey,
+                        key: _homePromoBannerKey,
                         container: CustomTourTooltip(
                           title: 'بانر الحجز',
                           description: 'تعرّف على خدمات الحجز مع أفضل أطباء الأسنان',
@@ -675,7 +728,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       Showcase.withWidget(
                 height: 150,
                 width: 280,
-                        key: TourConfig.homeCityDropdownKey,
+                        key: _homeCityDropdownKey,
                         container: CustomTourTooltip(
                           title: 'اختيار المحافظة',
                           description: 'اختر محافظتك لعرض الأطباء القريبين منك',
@@ -835,7 +888,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       Showcase.withWidget(
                 height: 150,
                 width: 280,
-                        key: TourConfig.homeChatBannerKey,
+                        key: _homeChatBannerKey,
                         container: CustomTourTooltip(
                           title: 'مساعد ثوثة الذكي',
                           description: 'لا تعرف ماذا تحتاج؟ اضغط هنا للتحدث مع المساعد الذكي',
@@ -907,7 +960,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         Showcase.withWidget(
                 height: 150,
                 width: 280,
-                          key: TourConfig.homeCategoriesGridKey,
+                          key: _homeCategoriesGridKey,
                           container: CustomTourTooltip(
                             title: 'الخدمات المتاحة',
                             description: 'اختر التخصص المطلوب لعرض الأطباء وحجز موعد',
