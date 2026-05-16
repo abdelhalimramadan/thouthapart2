@@ -253,8 +253,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             if (resolvedAssetPath.endsWith('.svg')) ...[
               SvgPicture.asset(
                 resolvedAssetPath,
-                width: iconSize,
-                height: iconSize,
+                width: resolvedAssetPath.contains('تقويم اسنان') ? iconSize * 0.6 : iconSize,
+                height: resolvedAssetPath.contains('تقويم اسنان') ? iconSize * 0.6 : iconSize,
                 fit: BoxFit.contain,
                 placeholderBuilder: (BuildContext context) => Container(
                   width: iconSize,
