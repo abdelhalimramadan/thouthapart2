@@ -252,7 +252,7 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
     'تنظيف وتبييض الأسنان': 'assets/svg/تبيض اسنان.svg',
     'تقويم اسنان': 'assets/svg/تقويم اسنان.svg',
     'تقويم الأسنان': 'assets/svg/تقويم اسنان.svg',
-    'تيجان وجسور': 'assets/svg/ثوثه الدكتور 1.svg', // Fallback if image not found
+    'تيجان وجسور': 'assets/images/تيجان وجسور.webp',
     'تركيبات اسنان': 'assets/svg/تركيبات اسنان.svg',
     'تركيبات متحركة': 'assets/svg/تركيبات اسنان.svg',
     'اطفال2': 'assets/svg/اطفال2.svg',
@@ -453,7 +453,10 @@ class _SecondaryHomeScreenState extends State<SecondaryHomeScreen> {
             // Display image flexibly to avoid overflow and clipping.
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(
+                  horizontal: resolvedAssetPath.contains('تقويم اسنان') ? 18.0 : 12.0,
+                  vertical: resolvedAssetPath.contains('تقويم اسنان') ? 6.0 : 0.0,
+                ),
                 child: resolvedAssetPath.endsWith('.svg')
                     ? SvgPicture.asset(
                         resolvedAssetPath,
