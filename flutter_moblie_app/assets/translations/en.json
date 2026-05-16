@@ -1,4 +1,5 @@
 {
+  "ثوثة": "Thoutha",
   "tour": {
     "next": "Next",
     "finish": "Got it",
@@ -433,7 +434,10 @@
     "notifications_will_be_displayed": "Notifications will be displayed here as they arrive",
     "click_on_the_icon": "Click on the icon to view all notifications",
     "unknown_time": "Unknown time",
-    "no_content": "No content"
+    "no_content": "No content",
+    "delete_all": "Delete All",
+    "delete_all_confirmation": "Are you sure you want to delete all notifications?",
+    "notification_deleted": "Notification deleted"
   },
   "onboarding": {
     "opinion": "opinion",

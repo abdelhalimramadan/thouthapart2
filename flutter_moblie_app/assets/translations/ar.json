@@ -1,4 +1,5 @@
 {
+  "ثوثة": "ثوثة",
   "tour": {
     "next": "التالي",
     "finish": "فهمت",
@@ -432,7 +433,10 @@
     "notifications_will_be_displayed": "سيتم عرض الاشعارات هنا عند وصولها",
     "click_on_the_icon": "اضغط على الايقونة لعرض كل الاشعارات",
     "unknown_time": "وقت غير معروف",
-    "no_content": "بدون محتوى"
+    "no_content": "بدون محتوى",
+    "delete_all": "حذف الكل",
+    "delete_all_confirmation": "هل أنت متأكد من حذف جميع الإشعارات؟",
+    "notification_deleted": "تم حذف الإشعار"
   },
   "onboarding": {
     "opinion": "رأى",

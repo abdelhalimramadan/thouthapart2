@@ -107,6 +107,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               bloc: _cubit,
               builder: (context, state) {
                 if (state is SuccessState && state.notifications.isNotEmpty) {
+                  return IconButton(
+                    tooltip: 'notifications.delete_all'.tr(),
+                    onPressed: () => _showDeleteAllConfirmation(context),
+                    icon: Icon(
+                      Icons.delete_sweep_outlined,
+                      color: Colors.red.withOpacity(0.8),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+            BlocBuilder<NotificationsCubit, NotificationsState>(
+              bloc: _cubit,
+              builder: (context, state) {
+                if (state is SuccessState && state.notifications.isNotEmpty) {
                   final unreadCount =
                       state.notifications.where((n) => n.readStatus == false).length;
   
@@ -217,7 +233,36 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   itemCount: visibleNotifications.length,
                   itemBuilder: (context, index) {
                     final notification = visibleNotifications[index];
-                    return _buildNotificationCard(context, notification);
+                    return Dismissible(
+                      key: Key('notif_${notification.id}'),
+                      direction: DismissDirection.endToStart,
+                      onDismissed: (direction) {
+                        _cubit.deleteNotification(notification.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'notifications.notification_deleted'.tr(),
+                              style: const TextStyle(fontFamily: 'Cairo'),
+                            ),
+                            backgroundColor: Colors.red.shade400,
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      background: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade400,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20),
+                        child: const Icon(Icons.delete_outline_rounded,
+                            color: Colors.white),
+                      ),
+                      child: _buildNotificationCard(context, notification),
+                    );
                   },
                 ),
               );
@@ -530,6 +575,46 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   ),
 );
 }
+
+  void _showDeleteAllConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'notifications.delete_all'.tr(),
+          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'notifications.delete_all_confirmation'.tr(),
+          style: const TextStyle(fontFamily: 'Cairo'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'booking.cancellation'.tr(),
+              style: const TextStyle(fontFamily: 'Cairo', color: Colors.grey),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _cubit.deleteAllNotifications();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: Text(
+              'doctor.delete'.tr(),
+              style: const TextStyle(fontFamily: 'Cairo', color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showNotificationDetailsSheet(
     BuildContext context,

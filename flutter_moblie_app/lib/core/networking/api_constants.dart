@@ -3,9 +3,9 @@ class ApiConstants {
   static const String baseUrl = 'https://thoutha.page';
   static const String otpBaseUrl = baseUrl;
 
-  // ── Notification Microservice (Development) ───────────────────
+  // ── Notification Microservice ────────────────────────────────
   static const String notificationMicroserviceUrl =
-      'http://16.16.218.59:9000/api/v1/notifications';
+      '$baseUrl/api/v1/notifications';
   // ── Authentication ────────────────────────────────────────────
   static const String doctorLogin = '/api/auth/login/doctor';
   static const String signup = '/api/auth/signup';
@@ -53,35 +53,40 @@ class ApiConstants {
   static const String startSession = '/api/session/start';
   static const String submitAnswer = '/api/session/answer';
   static const String chat = '/api/chat';
-  // ── Notifications Microservice (16.16.218.59:9000) ──────────────
+  // ── Notifications Microservice ────────────────────────────────
   // Base URL for all notification operations
-  static const String notificationBaseUrl = 'http://16.16.218.59:9000/api/v1';
+  static const String notificationBaseUrl = '$baseUrl/api/v1';
 
   // Device Token Registration
   static const String registerDeviceToken =
-      'http://16.16.218.59:9000/api/v1/device-tokens/register';
+      '/api/v1/device-tokens/register';
 
   // Notification History & Management
   static const String getNotifications =
-      'http://16.16.218.59:9000/api/v1/notifications'; // GET all
+      '/api/v1/notifications'; // GET all
   static const String getNotificationById =
-      'http://16.16.218.59:9000/api/v1/notifications/{id}'; // GET one
+      '/api/v1/notifications/{id}'; // GET one
   static const String markNotificationAsRead =
-      'http://16.16.218.59:9000/api/v1/notifications/{id}/read'; // PATCH
+      '/api/v1/notifications/{id}/read'; // PATCH
   static const String markAllNotificationsAsRead =
-      'http://16.16.218.59:9000/api/v1/notifications/read-all'; // PATCH
+      '/api/v1/notifications/read-all'; // PATCH
   static const String deleteNotification =
-      'http://16.16.218.59:9000/api/v1/notifications/{id}'; // DELETE one
+      '/api/v1/notifications/{id}'; // DELETE one
   static const String deleteAllNotifications =
-      'http://16.16.218.59:9000/api/v1/notifications'; // DELETE all
+      '/api/v1/notifications'; // DELETE all
 
   // Notification Preferences & Settings
   static const String getNotificationPreferences =
-      'http://16.16.218.59:9000/api/v1/notification-preferences'; // GET
+      '/api/v1/notification-preferences'; // GET
   static const String updateNotificationPreferences =
-      'http://16.16.218.59:9000/api/v1/notification-preferences'; // PUT/PATCH
+      '/api/v1/notification-preferences'; // PUT/PATCH
 
   // Notification History
   static const String notificationHistory =
-      'http://16.16.218.59:9000/api/v1/notifications/history'; // GET with pagination
+      '/api/v1/notifications/history'; // GET with pagination
+
+  // Patient Notifications
+  static const String getPatientToken = '/api/v1/patient/token';
+  static const String getPatientNotifications = '/api/v1/patient/notifications/{token}';
+  static const String validatePatientToken = '/api/v1/patient/token-validate';
 }
