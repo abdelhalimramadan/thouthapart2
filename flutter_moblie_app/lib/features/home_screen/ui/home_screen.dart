@@ -174,13 +174,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
        {int? categoryId, String? cityName}) {
      final isDark = Theme.of(context).brightness == Brightness.dark;
      final screenW = MediaQuery.of(context).size.width;
-     final double iconSize = (screenW * 0.18).clamp(48.0, 90.0);
-     final double categoryMargin = 5;
-     final double borderRadius = 16;
-     final double borderWidth = 1;
-     final double blurRadius = 4;
-     final double iconLabelSpacing = 8;
-     final double labelPadding = 6;
      final double fontSize = (screenW * 0.033).clamp(11.0, 15.0);
 
      final defaultAssetPaths = [
@@ -228,52 +221,56 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         );
       },
       child: Container(
-        margin: EdgeInsets.all(categoryMargin),
+        margin: const EdgeInsets.all(5),
         decoration: BoxDecoration(
           color: Theme.of(context).cardTheme.color,
-          borderRadius: BorderRadius.circular(borderRadius),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
-            width: borderWidth,
+            width: 1,
           ),
           boxShadow: [
             BoxShadow(
               color: isDark
                   ? Colors.black.withOpacity(0.3)
                   : Colors.grey.withOpacity(0.1),
-              blurRadius: blurRadius,
-              offset: Offset(0, 2),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Handle both SVG and regular images
-            if (resolvedAssetPath.endsWith('.svg')) ...[
-              SvgPicture.asset(
-                resolvedAssetPath,
-                width: resolvedAssetPath.contains('تقويم اسنان') ? iconSize * 0.6 : iconSize,
-                height: resolvedAssetPath.contains('تقويم اسنان') ? iconSize * 0.6 : iconSize,
-                fit: BoxFit.contain,
-                placeholderBuilder: (BuildContext context) => Container(
-                  width: iconSize,
-                  height: iconSize,
-                  color: isDark ? Colors.grey[800] : Colors.grey[200],
-                  child: Icon(Icons.image, size: 24, color: Colors.grey),
+            const SizedBox(height: 12),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: resolvedAssetPath.contains('تقويم اسنان') ? 16.0 : 12.0,
+                  vertical: resolvedAssetPath.contains('تقويم اسنان') ? 11.0 : 0.0,
                 ),
+                child: resolvedAssetPath.endsWith('.svg')
+                    ? SvgPicture.asset(
+                        resolvedAssetPath,
+                        fit: BoxFit.contain,
+                        placeholderBuilder: (BuildContext context) => Container(
+                          color: isDark ? Colors.grey[800] : Colors.grey[200],
+                          child: const Icon(Icons.image, size: 32, color: Colors.grey),
+                        ),
+                      )
+                    : Image.asset(
+                        resolvedAssetPath,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: isDark ? Colors.grey[800] : Colors.grey[200],
+                          child: const Icon(Icons.image, size: 32, color: Colors.grey),
+                        ),
+                      ),
               ),
-            ] else ...[
-              Image.asset(
-                resolvedAssetPath,
-                width: iconSize,
-                height: iconSize,
-                fit: BoxFit.contain,
-              ),
-            ],
-            SizedBox(height: iconLabelSpacing),
+            ),
+            const SizedBox(height: 8),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: labelPadding),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 localizedCategoryName(rawCategoryName),
                 textAlign: TextAlign.center,
@@ -286,6 +283,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            const SizedBox(height: 12),
           ],
         ),
       ),
