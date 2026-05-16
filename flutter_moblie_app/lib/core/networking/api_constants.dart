@@ -59,7 +59,7 @@ class ApiConstants {
 
   // Device Token Registration
   static const String registerDeviceToken =
-      'http://16.16.218.59:9000/api/v1/device-tokens/register'; // Main backend (8080)
+      'http://16.16.218.59:9000/api/v1/device-tokens/register';
 
   // Notification History & Management
   static const String getNotifications =
