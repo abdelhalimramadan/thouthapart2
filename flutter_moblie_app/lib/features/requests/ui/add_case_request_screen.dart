@@ -7,6 +7,7 @@ import 'package:thoutha_mobile_app/core/theming/colors.dart';
 import 'package:thoutha_mobile_app/core/theming/styles.dart';
 import 'package:thoutha_mobile_app/core/widgets/app_text_button.dart';
 import 'package:thoutha_mobile_app/core/di/dependency_injection.dart';
+import 'package:thoutha_mobile_app/core/networking/api_service.dart';
 import 'package:thoutha_mobile_app/features/requests/data/models/case_request_body.dart';
 import 'package:thoutha_mobile_app/features/requests/data/models/case_request_model.dart';
 import 'package:thoutha_mobile_app/features/requests/data/repos/case_request_repo.dart';
@@ -81,14 +82,12 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
     final lastName = await SharedPrefHelper.getString('last_name') ?? '';
     final category = await SharedPrefHelper.getString('category') ?? '';
 
-    // fallback to initialSpecialization if SharedPref empty
     if (mounted) {
       setState(() {
         _firstName = firstName;
         _lastName = lastName;
-        _category = category.isNotEmpty
-            ? category
-            : (widget.initialSpecialization ?? '');
+        // Prioritize widget.initialSpecialization to show what they are about to post
+        _category = widget.initialSpecialization ?? category;
         _isLoadingInfo = false;
       });
     }
@@ -286,6 +285,30 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
         );
       }
 
+      // 1. Update Doctor Specialty on Server
+      final firstName = await SharedPrefHelper.getString('first_name');
+      final lastName = await SharedPrefHelper.getString('last_name');
+      final phone = await SharedPrefHelper.getString('phone');
+      final faculty = await SharedPrefHelper.getString('faculty');
+      final yearString = await SharedPrefHelper.getString('year');
+      final governorate = await SharedPrefHelper.getString('governorate');
+      final dynamic studyYear = int.tryParse(yearString) ?? (yearString.isNotEmpty ? yearString : null);
+
+      final updateBody = <String, dynamic>{
+        if (firstName.isNotEmpty) 'firstName': firstName,
+        if (lastName.isNotEmpty) 'lastName': lastName,
+        if (phone.isNotEmpty) 'phoneNumber': phone,
+        if (studyYear != null) 'studyYear': studyYear,
+        if (faculty.isNotEmpty) 'universityName': faculty,
+        if (governorate.isNotEmpty) 'cityName': governorate,
+        'categoryName': _category,
+      };
+
+      final apiService = getIt<ApiService>();
+      await apiService.updateDoctor(updateBody);
+      await SharedPrefHelper.setData('category', _category);
+
+      // 2. Publish Case Request
       final body = CaseRequestBody(
         description: _descriptionController.text.trim().isEmpty
             ? 'requests.there_are_no_additional'.tr()
@@ -510,6 +533,7 @@ class _AddCaseRequestScreenState extends State<AddCaseRequestScreen> {
                           textStyle: TextStyles.font16WhiteSemiBold.copyWith(
                             fontFamily: 'Cairo',
                             fontSize: 16,
+                            color: isDark ? Colors.black : Colors.white,
                           ),
                           backgroundColor: ColorsManager.mainBlue,
                           onPressed: _publishRequest,
