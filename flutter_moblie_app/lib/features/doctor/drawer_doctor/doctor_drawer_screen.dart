@@ -79,9 +79,15 @@ class _DoctorDrawerState extends State<DoctorDrawer> {
   Future<void> _fetchAppVersion() async {
     try {
       final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      final int buildNum = int.tryParse(packageInfo.buildNumber) ?? 0;
       if (mounted) {
         setState(() {
-          _appVersion = packageInfo.version;
+          if (buildNum >= 34) {
+            final int patch = buildNum - 34;
+            _appVersion = '1.0.$patch';
+          } else {
+            _appVersion = packageInfo.version;
+          }
         });
       }
     } catch (e) {

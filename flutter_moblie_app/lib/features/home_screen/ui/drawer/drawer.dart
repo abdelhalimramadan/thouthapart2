@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:thoutha_mobile_app/core/routing/routes.dart';
 import 'package:thoutha_mobile_app/core/theming/theme_provider.dart';
@@ -22,10 +23,31 @@ class HomeDrawer extends StatefulWidget {
 
 class _HomeDrawerState extends State<HomeDrawer> {
   bool _isTourStarted = false;
+  String _appVersion = '1.0.0';
 
   @override
   void initState() {
     super.initState();
+    _fetchAppVersion();
+  }
+
+  Future<void> _fetchAppVersion() async {
+    try {
+      final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      final int buildNum = int.tryParse(packageInfo.buildNumber) ?? 0;
+      if (mounted) {
+        setState(() {
+          if (buildNum >= 34) {
+            final int patch = buildNum - 34;
+            _appVersion = '1.0.$patch';
+          } else {
+            _appVersion = packageInfo.version;
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching app version: $e');
+    }
   }
 
   Widget _menuItem(
@@ -356,7 +378,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                     Divider(indent: 32, endIndent: 32),
                     SizedBox(height: 8),
                     Text(
-                      'home_screen.version_100'.tr(),
+                      'doctor.version'.tr(namedArgs: {'version': _appVersion}),
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.bold,
